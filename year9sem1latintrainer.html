@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Latin Trainer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #161412;
+    --surface:   #1e1b18;
+    --surface2:  #252118;
+    --surface3:  #2c271f;
+    --border:    #35302a;
+    --border2:   #4a4238;
+    --text:      #e8e0d5;
+    --text2:     #9e9080;
+    --text3:     #665e52;
+    --accent:    #c4935a;
+    --accent-dim:#8a6035;
+    --accent-bg: #231e16;
+    --green:     #7dbf95;
+    --green-bg:  #131f18;
+    --green-bdr: #2a4535;
+    --red:       #c97a7a;
+    --red-bg:    #1f1313;
+    --red-bdr:   #4a2525;
+    --gold:      #c4a35a;
+    --gold-bg:   #1e1a10;
+    --gold-bdr:  #4a3d18;
+    --serif: 'IM Fell English', Georgia, serif;
+    --sans: 'Instrument Sans', system-ui, sans-serif;
+    --r: 10px;
+    --rs: 6px;
+    --t: 0.18s ease;
+  }
+
+  body { font-family: var(--sans); background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  .app { max-width: 760px; margin: 0 auto; padding: 2rem 1.5rem 5rem; }
+
+  .masthead { text-align: center; padding: 2.5rem 0 2rem; border-bottom: 1px solid var(--border); margin-bottom: 2rem; }
+  .ornament { font-family: var(--serif); font-size: 13px; color: var(--text3); letter-spacing: 0.18em; margin-bottom: 1rem; }
+  h1 { font-family: var(--serif); font-size: 40px; font-weight: 400; color: var(--text); line-height: 1.1; }
+  h1 em { font-style: italic; color: var(--accent); }
+  .sub { font-size: 12px; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 0.5rem; }
+
+  .mode-toggle { display: flex; background: var(--surface2); border: 1px solid var(--border); border-radius: 999px; padding: 3px; gap: 2px; width: fit-content; margin: 0 auto 2rem; }
+  .mode-btn { font-family: var(--sans); font-size: 13px; font-weight: 500; padding: 7px 20px; border-radius: 999px; border: none; background: transparent; color: var(--text2); cursor: pointer; transition: all var(--t); letter-spacing: 0.01em; }
+  .mode-btn.active { background: var(--surface3); color: var(--accent); border: 1px solid var(--border2); }
+
+  .sel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1.5rem; }
+
+  .cat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; transition: border-color var(--t); }
+  .cat-card:hover { border-color: var(--border2); }
+  .cat-card.has-sel { border-color: var(--accent-dim); }
+
+  .cat-hdr { display: flex; align-items: center; gap: 10px; padding: 12px 14px; cursor: pointer; user-select: none; transition: background var(--t); }
+  .cat-hdr:hover { background: var(--surface2); }
+
+  .cbox { width: 16px; height: 16px; border: 1.5px solid var(--border2); border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all var(--t); background: var(--surface); cursor: pointer; }
+  .cbox.checked { background: var(--accent); border-color: var(--accent); }
+  .cbox.indeterminate { background: var(--accent-bg); border-color: var(--accent-dim); }
+  .cbox svg { width: 10px; height: 10px; display: none; }
+  .cbox.checked svg.ck { display: block; }
+  .cbox.indeterminate svg.da { display: block; }
+
+  .cat-lbl { font-size: 13px; font-weight: 500; color: var(--text); flex: 1; }
+  .cat-cnt { font-size: 11px; color: var(--text3); background: var(--surface2); padding: 2px 7px; border-radius: 999px; border: 1px solid var(--border); }
+  .chevron { font-size: 11px; color: var(--text3); transition: transform 0.2s; display: inline-block; }
+  .chevron.open { transform: rotate(180deg); }
+
+  .sub-list { border-top: 1px solid var(--border); padding: 8px 14px 10px; background: var(--bg); display: none; }
+  .sub-list.open { display: block; }
+
+  .sub-row { display: flex; align-items: center; gap: 8px; padding: 5px 0; cursor: pointer; user-select: none; }
+  .sbox { width: 14px; height: 14px; border: 1.5px solid var(--border2); border-radius: 3px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all var(--t); background: var(--surface); cursor: pointer; }
+  .sbox.checked { background: var(--accent); border-color: var(--accent); }
+  .sbox svg { width: 9px; height: 9px; display: none; }
+  .sbox.checked svg { display: block; }
+  .sub-lbl { font-size: 12px; color: var(--text2); flex: 1; }
+  .sub-cnt { font-size: 11px; color: var(--text3); }
+
+  .start-bar { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 14px 18px; display: flex; align-items: center; gap: 12px; margin-bottom: 2rem; }
+  .word-pill { font-family: var(--serif); font-size: 15px; color: var(--text2); flex: 1; }
+  .start-btns { display: flex; gap: 8px; }
+  .btn-primary { font-family: var(--sans); font-size: 13px; font-weight: 600; letter-spacing: 0.04em; padding: 8px 20px; border-radius: 999px; border: 1px solid var(--accent); background: var(--accent); color: var(--bg); cursor: pointer; transition: all var(--t); white-space: nowrap; }
+  .btn-primary:hover { background: #d4a568; border-color: #d4a568; }
+  .btn-primary:disabled { opacity: 0.25; cursor: default; }
+  .btn-secondary { font-family: var(--sans); font-size: 13px; font-weight: 500; padding: 8px 18px; border-radius: 999px; border: 1px solid var(--border2); background: var(--surface2); color: var(--text2); cursor: pointer; transition: all var(--t); white-space: nowrap; }
+  .btn-secondary:hover { color: var(--text); background: var(--surface3); }
+  .btn-secondary:disabled { opacity: 0.25; cursor: default; }
+
+  #quizView { display: none; }
+
+  .prog-row { display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem; }
+  .prog-track { flex: 1; height: 2px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .prog-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.4s ease; }
+  .prog-lbl { font-size: 12px; color: var(--text3); min-width: 48px; text-align: right; }
+  .score-pill { font-size: 12px; color: var(--green); background: var(--green-bg); padding: 3px 10px; border-radius: 999px; border: 1px solid var(--green-bdr); }
+
+  .round-badge { text-align: center; margin-bottom: 1rem; }
+  .round-badge span { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); background: var(--surface2); padding: 3px 12px; border-radius: 999px; border: 1px solid var(--border); }
+
+  .prompt-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 2.5rem 2rem 2rem; text-align: center; margin-bottom: 0.75rem; min-height: 155px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .p-dir { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); margin-bottom: 14px; }
+  .p-word { font-family: var(--serif); font-size: 34px; color: var(--text); line-height: 1.25; margin-bottom: 10px; }
+  .p-tags { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+  .tag { font-size: 11px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--border); color: var(--text2); background: var(--surface2); }
+  .tag.decl { color: var(--accent); background: var(--accent-bg); border-color: var(--accent-dim); }
+  .tag.gend { color: var(--gold); background: var(--gold-bg); border-color: var(--gold-bdr); }
+
+  .hint-box { font-size: 12px; color: var(--text3); text-align: center; margin-bottom: 10px; font-family: var(--serif); font-style: italic; min-height: 18px; }
+
+  .answer-wrap { margin-bottom: 8px; }
+  .answer-input { width: 100%; font-family: var(--serif); font-size: 20px; padding: 13px 18px; border: 1.5px solid var(--border2); border-radius: var(--r); background: var(--surface); color: var(--text); outline: none; transition: all var(--t); text-align: center; }
+  .answer-input::placeholder { color: var(--text3); }
+  .answer-input:focus { border-color: var(--accent-dim); box-shadow: 0 0 0 3px rgba(196,147,90,0.08); }
+  .answer-input.correct { border-color: var(--green); background: var(--green-bg); color: var(--green); }
+  .answer-input.wrong { border-color: var(--red); background: var(--red-bg); color: var(--red); }
+
+  .action-row { display: flex; gap: 8px; margin-bottom: 8px; }
+  .check-btn { flex: 1; font-family: var(--sans); font-size: 14px; font-weight: 600; letter-spacing: 0.03em; padding: 11px; border-radius: var(--r); border: 1px solid var(--accent); background: var(--accent); color: var(--bg); cursor: pointer; transition: all var(--t); }
+  .check-btn:hover { background: #d4a568; }
+  .skip-btn { font-family: var(--sans); font-size: 13px; padding: 11px 16px; border-radius: var(--r); border: 1px solid var(--border2); background: var(--surface); color: var(--text2); cursor: pointer; transition: all var(--t); }
+  .skip-btn:hover { background: var(--surface2); }
+  .next-btn { width: 100%; font-family: var(--sans); font-size: 14px; font-weight: 500; padding: 11px; border-radius: var(--r); border: 1px solid var(--border2); background: var(--surface); color: var(--text); cursor: pointer; transition: all var(--t); display: none; }
+  .next-btn:hover { background: var(--surface2); }
+
+  .feedback-box { padding: 10px 16px; border-radius: var(--rs); font-size: 14px; margin-bottom: 8px; display: none; font-family: var(--serif); }
+  .feedback-box.correct { display: block; color: var(--green); background: var(--green-bg); border: 1px solid var(--green-bdr); }
+  .feedback-box.wrong { display: block; color: var(--red); background: var(--red-bg); border: 1px solid var(--red-bdr); }
+
+  #resultView { display: none; }
+  .result-wrap { text-align: center; padding: 3rem 0; }
+  .res-label { font-family: var(--serif); font-size: 13px; color: var(--text3); letter-spacing: 0.12em; margin-bottom: 1rem; }
+  .res-score { font-family: var(--serif); font-size: 60px; color: var(--accent); line-height: 1; margin-bottom: 0.4rem; }
+  .res-total { font-size: 14px; color: var(--text2); margin-bottom: 0.5rem; }
+  .res-phrase { font-family: var(--serif); font-style: italic; font-size: 17px; color: var(--text2); margin-bottom: 2rem; }
+  .res-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+  .review-banner { display: flex; align-items: center; gap: 14px; background: var(--surface); border: 1px solid var(--gold-bdr); border-radius: var(--r); padding: 14px 18px; margin-bottom: 1.5rem; }
+  .review-icon { font-size: 18px; color: var(--gold); flex-shrink: 0; }
+  .review-text { flex: 1; }
+  .review-text strong { font-size: 14px; font-weight: 600; color: var(--text); display: block; margin-bottom: 2px; }
+  .review-text span { font-size: 12px; color: var(--text2); }
+  .review-btn { font-family: var(--sans); font-size: 13px; font-weight: 600; padding: 8px 18px; border-radius: 999px; border: 1px solid var(--gold-bdr); background: var(--gold-bg); color: var(--gold); cursor: pointer; transition: all var(--t); white-space: nowrap; }
+  .review-btn:hover { background: #2a2210; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+  .prompt-card { animation: fadeIn 0.22s ease; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div id="selectorView">
+    <div class="masthead">
+      <div class="ornament">✦ &nbsp; ✦ &nbsp; ✦</div>
+      <h1><em>Latin</em> Trainer</h1>
+      <p class="sub">Vocabularium Latinum</p>
+    </div>
+
+    <div class="mode-toggle">
+      <button class="mode-btn active" id="modeEL" onclick="setMode('el')">English → Latin</button>
+      <button class="mode-btn" id="modeLE" onclick="setMode('le')">Latin → English</button>
+    </div>
+
+    <div class="sel-grid" id="selGrid"></div>
+
+    <div class="start-bar">
+      <span class="word-pill" id="wordPill">0 words selected</span>
+      <div class="start-btns">
+        <button class="btn-secondary" id="reviewStartBtn" onclick="startSession('review')" disabled>Review mode</button>
+        <button class="btn-primary" id="startBtn" onclick="startSession('normal')" disabled>Begin</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="quizView">
+    <div class="prog-row">
+      <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
+      <span class="prog-lbl" id="progLbl">1 / 10</span>
+      <span class="score-pill" id="scorePill">0 correct</span>
+    </div>
+
+    <div class="round-badge" id="roundBadge"><span>Round 1</span></div>
+
+    <div class="prompt-card" id="promptCard">
+      <div class="p-dir" id="pDir"></div>
+      <div class="p-word" id="pWord"></div>
+      <div class="p-tags" id="pTags"></div>
+    </div>
+
+    <div class="hint-box" id="hintBox"></div>
+
+    <div class="answer-wrap">
+      <input class="answer-input" id="answerInput" type="text" placeholder="Type your answer…" autocomplete="off" spellcheck="false" />
+    </div>
+
+    <div class="feedback-box" id="feedbackBox"></div>
+
+    <div class="action-row">
+      <button class="check-btn" id="checkBtn" onclick="checkAnswer()">Check</button>
+      <button class="skip-btn" onclick="skipQ()">Skip</button>
+    </div>
+    <button class="next-btn" id="nextBtn" onclick="nextQ()">Next →</button>
+  </div>
+
+  <div id="resultView">
+    <div class="result-wrap">
+      <div class="res-label" id="resLabel">Result</div>
+      <div class="res-score" id="resScore"></div>
+      <div class="res-total" id="resTotal"></div>
+      <div class="res-phrase" id="resPhrase"></div>
+      <div id="reviewBanner" class="review-banner" style="display:none">
+        <span class="review-icon">↺</span>
+        <div class="review-text">
+          <strong id="reviewBannerTitle"></strong>
+          <span id="reviewBannerSub"></span>
+        </div>
+        <button class="review-btn" onclick="continueReview()">Review →</button>
+      </div>
+      <div class="res-btns">
+        <button class="btn-primary" onclick="retryQuiz()">Try again</button>
+        <button class="btn-secondary" onclick="backToMenu()">Menu</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+<script>
+const DATA = {
+  nouns:{label:"Nouns",sub:{
+    "1st declension":{decl:"1st",words:[
+      {lat:"casa",gen:null,gender:"f",eng:["cottage"]},{lat:"puella",gen:null,gender:"f",eng:["girl"]},{lat:"cena",gen:null,gender:"f",eng:["dinner"]},{lat:"terra",gen:null,gender:"f",eng:["land","country","ground","earth"]},{lat:"femina",gen:null,gender:"f",eng:["woman"]},{lat:"regina",gen:null,gender:"f",eng:["queen"]},{lat:"mensa",gen:null,gender:"f",eng:["table"]},{lat:"silva",gen:null,gender:"f",eng:["forest","woods"]},{lat:"porta",gen:null,gender:"f",eng:["gate"]},{lat:"hasta",gen:null,gender:"f",eng:["spear"]},{lat:"aqua",gen:null,gender:"f",eng:["water"]},{lat:"epistula",gen:null,gender:"f",eng:["letter"]},{lat:"via",gen:null,gender:"f",eng:["road","street"]},{lat:"ianua",gen:null,gender:"f",eng:["door"]},{lat:"taberna",gen:null,gender:"f",eng:["tavern"]},{lat:"filia",gen:null,gender:"f",eng:["daughter"]},{lat:"fabula",gen:null,gender:"f",eng:["story"]},{lat:"insula",gen:null,gender:"f",eng:["island"]},{lat:"pecunia",gen:null,gender:"f",eng:["money"]},{lat:"pugna",gen:null,gender:"f",eng:["fight"]},{lat:"patria",gen:null,gender:"f",eng:["homeland"]},{lat:"magistra",gen:null,gender:"f",eng:["female teacher"]},{lat:"ancilla",gen:null,gender:"f",eng:["slave girl"]},{lat:"hora",gen:null,gender:"f",eng:["hour"]},{lat:"toga",gen:null,gender:"f",eng:["toga"]},{lat:"statua",gen:null,gender:"f",eng:["statue"]},{lat:"dea",gen:null,gender:"f",eng:["goddess"]},{lat:"schola",gen:null,gender:"f",eng:["class","classroom"]},{lat:"domina",gen:null,gender:"f",eng:["mistress"]},{lat:"agricola",gen:null,gender:"m",eng:["farmer"]},{lat:"poeta",gen:null,gender:"m",eng:["poet"]},{lat:"nauta",gen:null,gender:"m",eng:["sailor"]}
+    ]},
+    "2nd declension (masc)":{decl:"2nd",words:[
+      {lat:"servus",gen:null,gender:"m",eng:["slave"]},{lat:"discipulus",gen:null,gender:"m",eng:["student"]},{lat:"amicus",gen:null,gender:"m",eng:["friend"]},{lat:"filius",gen:null,gender:"m",eng:["son"]},{lat:"murus",gen:null,gender:"m",eng:["wall"]},{lat:"cibus",gen:null,gender:"m",eng:["food"]},{lat:"hortus",gen:null,gender:"m",eng:["garden"]},{lat:"equus",gen:null,gender:"m",eng:["horse"]},{lat:"campus",gen:null,gender:"m",eng:["plain"]},{lat:"colonus",gen:null,gender:"m",eng:["farmer"]},{lat:"somnus",gen:null,gender:"m",eng:["sleep"]},{lat:"sonus",gen:null,gender:"m",eng:["sound"]},{lat:"nuntius",gen:null,gender:"m",eng:["messenger"]},{lat:"ventus",gen:null,gender:"m",eng:["wind"]},{lat:"gladius",gen:null,gender:"m",eng:["sword"]},{lat:"deus",gen:null,gender:"m",eng:["god"]},{lat:"ludus",gen:null,gender:"m",eng:["school"]},{lat:"annus",gen:null,gender:"m",eng:["year"]},{lat:"barbarus",gen:null,gender:"m",eng:["barbarian"]},{lat:"libertus",gen:null,gender:"m",eng:["freedman"]},{lat:"dominus",gen:null,gender:"m",eng:["master"]},{lat:"medicus",gen:null,gender:"m",eng:["doctor"]},{lat:"vir",gen:null,gender:"m",eng:["man"]},{lat:"puer",gen:null,gender:"m",eng:["boy"]},{lat:"ager",gen:null,gender:"m",eng:["field"]},{lat:"liber",gen:null,gender:"m",eng:["book"]},{lat:"magister",gen:null,gender:"m",eng:["teacher"]}
+    ]},
+    "2nd declension (neut)":{decl:"2nd",words:[
+      {lat:"castra",gen:null,gender:"n",eng:["camp"]},{lat:"bellum",gen:null,gender:"n",eng:["war"]},{lat:"vinum",gen:null,gender:"n",eng:["wine"]},{lat:"proelium",gen:null,gender:"n",eng:["battle"]},{lat:"periculum",gen:null,gender:"n",eng:["danger"]},{lat:"arma",gen:null,gender:"n",eng:["arms","weapons"]},{lat:"frumentum",gen:null,gender:"n",eng:["wheat","grain"]},{lat:"consilium",gen:null,gender:"n",eng:["plan"]},{lat:"auxilium",gen:null,gender:"n",eng:["help"]},{lat:"donum",gen:null,gender:"n",eng:["gift"]},{lat:"verbum",gen:null,gender:"n",eng:["word"]},{lat:"saxum",gen:null,gender:"n",eng:["rock"]},{lat:"oppidum",gen:null,gender:"n",eng:["town"]}
+    ]},
+    "3rd declension (masc)":{decl:"3rd",words:[
+      {lat:"leo",gen:"leonis",gender:"m",eng:["lion"]},{lat:"rex",gen:"regis",gender:"m",eng:["king"]},{lat:"pater",gen:"patris",gender:"m",eng:["father"]},{lat:"frater",gen:"fratris",gender:"m",eng:["brother"]},{lat:"iuvenis",gen:"iuvenis",gender:"m",eng:["young man"]},{lat:"canis",gen:"canis",gender:"m",eng:["dog"]},{lat:"comes",gen:"comitis",gender:"m",eng:["companion"]},{lat:"consul",gen:"consulis",gender:"m",eng:["consul"]},{lat:"dux",gen:"ducis",gender:"m",eng:["leader"]},{lat:"imperator",gen:"imperatoris",gender:"m",eng:["general"]},{lat:"centurio",gen:"centurionis",gender:"m",eng:["centurion"]},{lat:"amor",gen:"amoris",gender:"m",eng:["love"]},{lat:"flos",gen:"floris",gender:"m",eng:["flower"]},{lat:"miles",gen:"militis",gender:"m",eng:["soldier"]},{lat:"labor",gen:"laboris",gender:"m",eng:["work"]},{lat:"viator",gen:"viatoris",gender:"m",eng:["traveller"]},{lat:"senex",gen:"senis",gender:"m",eng:["old man"]},{lat:"senator",gen:"senatoris",gender:"m",eng:["senator"]},{lat:"clamor",gen:"clamoris",gender:"m",eng:["shout"]},{lat:"dolor",gen:"doloris",gender:"m",eng:["pain","grief"]},{lat:"eques",gen:"equitis",gender:"m",eng:["horseman"]},{lat:"pes",gen:"pedis",gender:"m",eng:["foot"]},{lat:"custos",gen:"custodis",gender:"m",eng:["guard"]},{lat:"mons",gen:"montis",gender:"m",eng:["mountain"]},{lat:"civis",gen:"civis",gender:"m",eng:["citizen"]},{lat:"hostis",gen:"hostis",gender:"m",eng:["enemy"]},{lat:"pons",gen:"pontis",gender:"m",eng:["bridge"]},{lat:"dens",gen:"dentis",gender:"m",eng:["tooth"]},{lat:"parens",gen:"parentis",gender:"m",eng:["parent"]}
+    ]},
+    "3rd declension (fem)":{decl:"3rd",words:[
+      {lat:"vox",gen:"vocis",gender:"f",eng:["voice"]},{lat:"mater",gen:"matris",gender:"f",eng:["mother"]},{lat:"soror",gen:"sororis",gender:"f",eng:["sister"]},{lat:"libertas",gen:"libertatis",gender:"f",eng:["freedom"]},{lat:"tempestas",gen:"tempestatis",gender:"f",eng:["storm"]},{lat:"arbor",gen:"arboris",gender:"f",eng:["tree"]},{lat:"lex",gen:"legis",gender:"f",eng:["law"]},{lat:"pax",gen:"pacis",gender:"f",eng:["peace"]},{lat:"virtus",gen:"virtutis",gender:"f",eng:["courage","virtue"]},{lat:"virgo",gen:"virginis",gender:"f",eng:["maiden","virgin"]},{lat:"urbs",gen:"urbis",gender:"f",eng:["city"]},{lat:"mors",gen:"mortis",gender:"f",eng:["death"]},{lat:"nox",gen:"noctis",gender:"f",eng:["night"]},{lat:"navis",gen:"navis",gender:"f",eng:["ship"]},{lat:"classis",gen:"classis",gender:"f",eng:["fleet"]}
+    ]},
+    "3rd declension (neut)":{decl:"3rd",words:[
+      {lat:"nomen",gen:"nominis",gender:"n",eng:["name"]},{lat:"tempus",gen:"temporis",gender:"n",eng:["time"]},{lat:"vulnus",gen:"vulneris",gender:"n",eng:["wound"]},{lat:"litus",gen:"litoris",gender:"n",eng:["shore","beach"]},{lat:"flumen",gen:"fluminis",gender:"n",eng:["river"]},{lat:"foedus",gen:"foederis",gender:"n",eng:["treaty"]},{lat:"moenia",gen:"moenium",gender:"n",eng:["city walls"]},{lat:"carmen",gen:"carminis",gender:"n",eng:["poem","song"]},{lat:"mare",gen:"maris",gender:"n",eng:["sea"]}
+    ]}
+  }},
+  adjectives:{label:"Adjectives",sub:{
+    "1st/2nd declension":{decl:null,words:[
+      {lat:"bonus",gen:null,gender:null,eng:["good"]},{lat:"laetus",gen:null,gender:null,eng:["happy"]},{lat:"iratus",gen:null,gender:null,eng:["angry"]},{lat:"fessus",gen:null,gender:null,eng:["tired"]},{lat:"magnus",gen:null,gender:null,eng:["big","great"]},{lat:"parvus",gen:null,gender:null,eng:["small"]},{lat:"malus",gen:null,gender:null,eng:["bad"]},{lat:"benignus",gen:null,gender:null,eng:["kind"]},{lat:"multus",gen:null,gender:null,eng:["much"]},{lat:"latus",gen:null,gender:null,eng:["wide"]},{lat:"anxius",gen:null,gender:null,eng:["anxious"]},{lat:"longus",gen:null,gender:null,eng:["long"]},{lat:"sollicitus",gen:null,gender:null,eng:["worried"]},{lat:"novus",gen:null,gender:null,eng:["new"]},{lat:"optimus",gen:null,gender:null,eng:["best","excellent"]},{lat:"miser",gen:null,gender:null,eng:["miserable"]},{lat:"liber",gen:null,gender:null,eng:["free"]},{lat:"pulcher",gen:null,gender:null,eng:["beautiful"]}
+    ]},
+    "3rd declension":{decl:null,words:[
+      {lat:"fortis",gen:null,gender:null,eng:["brave"]},{lat:"gravis",gen:null,gender:null,eng:["heavy","serious"]},{lat:"levis",gen:null,gender:null,eng:["light"]},{lat:"omnis",gen:null,gender:null,eng:["all","every"]},{lat:"incolumis",gen:null,gender:null,eng:["safe","unharmed"]},{lat:"brevis",gen:null,gender:null,eng:["short"]},{lat:"crudelis",gen:null,gender:null,eng:["cruel"]},{lat:"tristis",gen:null,gender:null,eng:["sad"]},{lat:"gracilis",gen:null,gender:null,eng:["slender","slim"]},{lat:"facilis",gen:null,gender:null,eng:["easy"]},{lat:"difficilis",gen:null,gender:null,eng:["difficult"]},{lat:"insignis",gen:null,gender:null,eng:["outstanding"]},{lat:"dulcis",gen:null,gender:null,eng:["sweet"]}
+    ]}
+  }},
+  verbs:{label:"Verbs",sub:{
+    "1st conjugation":{decl:null,words:[
+      {lat:"porto",gen:null,gender:null,eng:["carry"]},{lat:"ceno",gen:null,gender:null,eng:["dine"]},{lat:"ambulo",gen:null,gender:null,eng:["walk"]},{lat:"navigo",gen:null,gender:null,eng:["sail"]},{lat:"amo",gen:null,gender:null,eng:["love"]},{lat:"rogo",gen:null,gender:null,eng:["ask"]},{lat:"pugno",gen:null,gender:null,eng:["fight"]},{lat:"oppugno",gen:null,gender:null,eng:["attack"]},{lat:"convoco",gen:null,gender:null,eng:["call together","assemble"]},{lat:"habito",gen:null,gender:null,eng:["live"]},{lat:"exspecto",gen:null,gender:null,eng:["wait for"]},{lat:"servo",gen:null,gender:null,eng:["save"]},{lat:"laboro",gen:null,gender:null,eng:["work"]},{lat:"festino",gen:null,gender:null,eng:["hurry"]},{lat:"do",gen:null,gender:null,eng:["give"]},{lat:"paro",gen:null,gender:null,eng:["prepare"]},{lat:"iuvo",gen:null,gender:null,eng:["help"]},{lat:"laudo",gen:null,gender:null,eng:["praise"]},{lat:"specto",gen:null,gender:null,eng:["watch","look at"]},{lat:"narro",gen:null,gender:null,eng:["tell"]},{lat:"saluto",gen:null,gender:null,eng:["greet"]},{lat:"voco",gen:null,gender:null,eng:["call"]},{lat:"clamo",gen:null,gender:null,eng:["shout"]},{lat:"curo",gen:null,gender:null,eng:["care for","look after"]},{lat:"intro",gen:null,gender:null,eng:["enter"]},{lat:"supero",gen:null,gender:null,eng:["overcome"]},{lat:"neco",gen:null,gender:null,eng:["kill"]},{lat:"excito",gen:null,gender:null,eng:["wake up","arouse"]}
+    ]},
+    "2nd conjugation":{decl:null,words:[
+      {lat:"moneo",gen:null,gender:null,eng:["warn","advise"]},{lat:"sedeo",gen:null,gender:null,eng:["sit"]},{lat:"maneo",gen:null,gender:null,eng:["stay","remain"]},{lat:"iaceo",gen:null,gender:null,eng:["lie down"]},{lat:"taceo",gen:null,gender:null,eng:["be quiet","be silent"]},{lat:"habeo",gen:null,gender:null,eng:["have","own","possess"]},{lat:"timeo",gen:null,gender:null,eng:["fear"]},{lat:"iubeo",gen:null,gender:null,eng:["order"]},{lat:"terreo",gen:null,gender:null,eng:["terrify"]},{lat:"video",gen:null,gender:null,eng:["see"]},{lat:"doceo",gen:null,gender:null,eng:["teach"]},{lat:"debeo",gen:null,gender:null,eng:["ought","owe"]},{lat:"respondeo",gen:null,gender:null,eng:["answer","reply"]},{lat:"persuadeo",gen:null,gender:null,eng:["persuade"]}
+    ]},
+    "3rd conjugation":{decl:null,words:[
+      {lat:"procedo",gen:null,gender:null,eng:["go forward"]},{lat:"rego",gen:null,gender:null,eng:["rule"]},{lat:"lego",gen:null,gender:null,eng:["read"]},{lat:"scribo",gen:null,gender:null,eng:["write"]},{lat:"duco",gen:null,gender:null,eng:["lead"]},{lat:"mitto",gen:null,gender:null,eng:["send"]},{lat:"cado",gen:null,gender:null,eng:["fall"]},{lat:"resisto",gen:null,gender:null,eng:["resist"]},{lat:"dico",gen:null,gender:null,eng:["say","speak"]},{lat:"ludo",gen:null,gender:null,eng:["play"]},{lat:"occido",gen:null,gender:null,eng:["slaughter","kill"]},{lat:"descendo",gen:null,gender:null,eng:["go down"]},{lat:"vinco",gen:null,gender:null,eng:["conquer"]},{lat:"trado",gen:null,gender:null,eng:["hand over"]},{lat:"pono",gen:null,gender:null,eng:["place","put"]},{lat:"surgo",gen:null,gender:null,eng:["arise","get up"]},{lat:"curro",gen:null,gender:null,eng:["run"]},{lat:"constituo",gen:null,gender:null,eng:["decide"]},{lat:"ascendo",gen:null,gender:null,eng:["go up","climb"]},{lat:"defendo",gen:null,gender:null,eng:["defend"]},{lat:"dimitto",gen:null,gender:null,eng:["send away"]},{lat:"bibo",gen:null,gender:null,eng:["drink"]},{lat:"reddo",gen:null,gender:null,eng:["give back"]},{lat:"accedo",gen:null,gender:null,eng:["approach"]},{lat:"relinquo",gen:null,gender:null,eng:["leave behind","abandon"]},{lat:"emo",gen:null,gender:null,eng:["buy"]},{lat:"vendo",gen:null,gender:null,eng:["sell"]},{lat:"contendo",gen:null,gender:null,eng:["hurry","march"]},{lat:"traho",gen:null,gender:null,eng:["drag"]},{lat:"claudo",gen:null,gender:null,eng:["close","shut"]},{lat:"facio",gen:null,gender:null,eng:["do","make"]},{lat:"fugio",gen:null,gender:null,eng:["flee"]},{lat:"capio",gen:null,gender:null,eng:["take","capture"]},{lat:"cupio",gen:null,gender:null,eng:["desire"]},{lat:"accipio",gen:null,gender:null,eng:["receive"]},{lat:"iacio",gen:null,gender:null,eng:["throw"]},{lat:"conicio",gen:null,gender:null,eng:["hurl"]},{lat:"interficio",gen:null,gender:null,eng:["kill"]}
+    ]},
+    "4th conjugation":{decl:null,words:[
+      {lat:"invenio",gen:null,gender:null,eng:["find"]},{lat:"dormio",gen:null,gender:null,eng:["sleep"]},{lat:"audio",gen:null,gender:null,eng:["hear"]},{lat:"venio",gen:null,gender:null,eng:["come"]},{lat:"advenio",gen:null,gender:null,eng:["arrive","come to"]},{lat:"convenio",gen:null,gender:null,eng:["come together"]},{lat:"punio",gen:null,gender:null,eng:["punish"]},{lat:"custodio",gen:null,gender:null,eng:["guard"]}
+    ]},
+    "irregular":{decl:null,words:[
+      {lat:"sum",gen:null,gender:null,eng:["be"]},{lat:"adsum",gen:null,gender:null,eng:["be present"]},{lat:"absum",gen:null,gender:null,eng:["be absent"]},{lat:"possum",gen:null,gender:null,eng:["be able","can"]},{lat:"eo",gen:null,gender:null,eng:["go"]},{lat:"transeo",gen:null,gender:null,eng:["cross"]},{lat:"abeo",gen:null,gender:null,eng:["go away"]},{lat:"exeo",gen:null,gender:null,eng:["go out"]},{lat:"redeo",gen:null,gender:null,eng:["go back"]},{lat:"ineo",gen:null,gender:null,eng:["go into"]}
+    ]}
+  }},
+  prepositions:{label:"Prepositions",sub:{
+    "with ablative":{decl:null,words:[
+      {lat:"sub",gen:null,gender:null,eng:["under"]},{lat:"in",gen:null,gender:null,eng:["in","on"]},{lat:"cum",gen:null,gender:null,eng:["with"]},{lat:"de",gen:null,gender:null,eng:["about","down from"]},{lat:"ex",gen:null,gender:null,eng:["out of","from"]},{lat:"ab",gen:null,gender:null,eng:["from"]}
+    ]},
+    "with accusative":{decl:null,words:[
+      {lat:"ad",gen:null,gender:null,eng:["to"]},{lat:"in",gen:null,gender:null,eng:["into","onto"]},{lat:"trans",gen:null,gender:null,eng:["across"]},{lat:"per",gen:null,gender:null,eng:["through"]},{lat:"prope",gen:null,gender:null,eng:["near"]},{lat:"contra",gen:null,gender:null,eng:["against"]},{lat:"circum",gen:null,gender:null,eng:["around"]},{lat:"post",gen:null,gender:null,eng:["after"]},{lat:"ante",gen:null,gender:null,eng:["before"]},{lat:"propter",gen:null,gender:null,eng:["on account of"]}
+    ]}
+  }},
+  conjunctions:{label:"Conjunctions",sub:{"conjunctions":{decl:null,words:[
+    {lat:"nam",gen:null,gender:null,eng:["for"]},{lat:"quod",gen:null,gender:null,eng:["because"]},{lat:"et",gen:null,gender:null,eng:["and"]},{lat:"sed",gen:null,gender:null,eng:["but"]},{lat:"tamen",gen:null,gender:null,eng:["however","nevertheless"]},{lat:"itaque",gen:null,gender:null,eng:["and so"]}
+  ]}}},
+  adverbs:{label:"Adverbs",sub:{"adverbs":{decl:null,words:[
+    {lat:"fortiter",gen:null,gender:null,eng:["bravely"]},{lat:"bene",gen:null,gender:null,eng:["well"]},{lat:"celeriter",gen:null,gender:null,eng:["quickly"]},{lat:"diligenter",gen:null,gender:null,eng:["carefully","diligently"]},{lat:"numquam",gen:null,gender:null,eng:["never"]},{lat:"nunc",gen:null,gender:null,eng:["now"]},{lat:"iterum",gen:null,gender:null,eng:["again"]},{lat:"tandem",gen:null,gender:null,eng:["at last"]},{lat:"lente",gen:null,gender:null,eng:["slowly"]},{lat:"laete",gen:null,gender:null,eng:["happily"]},{lat:"diu",gen:null,gender:null,eng:["for a long time"]},{lat:"subito",gen:null,gender:null,eng:["suddenly"]},{lat:"iam",gen:null,gender:null,eng:["now","already"]},{lat:"statim",gen:null,gender:null,eng:["at once"]},{lat:"saepe",gen:null,gender:null,eng:["often"]},{lat:"mox",gen:null,gender:null,eng:["soon"]}
+  ]}}},
+  interrogatives:{label:"Interrogatives",sub:{"interrogatives":{decl:null,words:[
+    {lat:"quis",gen:null,gender:null,eng:["who"]},{lat:"quid",gen:null,gender:null,eng:["what"]},{lat:"quando",gen:null,gender:null,eng:["when"]},{lat:"ubi",gen:null,gender:null,eng:["where"]},{lat:"quo modo",gen:null,gender:null,eng:["how"]},{lat:"cur",gen:null,gender:null,eng:["why"]},{lat:"quantus",gen:null,gender:null,eng:["how big"]},{lat:"nonne",gen:null,gender:null,eng:["surely"]},{lat:"num",gen:null,gender:null,eng:["surely not"]}
+  ]}}},
+  pronouns:{label:"Pronouns",sub:{"pronouns":{decl:null,words:[
+    {lat:"me",gen:null,gender:null,eng:["me"]},{lat:"te",gen:null,gender:null,eng:["you (singular)"]},{lat:"eum",gen:null,gender:null,eng:["him"]},{lat:"eam",gen:null,gender:null,eng:["her"]},{lat:"eos",gen:null,gender:null,eng:["them (masculine)"]},{lat:"eas",gen:null,gender:null,eng:["them (feminine)"]},{lat:"vos",gen:null,gender:null,eng:["you (plural)"]},{lat:"nos",gen:null,gender:null,eng:["us"]}
+  ]}}}
+};
+
+let mode = 'el';
+let selected = {};
+let quizWords = [];
+let current = 0;
+let score = 0;
+let answered = false;
+let sessionMode = 'normal';
+let wrongWords = [];
+let round = 1;
+let totalWords = 0;
+let totalCorrect = 0;
+
+function is3rd(subKey){ return subKey && subKey.startsWith('3rd'); }
+
+function fullLat(w, subKey){
+  if(is3rd(subKey) && w.gen) return w.lat + ' ' + w.gen + ' ' + w.gender;
+  return w.lat;
+}
+
+function checkLat(input, w, subKey){
+  const n = s => s.toLowerCase().replace(/\s+/g,' ').trim();
+  const v = n(input);
+  if(!v) return false;
+  if(v === n(fullLat(w,subKey))) return true;
+  if(v === n(w.lat)) return true;
+  return false;
+}
+
+function checkEng(input, w){
+  const n = s => s.toLowerCase().replace(/[^a-z\s()]/g,'').replace(/\s+/g,' ').trim();
+  const v = n(input);
+  return w.eng.some(e => n(e) === v);
+}
+
+function buildUI(){
+  const grid = document.getElementById('selGrid');
+  grid.innerHTML = '';
+  Object.entries(DATA).forEach(([ck, cat]) => {
+    const sks = Object.keys(cat.sub);
+    const total = sks.reduce((a,s) => a + cat.sub[s].words.length, 0);
+    selected[ck] = {};
+    sks.forEach(s => { selected[ck][s] = false; });
+
+    const card = document.createElement('div');
+    card.className = 'cat-card'; card.id = 'card_'+ck;
+
+    const hdr = document.createElement('div');
+    hdr.className = 'cat-hdr';
+
+    const cb = document.createElement('div');
+    cb.className = 'cbox'; cb.id = 'cbox_'+ck;
+    cb.innerHTML = `<svg class="ck" viewBox="0 0 10 10" fill="none" stroke="#161412" stroke-width="1.8" stroke-linecap="round"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg><svg class="da" viewBox="0 0 10 10" fill="none" stroke="#c4935a" stroke-width="2" stroke-linecap="round"><line x1="2" y1="5" x2="8" y2="5"/></svg>`;
+
+    const lbl = document.createElement('span'); lbl.className = 'cat-lbl'; lbl.textContent = cat.label;
+    const cnt = document.createElement('span'); cnt.className = 'cat-cnt'; cnt.textContent = total;
+
+    hdr.appendChild(cb); hdr.appendChild(lbl); hdr.appendChild(cnt);
+
+    const subList = document.createElement('div');
+    subList.className = 'sub-list'; subList.id = 'subs_'+ck;
+
+    const chev = document.createElement('span');
+    chev.className = 'chevron'; chev.id = 'chev_'+ck; chev.textContent = '⌄';
+    hdr.appendChild(chev);
+    hdr.addEventListener('click', e => {
+      if(e.target === cb || cb.contains(e.target)) return;
+      subList.classList.toggle('open');
+      chev.classList.toggle('open');
+    });
+
+    cb.addEventListener('click', e => {
+      e.stopPropagation();
+      const allOn = Object.values(selected[ck]).every(v=>v);
+      const newV = !allOn;
+      sks.forEach(s => {
+        selected[ck][s] = newV;
+        const sc = document.getElementById('sbox_'+ck+'_'+s);
+        if(sc) sc.className = 'sbox'+(newV?' checked':'');
+      });
+      updCatBox(ck);
+      if(newV && !subList.classList.contains('open')){ subList.classList.add('open'); chev.classList.add('open'); }
+      updCount();
+    });
+
+    sks.forEach(s => {
+      const row = document.createElement('div'); row.className = 'sub-row';
+      const sc = document.createElement('div'); sc.className = 'sbox'; sc.id = 'sbox_'+ck+'_'+s;
+      sc.innerHTML = `<svg viewBox="0 0 9 9" fill="none" stroke="#161412" stroke-width="1.8" stroke-linecap="round"><polyline points="1,4.5 3.5,7 8,2"/></svg>`;
+      const sl = document.createElement('span'); sl.className = 'sub-lbl'; sl.textContent = s;
+      const sct = document.createElement('span'); sct.className = 'sub-cnt'; sct.textContent = cat.sub[s].words.length;
+      row.appendChild(sc); row.appendChild(sl); row.appendChild(sct);
+      row.addEventListener('click', () => {
+        selected[ck][s] = !selected[ck][s];
+        sc.className = 'sbox'+(selected[ck][s]?' checked':'');
+        updCatBox(ck);
+        updCount();
+      });
+      subList.appendChild(row);
+    });
+
+    card.appendChild(hdr); card.appendChild(subList);
+    grid.appendChild(card);
+  });
+  updCount();
+}
+
+function updCatBox(ck){
+  const vals = Object.values(selected[ck]);
+  const allOn = vals.every(v=>v), anyOn = vals.some(v=>v);
+  const cb = document.getElementById('cbox_'+ck);
+  const card = document.getElementById('card_'+ck);
+  cb.className = 'cbox'+(allOn?' checked':anyOn?' indeterminate':'');
+  if(card) card.className = 'cat-card'+(anyOn?' has-sel':'');
+}
+
+function setMode(m){
+  mode = m;
+  document.getElementById('modeEL').className = 'mode-btn'+(m==='el'?' active':'');
+  document.getElementById('modeLE').className = 'mode-btn'+(m==='le'?' active':'');
+}
+
+function getWords(){
+  const words = [];
+  Object.entries(selected).forEach(([ck,subs]) => {
+    Object.entries(subs).forEach(([sk,on]) => {
+      if(on) DATA[ck].sub[sk].words.forEach(w => words.push({...w,catKey:ck,subKey:sk}));
+    });
+  });
+  return words;
+}
+
+function updCount(){
+  const n = getWords().length;
+  document.getElementById('wordPill').textContent = n + (n===1?' word':' words') + ' selected';
+  document.getElementById('startBtn').disabled = n===0;
+  document.getElementById('reviewStartBtn').disabled = n===0;
+}
+
+function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
+
+function startSession(sm){
+  sessionMode = sm;
+  quizWords = shuffle([...getWords()]);
+  current = 0; score = 0; answered = false;
+  wrongWords = [];
+  round = 1;
+  totalWords = quizWords.length;
+  totalCorrect = 0;
+  showView('quizView');
+  showQ();
+}
+
+function showView(id){
+  ['selectorView','quizView','resultView'].forEach(v => {
+    const el = document.getElementById(v);
+    if(v === 'selectorView') el.style.display = (v===id?'':'none');
+    else el.style.display = (v===id?'block':'none');
+  });
+}
+
+function showQ(){
+  answered = false;
+  const w = quizWords[current];
+  const total = quizWords.length;
+  const pct = Math.round(current/total*100);
+  document.getElementById('progFill').style.width = pct+'%';
+  document.getElementById('progLbl').textContent = (current+1)+' / '+total;
+  document.getElementById('scorePill').textContent = score+' correct';
+  document.getElementById('roundBadge').innerHTML = '<span>Round '+round+'</span>';
+
+  const ai = document.getElementById('answerInput');
+  ai.value=''; ai.className='answer-input'; ai.disabled=false;
+  document.getElementById('feedbackBox').className='feedback-box';
+  document.getElementById('feedbackBox').textContent='';
+  document.getElementById('nextBtn').style.display='none';
+  document.getElementById('checkBtn').style.display='';
+  document.getElementById('hintBox').textContent='';
+
+  const tags = document.getElementById('pTags'); tags.innerHTML='';
+
+  if(mode==='el'){
+    document.getElementById('pDir').textContent = 'English → Latin';
+    document.getElementById('pWord').textContent = w.eng.join(', ');
+    if(w.catKey==='nouns'){
+      const d=document.createElement('span'); d.className='tag decl'; d.textContent=w.subKey; tags.appendChild(d);
+    }
+    if(is3rd(w.subKey)&&w.gen) document.getElementById('hintBox').textContent='Give: nominative  genitive  gender  (e.g. leo leonis m)';
+  } else {
+    document.getElementById('pDir').textContent = 'Latin → English';
+    document.getElementById('pWord').textContent = is3rd(w.subKey)&&w.gen ? w.lat+' '+w.gen+' '+w.gender : w.lat;
+    if(w.catKey==='nouns'){
+      const d=document.createElement('span'); d.className='tag decl'; d.textContent=w.subKey; tags.appendChild(d);
+    }
+    if(w.gender){
+      const g=document.createElement('span'); g.className='tag gend';
+      g.textContent = w.gender==='f'?'feminine':w.gender==='m'?'masculine':'neuter';
+      tags.appendChild(g);
+    }
+  }
+
+  const pc = document.getElementById('promptCard');
+  pc.style.animation='none';
+  requestAnimationFrame(()=>{ pc.style.animation='fadeIn 0.22s ease'; });
+  setTimeout(()=>ai.focus(),50);
+}
+
+function checkAnswer(){
+  if(answered) return;
+  const w = quizWords[current];
+  const val = document.getElementById('answerInput').value.trim();
+  if(!val) return;
+  answered = true;
+
+  const correct = mode==='el' ? checkLat(val,w,w.subKey) : checkEng(val,w);
+  const ai = document.getElementById('answerInput');
+  const fb = document.getElementById('feedbackBox');
+  ai.disabled = true;
+
+  if(correct){
+    score++; totalCorrect++;
+    ai.className='answer-input correct';
+    fb.className='feedback-box correct';
+    fb.textContent='✓ Correct';
+  } else {
+    if(sessionMode==='review') wrongWords.push(w);
+    ai.className='answer-input wrong';
+    fb.className='feedback-box wrong';
+    const ans = mode==='el' ? fullLat(w,w.subKey) : w.eng.join(', ');
+    fb.textContent='✗ '+ans;
+  }
+
+  document.getElementById('scorePill').textContent=score+' correct';
+  document.getElementById('checkBtn').style.display='none';
+  document.getElementById('nextBtn').style.display='block';
+}
+
+function skipQ(){
+  if(answered) return;
+  answered = true;
+  const w = quizWords[current];
+  if(sessionMode==='review') wrongWords.push(w);
+  const ai = document.getElementById('answerInput');
+  ai.className='answer-input wrong'; ai.disabled=true;
+  const fb = document.getElementById('feedbackBox');
+  fb.className='feedback-box wrong';
+  const ans = mode==='el' ? fullLat(w,w.subKey) : w.eng.join(', ');
+  fb.textContent='→ '+ans;
+  document.getElementById('checkBtn').style.display='none';
+  document.getElementById('nextBtn').style.display='block';
+}
+
+function nextQ(){
+  current++;
+  if(current>=quizWords.length){ showResult(); return; }
+  showQ();
+}
+
+const PHRASES = [[100,"Optime! Perfectly done."],[80,"Bene! Well done."],[60,"Satis bene. Keep going."],[0,"Persevera. Try again."]];
+
+function showResult(){
+  showView('resultView');
+  const total = quizWords.length;
+  const pct = Math.round(score/total*100);
+
+  if(sessionMode==='review'){
+    document.getElementById('resLabel').textContent = wrongWords.length===0 ? 'Review complete' : 'Round '+round+' complete';
+    document.getElementById('resScore').textContent = score+' / '+total;
+    document.getElementById('resTotal').textContent = pct+'% this round';
+    document.getElementById('resPhrase').textContent = wrongWords.length===0 ? 'Optime! You got everything right.' : (PHRASES.find(([t])=>pct>=t)||PHRASES[PHRASES.length-1])[1];
+
+    const banner = document.getElementById('reviewBanner');
+    if(wrongWords.length>0){
+      banner.style.display='flex';
+      document.getElementById('reviewBannerTitle').textContent = wrongWords.length+' word'+(wrongWords.length===1?' needs':'s need')+' more practice';
+      document.getElementById('reviewBannerSub').textContent = 'Round '+(round+1)+' will drill just these words.';
+    } else {
+      banner.style.display='none';
+    }
+  } else {
+    document.getElementById('resLabel').textContent = 'Result';
+    document.getElementById('resScore').textContent = score+' / '+total;
+    document.getElementById('resTotal').textContent = pct+'%';
+    document.getElementById('resPhrase').textContent = (PHRASES.find(([t])=>pct>=t)||PHRASES[PHRASES.length-1])[1];
+    document.getElementById('reviewBanner').style.display='none';
+  }
+}
+
+function continueReview(){
+  round++;
+  quizWords = shuffle([...wrongWords]);
+  wrongWords = [];
+  current = 0; score = 0; answered = false;
+  showView('quizView');
+  showQ();
+}
+
+function retryQuiz(){
+  quizWords = shuffle([...quizWords]);
+  wrongWords = [];
+  current = 0; score = 0; answered = false;
+  round = 1;
+  showView('quizView');
+  showQ();
+}
+
+function backToMenu(){
+  showView('selectorView');
+}
+
+document.addEventListener('keydown', e => {
+  if(document.getElementById('quizView').style.display!=='block') return;
+  if(e.key==='Enter'){
+    if(!answered) checkAnswer();
+    else if(document.getElementById('nextBtn').style.display!=='none') nextQ();
+  }
+});
+
+buildUI();
+</script>
+</body>
+</html>
