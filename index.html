@@ -7,253 +7,415 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+--bg:#161412;--surface:#1e1b18;--surface2:#252118;--surface3:#2c271f;
+--border:#35302a;--border2:#4a4238;--text:#e8e0d5;--text2:#9e9080;--text3:#665e52;
+--accent:#c4935a;--accent-dim:#8a6035;--accent-bg:#231e16;
+--green:#7dbf95;--green-bg:#131f18;--green-bdr:#2a4535;
+--red:#c97a7a;--red-bg:#1f1313;--red-bdr:#4a2525;
+--gold:#c4a35a;--gold-bg:#1e1a10;--gold-bdr:#4a3d18;
+--serif:'IM Fell English',Georgia,serif;--sans:'Instrument Sans',system-ui,sans-serif;
+--r:10px;--rs:6px;--t:0.18s ease}
+body.light{
+--bg:#f5f0e8;--surface:#fffdf8;--surface2:#f0ebe0;--surface3:#e8e0d0;
+--border:#d8d0c0;--border2:#c0b8a8;--text:#2a2318;--text2:#6b5f4e;--text3:#9e9080;
+--accent:#a0682a;--accent-dim:#c4935a;--accent-bg:#fdf5e8;
+--green:#2d7a4a;--green-bg:#eaf5ee;--green-bdr:#a0d4b4;
+--red:#9a3030;--red-bg:#faeaea;--red-bdr:#e0a0a0;
+--gold:#8a6010;--gold-bg:#fdf5e0;--gold-bdr:#d4b860}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;transition:background .2s,color .2s}
+.app{max-width:760px;margin:0 auto;padding:2rem 1.5rem 5rem}
+.masthead{text-align:center;padding:2.5rem 0 2rem;border-bottom:1px solid var(--border);margin-bottom:2rem;position:relative}
+.ornament{font-family:var(--serif);font-size:13px;color:var(--text3);letter-spacing:.18em;margin-bottom:1rem}
+h1{font-family:var(--serif);font-size:40px;font-weight:400;line-height:1.1}
+h1 em{font-style:italic;color:var(--accent)}
+.sub{font-size:12px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-top:.5rem}
+.masthead-btns{position:absolute;top:2.5rem;right:0;display:flex;gap:8px}
+.icon-btn{width:32px;height:32px;border-radius:999px;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all var(--t)}
+.icon-btn:hover{color:var(--text);background:var(--surface3)}
+.nav-tabs{display:flex;gap:2px;background:var(--surface2);border:1px solid var(--border);border-radius:999px;padding:3px;width:fit-content;margin:0 auto 2rem}
+.nav-tab{font-family:var(--sans);font-size:13px;font-weight:500;padding:7px 18px;border-radius:999px;border:none;background:transparent;color:var(--text2);cursor:pointer;transition:all var(--t)}
+.nav-tab.active{background:var(--surface3);color:var(--accent);border:1px solid var(--border2)}
+.mode-toggle{display:flex;background:var(--surface2);border:1px solid var(--border);border-radius:999px;padding:3px;gap:2px;width:fit-content;margin:0 auto 1.5rem;flex-wrap:wrap;justify-content:center}
+.mode-btn{font-family:var(--sans);font-size:13px;font-weight:500;padding:6px 16px;border-radius:999px;border:none;background:transparent;color:var(--text2);cursor:pointer;transition:all var(--t)}
+.mode-btn.active{background:var(--surface3);color:var(--accent);border:1px solid var(--border2)}
+.sel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.sel-header-btns{display:flex;gap:6px}
+.sel-small-btn{font-family:var(--sans);font-size:11px;font-weight:500;padding:4px 12px;border-radius:999px;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);cursor:pointer;transition:all var(--t)}
+.sel-small-btn:hover{color:var(--text);background:var(--surface3)}
+.sel-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.5rem}
+.cat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;transition:border-color var(--t)}
+.cat-card:hover{border-color:var(--border2)}
+.cat-card.has-sel{border-color:var(--accent-dim)}
+.cat-card.locked{opacity:.5;pointer-events:none}
+.cat-hdr{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;user-select:none;transition:background var(--t)}
+.cat-hdr:hover{background:var(--surface2)}
+.cbox{width:16px;height:16px;border:1.5px solid var(--border2);border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all var(--t);background:var(--surface);cursor:pointer}
+.cbox.checked{background:var(--accent);border-color:var(--accent)}
+.cbox.indeterminate{background:var(--accent-bg);border-color:var(--accent-dim)}
+.cbox svg{width:10px;height:10px;display:none}
+.cbox.checked svg.ck{display:block}
+.cbox.indeterminate svg.da{display:block}
+.cat-lbl{font-size:13px;font-weight:500;color:var(--text);flex:1}
+.cat-cnt{font-size:11px;color:var(--text3);background:var(--surface2);padding:2px 7px;border-radius:999px;border:1px solid var(--border)}
+.chevron{font-size:11px;color:var(--text3);transition:transform .2s;display:inline-block}
+.chevron.open{transform:rotate(180deg)}
+.sub-list{border-top:1px solid var(--border);padding:8px 14px 10px;background:var(--bg);display:none}
+.sub-list.open{display:block}
+.sub-row{display:flex;align-items:center;gap:8px;padding:5px 0;cursor:pointer;user-select:none}
+.sbox{width:14px;height:14px;border:1.5px solid var(--border2);border-radius:3px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all var(--t);background:var(--surface);cursor:pointer}
+.sbox.checked{background:var(--accent);border-color:var(--accent)}
+.sbox svg{width:9px;height:9px;display:none}
+.sbox.checked svg{display:block}
+.sub-lbl{font-size:12px;color:var(--text2);flex:1}
+.sub-cnt{font-size:11px;color:var(--text3)}
+.start-bar{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 18px;margin-bottom:.75rem}
+.start-bar-row{display:flex;align-items:center;gap:12px}
+.word-pill{font-family:var(--serif);font-size:15px;color:var(--text2);flex:1}
+.start-btns{display:flex;gap:8px}
+.btn-primary{font-family:var(--sans);font-size:13px;font-weight:600;letter-spacing:.04em;padding:8px 20px;border-radius:999px;border:1px solid var(--accent);background:var(--accent);color:var(--bg);cursor:pointer;transition:all var(--t);white-space:nowrap}
+.btn-primary:hover{opacity:.9}
+.btn-primary:disabled{opacity:.25;cursor:default}
+.btn-secondary{font-family:var(--sans);font-size:13px;font-weight:500;padding:8px 18px;border-radius:999px;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);cursor:pointer;transition:all var(--t);white-space:nowrap}
+.btn-secondary:hover{color:var(--text);background:var(--surface3)}
+.btn-secondary:disabled{opacity:.25;cursor:default}
+.speed-row{display:flex;align-items:center;gap:10px;padding-top:12px;border-top:1px solid var(--border);margin-top:12px}
+.speed-lbl{font-size:12px;color:var(--text3);white-space:nowrap}
+.speed-val{font-size:12px;color:var(--accent);min-width:28px;text-align:right}
+input[type=range]{flex:1;accent-color:var(--accent)}
+.speed-toggle{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);cursor:pointer;user-select:none}
+.speed-toggle input{accent-color:var(--accent)}
+.diff-row{display:flex;align-items:center;gap:8px;padding-top:12px;border-top:1px solid var(--border);margin-top:12px}
+.diff-lbl{font-size:12px;color:var(--text3);white-space:nowrap}
+.diff-btns{display:flex;gap:4px}
+.diff-btn{font-family:var(--sans);font-size:11px;font-weight:500;padding:4px 12px;border-radius:999px;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;transition:all var(--t)}
+.diff-btn.active{border-color:var(--accent);color:var(--accent);background:var(--accent-bg)}
+.diff-btn.d-insane.active{border-color:var(--red);color:var(--red);background:var(--red-bg)}
+.sentence-notice{font-size:12px;color:var(--text3);background:var(--accent-bg);border:1px solid var(--accent-dim);border-radius:var(--rs);padding:8px 12px;margin-top:10px;text-align:center}
+#quizView{display:none}
+.prog-row{display:flex;align-items:center;gap:10px;margin-bottom:1.25rem}
+.prog-track{flex:1;height:2px;background:var(--border);border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .4s ease}
+.prog-lbl{font-size:12px;color:var(--text3);min-width:48px;text-align:right}
+.score-pill{font-size:12px;color:var(--green);background:var(--green-bg);padding:3px 10px;border-radius:999px;border:1px solid var(--green-bdr)}
+.quiz-menu-btn{font-family:var(--sans);font-size:12px;font-weight:500;padding:4px 12px;border-radius:999px;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);cursor:pointer;transition:all var(--t)}
+.round-badge{text-align:center;margin-bottom:1rem}
+.round-badge span{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);background:var(--surface2);padding:3px 12px;border-radius:999px;border:1px solid var(--border)}
+.prompt-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2rem 2rem 1.5rem;text-align:center;margin-bottom:.75rem;min-height:155px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative}
+.p-dir{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:14px}
+.p-word{font-family:var(--serif);font-size:34px;color:var(--text);line-height:1.25;margin-bottom:10px}
+.p-tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.tag{font-size:11px;padding:3px 10px;border-radius:999px;border:1px solid var(--border);color:var(--text2);background:var(--surface2)}
+.tag.decl{color:var(--accent);background:var(--accent-bg);border-color:var(--accent-dim)}
+.tag.gend{color:var(--gold);background:var(--gold-bg);border-color:var(--gold-bdr)}
+.tag.diff{color:var(--red);background:var(--red-bg);border-color:var(--red-bdr)}
+.timer-ring{position:absolute;top:12px;right:14px;width:36px;height:36px}
+.timer-ring svg{transform:rotate(-90deg)}
+.timer-track{fill:none;stroke:var(--border);stroke-width:3}
+.timer-arc{fill:none;stroke:var(--accent);stroke-width:3;stroke-linecap:round;transition:stroke-dashoffset .25s linear,stroke .25s}
+.timer-arc.urgent{stroke:var(--red)}
+.timer-txt{font-size:10px;font-weight:600;fill:var(--text2);text-anchor:middle;dominant-baseline:middle}
+.hint-box{font-size:12px;color:var(--text3);text-align:center;margin-bottom:10px;font-family:var(--serif);font-style:italic;min-height:18px}
+.answer-wrap{margin-bottom:8px}
+.answer-input{width:100%;font-family:var(--serif);font-size:20px;padding:13px 18px;border:1.5px solid var(--border2);border-radius:var(--r);background:var(--surface);color:var(--text);outline:none;transition:all var(--t);text-align:center}
+.answer-input::placeholder{color:var(--text3)}
+.answer-input:focus{border-color:var(--accent-dim);box-shadow:0 0 0 3px rgba(196,147,90,.08)}
+.answer-input.correct{border-color:var(--green);background:var(--green-bg);color:var(--green)}
+.answer-input.wrong{border-color:var(--red);background:var(--red-bg);color:var(--red)}
+.action-row{display:flex;gap:8px;margin-bottom:8px}
+.check-btn{flex:1;font-family:var(--sans);font-size:14px;font-weight:600;padding:11px;border-radius:var(--r);border:1px solid var(--accent);background:var(--accent);color:var(--bg);cursor:pointer;transition:all var(--t)}
+.skip-btn{font-family:var(--sans);font-size:13px;padding:11px 16px;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface);color:var(--text2);cursor:pointer;transition:all var(--t)}
+.next-btn{width:100%;font-family:var(--sans);font-size:14px;font-weight:500;padding:11px;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface);color:var(--text);cursor:pointer;transition:all var(--t);display:none}
+.next-btn:hover{background:var(--surface2)}
+.feedback-box{padding:10px 16px;border-radius:var(--rs);font-size:14px;margin-bottom:8px;display:none;font-family:var(--serif)}
+.feedback-box.correct{display:block;color:var(--green);background:var(--green-bg);border:1px solid var(--green-bdr)}
+.feedback-box.wrong{display:block;color:var(--red);background:var(--red-bg);border:1px solid var(--red-bdr)}
+.feedback-box.info{display:block;color:var(--text2);background:var(--surface2);border:1px solid var(--border2)}
+.mc-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.mc-btn{font-family:var(--serif);font-size:16px;padding:12px 14px;border-radius:var(--r);border:1.5px solid var(--border2);background:var(--surface);color:var(--text);cursor:pointer;transition:all var(--t);text-align:left;line-height:1.3;display:flex;gap:10px;align-items:flex-start}
+.mc-btn:hover:not(:disabled){border-color:var(--accent-dim);background:var(--accent-bg)}
+.mc-btn.correct{border-color:var(--green);background:var(--green-bg);color:var(--green);cursor:default}
+.mc-btn.wrong{border-color:var(--red);background:var(--red-bg);color:var(--red);cursor:default}
+.mc-btn.reveal{border-color:var(--green);background:var(--green-bg);color:var(--green);cursor:default}
+.mc-btn:disabled{cursor:default}
+.mc-num{font-family:var(--sans);font-size:11px;font-weight:600;color:var(--text3);padding-top:2px;flex-shrink:0}
 
-  :root {
-    --bg:        #161412;
-    --surface:   #1e1b18;
-    --surface2:  #252118;
-    --surface3:  #2c271f;
-    --border:    #35302a;
-    --border2:   #4a4238;
-    --text:      #e8e0d5;
-    --text2:     #9e9080;
-    --text3:     #665e52;
-    --accent:    #c4935a;
-    --accent-dim:#8a6035;
-    --accent-bg: #231e16;
-    --green:     #7dbf95;
-    --green-bg:  #131f18;
-    --green-bdr: #2a4535;
-    --red:       #c97a7a;
-    --red-bg:    #1f1313;
-    --red-bdr:   #4a2525;
-    --gold:      #c4a35a;
-    --gold-bg:   #1e1a10;
-    --gold-bdr:  #4a3d18;
-    --serif: 'IM Fell English', Georgia, serif;
-    --sans: 'Instrument Sans', system-ui, sans-serif;
-    --r: 10px;
-    --rs: 6px;
-    --t: 0.18s ease;
-  }
+/* SENTENCE MODE */
+.sentence-prompt{font-family:var(--serif);font-size:22px;color:var(--text);line-height:1.6;text-align:center;margin-bottom:10px;word-spacing:4px}
+.sentence-prompt .sword{cursor:pointer;border-bottom:1px dotted var(--accent-dim);padding-bottom:1px;display:inline;position:relative}
+.sentence-prompt .sword:hover{color:var(--accent);border-bottom-color:var(--accent)}
+.sword-tip{display:inline-block;background:var(--surface3);border:1px solid var(--border2);border-radius:6px;padding:3px 9px;font-family:var(--sans);font-size:12px;color:var(--text);margin-left:4px;vertical-align:middle}
+.sentence-textarea{width:100%;font-family:var(--serif);font-size:18px;padding:13px 18px;border:1.5px solid var(--border2);border-radius:var(--r);background:var(--surface);color:var(--text);outline:none;transition:all var(--t);resize:vertical;min-height:90px;line-height:1.5}
+.sentence-textarea::placeholder{color:var(--text3)}
+.sentence-textarea:focus{border-color:var(--accent-dim);box-shadow:0 0 0 3px rgba(196,147,90,.08)}
+.sentence-textarea.correct{border-color:var(--green);background:var(--green-bg);color:var(--green)}
+.sentence-textarea.wrong{border-color:var(--red);background:var(--red-bg);color:var(--red)}
+.loading-shimmer{font-family:var(--serif);font-style:italic;color:var(--text3);font-size:18px;text-align:center;padding:1rem}
+.ai-feedback{padding:12px 16px;border-radius:var(--rs);font-size:14px;margin-bottom:8px;display:none;font-family:var(--sans);line-height:1.5}
+.ai-feedback.correct{display:block;color:var(--green);background:var(--green-bg);border:1px solid var(--green-bdr)}
+.ai-feedback.wrong{display:block;color:var(--red);background:var(--red-bg);border:1px solid var(--red-bdr)}
+.ai-feedback.partial{display:block;color:var(--gold);background:var(--gold-bg);border:1px solid var(--gold-bdr)}
+.next-sent-btn{width:100%;font-family:var(--sans);font-size:14px;font-weight:500;padding:11px;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface);color:var(--text);cursor:pointer;transition:all var(--t);display:none}
+.next-sent-btn:hover{background:var(--surface2)}
 
-  body { font-family: var(--sans); background: var(--bg); color: var(--text); min-height: 100vh; }
+#resultView{display:none}
+.result-wrap{text-align:center;padding:3rem 0}
+.res-label{font-family:var(--serif);font-size:13px;color:var(--text3);letter-spacing:.12em;margin-bottom:1rem}
+.res-score{font-family:var(--serif);font-size:60px;color:var(--accent);line-height:1;margin-bottom:.4rem}
+.res-total{font-size:14px;color:var(--text2);margin-bottom:.5rem}
+.res-phrase{font-family:var(--serif);font-style:italic;font-size:17px;color:var(--text2);margin-bottom:2rem}
+.res-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.review-banner{display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--gold-bdr);border-radius:var(--r);padding:14px 18px;margin-bottom:1.5rem}
+.review-icon{font-size:18px;color:var(--gold)}
+.review-text{flex:1}
+.review-text strong{font-size:14px;font-weight:600;color:var(--text);display:block;margin-bottom:2px}
+.review-text span{font-size:12px;color:var(--text2)}
+.review-btn{font-family:var(--sans);font-size:13px;font-weight:600;padding:8px 18px;border-radius:999px;border:1px solid var(--gold-bdr);background:var(--gold-bg);color:var(--gold);cursor:pointer;white-space:nowrap}
 
-  .app { max-width: 760px; margin: 0 auto; padding: 2rem 1.5rem 5rem; }
+#statsView{display:none}
+.stats-header{margin-bottom:1.5rem}
+.stats-header h2{font-family:var(--serif);font-size:26px;font-weight:400;color:var(--text);margin-bottom:.25rem}
+.stats-header p{font-size:13px;color:var(--text3)}
+.stat-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:2rem}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px}
+.stat-card .sc-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.stat-card .sc-value{font-family:var(--serif);font-size:26px;color:var(--accent)}
+.stat-card .sc-sub{font-size:11px;color:var(--text3);margin-top:2px}
+.section-title{font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);margin-bottom:1rem}
+.cat-stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:2rem}
+.cat-stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px}
+.cat-stat-card .cs-name{font-size:13px;font-weight:500;color:var(--text);margin-bottom:10px}
+.cs-bar-track{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:6px}
+.cs-bar-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .5s ease}
+.cs-meta{display:flex;justify-content:space-between;font-size:11px;color:var(--text3)}
+.cs-acc{color:var(--accent);font-weight:500}
+.due-badge{font-size:10px;padding:2px 7px;border-radius:999px;background:var(--gold-bg);color:var(--gold);border:1px solid var(--gold-bdr);margin-left:6px}
+.session-chart{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px;margin-bottom:2rem}
+.bars-wrap{display:flex;align-items:flex-end;gap:6px;height:80px;margin-bottom:8px}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.bar-fill{width:100%;border-radius:3px 3px 0 0;background:var(--accent);min-height:2px}
+.bar-lbl{font-size:10px;color:var(--text3);white-space:nowrap}
+.no-stats{font-family:var(--serif);font-style:italic;color:var(--text3);text-align:center;padding:3rem 0}
+.sr-clear-btn{font-family:var(--sans);font-size:12px;padding:6px 14px;border-radius:999px;border:1px solid var(--red-bdr);background:var(--red-bg);color:var(--red);cursor:pointer}
 
-  .word-drawer-tab { position: fixed; right: 0; top: 50%; transform: translateY(-50%) rotate(-90deg); transform-origin: right bottom; z-index: 20; font-family: var(--sans); font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 8px 14px; border: 1px solid var(--border2); border-bottom: none; border-radius: 8px 8px 0 0; background: var(--surface2); color: var(--accent); cursor: pointer; }
-  .word-drawer { position: fixed; top: 0; right: 0; width: min(340px, 88vw); height: 100vh; background: var(--surface); border-left: 1px solid var(--border2); box-shadow: -18px 0 40px rgba(0,0,0,0.25); transform: translateX(100%); transition: transform 0.25s ease; z-index: 30; display: flex; flex-direction: column; }
-  .word-drawer.open { transform: translateX(0); }
-  .word-drawer-head { display: flex; align-items: center; gap: 12px; padding: 18px; border-bottom: 1px solid var(--border); }
-  .word-drawer-title { flex: 1; }
-  .word-drawer-title strong { display: block; font-family: var(--serif); font-size: 22px; font-weight: 400; color: var(--text); }
-  .word-drawer-title span { display: block; margin-top: 2px; font-size: 12px; color: var(--text3); }
-  .word-drawer-close { width: 30px; height: 30px; border-radius: 999px; border: 1px solid var(--border2); background: var(--surface2); color: var(--text2); cursor: pointer; }
-  .word-list { overflow-y: auto; padding: 10px 12px 22px; }
-  .word-row { padding: 10px 8px; border-bottom: 1px solid var(--border); }
-  .word-row-lat { font-family: var(--serif); font-size: 17px; color: var(--text); }
-  .word-row-eng { font-size: 12px; color: var(--text2); margin-top: 3px; line-height: 1.35; }
-  .word-row-meta { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 4px; }
-  .word-empty { color: var(--text3); font-family: var(--serif); font-style: italic; padding: 22px 8px; text-align: center; }
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;display:flex;align-items:center;justify-content:center}
+.overlay-box{background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:1.5rem 2rem;max-width:380px;width:90%}
+.overlay-title{font-family:var(--serif);font-size:22px;font-weight:400;color:var(--text);margin-bottom:1.25rem}
+.shortcut-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)}
+.shortcut-row:last-child{border-bottom:none}
+.shortcut-desc{font-size:13px;color:var(--text2)}
+.kbd{font-family:var(--sans);font-size:11px;font-weight:600;padding:3px 8px;border-radius:5px;border:1px solid var(--border2);background:var(--surface2);color:var(--text)}
+.overlay-close{margin-top:1.25rem;width:100%}
 
-  @media (max-width: 980px) { .word-drawer-tab { top: auto; bottom: 18px; transform: none; right: 18px; border: 1px solid var(--border2); border-radius: 999px; } }
-
-  .masthead { text-align: center; padding: 2.5rem 0 2rem; border-bottom: 1px solid var(--border); margin-bottom: 2rem; }
-  .ornament { font-family: var(--serif); font-size: 13px; color: var(--text3); letter-spacing: 0.18em; margin-bottom: 1rem; }
-  h1 { font-family: var(--serif); font-size: 40px; font-weight: 400; color: var(--text); line-height: 1.1; }
-  h1 em { font-style: italic; color: var(--accent); }
-  .sub { font-size: 12px; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 0.5rem; }
-
-  .mode-toggle { display: flex; background: var(--surface2); border: 1px solid var(--border); border-radius: 999px; padding: 3px; gap: 2px; width: fit-content; margin: 0 auto 2rem; }
-  .mode-btn { font-family: var(--sans); font-size: 13px; font-weight: 500; padding: 7px 20px; border-radius: 999px; border: none; background: transparent; color: var(--text2); cursor: pointer; transition: all var(--t); letter-spacing: 0.01em; }
-  .mode-btn.active { background: var(--surface3); color: var(--accent); border: 1px solid var(--border2); }
-
-  .sel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1.5rem; }
-
-  .cat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; transition: border-color var(--t); }
-  .cat-card:hover { border-color: var(--border2); }
-  .cat-card.has-sel { border-color: var(--accent-dim); }
-
-  .cat-hdr { display: flex; align-items: center; gap: 10px; padding: 12px 14px; cursor: pointer; user-select: none; transition: background var(--t); }
-  .cat-hdr:hover { background: var(--surface2); }
-
-  .cbox { width: 16px; height: 16px; border: 1.5px solid var(--border2); border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all var(--t); background: var(--surface); cursor: pointer; }
-  .cbox.checked { background: var(--accent); border-color: var(--accent); }
-  .cbox.indeterminate { background: var(--accent-bg); border-color: var(--accent-dim); }
-  .cbox svg { width: 10px; height: 10px; display: none; }
-  .cbox.checked svg.ck { display: block; }
-  .cbox.indeterminate svg.da { display: block; }
-
-  .cat-lbl { font-size: 13px; font-weight: 500; color: var(--text); flex: 1; }
-  .cat-cnt { font-size: 11px; color: var(--text3); background: var(--surface2); padding: 2px 7px; border-radius: 999px; border: 1px solid var(--border); }
-  .chevron { font-size: 11px; color: var(--text3); transition: transform 0.2s; display: inline-block; }
-  .chevron.open { transform: rotate(180deg); }
-
-  .sub-list { border-top: 1px solid var(--border); padding: 8px 14px 10px; background: var(--bg); display: none; }
-  .sub-list.open { display: block; }
-
-  .sub-row { display: flex; align-items: center; gap: 8px; padding: 5px 0; cursor: pointer; user-select: none; }
-  .sbox { width: 14px; height: 14px; border: 1.5px solid var(--border2); border-radius: 3px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all var(--t); background: var(--surface); cursor: pointer; }
-  .sbox.checked { background: var(--accent); border-color: var(--accent); }
-  .sbox svg { width: 9px; height: 9px; display: none; }
-  .sbox.checked svg { display: block; }
-  .sub-lbl { font-size: 12px; color: var(--text2); flex: 1; }
-  .sub-cnt { font-size: 11px; color: var(--text3); }
-
-  .start-bar { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 14px 18px; display: flex; align-items: center; gap: 12px; margin-bottom: 2rem; }
-  .word-pill { font-family: var(--serif); font-size: 15px; color: var(--text2); flex: 1; }
-  .start-btns { display: flex; gap: 8px; }
-  .btn-primary { font-family: var(--sans); font-size: 13px; font-weight: 600; letter-spacing: 0.04em; padding: 8px 20px; border-radius: 999px; border: 1px solid var(--accent); background: var(--accent); color: var(--bg); cursor: pointer; transition: all var(--t); white-space: nowrap; }
-  .btn-primary:hover { background: #d4a568; border-color: #d4a568; }
-  .btn-primary:disabled { opacity: 0.25; cursor: default; }
-  .btn-secondary { font-family: var(--sans); font-size: 13px; font-weight: 500; padding: 8px 18px; border-radius: 999px; border: 1px solid var(--border2); background: var(--surface2); color: var(--text2); cursor: pointer; transition: all var(--t); white-space: nowrap; }
-  .btn-secondary:hover { color: var(--text); background: var(--surface3); }
-  .btn-secondary:disabled { opacity: 0.25; cursor: default; }
-
-  #quizView { display: none; }
-
-  .prog-row { display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem; }
-  .prog-track { flex: 1; height: 2px; background: var(--border); border-radius: 2px; overflow: hidden; }
-  .prog-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.4s ease; }
-  .prog-lbl { font-size: 12px; color: var(--text3); min-width: 48px; text-align: right; }
-  .score-pill { font-size: 12px; color: var(--green); background: var(--green-bg); padding: 3px 10px; border-radius: 999px; border: 1px solid var(--green-bdr); }
-  .quiz-menu-btn { font-family: var(--sans); font-size: 12px; font-weight: 500; padding: 4px 12px; border-radius: 999px; border: 1px solid var(--border2); background: var(--surface2); color: var(--text2); cursor: pointer; transition: all var(--t); white-space: nowrap; }
-  .quiz-menu-btn:hover { color: var(--text); background: var(--surface3); }
-
-  .round-badge { text-align: center; margin-bottom: 1rem; }
-  .round-badge span { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); background: var(--surface2); padding: 3px 12px; border-radius: 999px; border: 1px solid var(--border); }
-
-  .prompt-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 2.5rem 2rem 2rem; text-align: center; margin-bottom: 0.75rem; min-height: 155px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-  .p-dir { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); margin-bottom: 14px; }
-  .p-word { font-family: var(--serif); font-size: 34px; color: var(--text); line-height: 1.25; margin-bottom: 10px; }
-  .p-tags { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
-  .tag { font-size: 11px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--border); color: var(--text2); background: var(--surface2); }
-  .tag.decl { color: var(--accent); background: var(--accent-bg); border-color: var(--accent-dim); }
-  .tag.gend { color: var(--gold); background: var(--gold-bg); border-color: var(--gold-bdr); }
-
-  .hint-box { font-size: 12px; color: var(--text3); text-align: center; margin-bottom: 10px; font-family: var(--serif); font-style: italic; min-height: 18px; }
-
-  .answer-wrap { margin-bottom: 8px; }
-  .answer-input { width: 100%; font-family: var(--serif); font-size: 20px; padding: 13px 18px; border: 1.5px solid var(--border2); border-radius: var(--r); background: var(--surface); color: var(--text); outline: none; transition: all var(--t); text-align: center; }
-  .answer-input::placeholder { color: var(--text3); }
-  .answer-input:focus { border-color: var(--accent-dim); box-shadow: 0 0 0 3px rgba(196,147,90,0.08); }
-  .answer-input.correct { border-color: var(--green); background: var(--green-bg); color: var(--green); }
-  .answer-input.wrong { border-color: var(--red); background: var(--red-bg); color: var(--red); }
-
-  .action-row { display: flex; gap: 8px; margin-bottom: 8px; }
-  .check-btn { flex: 1; font-family: var(--sans); font-size: 14px; font-weight: 600; letter-spacing: 0.03em; padding: 11px; border-radius: var(--r); border: 1px solid var(--accent); background: var(--accent); color: var(--bg); cursor: pointer; transition: all var(--t); }
-  .check-btn:hover { background: #d4a568; }
-  .skip-btn { font-family: var(--sans); font-size: 13px; padding: 11px 16px; border-radius: var(--r); border: 1px solid var(--border2); background: var(--surface); color: var(--text2); cursor: pointer; transition: all var(--t); }
-  .skip-btn:hover { background: var(--surface2); }
-  .next-btn { width: 100%; font-family: var(--sans); font-size: 14px; font-weight: 500; padding: 11px; border-radius: var(--r); border: 1px solid var(--border2); background: var(--surface); color: var(--text); cursor: pointer; transition: all var(--t); display: none; }
-  .next-btn:hover { background: var(--surface2); }
-
-  .feedback-box { padding: 10px 16px; border-radius: var(--rs); font-size: 14px; margin-bottom: 8px; display: none; font-family: var(--serif); }
-  .feedback-box.correct { display: block; color: var(--green); background: var(--green-bg); border: 1px solid var(--green-bdr); }
-  .feedback-box.wrong { display: block; color: var(--red); background: var(--red-bg); border: 1px solid var(--red-bdr); }
-
-  #resultView { display: none; }
-  .result-wrap { text-align: center; padding: 3rem 0; }
-  .res-label { font-family: var(--serif); font-size: 13px; color: var(--text3); letter-spacing: 0.12em; margin-bottom: 1rem; }
-  .res-score { font-family: var(--serif); font-size: 60px; color: var(--accent); line-height: 1; margin-bottom: 0.4rem; }
-  .res-total { font-size: 14px; color: var(--text2); margin-bottom: 0.5rem; }
-  .res-phrase { font-family: var(--serif); font-style: italic; font-size: 17px; color: var(--text2); margin-bottom: 2rem; }
-  .res-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
-
-  .review-banner { display: flex; align-items: center; gap: 14px; background: var(--surface); border: 1px solid var(--gold-bdr); border-radius: var(--r); padding: 14px 18px; margin-bottom: 1.5rem; }
-  .review-icon { font-size: 18px; color: var(--gold); flex-shrink: 0; }
-  .review-text { flex: 1; }
-  .review-text strong { font-size: 14px; font-weight: 600; color: var(--text); display: block; margin-bottom: 2px; }
-  .review-text span { font-size: 12px; color: var(--text2); }
-  .review-btn { font-family: var(--sans); font-size: 13px; font-weight: 600; padding: 8px 18px; border-radius: 999px; border: 1px solid var(--gold-bdr); background: var(--gold-bg); color: var(--gold); cursor: pointer; transition: all var(--t); white-space: nowrap; }
-  .review-btn:hover { background: #2a2210; }
-
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
-  .prompt-card { animation: fadeIn 0.22s ease; }
+.word-drawer-tab{position:fixed;right:0;top:50%;transform:translateY(-50%) rotate(-90deg);transform-origin:right bottom;z-index:20;font-family:var(--sans);font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:8px 14px;border:1px solid var(--border2);border-bottom:none;border-radius:8px 8px 0 0;background:var(--surface2);color:var(--accent);cursor:pointer}
+.word-drawer{position:fixed;top:0;right:0;width:min(340px,88vw);height:100vh;background:var(--surface);border-left:1px solid var(--border2);box-shadow:-18px 0 40px rgba(0,0,0,.25);transform:translateX(100%);transition:transform .25s ease;z-index:30;display:flex;flex-direction:column}
+.word-drawer.open{transform:translateX(0)}
+.word-drawer-head{display:flex;align-items:center;gap:12px;padding:18px;border-bottom:1px solid var(--border)}
+.word-drawer-title{flex:1}
+.word-drawer-title strong{display:block;font-family:var(--serif);font-size:22px;font-weight:400;color:var(--text)}
+.word-drawer-title span{display:block;margin-top:2px;font-size:12px;color:var(--text3)}
+.word-drawer-close{width:30px;height:30px;border-radius:999px;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);cursor:pointer}
+.word-list{overflow-y:auto;padding:10px 12px 22px}
+.word-row{padding:10px 8px;border-bottom:1px solid var(--border)}
+.word-row-lat{font-family:var(--serif);font-size:17px;color:var(--text)}
+.word-row-eng{font-size:12px;color:var(--text2);margin-top:3px;line-height:1.35}
+.word-row-meta{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-top:4px}
+.word-row-sr{font-size:10px;margin-top:3px}
+.word-empty{color:var(--text3);font-family:var(--serif);font-style:italic;padding:22px 8px;text-align:center}
+@media(max-width:980px){.word-drawer-tab{top:auto;bottom:18px;transform:none;right:18px;border:1px solid var(--border2);border-radius:999px}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.prompt-card{animation:fadeIn .22s ease}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.pulsing{animation:pulse 1.2s ease infinite}
 </style>
 </head>
 <body>
 <div class="app">
 
-  <div id="selectorView">
-    <div class="masthead">
-      <div class="ornament">✦ &nbsp; ✦ &nbsp; ✦</div>
-      <h1><em>Latin</em> Trainer</h1>
-      <p class="sub">Vocabularium Latinum</p>
+<div id="selectorView">
+  <div class="masthead">
+    <div class="ornament">✦ &nbsp; ✦ &nbsp; ✦</div>
+    <h1><em>Latin</em> Trainer</h1>
+    <p class="sub">Vocabularium Latinum</p>
+    <div class="masthead-btns">
+      <button class="icon-btn" id="themeBtn" onclick="toggleTheme()" title="Toggle theme">☀</button>
+      <button class="icon-btn" onclick="showShortcuts()" title="Keyboard shortcuts">?</button>
     </div>
-
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showMainTab('practice')">Practice</button>
+    <button class="nav-tab" onclick="showMainTab('stats')">Stats</button>
+  </div>
+  <div id="practicePanel">
     <div class="mode-toggle">
       <button class="mode-btn active" id="modeEL" onclick="setMode('el')">English → Latin</button>
       <button class="mode-btn" id="modeLE" onclick="setMode('le')">Latin → English</button>
     </div>
-
+    <div class="mode-toggle" id="quizTypeToggle">
+      <button class="mode-btn active" id="typeVocab" onclick="setQuizType('vocab')">Vocabulary</button>
+      <button class="mode-btn" id="typeDrill" onclick="setQuizType('drill')">Declension / conjugation</button>
+      <button class="mode-btn" id="typeSent" onclick="setQuizType('sentences')">Sentences</button>
+    </div>
+    <div class="mode-toggle" id="inputModeToggle">
+      <button class="mode-btn active" id="inputTyped" onclick="setInputMode('typed')">Typed</button>
+      <button class="mode-btn" id="inputMC" onclick="setInputMode('mc')">Multiple choice</button>
+    </div>
+    <div class="sel-header">
+      <span style="font-size:12px;color:var(--text3)" id="selHeaderLabel">Categories</span>
+      <div class="sel-header-btns">
+        <button class="sel-small-btn" onclick="selectAll()">Select all</button>
+        <button class="sel-small-btn" onclick="deselectAll()">Deselect all</button>
+      </div>
+    </div>
     <div class="sel-grid" id="selGrid"></div>
-
+    <div id="sentNotice" class="sentence-notice" style="display:none">All categories are auto-selected in Sentences mode.</div>
     <div class="start-bar">
-      <span class="word-pill" id="wordPill">0 words selected</span>
-      <div class="start-btns">
-        <button class="btn-primary" id="startBtn" onclick="startSession('review')" disabled>Begin</button>
+      <div class="start-bar-row">
+        <span class="word-pill" id="wordPill">0 words selected</span>
+        <div class="start-btns">
+          <button class="btn-secondary" id="srBtn" onclick="startSR()" disabled>Due words</button>
+          <button class="btn-primary" id="startBtn" onclick="startSession()" disabled>Begin</button>
+        </div>
+      </div>
+      <div class="speed-row">
+        <label class="speed-toggle"><input type="checkbox" id="speedOn" onchange="toggleSpeed()"> Speed mode</label>
+        <span class="speed-lbl" id="speedLbl" style="display:none">Time:</span>
+        <input type="range" id="speedSlider" min="1" max="20" value="5" step="1" style="display:none" oninput="updSpeedVal()">
+        <span class="speed-val" id="speedVal" style="display:none">5s</span>
+      </div>
+      <div class="diff-row" id="diffRow" style="display:none">
+        <span class="diff-lbl">Difficulty:</span>
+        <div class="diff-btns">
+          <button class="diff-btn active" id="dEasy" onclick="setDiff('easy')">Easy</button>
+          <button class="diff-btn" id="dMed" onclick="setDiff('medium')">Medium</button>
+          <button class="diff-btn" id="dHard" onclick="setDiff('hard')">Hard</button>
+          <button class="diff-btn d-insane" id="dInsane" onclick="setDiff('insane')">Insane</button>
+        </div>
       </div>
     </div>
   </div>
+</div>
 
-  <div id="quizView">
-    <div class="prog-row">
-      <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
-      <span class="prog-lbl" id="progLbl">1 / 10</span>
-      <span class="score-pill" id="scorePill">0 correct</span>
-      <button class="quiz-menu-btn" onclick="backToMenu()">Menu</button>
-    </div>
+<!-- QUIZ VIEW -->
+<div id="quizView">
+  <div class="prog-row">
+    <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
+    <span class="prog-lbl" id="progLbl">1 / 10</span>
+    <span class="score-pill" id="scorePill">0 correct</span>
+    <button class="quiz-menu-btn" onclick="backToMenu()">Menu</button>
+  </div>
+  <div class="round-badge" id="roundBadge"><span>Round 1</span></div>
+  <div class="prompt-card" id="promptCard">
+    <svg class="timer-ring" id="timerRing" style="display:none">
+      <circle class="timer-track" cx="18" cy="18" r="15"/>
+      <circle class="timer-arc" id="timerArc" cx="18" cy="18" r="15" stroke-dasharray="94.25" stroke-dashoffset="0"/>
+      <text class="timer-txt" id="timerTxt" x="18" y="19">5</text>
+    </svg>
+    <div class="p-dir" id="pDir"></div>
+    <div class="p-word" id="pWord"></div>
+    <div class="p-tags" id="pTags"></div>
+  </div>
+  <div class="hint-box" id="hintBox"></div>
 
-    <div class="round-badge" id="roundBadge"><span>Round 1</span></div>
-
-    <div class="prompt-card" id="promptCard">
-      <div class="p-dir" id="pDir"></div>
-      <div class="p-word" id="pWord"></div>
-      <div class="p-tags" id="pTags"></div>
-    </div>
-
-    <div class="hint-box" id="hintBox"></div>
-
+  <!-- typed vocab/drill -->
+  <div id="typedSection">
     <div class="answer-wrap">
-      <input class="answer-input" id="answerInput" type="text" placeholder="Type your answer…" autocomplete="off" spellcheck="false" />
+      <input class="answer-input" id="answerInput" type="text" placeholder="Type your answer…" autocomplete="off" spellcheck="false"/>
     </div>
-
     <div class="feedback-box" id="feedbackBox"></div>
-
     <div class="action-row">
-      <button class="check-btn" id="checkBtn" onclick="checkAnswer()">Check</button>
-      <button class="skip-btn" onclick="skipQ()">Skip</button>
+      <button class="check-btn" id="checkBtn" onclick="dispatchCheck()">Check</button>
+      <button class="skip-btn" onclick="dispatchSkip()">Skip</button>
     </div>
     <button class="next-btn" id="nextBtn" onclick="nextQ()">Next →</button>
   </div>
 
-  <div id="resultView">
-    <div class="result-wrap">
-      <div class="res-label" id="resLabel">Result</div>
-      <div class="res-score" id="resScore"></div>
-      <div class="res-total" id="resTotal"></div>
-      <div class="res-phrase" id="resPhrase"></div>
-      <div id="reviewBanner" class="review-banner" style="display:none">
-        <span class="review-icon">↺</span>
-        <div class="review-text">
-          <strong id="reviewBannerTitle"></strong>
-          <span id="reviewBannerSub"></span>
-        </div>
-        <button class="review-btn" onclick="continueReview()">Review →</button>
-      </div>
-      <div class="res-btns">
-        <button class="btn-primary" onclick="retryQuiz()">Try again</button>
-        <button class="btn-secondary" onclick="backToMenu()">Menu</button>
-      </div>
-    </div>
+  <!-- mc vocab/drill -->
+  <div id="mcSection" style="display:none">
+    <div class="mc-grid" id="mcGrid"></div>
+    <div class="feedback-box" id="mcFeedback"></div>
+    <button class="next-btn" id="mcNextBtn" onclick="nextQ()" style="display:none">Next →</button>
   </div>
 
+  <!-- sentences section -->
+  <div id="sentSection" style="display:none">
+    <div id="sentLoadArea">
+      <div class="loading-shimmer pulsing">Generating sentence…</div>
+    </div>
+    <div id="sentAnswerArea" style="display:none">
+      <textarea class="sentence-textarea" id="sentInput" placeholder="Type your translation here…" spellcheck="false"></textarea>
+      <div class="ai-feedback" id="aiFeedback"></div>
+      <div class="action-row">
+        <button class="check-btn" id="sentCheckBtn" onclick="checkSentence()">Check translation</button>
+        <button class="skip-btn" onclick="skipSentence()">Skip</button>
+      </div>
+      <button class="next-sent-btn" id="nextSentBtn" onclick="nextSentence()">Next sentence →</button>
+    </div>
+  </div>
 </div>
 
-<button class="word-drawer-tab" id="wordDrawerTab" onclick="toggleWordDrawer(true)">Word list</button>
-<aside class="word-drawer" id="wordDrawer" aria-label="Word list">
+<!-- RESULT VIEW -->
+<div id="resultView">
+  <div class="result-wrap">
+    <div class="res-label" id="resLabel">Result</div>
+    <div class="res-score" id="resScore"></div>
+    <div class="res-total" id="resTotal"></div>
+    <div class="res-phrase" id="resPhrase"></div>
+    <div id="reviewBanner" class="review-banner" style="display:none">
+      <span class="review-icon">↺</span>
+      <div class="review-text">
+        <strong id="reviewBannerTitle"></strong>
+        <span id="reviewBannerSub"></span>
+      </div>
+      <button class="review-btn" onclick="continueReview()">Review →</button>
+    </div>
+    <div class="res-btns">
+      <button class="btn-primary" onclick="retryQuiz()">Try again</button>
+      <button class="btn-secondary" onclick="backToMenu()">Menu</button>
+    </div>
+  </div>
+</div>
+
+<!-- STATS VIEW -->
+<div id="statsView">
+  <div class="stats-header"><h2>Statistics</h2><p>Your learning progress across all sessions</p></div>
+  <div class="stat-cards" id="statCards"></div>
+  <p class="section-title">Recent sessions</p>
+  <div class="session-chart" id="sessionChart"></div>
+  <p class="section-title">By category</p>
+  <div class="cat-stats-grid" id="catStatsGrid"></div>
+  <div style="text-align:center" id="resetArea">
+    <button class="sr-clear-btn" onclick="showResetConfirm()">Reset all data</button>
+  </div>
+  <div id="resetConfirm" style="display:none;margin-top:1rem;background:var(--red-bg);border:1px solid var(--red-bdr);border-radius:var(--r);padding:14px 18px;text-align:center">
+    <p style="font-size:13px;color:var(--red);margin-bottom:12px">This will clear all SR intervals and session history. Cannot be undone.</p>
+    <div style="display:flex;gap:8px;justify-content:center">
+      <button class="btn-primary" style="background:var(--red);border-color:var(--red)" onclick="confirmReset()">Yes, reset</button>
+      <button class="btn-secondary" onclick="cancelReset()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- SHORTCUTS OVERLAY -->
+<div class="overlay" id="shortcutsOverlay" style="display:none" onclick="hideShortcuts()">
+  <div class="overlay-box" onclick="event.stopPropagation()">
+    <div class="overlay-title">Keyboard shortcuts</div>
+    <div class="shortcut-row"><span class="shortcut-desc">Check answer / Next question</span><span class="kbd">Enter</span></div>
+    <div class="shortcut-row"><span class="shortcut-desc">Select MC option 1–4</span><span class="kbd">1 – 4</span></div>
+    <div class="shortcut-row"><span class="shortcut-desc">Skip question</span><span class="kbd">Escape</span></div>
+    <div class="shortcut-row"><span class="shortcut-desc">Hint (first letter)</span><span class="kbd">Tab</span></div>
+    <div class="shortcut-row"><span class="shortcut-desc">Show shortcuts</span><span class="kbd">?</span></div>
+    <button class="btn-secondary overlay-close" onclick="hideShortcuts()">Close</button>
+  </div>
+</div>
+
+<!-- WORD POPUP removed - now inline -->
+
+</div><!-- .app -->
+
+<button class="word-drawer-tab" onclick="toggleWordDrawer(true)">Word list</button>
+<aside class="word-drawer" id="wordDrawer">
   <div class="word-drawer-head">
     <div class="word-drawer-title">
       <strong>Words</strong>
@@ -265,474 +427,652 @@
 </aside>
 
 <script>
-const DATA = {
-  nouns:{label:"Nouns",sub:{
-    "1st declension":{decl:"1st",words:[
-      {lat:"casa",gen:null,gender:"f",eng:["cottage"]},{lat:"puella",gen:null,gender:"f",eng:["girl"]},{lat:"cena",gen:null,gender:"f",eng:["dinner"]},{lat:"terra",gen:null,gender:"f",eng:["land","country","ground","earth"]},{lat:"femina",gen:null,gender:"f",eng:["woman"]},{lat:"regina",gen:null,gender:"f",eng:["queen"]},{lat:"mensa",gen:null,gender:"f",eng:["table"]},{lat:"silva",gen:null,gender:"f",eng:["forest","woods"]},{lat:"porta",gen:null,gender:"f",eng:["gate"]},{lat:"hasta",gen:null,gender:"f",eng:["spear"]},{lat:"aqua",gen:null,gender:"f",eng:["water"]},{lat:"epistula",gen:null,gender:"f",eng:["letter"]},{lat:"via",gen:null,gender:"f",eng:["road","street"]},{lat:"ianua",gen:null,gender:"f",eng:["door"]},{lat:"taberna",gen:null,gender:"f",eng:["tavern"]},{lat:"filia",gen:null,gender:"f",eng:["daughter"]},{lat:"fabula",gen:null,gender:"f",eng:["story"]},{lat:"insula",gen:null,gender:"f",eng:["island"]},{lat:"pecunia",gen:null,gender:"f",eng:["money"]},{lat:"pugna",gen:null,gender:"f",eng:["fight"]},{lat:"patria",gen:null,gender:"f",eng:["homeland"]},{lat:"magistra",gen:null,gender:"f",eng:["female teacher"]},{lat:"ancilla",gen:null,gender:"f",eng:["slave girl"]},{lat:"hora",gen:null,gender:"f",eng:["hour"]},{lat:"toga",gen:null,gender:"f",eng:["toga"]},{lat:"statua",gen:null,gender:"f",eng:["statue"]},{lat:"dea",gen:null,gender:"f",eng:["goddess"]},{lat:"schola",gen:null,gender:"f",eng:["class","classroom"]},{lat:"domina",gen:null,gender:"f",eng:["mistress"]},{lat:"agricola",gen:null,gender:"m",eng:["farmer"]},{lat:"poeta",gen:null,gender:"m",eng:["poet"]},{lat:"nauta",gen:null,gender:"m",eng:["sailor"]}
-    ]},
-    "2nd declension (masc)":{decl:"2nd",words:[
-      {lat:"servus",gen:null,gender:"m",eng:["slave"]},{lat:"discipulus",gen:null,gender:"m",eng:["student"]},{lat:"amicus",gen:null,gender:"m",eng:["friend"]},{lat:"filius",gen:null,gender:"m",eng:["son"]},{lat:"murus",gen:null,gender:"m",eng:["wall"]},{lat:"cibus",gen:null,gender:"m",eng:["food"]},{lat:"hortus",gen:null,gender:"m",eng:["garden"]},{lat:"equus",gen:null,gender:"m",eng:["horse"]},{lat:"campus",gen:null,gender:"m",eng:["plain"]},{lat:"colonus",gen:null,gender:"m",eng:["farmer"]},{lat:"somnus",gen:null,gender:"m",eng:["sleep"]},{lat:"sonus",gen:null,gender:"m",eng:["sound"]},{lat:"nuntius",gen:null,gender:"m",eng:["messenger"]},{lat:"ventus",gen:null,gender:"m",eng:["wind"]},{lat:"gladius",gen:null,gender:"m",eng:["sword"]},{lat:"deus",gen:null,gender:"m",eng:["god"]},{lat:"ludus",gen:null,gender:"m",eng:["school"]},{lat:"annus",gen:null,gender:"m",eng:["year"]},{lat:"barbarus",gen:null,gender:"m",eng:["barbarian"]},{lat:"libertus",gen:null,gender:"m",eng:["freedman"]},{lat:"dominus",gen:null,gender:"m",eng:["master"]},{lat:"medicus",gen:null,gender:"m",eng:["doctor"]},{lat:"vir",gen:null,gender:"m",eng:["man"]},{lat:"puer",gen:null,gender:"m",eng:["boy"]},{lat:"ager",gen:null,gender:"m",eng:["field"]},{lat:"liber",gen:null,gender:"m",eng:["book"]},{lat:"magister",gen:null,gender:"m",eng:["teacher"]}
-    ]},
-    "2nd declension (neut)":{decl:"2nd",words:[
-      {lat:"castra",gen:null,gender:"n",eng:["camp"]},{lat:"bellum",gen:null,gender:"n",eng:["war"]},{lat:"vinum",gen:null,gender:"n",eng:["wine"]},{lat:"proelium",gen:null,gender:"n",eng:["battle"]},{lat:"periculum",gen:null,gender:"n",eng:["danger"]},{lat:"arma",gen:null,gender:"n",eng:["arms","weapons"]},{lat:"frumentum",gen:null,gender:"n",eng:["wheat","grain"]},{lat:"consilium",gen:null,gender:"n",eng:["plan"]},{lat:"auxilium",gen:null,gender:"n",eng:["help"]},{lat:"donum",gen:null,gender:"n",eng:["gift"]},{lat:"verbum",gen:null,gender:"n",eng:["word"]},{lat:"saxum",gen:null,gender:"n",eng:["rock"]},{lat:"oppidum",gen:null,gender:"n",eng:["town"]}
-    ]},
-    "3rd declension (masc)":{decl:"3rd",words:[
-      {lat:"leo",gen:"leonis",gender:"m",eng:["lion"]},{lat:"rex",gen:"regis",gender:"m",eng:["king"]},{lat:"pater",gen:"patris",gender:"m",eng:["father"]},{lat:"frater",gen:"fratris",gender:"m",eng:["brother"]},{lat:"iuvenis",gen:"iuvenis",gender:"m",eng:["young man"]},{lat:"canis",gen:"canis",gender:"m",eng:["dog"]},{lat:"comes",gen:"comitis",gender:"m",eng:["companion"]},{lat:"consul",gen:"consulis",gender:"m",eng:["consul"]},{lat:"dux",gen:"ducis",gender:"m",eng:["leader"]},{lat:"imperator",gen:"imperatoris",gender:"m",eng:["general"]},{lat:"centurio",gen:"centurionis",gender:"m",eng:["centurion"]},{lat:"amor",gen:"amoris",gender:"m",eng:["love"]},{lat:"flos",gen:"floris",gender:"m",eng:["flower"]},{lat:"miles",gen:"militis",gender:"m",eng:["soldier"]},{lat:"labor",gen:"laboris",gender:"m",eng:["work"]},{lat:"viator",gen:"viatoris",gender:"m",eng:["traveller"]},{lat:"senex",gen:"senis",gender:"m",eng:["old man"]},{lat:"senator",gen:"senatoris",gender:"m",eng:["senator"]},{lat:"clamor",gen:"clamoris",gender:"m",eng:["shout"]},{lat:"dolor",gen:"doloris",gender:"m",eng:["pain","grief"]},{lat:"eques",gen:"equitis",gender:"m",eng:["horseman"]},{lat:"pes",gen:"pedis",gender:"m",eng:["foot"]},{lat:"custos",gen:"custodis",gender:"m",eng:["guard"]},{lat:"mons",gen:"montis",gender:"m",eng:["mountain"]},{lat:"civis",gen:"civis",gender:"m",eng:["citizen"]},{lat:"hostis",gen:"hostis",gender:"m",eng:["enemy"]},{lat:"pons",gen:"pontis",gender:"m",eng:["bridge"]},{lat:"dens",gen:"dentis",gender:"m",eng:["tooth"]},{lat:"parens",gen:"parentis",gender:"m",eng:["parent"]}
-    ]},
-    "3rd declension (fem)":{decl:"3rd",words:[
-      {lat:"vox",gen:"vocis",gender:"f",eng:["voice"]},{lat:"mater",gen:"matris",gender:"f",eng:["mother"]},{lat:"soror",gen:"sororis",gender:"f",eng:["sister"]},{lat:"libertas",gen:"libertatis",gender:"f",eng:["freedom"]},{lat:"tempestas",gen:"tempestatis",gender:"f",eng:["storm"]},{lat:"arbor",gen:"arboris",gender:"f",eng:["tree"]},{lat:"lex",gen:"legis",gender:"f",eng:["law"]},{lat:"pax",gen:"pacis",gender:"f",eng:["peace"]},{lat:"virtus",gen:"virtutis",gender:"f",eng:["courage","virtue"]},{lat:"virgo",gen:"virginis",gender:"f",eng:["maiden","virgin"]},{lat:"urbs",gen:"urbis",gender:"f",eng:["city"]},{lat:"mors",gen:"mortis",gender:"f",eng:["death"]},{lat:"nox",gen:"noctis",gender:"f",eng:["night"]},{lat:"navis",gen:"navis",gender:"f",eng:["ship"]},{lat:"classis",gen:"classis",gender:"f",eng:["fleet"]}
-    ]},
-    "3rd declension (neut)":{decl:"3rd",words:[
-      {lat:"nomen",gen:"nominis",gender:"n",eng:["name"]},{lat:"tempus",gen:"temporis",gender:"n",eng:["time"]},{lat:"vulnus",gen:"vulneris",gender:"n",eng:["wound"]},{lat:"litus",gen:"litoris",gender:"n",eng:["shore","beach"]},{lat:"flumen",gen:"fluminis",gender:"n",eng:["river"]},{lat:"foedus",gen:"foederis",gender:"n",eng:["treaty"]},{lat:"moenia",gen:"moenium",gender:"n",eng:["city walls"]},{lat:"carmen",gen:"carminis",gender:"n",eng:["poem","song"]},{lat:"mare",gen:"maris",gender:"n",eng:["sea"]}
-    ]}
-  }},
-  adjectives:{label:"Adjectives",sub:{
-    "1st/2nd declension":{decl:null,words:[
-      {lat:"bonus",gen:null,gender:null,eng:["good"]},{lat:"laetus",gen:null,gender:null,eng:["happy"]},{lat:"iratus",gen:null,gender:null,eng:["angry"]},{lat:"fessus",gen:null,gender:null,eng:["tired"]},{lat:"magnus",gen:null,gender:null,eng:["big","great"]},{lat:"parvus",gen:null,gender:null,eng:["small"]},{lat:"malus",gen:null,gender:null,eng:["bad"]},{lat:"benignus",gen:null,gender:null,eng:["kind"]},{lat:"multus",gen:null,gender:null,eng:["much"]},{lat:"latus",gen:null,gender:null,eng:["wide"]},{lat:"anxius",gen:null,gender:null,eng:["anxious"]},{lat:"longus",gen:null,gender:null,eng:["long"]},{lat:"sollicitus",gen:null,gender:null,eng:["worried"]},{lat:"novus",gen:null,gender:null,eng:["new"]},{lat:"optimus",gen:null,gender:null,eng:["best","excellent"]},{lat:"miser",gen:null,gender:null,eng:["miserable"]},{lat:"liber",gen:null,gender:null,eng:["free"]},{lat:"pulcher",gen:null,gender:null,eng:["beautiful"]}
-    ]},
-    "3rd declension":{decl:null,words:[
-      {lat:"fortis",gen:null,gender:null,eng:["brave"]},{lat:"gravis",gen:null,gender:null,eng:["heavy","serious"]},{lat:"levis",gen:null,gender:null,eng:["light"]},{lat:"omnis",gen:null,gender:null,eng:["all","every"]},{lat:"incolumis",gen:null,gender:null,eng:["safe","unharmed"]},{lat:"brevis",gen:null,gender:null,eng:["short"]},{lat:"crudelis",gen:null,gender:null,eng:["cruel"]},{lat:"tristis",gen:null,gender:null,eng:["sad"]},{lat:"gracilis",gen:null,gender:null,eng:["slender","slim"]},{lat:"facilis",gen:null,gender:null,eng:["easy"]},{lat:"difficilis",gen:null,gender:null,eng:["difficult"]},{lat:"insignis",gen:null,gender:null,eng:["outstanding"]},{lat:"dulcis",gen:null,gender:null,eng:["sweet"]}
-    ]}
-  }},
-  verbs:{label:"Verbs",sub:{
-    "1st conjugation":{decl:null,words:[
-      {lat:"porto",gen:null,gender:null,eng:["carry"]},{lat:"ceno",gen:null,gender:null,eng:["dine"]},{lat:"ambulo",gen:null,gender:null,eng:["walk"]},{lat:"navigo",gen:null,gender:null,eng:["sail"]},{lat:"amo",gen:null,gender:null,eng:["love"]},{lat:"rogo",gen:null,gender:null,eng:["ask"]},{lat:"pugno",gen:null,gender:null,eng:["fight"]},{lat:"oppugno",gen:null,gender:null,eng:["attack"]},{lat:"convoco",gen:null,gender:null,eng:["call together","assemble"]},{lat:"habito",gen:null,gender:null,eng:["live"]},{lat:"exspecto",gen:null,gender:null,eng:["wait for"]},{lat:"servo",gen:null,gender:null,eng:["save"]},{lat:"laboro",gen:null,gender:null,eng:["work"]},{lat:"festino",gen:null,gender:null,eng:["hurry"]},{lat:"do",gen:null,gender:null,eng:["give"]},{lat:"paro",gen:null,gender:null,eng:["prepare"]},{lat:"iuvo",gen:null,gender:null,eng:["help"]},{lat:"laudo",gen:null,gender:null,eng:["praise"]},{lat:"specto",gen:null,gender:null,eng:["watch","look at"]},{lat:"narro",gen:null,gender:null,eng:["tell"]},{lat:"saluto",gen:null,gender:null,eng:["greet"]},{lat:"voco",gen:null,gender:null,eng:["call"]},{lat:"clamo",gen:null,gender:null,eng:["shout"]},{lat:"curo",gen:null,gender:null,eng:["care for","look after"]},{lat:"intro",gen:null,gender:null,eng:["enter"]},{lat:"supero",gen:null,gender:null,eng:["overcome"]},{lat:"neco",gen:null,gender:null,eng:["kill"]},{lat:"excito",gen:null,gender:null,eng:["wake up","arouse"]}
-    ]},
-    "2nd conjugation":{decl:null,words:[
-      {lat:"moneo",gen:null,gender:null,eng:["warn","advise"]},{lat:"sedeo",gen:null,gender:null,eng:["sit"]},{lat:"maneo",gen:null,gender:null,eng:["stay","remain"]},{lat:"iaceo",gen:null,gender:null,eng:["lie down"]},{lat:"taceo",gen:null,gender:null,eng:["be quiet","be silent"]},{lat:"habeo",gen:null,gender:null,eng:["have","own","possess"]},{lat:"timeo",gen:null,gender:null,eng:["fear"]},{lat:"iubeo",gen:null,gender:null,eng:["order"]},{lat:"terreo",gen:null,gender:null,eng:["terrify"]},{lat:"video",gen:null,gender:null,eng:["see"]},{lat:"doceo",gen:null,gender:null,eng:["teach"]},{lat:"debeo",gen:null,gender:null,eng:["ought","owe"]},{lat:"respondeo",gen:null,gender:null,eng:["answer","reply"]},{lat:"persuadeo",gen:null,gender:null,eng:["persuade"]}
-    ]},
-    "3rd conjugation":{decl:null,words:[
-      {lat:"procedo",gen:null,gender:null,eng:["go forward"]},{lat:"rego",gen:null,gender:null,eng:["rule"]},{lat:"lego",gen:null,gender:null,eng:["read"]},{lat:"scribo",gen:null,gender:null,eng:["write"]},{lat:"duco",gen:null,gender:null,eng:["lead"]},{lat:"mitto",gen:null,gender:null,eng:["send"]},{lat:"cado",gen:null,gender:null,eng:["fall"]},{lat:"resisto",gen:null,gender:null,eng:["resist"]},{lat:"dico",gen:null,gender:null,eng:["say","speak"]},{lat:"ludo",gen:null,gender:null,eng:["play"]},{lat:"occido",gen:null,gender:null,eng:["slaughter","kill"]},{lat:"descendo",gen:null,gender:null,eng:["go down"]},{lat:"vinco",gen:null,gender:null,eng:["conquer"]},{lat:"trado",gen:null,gender:null,eng:["hand over"]},{lat:"pono",gen:null,gender:null,eng:["place","put"]},{lat:"surgo",gen:null,gender:null,eng:["arise","get up"]},{lat:"curro",gen:null,gender:null,eng:["run"]},{lat:"constituo",gen:null,gender:null,eng:["decide"]},{lat:"ascendo",gen:null,gender:null,eng:["go up","climb"]},{lat:"defendo",gen:null,gender:null,eng:["defend"]},{lat:"dimitto",gen:null,gender:null,eng:["send away"]},{lat:"bibo",gen:null,gender:null,eng:["drink"]},{lat:"reddo",gen:null,gender:null,eng:["give back"]},{lat:"accedo",gen:null,gender:null,eng:["approach"]},{lat:"relinquo",gen:null,gender:null,eng:["leave behind","abandon"]},{lat:"emo",gen:null,gender:null,eng:["buy"]},{lat:"vendo",gen:null,gender:null,eng:["sell"]},{lat:"contendo",gen:null,gender:null,eng:["hurry","march"]},{lat:"traho",gen:null,gender:null,eng:["drag"]},{lat:"claudo",gen:null,gender:null,eng:["close","shut"]},{lat:"facio",gen:null,gender:null,eng:["do","make"]},{lat:"fugio",gen:null,gender:null,eng:["flee"]},{lat:"capio",gen:null,gender:null,eng:["take","capture"]},{lat:"cupio",gen:null,gender:null,eng:["desire"]},{lat:"accipio",gen:null,gender:null,eng:["receive"]},{lat:"iacio",gen:null,gender:null,eng:["throw"]},{lat:"conicio",gen:null,gender:null,eng:["hurl"]},{lat:"interficio",gen:null,gender:null,eng:["kill"]}
-    ]},
-    "4th conjugation":{decl:null,words:[
-      {lat:"invenio",gen:null,gender:null,eng:["find"]},{lat:"dormio",gen:null,gender:null,eng:["sleep"]},{lat:"audio",gen:null,gender:null,eng:["hear"]},{lat:"venio",gen:null,gender:null,eng:["come"]},{lat:"advenio",gen:null,gender:null,eng:["arrive","come to"]},{lat:"convenio",gen:null,gender:null,eng:["come together"]},{lat:"punio",gen:null,gender:null,eng:["punish"]},{lat:"custodio",gen:null,gender:null,eng:["guard"]}
-    ]},
-    "irregular":{decl:null,words:[
-      {lat:"sum",gen:null,gender:null,eng:["be"]},{lat:"adsum",gen:null,gender:null,eng:["be present"]},{lat:"absum",gen:null,gender:null,eng:["be absent"]},{lat:"possum",gen:null,gender:null,eng:["be able","can"]},{lat:"eo",gen:null,gender:null,eng:["go"]},{lat:"transeo",gen:null,gender:null,eng:["cross"]},{lat:"abeo",gen:null,gender:null,eng:["go away"]},{lat:"exeo",gen:null,gender:null,eng:["go out"]},{lat:"redeo",gen:null,gender:null,eng:["go back"]},{lat:"ineo",gen:null,gender:null,eng:["go into"]}
-    ]}
-  }},
-  prepositions:{label:"Prepositions",sub:{
-    "with ablative":{decl:null,words:[
-      {lat:"sub",gen:null,gender:null,eng:["under"]},{lat:"in",gen:null,gender:null,eng:["in","on"]},{lat:"cum",gen:null,gender:null,eng:["with"]},{lat:"de",gen:null,gender:null,eng:["about","down from"]},{lat:"ex",gen:null,gender:null,eng:["out of","from"]},{lat:"ab",gen:null,gender:null,eng:["from"]}
-    ]},
-    "with accusative":{decl:null,words:[
-      {lat:"ad",gen:null,gender:null,eng:["to"]},{lat:"in",gen:null,gender:null,eng:["into","onto"]},{lat:"trans",gen:null,gender:null,eng:["across"]},{lat:"per",gen:null,gender:null,eng:["through"]},{lat:"prope",gen:null,gender:null,eng:["near"]},{lat:"contra",gen:null,gender:null,eng:["against"]},{lat:"circum",gen:null,gender:null,eng:["around"]},{lat:"post",gen:null,gender:null,eng:["after"]},{lat:"ante",gen:null,gender:null,eng:["before"]},{lat:"propter",gen:null,gender:null,eng:["on account of"]}
-    ]}
-  }},
-  conjunctions:{label:"Conjunctions",sub:{"conjunctions":{decl:null,words:[
-    {lat:"nam",gen:null,gender:null,eng:["for"]},{lat:"quod",gen:null,gender:null,eng:["because"]},{lat:"et",gen:null,gender:null,eng:["and"]},{lat:"sed",gen:null,gender:null,eng:["but"]},{lat:"tamen",gen:null,gender:null,eng:["however","nevertheless"]},{lat:"itaque",gen:null,gender:null,eng:["and so"]}
-  ]}}},
-  adverbs:{label:"Adverbs",sub:{"adverbs":{decl:null,words:[
-    {lat:"fortiter",gen:null,gender:null,eng:["bravely"]},{lat:"bene",gen:null,gender:null,eng:["well"]},{lat:"celeriter",gen:null,gender:null,eng:["quickly"]},{lat:"diligenter",gen:null,gender:null,eng:["carefully","diligently"]},{lat:"numquam",gen:null,gender:null,eng:["never"]},{lat:"nunc",gen:null,gender:null,eng:["now"]},{lat:"iterum",gen:null,gender:null,eng:["again"]},{lat:"tandem",gen:null,gender:null,eng:["at last"]},{lat:"lente",gen:null,gender:null,eng:["slowly"]},{lat:"laete",gen:null,gender:null,eng:["happily"]},{lat:"diu",gen:null,gender:null,eng:["for a long time"]},{lat:"subito",gen:null,gender:null,eng:["suddenly"]},{lat:"iam",gen:null,gender:null,eng:["now","already"]},{lat:"statim",gen:null,gender:null,eng:["at once"]},{lat:"saepe",gen:null,gender:null,eng:["often"]},{lat:"mox",gen:null,gender:null,eng:["soon"]}
-  ]}}},
-  interrogatives:{label:"Interrogatives",sub:{"interrogatives":{decl:null,words:[
-    {lat:"quis",gen:null,gender:null,eng:["who"]},{lat:"quid",gen:null,gender:null,eng:["what"]},{lat:"quando",gen:null,gender:null,eng:["when"]},{lat:"ubi",gen:null,gender:null,eng:["where"]},{lat:"quo modo",gen:null,gender:null,eng:["how"]},{lat:"cur",gen:null,gender:null,eng:["why"]},{lat:"quantus",gen:null,gender:null,eng:["how big"]},{lat:"nonne",gen:null,gender:null,eng:["surely"]},{lat:"num",gen:null,gender:null,eng:["surely not"]}
-  ]}}},
-  pronouns:{label:"Pronouns",sub:{"pronouns":{decl:null,words:[
-    {lat:"me",gen:null,gender:null,eng:["me"]},{lat:"te",gen:null,gender:null,eng:["you singular"]},{lat:"eum",gen:null,gender:null,eng:["him"]},{lat:"eam",gen:null,gender:null,eng:["her"]},{lat:"eos",gen:null,gender:null,eng:["them masculine"]},{lat:"eas",gen:null,gender:null,eng:["them feminine"]},{lat:"vos",gen:null,gender:null,eng:["you plural"]},{lat:"nos",gen:null,gender:null,eng:["us"]}
-  ]}}}
-};
+/* ── DATA ───────────────────────────────────────────────────── */
+const DATA={nouns:{label:"Nouns",sub:{"1st declension":{decl:"1st",words:[{lat:"casa",gen:null,gender:"f",eng:["cottage"]},{lat:"puella",gen:null,gender:"f",eng:["girl"]},{lat:"cena",gen:null,gender:"f",eng:["dinner"]},{lat:"terra",gen:null,gender:"f",eng:["land","country","ground","earth"]},{lat:"femina",gen:null,gender:"f",eng:["woman"]},{lat:"regina",gen:null,gender:"f",eng:["queen"]},{lat:"mensa",gen:null,gender:"f",eng:["table"]},{lat:"silva",gen:null,gender:"f",eng:["forest","woods"]},{lat:"porta",gen:null,gender:"f",eng:["gate"]},{lat:"hasta",gen:null,gender:"f",eng:["spear"]},{lat:"aqua",gen:null,gender:"f",eng:["water"]},{lat:"epistula",gen:null,gender:"f",eng:["letter"]},{lat:"via",gen:null,gender:"f",eng:["road","street"]},{lat:"ianua",gen:null,gender:"f",eng:["door"]},{lat:"taberna",gen:null,gender:"f",eng:["tavern"]},{lat:"filia",gen:null,gender:"f",eng:["daughter"]},{lat:"fabula",gen:null,gender:"f",eng:["story"]},{lat:"insula",gen:null,gender:"f",eng:["island"]},{lat:"pecunia",gen:null,gender:"f",eng:["money"]},{lat:"pugna",gen:null,gender:"f",eng:["fight"]},{lat:"patria",gen:null,gender:"f",eng:["homeland"]},{lat:"magistra",gen:null,gender:"f",eng:["female teacher"]},{lat:"ancilla",gen:null,gender:"f",eng:["slave girl"]},{lat:"hora",gen:null,gender:"f",eng:["hour"]},{lat:"toga",gen:null,gender:"f",eng:["toga"]},{lat:"statua",gen:null,gender:"f",eng:["statue"]},{lat:"dea",gen:null,gender:"f",eng:["goddess"]},{lat:"schola",gen:null,gender:"f",eng:["class","classroom"]},{lat:"domina",gen:null,gender:"f",eng:["mistress"]},{lat:"agricola",gen:null,gender:"m",eng:["farmer"]},{lat:"poeta",gen:null,gender:"m",eng:["poet"]},{lat:"nauta",gen:null,gender:"m",eng:["sailor"]}]},"2nd declension (masc)":{decl:"2nd",words:[{lat:"servus",gen:null,gender:"m",eng:["slave"]},{lat:"discipulus",gen:null,gender:"m",eng:["student"]},{lat:"amicus",gen:null,gender:"m",eng:["friend"]},{lat:"filius",gen:null,gender:"m",eng:["son"]},{lat:"murus",gen:null,gender:"m",eng:["wall"]},{lat:"cibus",gen:null,gender:"m",eng:["food"]},{lat:"hortus",gen:null,gender:"m",eng:["garden"]},{lat:"equus",gen:null,gender:"m",eng:["horse"]},{lat:"campus",gen:null,gender:"m",eng:["plain"]},{lat:"colonus",gen:null,gender:"m",eng:["farmer"]},{lat:"somnus",gen:null,gender:"m",eng:["sleep"]},{lat:"sonus",gen:null,gender:"m",eng:["sound"]},{lat:"nuntius",gen:null,gender:"m",eng:["messenger"]},{lat:"ventus",gen:null,gender:"m",eng:["wind"]},{lat:"gladius",gen:null,gender:"m",eng:["sword"]},{lat:"deus",gen:null,gender:"m",eng:["god"]},{lat:"ludus",gen:null,gender:"m",eng:["school"]},{lat:"annus",gen:null,gender:"m",eng:["year"]},{lat:"barbarus",gen:null,gender:"m",eng:["barbarian"]},{lat:"libertus",gen:null,gender:"m",eng:["freedman"]},{lat:"dominus",gen:null,gender:"m",eng:["master"]},{lat:"medicus",gen:null,gender:"m",eng:["doctor"]},{lat:"vir",gen:null,gender:"m",eng:["man"]},{lat:"puer",gen:null,gender:"m",eng:["boy"]},{lat:"ager",gen:null,gender:"m",eng:["field"]},{lat:"liber",gen:null,gender:"m",eng:["book"]},{lat:"magister",gen:null,gender:"m",eng:["teacher"]}]},"2nd declension (neut)":{decl:"2nd",words:[{lat:"castra",gen:null,gender:"n",eng:["camp"]},{lat:"bellum",gen:null,gender:"n",eng:["war"]},{lat:"vinum",gen:null,gender:"n",eng:["wine"]},{lat:"proelium",gen:null,gender:"n",eng:["battle"]},{lat:"periculum",gen:null,gender:"n",eng:["danger"]},{lat:"arma",gen:null,gender:"n",eng:["arms","weapons"]},{lat:"frumentum",gen:null,gender:"n",eng:["wheat","grain"]},{lat:"consilium",gen:null,gender:"n",eng:["plan"]},{lat:"auxilium",gen:null,gender:"n",eng:["help"]},{lat:"donum",gen:null,gender:"n",eng:["gift"]},{lat:"verbum",gen:null,gender:"n",eng:["word"]},{lat:"saxum",gen:null,gender:"n",eng:["rock"]},{lat:"oppidum",gen:null,gender:"n",eng:["town"]}]},"3rd declension (masc)":{decl:"3rd",words:[{lat:"leo",gen:"leonis",gender:"m",eng:["lion"]},{lat:"rex",gen:"regis",gender:"m",eng:["king"]},{lat:"pater",gen:"patris",gender:"m",eng:["father"]},{lat:"frater",gen:"fratris",gender:"m",eng:["brother"]},{lat:"iuvenis",gen:"iuvenis",gender:"m",eng:["young man"]},{lat:"canis",gen:"canis",gender:"m",eng:["dog"]},{lat:"comes",gen:"comitis",gender:"m",eng:["companion"]},{lat:"consul",gen:"consulis",gender:"m",eng:["consul"]},{lat:"dux",gen:"ducis",gender:"m",eng:["leader"]},{lat:"imperator",gen:"imperatoris",gender:"m",eng:["general"]},{lat:"centurio",gen:"centurionis",gender:"m",eng:["centurion"]},{lat:"amor",gen:"amoris",gender:"m",eng:["love"]},{lat:"flos",gen:"floris",gender:"m",eng:["flower"]},{lat:"miles",gen:"militis",gender:"m",eng:["soldier"]},{lat:"labor",gen:"laboris",gender:"m",eng:["work"]},{lat:"viator",gen:"viatoris",gender:"m",eng:["traveller"]},{lat:"senex",gen:"senis",gender:"m",eng:["old man"]},{lat:"senator",gen:"senatoris",gender:"m",eng:["senator"]},{lat:"clamor",gen:"clamoris",gender:"m",eng:["shout"]},{lat:"dolor",gen:"doloris",gender:"m",eng:["pain","grief"]},{lat:"eques",gen:"equitis",gender:"m",eng:["horseman"]},{lat:"pes",gen:"pedis",gender:"m",eng:["foot"]},{lat:"custos",gen:"custodis",gender:"m",eng:["guard"]},{lat:"mons",gen:"montis",gender:"m",eng:["mountain"]},{lat:"civis",gen:"civis",gender:"m",eng:["citizen"]},{lat:"hostis",gen:"hostis",gender:"m",eng:["enemy"]},{lat:"pons",gen:"pontis",gender:"m",eng:["bridge"]},{lat:"dens",gen:"dentis",gender:"m",eng:["tooth"]},{lat:"parens",gen:"parentis",gender:"m",eng:["parent"]}]},"3rd declension (fem)":{decl:"3rd",words:[{lat:"vox",gen:"vocis",gender:"f",eng:["voice"]},{lat:"mater",gen:"matris",gender:"f",eng:["mother"]},{lat:"soror",gen:"sororis",gender:"f",eng:["sister"]},{lat:"libertas",gen:"libertatis",gender:"f",eng:["freedom"]},{lat:"tempestas",gen:"tempestatis",gender:"f",eng:["storm"]},{lat:"arbor",gen:"arboris",gender:"f",eng:["tree"]},{lat:"lex",gen:"legis",gender:"f",eng:["law"]},{lat:"pax",gen:"pacis",gender:"f",eng:["peace"]},{lat:"virtus",gen:"virtutis",gender:"f",eng:["courage","virtue"]},{lat:"virgo",gen:"virginis",gender:"f",eng:["maiden","virgin"]},{lat:"urbs",gen:"urbis",gender:"f",eng:["city"]},{lat:"mors",gen:"mortis",gender:"f",eng:["death"]},{lat:"nox",gen:"noctis",gender:"f",eng:["night"]},{lat:"navis",gen:"navis",gender:"f",eng:["ship"]},{lat:"classis",gen:"classis",gender:"f",eng:["fleet"]}]},"3rd declension (neut)":{decl:"3rd",words:[{lat:"nomen",gen:"nominis",gender:"n",eng:["name"]},{lat:"tempus",gen:"temporis",gender:"n",eng:["time"]},{lat:"vulnus",gen:"vulneris",gender:"n",eng:["wound"]},{lat:"litus",gen:"litoris",gender:"n",eng:["shore","beach"]},{lat:"flumen",gen:"fluminis",gender:"n",eng:["river"]},{lat:"foedus",gen:"foederis",gender:"n",eng:["treaty"]},{lat:"moenia",gen:"moenium",gender:"n",eng:["city walls"]},{lat:"carmen",gen:"carminis",gender:"n",eng:["poem","song"]},{lat:"mare",gen:"maris",gender:"n",eng:["sea"]}]}}},adjectives:{label:"Adjectives",sub:{"1st/2nd declension":{decl:null,words:[{lat:"bonus",gen:null,gender:null,eng:["good"]},{lat:"laetus",gen:null,gender:null,eng:["happy"]},{lat:"iratus",gen:null,gender:null,eng:["angry"]},{lat:"fessus",gen:null,gender:null,eng:["tired"]},{lat:"magnus",gen:null,gender:null,eng:["big","great"]},{lat:"parvus",gen:null,gender:null,eng:["small"]},{lat:"malus",gen:null,gender:null,eng:["bad"]},{lat:"benignus",gen:null,gender:null,eng:["kind"]},{lat:"multus",gen:null,gender:null,eng:["much"]},{lat:"latus",gen:null,gender:null,eng:["wide"]},{lat:"anxius",gen:null,gender:null,eng:["anxious"]},{lat:"longus",gen:null,gender:null,eng:["long"]},{lat:"sollicitus",gen:null,gender:null,eng:["worried"]},{lat:"novus",gen:null,gender:null,eng:["new"]},{lat:"optimus",gen:null,gender:null,eng:["best","excellent"]},{lat:"miser",gen:null,gender:null,eng:["miserable"]},{lat:"liber",gen:null,gender:null,eng:["free"]},{lat:"pulcher",gen:null,gender:null,eng:["beautiful"]}]},"3rd declension":{decl:null,words:[{lat:"fortis",gen:null,gender:null,eng:["brave"]},{lat:"gravis",gen:null,gender:null,eng:["heavy","serious"]},{lat:"levis",gen:null,gender:null,eng:["light"]},{lat:"omnis",gen:null,gender:null,eng:["all","every"]},{lat:"incolumis",gen:null,gender:null,eng:["safe","unharmed"]},{lat:"brevis",gen:null,gender:null,eng:["short"]},{lat:"crudelis",gen:null,gender:null,eng:["cruel"]},{lat:"tristis",gen:null,gender:null,eng:["sad"]},{lat:"gracilis",gen:null,gender:null,eng:["slender","slim"]},{lat:"facilis",gen:null,gender:null,eng:["easy"]},{lat:"difficilis",gen:null,gender:null,eng:["difficult"]},{lat:"insignis",gen:null,gender:null,eng:["outstanding"]},{lat:"dulcis",gen:null,gender:null,eng:["sweet"]}]}}},verbs:{label:"Verbs",sub:{"1st conjugation":{decl:null,words:[{lat:"porto",gen:null,gender:null,eng:["carry"]},{lat:"ceno",gen:null,gender:null,eng:["dine"]},{lat:"ambulo",gen:null,gender:null,eng:["walk"]},{lat:"navigo",gen:null,gender:null,eng:["sail"]},{lat:"amo",gen:null,gender:null,eng:["love"]},{lat:"rogo",gen:null,gender:null,eng:["ask"]},{lat:"pugno",gen:null,gender:null,eng:["fight"]},{lat:"oppugno",gen:null,gender:null,eng:["attack"]},{lat:"convoco",gen:null,gender:null,eng:["call together","assemble"]},{lat:"habito",gen:null,gender:null,eng:["live"]},{lat:"exspecto",gen:null,gender:null,eng:["wait for"]},{lat:"servo",gen:null,gender:null,eng:["save"]},{lat:"laboro",gen:null,gender:null,eng:["work"]},{lat:"festino",gen:null,gender:null,eng:["hurry"]},{lat:"do",gen:null,gender:null,eng:["give"]},{lat:"paro",gen:null,gender:null,eng:["prepare"]},{lat:"iuvo",gen:null,gender:null,eng:["help"]},{lat:"laudo",gen:null,gender:null,eng:["praise"]},{lat:"specto",gen:null,gender:null,eng:["watch","look at"]},{lat:"narro",gen:null,gender:null,eng:["tell"]},{lat:"saluto",gen:null,gender:null,eng:["greet"]},{lat:"voco",gen:null,gender:null,eng:["call"]},{lat:"clamo",gen:null,gender:null,eng:["shout"]},{lat:"curo",gen:null,gender:null,eng:["care for","look after"]},{lat:"intro",gen:null,gender:null,eng:["enter"]},{lat:"supero",gen:null,gender:null,eng:["overcome"]},{lat:"neco",gen:null,gender:null,eng:["kill"]},{lat:"excito",gen:null,gender:null,eng:["wake up","arouse"]}]},"2nd conjugation":{decl:null,words:[{lat:"moneo",gen:null,gender:null,eng:["warn","advise"]},{lat:"sedeo",gen:null,gender:null,eng:["sit"]},{lat:"maneo",gen:null,gender:null,eng:["stay","remain"]},{lat:"iaceo",gen:null,gender:null,eng:["lie down"]},{lat:"taceo",gen:null,gender:null,eng:["be quiet","be silent"]},{lat:"habeo",gen:null,gender:null,eng:["have","own","possess"]},{lat:"timeo",gen:null,gender:null,eng:["fear"]},{lat:"iubeo",gen:null,gender:null,eng:["order"]},{lat:"terreo",gen:null,gender:null,eng:["terrify"]},{lat:"video",gen:null,gender:null,eng:["see"]},{lat:"doceo",gen:null,gender:null,eng:["teach"]},{lat:"debeo",gen:null,gender:null,eng:["ought","owe"]},{lat:"respondeo",gen:null,gender:null,eng:["answer","reply"]},{lat:"persuadeo",gen:null,gender:null,eng:["persuade"]}]},"3rd conjugation":{decl:null,words:[{lat:"procedo",gen:null,gender:null,eng:["go forward"]},{lat:"rego",gen:null,gender:null,eng:["rule"]},{lat:"lego",gen:null,gender:null,eng:["read"]},{lat:"scribo",gen:null,gender:null,eng:["write"]},{lat:"duco",gen:null,gender:null,eng:["lead"]},{lat:"mitto",gen:null,gender:null,eng:["send"]},{lat:"cado",gen:null,gender:null,eng:["fall"]},{lat:"resisto",gen:null,gender:null,eng:["resist"]},{lat:"dico",gen:null,gender:null,eng:["say","speak"]},{lat:"ludo",gen:null,gender:null,eng:["play"]},{lat:"occido",gen:null,gender:null,eng:["slaughter","kill"]},{lat:"descendo",gen:null,gender:null,eng:["go down"]},{lat:"vinco",gen:null,gender:null,eng:["conquer"]},{lat:"trado",gen:null,gender:null,eng:["hand over"]},{lat:"pono",gen:null,gender:null,eng:["place","put"]},{lat:"surgo",gen:null,gender:null,eng:["arise","get up"]},{lat:"curro",gen:null,gender:null,eng:["run"]},{lat:"constituo",gen:null,gender:null,eng:["decide"]},{lat:"ascendo",gen:null,gender:null,eng:["go up","climb"]},{lat:"defendo",gen:null,gender:null,eng:["defend"]},{lat:"dimitto",gen:null,gender:null,eng:["send away"]},{lat:"bibo",gen:null,gender:null,eng:["drink"]},{lat:"reddo",gen:null,gender:null,eng:["give back"]},{lat:"accedo",gen:null,gender:null,eng:["approach"]},{lat:"relinquo",gen:null,gender:null,eng:["leave behind","abandon"]},{lat:"emo",gen:null,gender:null,eng:["buy"]},{lat:"vendo",gen:null,gender:null,eng:["sell"]},{lat:"contendo",gen:null,gender:null,eng:["hurry","march"]},{lat:"traho",gen:null,gender:null,eng:["drag"]},{lat:"claudo",gen:null,gender:null,eng:["close","shut"]},{lat:"facio",gen:null,gender:null,eng:["do","make"]},{lat:"fugio",gen:null,gender:null,eng:["flee"]},{lat:"capio",gen:null,gender:null,eng:["take","capture"]},{lat:"cupio",gen:null,gender:null,eng:["desire"]},{lat:"accipio",gen:null,gender:null,eng:["receive"]},{lat:"iacio",gen:null,gender:null,eng:["throw"]},{lat:"conicio",gen:null,gender:null,eng:["hurl"]},{lat:"interficio",gen:null,gender:null,eng:["kill"]}]},"4th conjugation":{decl:null,words:[{lat:"invenio",gen:null,gender:null,eng:["find"]},{lat:"dormio",gen:null,gender:null,eng:["sleep"]},{lat:"audio",gen:null,gender:null,eng:["hear"]},{lat:"venio",gen:null,gender:null,eng:["come"]},{lat:"advenio",gen:null,gender:null,eng:["arrive","come to"]},{lat:"convenio",gen:null,gender:null,eng:["come together"]},{lat:"punio",gen:null,gender:null,eng:["punish"]},{lat:"custodio",gen:null,gender:null,eng:["guard"]}]},irregular:{decl:null,words:[{lat:"sum",gen:null,gender:null,eng:["be"]},{lat:"adsum",gen:null,gender:null,eng:["be present"]},{lat:"absum",gen:null,gender:null,eng:["be absent"]},{lat:"possum",gen:null,gender:null,eng:["be able","can"]},{lat:"eo",gen:null,gender:null,eng:["go"]},{lat:"transeo",gen:null,gender:null,eng:["cross"]},{lat:"abeo",gen:null,gender:null,eng:["go away"]},{lat:"exeo",gen:null,gender:null,eng:["go out"]},{lat:"redeo",gen:null,gender:null,eng:["go back"]},{lat:"ineo",gen:null,gender:null,eng:["go into"]}]}}},prepositions:{label:"Prepositions",sub:{"with ablative":{decl:null,words:[{lat:"sub",gen:null,gender:null,eng:["under"]},{lat:"in",gen:null,gender:null,eng:["in","on"]},{lat:"cum",gen:null,gender:null,eng:["with"]},{lat:"de",gen:null,gender:null,eng:["about","down from"]},{lat:"ex",gen:null,gender:null,eng:["out of","from"]},{lat:"ab",gen:null,gender:null,eng:["from"]}]},"with accusative":{decl:null,words:[{lat:"ad",gen:null,gender:null,eng:["to"]},{lat:"in",gen:null,gender:null,eng:["into","onto"]},{lat:"trans",gen:null,gender:null,eng:["across"]},{lat:"per",gen:null,gender:null,eng:["through"]},{lat:"prope",gen:null,gender:null,eng:["near"]},{lat:"contra",gen:null,gender:null,eng:["against"]},{lat:"circum",gen:null,gender:null,eng:["around"]},{lat:"post",gen:null,gender:null,eng:["after"]},{lat:"ante",gen:null,gender:null,eng:["before"]},{lat:"propter",gen:null,gender:null,eng:["on account of"]}]}}},conjunctions:{label:"Conjunctions",sub:{conjunctions:{decl:null,words:[{lat:"nam",gen:null,gender:null,eng:["for"]},{lat:"quod",gen:null,gender:null,eng:["because"]},{lat:"et",gen:null,gender:null,eng:["and"]},{lat:"sed",gen:null,gender:null,eng:["but"]},{lat:"tamen",gen:null,gender:null,eng:["however","nevertheless"]},{lat:"itaque",gen:null,gender:null,eng:["and so"]}]}}},adverbs:{label:"Adverbs",sub:{adverbs:{decl:null,words:[{lat:"fortiter",gen:null,gender:null,eng:["bravely"]},{lat:"bene",gen:null,gender:null,eng:["well"]},{lat:"celeriter",gen:null,gender:null,eng:["quickly"]},{lat:"diligenter",gen:null,gender:null,eng:["carefully","diligently"]},{lat:"numquam",gen:null,gender:null,eng:["never"]},{lat:"nunc",gen:null,gender:null,eng:["now"]},{lat:"iterum",gen:null,gender:null,eng:["again"]},{lat:"tandem",gen:null,gender:null,eng:["at last"]},{lat:"lente",gen:null,gender:null,eng:["slowly"]},{lat:"laete",gen:null,gender:null,eng:["happily"]},{lat:"diu",gen:null,gender:null,eng:["for a long time"]},{lat:"subito",gen:null,gender:null,eng:["suddenly"]},{lat:"iam",gen:null,gender:null,eng:["now","already"]},{lat:"statim",gen:null,gender:null,eng:["at once"]},{lat:"saepe",gen:null,gender:null,eng:["often"]},{lat:"mox",gen:null,gender:null,eng:["soon"]}]}}},interrogatives:{label:"Interrogatives",sub:{interrogatives:{decl:null,words:[{lat:"quis",gen:null,gender:null,eng:["who"]},{lat:"quid",gen:null,gender:null,eng:["what"]},{lat:"quando",gen:null,gender:null,eng:["when"]},{lat:"ubi",gen:null,gender:null,eng:["where"]},{lat:"quo modo",gen:null,gender:null,eng:["how"]},{lat:"cur",gen:null,gender:null,eng:["why"]},{lat:"quantus",gen:null,gender:null,eng:["how big"]},{lat:"nonne",gen:null,gender:null,eng:["surely"]},{lat:"num",gen:null,gender:null,eng:["surely not"]}]}}},pronouns:{label:"Pronouns",sub:{pronouns:{decl:null,words:[{lat:"me",gen:null,gender:null,eng:["me"]},{lat:"te",gen:null,gender:null,eng:["you singular"]},{lat:"eum",gen:null,gender:null,eng:["him"]},{lat:"eam",gen:null,gender:null,eng:["her"]},{lat:"eos",gen:null,gender:null,eng:["them masculine"]},{lat:"eas",gen:null,gender:null,eng:["them feminine"]},{lat:"vos",gen:null,gender:null,eng:["you plural"]},{lat:"nos",gen:null,gender:null,eng:["us"]}]}}}};
 
-let mode = 'el';
-let selected = {};
-let quizWords = [];
-let current = 0;
-let score = 0;
-let answered = false;
-let sessionMode = 'normal';
-let wrongWords = [];
-let round = 1;
-let totalWords = 0;
-let totalCorrect = 0;
-let autoNextTimer = null;
+/* ── WORD LOOKUP MAP (for tooltips) ─────────────────────────── */
+const WORD_MAP = {};
+Object.entries(DATA).forEach(([ck,cat])=>Object.entries(cat.sub).forEach(([sk,sub])=>sub.words.forEach(w=>{
+  const k=w.lat.toLowerCase();
+  if(!WORD_MAP[k]) WORD_MAP[k]=[];
+  WORD_MAP[k].push(w.eng[0]);
+})));
 
-function stripAnnoyingNotes(s){
-  return String(s)
-    .replace(/\s*\((?:singular|plural|masculine|feminine|masc|fem)\)\s*/gi,' ')
-    .replace(/\b(?:singular|plural)\b/gi,' ')
-    .replace(/\s+/g,' ')
-    .trim();
+/* ── DECLENSION / CONJUGATION (same as before) ──────────────── */
+function decl1Forms(nom,gender){const st=nom.endsWith('a')?nom.slice(0,-1):nom;return{'nominative singular':nom,'genitive singular':st+'ae','dative singular':st+'ae','accusative singular':st+'am','ablative singular':st+'a','vocative singular':nom,'nominative plural':st+'ae','genitive plural':st+'arum','dative plural':st+'is','accusative plural':st+'as','ablative plural':st+'is','vocative plural':st+'ae'};}
+function decl2MascForms(nom){let voc;if(nom.endsWith('ius')){voc=nom.slice(0,-2)+'i';}else if(nom.endsWith('us')){voc=nom.slice(0,-2)+'e';}else voc=nom;const base=nom.endsWith('us')?nom.slice(0,-2):nom;return{'nominative singular':nom,'genitive singular':base+'i','dative singular':base+'o','accusative singular':base+'um','ablative singular':base+'o','vocative singular':voc,'nominative plural':base+'i','genitive plural':base+'orum','dative plural':base+'is','accusative plural':base+'os','ablative plural':base+'is','vocative plural':base+'i'};}
+function decl2NeutForms(nom){const isPl=nom==='castra'||nom==='arma'||nom==='moenia';const st=nom.endsWith('um')?nom.slice(0,-2):nom.endsWith('a')?nom.slice(0,-1):nom;if(isPl)return{'nominative plural':nom,'genitive plural':st+'orum','dative plural':st+'is','accusative plural':nom,'ablative plural':st+'is','vocative plural':nom};return{'nominative singular':nom,'genitive singular':st+'i','dative singular':st+'o','accusative singular':nom,'ablative singular':st+'o','vocative singular':nom,'nominative plural':st+'a','genitive plural':st+'orum','dative plural':st+'is','accusative plural':st+'a','ablative plural':st+'is','vocative plural':st+'a'};}
+function decl3Forms(nom,gen,gender){if(!gen)return null;const st=gen.endsWith('is')?gen.slice(0,-2):gen;const isNeut=gender==='n';const iStem=gen.endsWith('ium')||(nom.endsWith('is')&&gen===nom)||nom==='mare';const genPl=iStem?st+'ium':st+'um';const ablSg=(nom==='mare'||iStem)?st+'i':st+'e';if(isNeut){const nomPl=(nom.endsWith('e')||nom.endsWith('al')||nom.endsWith('ar'))?st+'ia':st+'a';return{'nominative singular':nom,'genitive singular':gen,'dative singular':st+'i','accusative singular':nom,'ablative singular':ablSg,'vocative singular':nom,'nominative plural':nomPl,'genitive plural':genPl,'dative plural':st+'ibus','accusative plural':nomPl,'ablative plural':st+'ibus','vocative plural':nomPl};}return{'nominative singular':nom,'genitive singular':gen,'dative singular':st+'i','accusative singular':st+'em','ablative singular':ablSg,'vocative singular':nom,'nominative plural':st+'es','genitive plural':genPl,'dative plural':st+'ibus','accusative plural':iStem?st+'is':st+'es','ablative plural':st+'ibus','vocative plural':st+'es'};}
+function adj12Forms(nom){let mst,fnom,nnom;if(nom.endsWith('us')){mst=nom.slice(0,-2);fnom=mst+'a';nnom=mst+'um';}else if(nom==='miser'){mst='miser';fnom='misera';nnom='miserum';}else if(nom==='liber'){mst='liber';fnom='libera';nnom='liberum';}else if(nom==='pulcher'){mst='pulchr';fnom='pulchra';nnom='pulchrum';}else{mst=nom;fnom=nom+'a';nnom=nom+'um';}const forms={};const mf=decl2MascForms(nom);Object.entries(mf).forEach(([k,v])=>forms['m '+k]=v);const ff=decl1Forms(fnom,'f');Object.entries(ff).forEach(([k,v])=>forms['f '+k]=v);const nf=decl2NeutForms(nnom);Object.entries(nf).forEach(([k,v])=>forms['n '+k]=v);return forms;}
+function adj3Forms(nom){const st=nom.endsWith('is')?nom.slice(0,-2):nom;const mfF={'nominative singular':nom,'genitive singular':st+'is','dative singular':st+'i','accusative singular':st+'em','ablative singular':st+'i','vocative singular':nom,'nominative plural':st+'es','genitive plural':st+'ium','dative plural':st+'ibus','accusative plural':st+'es','ablative plural':st+'ibus','vocative plural':st+'es'};const nF={'nominative singular':st+'e','genitive singular':st+'is','dative singular':st+'i','accusative singular':st+'e','ablative singular':st+'i','vocative singular':st+'e','nominative plural':st+'ia','genitive plural':st+'ium','dative plural':st+'ibus','accusative plural':st+'ia','ablative plural':st+'ibus','vocative plural':st+'ia'};const forms={};Object.entries(mfF).forEach(([k,v])=>{forms['m '+k]=v;forms['f '+k]=v;});Object.entries(nF).forEach(([k,v])=>forms['n '+k]=v);return forms;}
+function getNounForms(w,sk){if(sk==='1st declension')return decl1Forms(w.lat,w.gender);if(sk==='2nd declension (masc)')return decl2MascForms(w.lat);if(sk==='2nd declension (neut)')return decl2NeutForms(w.lat);if(sk.startsWith('3rd'))return decl3Forms(w.lat,w.gen,w.gender);return null;}
+function getAdjForms(w,sk){if(sk==='1st/2nd declension')return adj12Forms(w.lat);if(sk==='3rd declension')return adj3Forms(w.lat);return null;}
+const IRREG_PRES={'sum':{'1st singular':'sum','2nd singular':'es','3rd singular':'est','1st plural':'sumus','2nd plural':'estis','3rd plural':'sunt'},'adsum':{'1st singular':'adsum','2nd singular':'ades','3rd singular':'adest','1st plural':'adsumus','2nd plural':'adestis','3rd plural':'adsunt'},'absum':{'1st singular':'absum','2nd singular':'abes','3rd singular':'abest','1st plural':'absumus','2nd plural':'abestis','3rd plural':'absunt'},'possum':{'1st singular':'possum','2nd singular':'potes','3rd singular':'potest','1st plural':'possumus','2nd plural':'potestis','3rd plural':'possunt'},'eo':{'1st singular':'eo','2nd singular':'is','3rd singular':'it','1st plural':'imus','2nd plural':'itis','3rd plural':'eunt'},'transeo':{'1st singular':'transeo','2nd singular':'transis','3rd singular':'transit','1st plural':'transimus','2nd plural':'transitis','3rd plural':'transeunt'},'abeo':{'1st singular':'abeo','2nd singular':'abis','3rd singular':'abit','1st plural':'abimus','2nd plural':'abitis','3rd plural':'abeunt'},'exeo':{'1st singular':'exeo','2nd singular':'exis','3rd singular':'exit','1st plural':'eximus','2nd plural':'exitis','3rd plural':'exeunt'},'redeo':{'1st singular':'redeo','2nd singular':'redis','3rd singular':'redit','1st plural':'redimus','2nd plural':'reditis','3rd plural':'redeunt'},'ineo':{'1st singular':'ineo','2nd singular':'inis','3rd singular':'init','1st plural':'inimus','2nd plural':'initis','3rd plural':'ineunt'}};
+function getVerbConj(w,sk){if(IRREG_PRES[w.lat])return IRREG_PRES[w.lat];const inf=w.lat;if(sk==='1st conjugation'){if(inf==='do')return{'1st singular':'do','2nd singular':'das','3rd singular':'dat','1st plural':'damus','2nd plural':'datis','3rd plural':'dant'};const st=inf.slice(0,-1);return{'1st singular':inf,'2nd singular':st+'as','3rd singular':st+'at','1st plural':st+'amus','2nd plural':st+'atis','3rd plural':st+'ant'};}if(sk==='2nd conjugation'){const st=inf.slice(0,-2);return{'1st singular':inf,'2nd singular':st+'es','3rd singular':st+'et','1st plural':st+'emus','2nd plural':st+'etis','3rd plural':st+'ent'};}if(sk==='3rd conjugation'){const isIO=['facio','fugio','capio','cupio','accipio','iacio','conicio','interficio'].includes(inf);if(isIO){const st=inf.slice(0,-2);return{'1st singular':inf,'2nd singular':st+'is','3rd singular':st+'it','1st plural':st+'imus','2nd plural':st+'itis','3rd plural':st+'iunt'};}const st=inf.slice(0,-1);return{'1st singular':inf,'2nd singular':st+'is','3rd singular':st+'it','1st plural':st+'imus','2nd plural':st+'itis','3rd plural':st+'unt'};}if(sk==='4th conjugation'){const st=inf.slice(0,-2);return{'1st singular':inf,'2nd singular':st+'is','3rd singular':st+'it','1st plural':st+'imus','2nd plural':st+'itis','3rd plural':st+'iunt'};}return null;}
+function genDrillQuestions(words){const qs=[];words.forEach(w=>{if(w.catKey==='nouns'){const f=getNounForms(w,w.subKey);if(f)Object.entries(f).forEach(([k,form])=>qs.push({type:'decl',word:w,key:k,form,target:w.lat}));}else if(w.catKey==='adjectives'){const f=getAdjForms(w,w.subKey);if(f)Object.entries(f).forEach(([k,form])=>qs.push({type:'decl',word:w,key:k,form,target:w.lat}));}else if(w.catKey==='verbs'){const f=getVerbConj(w,w.subKey);if(f)Object.entries(f).forEach(([person,form])=>qs.push({type:'conj',word:w,key:person,form,target:w.lat}));}});return qs;}
+
+/* ── STORAGE / SR ────────────────────────────────────────────── */
+const SR_KEY='latin_sr_v2',STATS_KEY='latin_stats_v2',THEME_KEY='latin_theme';
+let srData={},statsData={sessions:[],catStats:{}};
+async function loadPersisted(){
+  try{const r=await window.storage.get(SR_KEY);if(r)srData=JSON.parse(r.value);}catch(e){}
+  try{const r=await window.storage.get(STATS_KEY);if(r)statsData=JSON.parse(r.value);}catch(e){}
+  try{const r=await window.storage.get(THEME_KEY);if(r&&r.value==='light'){document.body.classList.add('light');document.getElementById('themeBtn').textContent='☾';}}catch(e){}
+  updCount();
+}
+async function saveSR(){try{await window.storage.set(SR_KEY,JSON.stringify(srData));}catch(e){}}
+async function saveStats(){try{await window.storage.set(STATS_KEY,JSON.stringify(statsData));}catch(e){}}
+function srKey(w){return w.catKey+'|'+w.subKey+'|'+w.lat;}
+function getSR(w){const k=srKey(w);if(!srData[k])srData[k]={ef:2.5,interval:0,due:0,seen:0,correct:0};return srData[k];}
+function updateSR(w,correct){const r=getSR(w);r.seen++;if(correct){r.correct++;r.interval=r.interval===0?1:r.interval===1?6:Math.round(r.interval*r.ef);r.ef=Math.max(1.3,r.ef+0.1);}else{r.interval=0;r.ef=Math.max(1.3,r.ef-0.2);}r.due=Date.now()+r.interval*86400000;saveSR();}
+function isDue(w){const r=getSR(w);return r.interval===0||r.due<=Date.now();}
+function getDueCount(words){return words.filter(w=>isDue(w)).length;}
+
+/* ── APP STATE ───────────────────────────────────────────────── */
+let mode='el',quizType='vocab',inputMode='typed',difficulty='easy';
+let selected={};
+let quizWords=[],current=0,score=0,answered=false;
+let wrongWords=[],round=1;
+let autoNextTimer=null;
+let speedEnabled=false,speedSecs=5;
+let timerInterval=null,timerRemaining=0;
+let currentDrillQs=[],drillIdx=0;
+let isDrillMode=false,isSentMode=false;
+let mainTab='practice';
+let sentenceData=null; // {latin, english, wordMap}
+let sentScore=0,sentTotal=0;
+
+/* ── THEME ───────────────────────────────────────────────────── */
+function toggleTheme(){const light=document.body.classList.toggle('light');document.getElementById('themeBtn').textContent=light?'☾':'☀';try{window.storage.set(THEME_KEY,light?'light':'dark');}catch(e){}}
+
+/* ── SPEED ───────────────────────────────────────────────────── */
+function toggleSpeed(){speedEnabled=document.getElementById('speedOn').checked;['speedLbl','speedSlider','speedVal'].forEach(id=>document.getElementById(id).style.display=speedEnabled?'':'none');}
+function updSpeedVal(){speedSecs=parseInt(document.getElementById('speedSlider').value);document.getElementById('speedVal').textContent=speedSecs+'s';}
+function startTimer(){if(!speedEnabled){document.getElementById('timerRing').style.display='none';return;}timerRemaining=speedSecs;document.getElementById('timerRing').style.display='';updateTimerDisplay();timerInterval=setInterval(()=>{timerRemaining--;updateTimerDisplay();if(timerRemaining<=0){clearInterval(timerInterval);timeUp();}},1000);}
+function updateTimerDisplay(){const pct=timerRemaining/speedSecs;const arc=document.getElementById('timerArc');arc.style.strokeDashoffset=94.25*(1-pct);arc.className='timer-arc'+(timerRemaining<=3?' urgent':'');document.getElementById('timerTxt').textContent=timerRemaining;}
+function stopTimer(){clearInterval(timerInterval);document.getElementById('timerRing').style.display='none';}
+function timeUp(){if(answered)return;if(isDrillMode)skipDrillQ();else if(isSentMode)skipSentence();else skipQ();}
+
+/* ── DIFFICULTY ──────────────────────────────────────────────── */
+function setDiff(d){
+  difficulty=d;
+  [{id:'dEasy',val:'easy'},{id:'dMed',val:'medium'},{id:'dHard',val:'hard'},{id:'dInsane',val:'insane'}].forEach(({id,val})=>{
+    const b=document.getElementById(id);
+    if(b) b.className='diff-btn'+(val==='insane'?' d-insane':'')+(d===val?' active':'');
+  });
 }
 
-function stripAnnoyingNotes(text){
-  // Remove notes that are annoying to type, unless we deliberately show them as question clues.
-  return String(text)
-    .replace(/\s*\((?:singular|plural|masculine|feminine|masc|fem)\)\s*/gi, ' ')
-    .replace(/\b(?:singular|plural|masculine|feminine|masc|fem)\b/gi, ' ')
-    .replace(/\s+/g,' ')
-    .trim();
+/* ── SHORTCUTS ───────────────────────────────────────────────── */
+function showShortcuts(){document.getElementById('shortcutsOverlay').style.display='flex';}
+function hideShortcuts(){document.getElementById('shortcutsOverlay').style.display='none';}
+
+/* ── MAIN TABS ───────────────────────────────────────────────── */
+function showMainTab(t){
+  mainTab=t;
+  document.querySelectorAll('.nav-tab').forEach((b,i)=>b.classList.toggle('active',(i===0&&t==='practice')||(i===1&&t==='stats')));
+  document.getElementById('practicePanel').style.display=t==='practice'?'':'none';
+  document.getElementById('statsView').style.display=t==='stats'?'block':'none';
+  if(t==='stats') renderStats();
 }
 
-function displayEng(w){
-  // These extra words are CLUES in English → Latin, so you can tell which Latin word to type.
-  if(w.lat === 'eos') return 'them masculine';
-  if(w.lat === 'eas') return 'them feminine';
-  if(w.lat === 'te') return 'you singular';
-  if(w.lat === 'vos') return 'you plural';
-  return w.eng.map(e => String(e).replace(/[()]/g,'').replace(/\s+/g,' ').trim()).join(', ');
+/* ── SELECTOR ────────────────────────────────────────────────── */
+function selectAll(){
+  Object.entries(DATA).forEach(([ck,cat])=>{
+    Object.keys(cat.sub).forEach(sk=>{selected[ck][sk]=true;const sc=document.getElementById('sbox_'+ck+'_'+sk);if(sc)sc.className='sbox checked';});
+    updCatBox(ck);
+  });
+  updCount();
 }
-
-function normaliseAnswerText(s){
-  let text = String(s).toLowerCase().trim();
-  // In Latin → English, the extra clue words are NOT required in your answer.
-  text = text.replace(/^them\s*(?:\((?:masculine|feminine|masc|fem)\)|(?:masculine|feminine|masc|fem))?$/i, 'them');
-  text = text.replace(/^you\s*(?:\((?:singular|plural)\)|(?:singular|plural))?$/i, 'you');
-  return stripAnnoyingNotes(text)
-    .toLowerCase()
-    .replace(/[^a-z\s]/g,'')
-    .replace(/\s+/g,' ')
-    .trim();
-}
-
-function is3rd(subKey){ return subKey && subKey.startsWith('3rd'); }
-
-function fullLat(w, subKey){
-  if(is3rd(subKey) && w.gen) return w.lat + ' ' + w.gen + ' ' + w.gender;
-  return w.lat;
-}
-
-function checkLat(input, w, subKey){
-  const n = s => s.toLowerCase().replace(/\s+/g,' ').trim();
-  const v = n(input);
-  if(!v) return false;
-  if(v === n(fullLat(w,subKey))) return true;
-  if(v === n(w.lat)) return true;
-  return false;
-}
-
-function checkEng(input, w){
-  const v = normaliseAnswerText(input);
-
-  // Latin → English: these pairs should accept the simple base word only.
-  // The extra detail is only a clue when English is shown as the QUESTION.
-  if((w.lat === 'eos' || w.lat === 'eas') && v === 'them') return true;
-  if((w.lat === 'te' || w.lat === 'vos') && v === 'you') return true;
-
-  return w.eng.some(e => normaliseAnswerText(e) === v);
+function deselectAll(){
+  Object.entries(DATA).forEach(([ck,cat])=>{
+    Object.keys(cat.sub).forEach(sk=>{selected[ck][sk]=false;const sc=document.getElementById('sbox_'+ck+'_'+sk);if(sc)sc.className='sbox';});
+    updCatBox(ck);
+  });
+  updCount();
 }
 
 function buildUI(){
-  const grid = document.getElementById('selGrid');
-  grid.innerHTML = '';
-  Object.entries(DATA).forEach(([ck, cat]) => {
-    const sks = Object.keys(cat.sub);
-    const total = sks.reduce((a,s) => a + cat.sub[s].words.length, 0);
-    selected[ck] = {};
-    sks.forEach(s => { selected[ck][s] = false; });
-
-    const card = document.createElement('div');
-    card.className = 'cat-card'; card.id = 'card_'+ck;
-
-    const hdr = document.createElement('div');
-    hdr.className = 'cat-hdr';
-
-    const cb = document.createElement('div');
-    cb.className = 'cbox'; cb.id = 'cbox_'+ck;
-    cb.innerHTML = `<svg class="ck" viewBox="0 0 10 10" fill="none" stroke="#161412" stroke-width="1.8" stroke-linecap="round"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg><svg class="da" viewBox="0 0 10 10" fill="none" stroke="#c4935a" stroke-width="2" stroke-linecap="round"><line x1="2" y1="5" x2="8" y2="5"/></svg>`;
-
-    const lbl = document.createElement('span'); lbl.className = 'cat-lbl'; lbl.textContent = cat.label;
-    const cnt = document.createElement('span'); cnt.className = 'cat-cnt'; cnt.textContent = total;
-
-    hdr.appendChild(cb); hdr.appendChild(lbl); hdr.appendChild(cnt);
-
-    const subList = document.createElement('div');
-    subList.className = 'sub-list'; subList.id = 'subs_'+ck;
-
-    const chev = document.createElement('span');
-    chev.className = 'chevron'; chev.id = 'chev_'+ck; chev.textContent = '⌄';
-    hdr.appendChild(chev);
-    hdr.addEventListener('click', e => {
-      if(e.target === cb || cb.contains(e.target)) return;
-      subList.classList.toggle('open');
-      chev.classList.toggle('open');
+  const grid=document.getElementById('selGrid');grid.innerHTML='';
+  Object.entries(DATA).forEach(([ck,cat])=>{
+    const sks=Object.keys(cat.sub);const total=sks.reduce((a,s)=>a+cat.sub[s].words.length,0);
+    selected[ck]={};sks.forEach(s=>{selected[ck][s]=false;});
+    const card=document.createElement('div');card.className='cat-card';card.id='card_'+ck;
+    const hdr=document.createElement('div');hdr.className='cat-hdr';
+    const cb=document.createElement('div');cb.className='cbox';cb.id='cbox_'+ck;
+    cb.innerHTML=`<svg class="ck" viewBox="0 0 10 10" fill="none" stroke="#161412" stroke-width="1.8" stroke-linecap="round"><polyline points="1.5,5 4,7.5 8.5,2.5"/></svg><svg class="da" viewBox="0 0 10 10" fill="none" stroke="#c4935a" stroke-width="2" stroke-linecap="round"><line x1="2" y1="5" x2="8" y2="5"/></svg>`;
+    const lbl=document.createElement('span');lbl.className='cat-lbl';lbl.textContent=cat.label;
+    const cnt=document.createElement('span');cnt.className='cat-cnt';cnt.textContent=total;
+    const chev=document.createElement('span');chev.className='chevron';chev.id='chev_'+ck;chev.textContent='⌄';
+    hdr.appendChild(cb);hdr.appendChild(lbl);hdr.appendChild(cnt);hdr.appendChild(chev);
+    const subList=document.createElement('div');subList.className='sub-list';subList.id='subs_'+ck;
+    hdr.addEventListener('click',e=>{if(e.target===cb||cb.contains(e.target))return;subList.classList.toggle('open');chev.classList.toggle('open');});
+    cb.addEventListener('click',e=>{
+      e.stopPropagation();const allOn=Object.values(selected[ck]).every(v=>v);const nv=!allOn;
+      sks.forEach(s=>{selected[ck][s]=nv;const sc=document.getElementById('sbox_'+ck+'_'+s);if(sc)sc.className='sbox'+(nv?' checked':'');});
+      updCatBox(ck);if(nv&&!subList.classList.contains('open')){subList.classList.add('open');chev.classList.add('open');}updCount();
     });
-
-    cb.addEventListener('click', e => {
-      e.stopPropagation();
-      const allOn = Object.values(selected[ck]).every(v=>v);
-      const newV = !allOn;
-      sks.forEach(s => {
-        selected[ck][s] = newV;
-        const sc = document.getElementById('sbox_'+ck+'_'+s);
-        if(sc) sc.className = 'sbox'+(newV?' checked':'');
-      });
-      updCatBox(ck);
-      if(newV && !subList.classList.contains('open')){ subList.classList.add('open'); chev.classList.add('open'); }
-      updCount();
-    });
-
-    sks.forEach(s => {
-      const row = document.createElement('div'); row.className = 'sub-row';
-      const sc = document.createElement('div'); sc.className = 'sbox'; sc.id = 'sbox_'+ck+'_'+s;
-      sc.innerHTML = `<svg viewBox="0 0 9 9" fill="none" stroke="#161412" stroke-width="1.8" stroke-linecap="round"><polyline points="1,4.5 3.5,7 8,2"/></svg>`;
-      const sl = document.createElement('span'); sl.className = 'sub-lbl'; sl.textContent = s;
-      const sct = document.createElement('span'); sct.className = 'sub-cnt'; sct.textContent = cat.sub[s].words.length;
-      row.appendChild(sc); row.appendChild(sl); row.appendChild(sct);
-      row.addEventListener('click', () => {
-        selected[ck][s] = !selected[ck][s];
-        sc.className = 'sbox'+(selected[ck][s]?' checked':'');
-        updCatBox(ck);
-        updCount();
-      });
+    sks.forEach(s=>{
+      const row=document.createElement('div');row.className='sub-row';
+      const sc=document.createElement('div');sc.className='sbox';sc.id='sbox_'+ck+'_'+s;
+      sc.innerHTML=`<svg viewBox="0 0 9 9" fill="none" stroke="#161412" stroke-width="1.8" stroke-linecap="round"><polyline points="1,4.5 3.5,7 8,2"/></svg>`;
+      const sl=document.createElement('span');sl.className='sub-lbl';sl.textContent=s;
+      const sct=document.createElement('span');sct.className='sub-cnt';sct.textContent=cat.sub[s].words.length;
+      row.appendChild(sc);row.appendChild(sl);row.appendChild(sct);
+      row.addEventListener('click',()=>{selected[ck][s]=!selected[ck][s];sc.className='sbox'+(selected[ck][s]?' checked':'');updCatBox(ck);updCount();});
       subList.appendChild(row);
     });
-
-    card.appendChild(hdr); card.appendChild(subList);
-    grid.appendChild(card);
+    card.appendChild(hdr);card.appendChild(subList);grid.appendChild(card);
   });
   updCount();
 }
 
 function updCatBox(ck){
-  const vals = Object.values(selected[ck]);
-  const allOn = vals.every(v=>v), anyOn = vals.some(v=>v);
-  const cb = document.getElementById('cbox_'+ck);
-  const card = document.getElementById('card_'+ck);
-  cb.className = 'cbox'+(allOn?' checked':anyOn?' indeterminate':'');
-  if(card) card.className = 'cat-card'+(anyOn?' has-sel':'');
+  const vals=Object.values(selected[ck]);const allOn=vals.every(v=>v),anyOn=vals.some(v=>v);
+  document.getElementById('cbox_'+ck).className='cbox'+(allOn?' checked':anyOn?' indeterminate':'');
+  document.getElementById('card_'+ck).className='cat-card'+(anyOn?' has-sel':'');
 }
 
-function setMode(m){
-  mode = m;
-  document.getElementById('modeEL').className = 'mode-btn'+(m==='el'?' active':'');
-  document.getElementById('modeLE').className = 'mode-btn'+(m==='le'?' active':'');
-  if(document.getElementById('wordDrawer').classList.contains('open')) renderWordList();
+function setMode(m){mode=m;document.getElementById('modeEL').className='mode-btn'+(m==='el'?' active':'');document.getElementById('modeLE').className='mode-btn'+(m==='le'?' active':'');}
+
+function setQuizType(t){
+  quizType=t;
+  ['typeVocab','typeDrill','typeSent'].forEach((id,i)=>document.getElementById(id).className='mode-btn'+(['vocab','drill','sentences'][i]===t?' active':''));
+  const isSent=t==='sentences';
+  document.getElementById('diffRow').style.display=isSent?'flex':'none';
+  document.getElementById('sentNotice').style.display=isSent?'block':'none';
+  document.getElementById('inputModeToggle').style.display=isSent?'none':'flex';
+  if(isSent){selectAll();lockGrid(true);}
+  else{lockGrid(false);}
+  updCount();
 }
+
+function lockGrid(locked){
+  document.querySelectorAll('.cat-card').forEach(c=>c.classList.toggle('locked',locked));
+}
+
+function setInputMode(t){inputMode=t;document.getElementById('inputTyped').className='mode-btn'+(t==='typed'?' active':'');document.getElementById('inputMC').className='mode-btn'+(t==='mc'?' active':'');}
 
 function getWords(){
-  const words = [];
-  Object.entries(selected).forEach(([ck,subs]) => {
-    Object.entries(subs).forEach(([sk,on]) => {
-      if(on) DATA[ck].sub[sk].words.forEach(w => words.push({...w,catKey:ck,subKey:sk}));
-    });
-  });
-  return words;
-}
-
-function toggleWordDrawer(open){
-  const drawer = document.getElementById('wordDrawer');
-  drawer.classList.toggle('open', open);
-  if(open) renderWordList();
-}
-
-function renderWordList(){
-  const list = document.getElementById('wordList');
-  const words = getWords();
-  document.getElementById('wordDrawerCount').textContent = words.length + (words.length===1 ? ' selected' : ' selected');
-  if(words.length===0){
-    list.innerHTML = '<div class="word-empty">Choose some categories to see the words here.</div>';
-    return;
-  }
-  list.innerHTML = words.map(w => {
-    const lat = fullLat(w,w.subKey);
-    const eng = displayEng(w);
-    const meta = DATA[w.catKey].label + (w.subKey ? ' · ' + w.subKey : '');
-    return `<div class="word-row"><div class="word-row-lat">${lat}</div><div class="word-row-eng">${eng}</div><div class="word-row-meta">${meta}</div></div>`;
-  }).join('');
+  const ws=[];
+  Object.entries(selected).forEach(([ck,subs])=>Object.entries(subs).forEach(([sk,on])=>{
+    if(on) DATA[ck].sub[sk].words.forEach(w=>ws.push({...w,catKey:ck,subKey:sk}));
+  }));
+  return ws;
 }
 
 function updCount(){
-  const n = getWords().length;
-  document.getElementById('wordPill').textContent = n + (n===1?' word':' words') + ' selected';
-  document.getElementById('startBtn').disabled = n===0;
-  document.getElementById('wordDrawerCount').textContent = n + (n===1?' selected':' selected');
+  const words=getWords();const n=words.length;
+  const isSent=quizType==='sentences';
+  document.getElementById('wordPill').textContent=isSent?'All categories selected':n+(n===1?' word':' words')+' selected';
+  document.getElementById('startBtn').disabled=isSent?false:n===0;
+  const due=getDueCount(words);
+  const srBtn=document.getElementById('srBtn');
+  srBtn.disabled=isSent||due===0;srBtn.textContent=due>0&&!isSent?`Due (${due})`:'Due (0)';
+  document.getElementById('wordDrawerCount').textContent=n+' selected';
   if(document.getElementById('wordDrawer').classList.contains('open')) renderWordList();
 }
 
-function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
+/* ── HELPERS ─────────────────────────────────────────────────── */
+function stripNotes(s){return String(s).replace(/\s*\((?:singular|plural|masculine|feminine|masc|fem)\)\s*/gi,' ').replace(/\b(?:singular|plural)\b/gi,' ').replace(/\s+/g,' ').trim();}
+function displayEng(w){if(w.lat==='eos')return 'them masculine';if(w.lat==='eas')return 'them feminine';if(w.lat==='te')return 'you singular';if(w.lat==='vos')return 'you plural';return w.eng.map(e=>String(e).replace(/[()]/g,'').trim()).join(', ');}
+function normalise(s){let t=String(s).toLowerCase().trim();t=t.replace(/^them\s*(?:\((?:masculine|feminine|masc|fem)\)|(?:masculine|feminine|masc|fem))?$/i,'them');t=t.replace(/^you\s*(?:\((?:singular|plural)\)|(?:singular|plural))?$/i,'you');return stripNotes(t).toLowerCase().replace(/[^a-z\s]/g,'').replace(/\s+/g,' ').trim();}
+function is3rd(sk){return sk&&sk.startsWith('3rd');}
+function fullLat(w,sk){return is3rd(sk)&&w.gen?w.lat+' '+w.gen+' '+w.gender:w.lat;}
+function checkLat(inp,w,sk){const n=s=>s.toLowerCase().replace(/\s+/g,' ').trim();const v=n(inp);return v&&(v===n(fullLat(w,sk))||v===n(w.lat));}
+function checkEng(inp,w){const v=normalise(inp);if((w.lat==='eos'||w.lat==='eas')&&v==='them')return true;if((w.lat==='te'||w.lat==='vos')&&v==='you')return true;return w.eng.some(e=>normalise(e)===v);}
+function correctAnswer(w){return mode==='el'?fullLat(w,w.subKey):displayEng(w);}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 
-function startSession(sm){
-  clearTimeout(autoNextTimer);
-  sessionMode = sm;
-  quizWords = shuffle([...getWords()]);
-  current = 0; score = 0; answered = false;
-  wrongWords = [];
-  round = 1;
-  totalWords = quizWords.length;
-  totalCorrect = 0;
-  showView('quizView');
-  showQ();
+/* ── SESSION START ───────────────────────────────────────────── */
+function startSession(){
+  if(quizType==='sentences'){startSentences();return;}
+  const words=shuffle([...getWords()]);beginQuiz(words,'normal');
+}
+function startSR(){
+  const words=getWords();
+  beginQuiz([...shuffle(words.filter(w=>isDue(w))),...shuffle(words.filter(w=>!isDue(w)))],'sr');
+}
+function beginQuiz(words,sm){
+  clearTimeout(autoNextTimer);stopTimer();
+  isDrillMode=(quizType==='drill');isSentMode=false;
+  if(isDrillMode){
+    currentDrillQs=shuffle(genDrillQuestions(words));drillIdx=0;
+    if(!currentDrillQs.length){return;}
+    quizWords=words;
+  } else {quizWords=words;}
+  current=0;score=0;answered=false;wrongWords=[];round=1;
+  showView('quizView');isDrillMode?showDrillQ():showQ();
 }
 
+/* ── VIEW MANAGEMENT ─────────────────────────────────────────── */
 function showView(id){
-  ['selectorView','quizView','resultView'].forEach(v => {
-    const el = document.getElementById(v);
-    if(v === 'selectorView') el.style.display = (v===id?'':'none');
-    else el.style.display = (v===id?'block':'none');
-  });
+  ['selectorView','quizView','resultView','statsView'].forEach(v=>document.getElementById(v).style.display=(v===id?(v==='selectorView'?'':'block'):'none'));
 }
 
+/* ── VOCAB QUIZ ──────────────────────────────────────────────── */
 function showQ(){
-  clearTimeout(autoNextTimer);
-  answered = false;
-  const w = quizWords[current];
-  const total = quizWords.length;
-  const pct = Math.round(current/total*100);
-  document.getElementById('progFill').style.width = pct+'%';
-  document.getElementById('progLbl').textContent = (current+1)+' / '+total;
-  document.getElementById('scorePill').textContent = score+' correct';
-  document.getElementById('roundBadge').innerHTML = '<span>Round '+round+'</span>';
-
-  const ai = document.getElementById('answerInput');
-  ai.value=''; ai.className='answer-input'; ai.disabled=false;
-  document.getElementById('feedbackBox').className='feedback-box';
-  document.getElementById('feedbackBox').textContent='';
-  document.getElementById('nextBtn').style.display='none';
-  document.getElementById('checkBtn').style.display='';
-  document.getElementById('checkBtn').disabled=false;
-  document.querySelector('.skip-btn').disabled=false;
+  clearTimeout(autoNextTimer);stopTimer();answered=false;
+  const w=quizWords[current];const total=quizWords.length;
+  document.getElementById('progFill').style.width=Math.round(current/total*100)+'%';
+  document.getElementById('progLbl').textContent=(current+1)+' / '+total;
+  document.getElementById('scorePill').textContent=score+' correct';
+  document.getElementById('roundBadge').innerHTML='<span>Round '+round+'</span>';
   document.getElementById('hintBox').textContent='';
+  const tags=document.getElementById('pTags');tags.innerHTML='';
+  if(mode==='el'){document.getElementById('pDir').textContent='English → Latin';document.getElementById('pWord').textContent=displayEng(w);if(w.catKey==='nouns'){const d=document.createElement('span');d.className='tag decl';d.textContent=w.subKey;tags.appendChild(d);}if(is3rd(w.subKey)&&w.gen)document.getElementById('hintBox').textContent='Give: nominative  genitive  gender  (e.g. leo leonis m)';}
+  else{document.getElementById('pDir').textContent='Latin → English';document.getElementById('pWord').textContent=is3rd(w.subKey)&&w.gen?w.lat+' '+w.gen+' '+w.gender:w.lat;if(w.catKey==='nouns'){const d=document.createElement('span');d.className='tag decl';d.textContent=w.subKey;tags.appendChild(d);}if(w.gender){const g=document.createElement('span');g.className='tag gend';g.textContent=w.gender==='f'?'feminine':w.gender==='m'?'masculine':'neuter';tags.appendChild(g);}}
+  const pc=document.getElementById('promptCard');pc.style.animation='none';requestAnimationFrame(()=>{pc.style.animation='fadeIn .22s ease';});
+  inputMode==='typed'?showTypedQ():showMCQ(w);startTimer();
+}
 
-  const tags = document.getElementById('pTags'); tags.innerHTML='';
+function showTypedQ(){
+  document.getElementById('typedSection').style.display='';document.getElementById('mcSection').style.display='none';document.getElementById('sentSection').style.display='none';
+  const ai=document.getElementById('answerInput');ai.value='';ai.className='answer-input';ai.disabled=false;
+  document.getElementById('feedbackBox').className='feedback-box';document.getElementById('feedbackBox').textContent='';
+  document.getElementById('nextBtn').style.display='none';document.getElementById('checkBtn').style.display='';document.getElementById('checkBtn').disabled=false;
+  document.querySelector('.skip-btn').disabled=false;setTimeout(()=>ai.focus(),50);
+}
 
-  if(mode==='el'){
-    document.getElementById('pDir').textContent = 'English → Latin';
-    document.getElementById('pWord').textContent = displayEng(w);
-    if(w.catKey==='nouns'){
-      const d=document.createElement('span'); d.className='tag decl'; d.textContent=w.subKey; tags.appendChild(d);
-    }
-    if(is3rd(w.subKey)&&w.gen) document.getElementById('hintBox').textContent='Give: nominative  genitive  gender  (e.g. leo leonis m)';
-  } else {
-    document.getElementById('pDir').textContent = 'Latin → English';
-    document.getElementById('pWord').textContent = is3rd(w.subKey)&&w.gen ? w.lat+' '+w.gen+' '+w.gender : w.lat;
-    if(w.catKey==='nouns'){
-      const d=document.createElement('span'); d.className='tag decl'; d.textContent=w.subKey; tags.appendChild(d);
-    }
-    if(w.gender){
-      const g=document.createElement('span'); g.className='tag gend';
-      g.textContent = w.gender==='f'?'feminine':w.gender==='m'?'masculine':'neuter';
-      tags.appendChild(g);
-    }
-  }
+function showMCQ(w){
+  document.getElementById('typedSection').style.display='none';document.getElementById('mcSection').style.display='';document.getElementById('sentSection').style.display='none';
+  document.getElementById('mcFeedback').className='feedback-box';document.getElementById('mcFeedback').textContent='';document.getElementById('mcNextBtn').style.display='none';
+  const pool=shuffle([...quizWords.filter(x=>x.lat!==w.lat)]);
+  const chosen=[];const used=new Set([correctAnswer(w)]);
+  for(const x of pool){const a=correctAnswer(x);if(!used.has(a)){used.add(a);chosen.push(x);if(chosen.length===3)break;}}
+  const opts=shuffle([w,...chosen]);
+  const grid=document.getElementById('mcGrid');grid.innerHTML='';
+  opts.forEach((opt,i)=>{const btn=document.createElement('button');btn.className='mc-btn';btn.innerHTML=`<span class="mc-num">${i+1}</span><span>${correctAnswer(opt)}</span>`;btn.onclick=()=>handleMC(opt,w);grid.appendChild(btn);});
+}
 
-  const pc = document.getElementById('promptCard');
-  pc.style.animation='none';
-  requestAnimationFrame(()=>{ pc.style.animation='fadeIn 0.22s ease'; });
-  setTimeout(()=>ai.focus(),50);
+function handleMC(chosen,correct){
+  if(answered)return;answered=true;stopTimer();
+  const isCorrect=chosen.lat===correct.lat;
+  const btns=document.getElementById('mcGrid').querySelectorAll('.mc-btn');
+  const ca=correctAnswer(correct);
+  btns.forEach(b=>{b.disabled=true;const t=b.querySelector('span:last-child').textContent;if(t===ca)b.className='mc-btn reveal';if(t===correctAnswer(chosen)&&!isCorrect)b.className='mc-btn wrong';});
+  const fb=document.getElementById('mcFeedback');
+  if(isCorrect){score++;fb.className='feedback-box correct';fb.textContent='✓ Correct';}
+  else{wrongWords.push(correct);fb.className='feedback-box wrong';fb.textContent='✗ '+ca;}
+  updateSR(correct,isCorrect);recordAnswer(correct,isCorrect);
+  document.getElementById('scorePill').textContent=score+' correct';
+  document.getElementById('mcNextBtn').style.display='block';
+  autoNextTimer=setTimeout(nextQ,isCorrect?500:1200);
 }
 
 function checkAnswer(){
-  if(answered) return;
-  const w = quizWords[current];
-  const val = document.getElementById('answerInput').value.trim();
-  if(!val) return;
-  answered = true;
-
-  const correct = mode==='el' ? checkLat(val,w,w.subKey) : checkEng(val,w);
-  const ai = document.getElementById('answerInput');
-  const fb = document.getElementById('feedbackBox');
-  ai.disabled = true;
-
-  if(correct){
-    score++; totalCorrect++;
-    ai.className='answer-input correct';
-    fb.className='feedback-box correct';
-    fb.textContent='✓ Correct';
-  } else {
-    if(sessionMode==='review') wrongWords.push(w);
-    ai.className='answer-input wrong';
-    fb.className='feedback-box wrong';
-    const ans = mode==='el' ? fullLat(w,w.subKey) : displayEng(w);
-    fb.textContent='✗ '+ans;
-  }
-
+  if(answered)return;const w=quizWords[current];const val=document.getElementById('answerInput').value.trim();if(!val)return;
+  answered=true;stopTimer();
+  const correct=mode==='el'?checkLat(val,w,w.subKey):checkEng(val,w);
+  const ai=document.getElementById('answerInput');const fb=document.getElementById('feedbackBox');ai.disabled=true;
+  if(correct){score++;ai.className='answer-input correct';fb.className='feedback-box correct';fb.textContent='✓ Correct';}
+  else{wrongWords.push(w);ai.className='answer-input wrong';fb.className='feedback-box wrong';fb.textContent='✗ '+correctAnswer(w);}
+  updateSR(w,correct);recordAnswer(w,correct);
   document.getElementById('scorePill').textContent=score+' correct';
   document.getElementById('checkBtn').style.display='none';
-  document.querySelector('.skip-btn').disabled=true;
   document.getElementById('nextBtn').style.display='block';
-  document.getElementById('nextBtn').textContent = correct ? 'Next in 0.5s…' : 'Next in 1s…';
-  autoNextTimer = setTimeout(nextQ, correct ? 500 : 1000);
+  autoNextTimer=setTimeout(nextQ,correct?500:1200);
 }
 
 function skipQ(){
-  if(answered) return;
-  answered = true;
-  const w = quizWords[current];
-  if(sessionMode==='review') wrongWords.push(w);
-  const ai = document.getElementById('answerInput');
-  ai.className='answer-input wrong'; ai.disabled=true;
-  const fb = document.getElementById('feedbackBox');
-  fb.className='feedback-box wrong';
-  const ans = mode==='el' ? fullLat(w,w.subKey) : displayEng(w);
-  fb.textContent='→ '+ans;
+  if(answered)return;answered=true;stopTimer();
+  const w=quizWords[current];wrongWords.push(w);updateSR(w,false);recordAnswer(w,false);
+  const ai=document.getElementById('answerInput');ai.className='answer-input wrong';ai.disabled=true;
+  const fb=document.getElementById('feedbackBox');fb.className='feedback-box wrong';fb.textContent='→ '+correctAnswer(w);
   document.getElementById('checkBtn').style.display='none';
-  document.querySelector('.skip-btn').disabled=true;
-  document.getElementById('nextBtn').style.display='block';
-  document.getElementById('nextBtn').textContent = 'Next in 1s…';
-  autoNextTimer = setTimeout(nextQ, 1000);
+  document.getElementById('nextBtn').style.display='block';autoNextTimer=setTimeout(nextQ,1200);
 }
+
+function revealHint(){if(answered)return;const w=quizWords[current];document.getElementById('hintBox').textContent='Hint: '+correctAnswer(w)[0].toUpperCase()+'…';}
 
 function nextQ(){
   clearTimeout(autoNextTimer);
-  document.getElementById('nextBtn').textContent = 'Next →';
-  current++;
-  if(current>=quizWords.length){ showResult(); return; }
-  showQ();
+  if(isDrillMode){drillIdx++;if(drillIdx>=currentDrillQs.length){showResult();return;}showDrillQ();return;}
+  current++;if(current>=quizWords.length){showResult();return;}showQ();
 }
 
-const PHRASES = [[100,"Optime! Perfectly done."],[80,"Bene! Well done."],[60,"Satis bene. Keep going."],[0,"Persevera. Try again."]];
+/* ── DRILL QUIZ ──────────────────────────────────────────────── */
+function showDrillQ(){
+  clearTimeout(autoNextTimer);stopTimer();answered=false;
+  const q=currentDrillQs[drillIdx];const total=currentDrillQs.length;
+  document.getElementById('progFill').style.width=Math.round(drillIdx/total*100)+'%';
+  document.getElementById('progLbl').textContent=(drillIdx+1)+' / '+total;
+  document.getElementById('scorePill').textContent=score+' correct';
+  document.getElementById('roundBadge').innerHTML='<span>Drills · Round '+round+'</span>';
+  document.getElementById('hintBox').textContent='';document.getElementById('pTags').innerHTML='';
+  document.getElementById('pDir').textContent=q.type==='conj'?'Conjugation drill':'Declension drill';
+  const kl=q.key.replace(' singular',' sg').replace(' plural',' pl');
+  document.getElementById('pWord').innerHTML=`<span style="font-size:16px;color:var(--text3)">${kl} of</span><br>${q.target}`;
+  const pc=document.getElementById('promptCard');pc.style.animation='none';requestAnimationFrame(()=>{pc.style.animation='fadeIn .22s ease';});
+  inputMode==='typed'?showTypedDrillQ():showMCDrillQ(q);startTimer();
+}
 
-function showResult(){
-  showView('resultView');
-  const total = quizWords.length;
-  const pct = Math.round(score/total*100);
+function showTypedDrillQ(){
+  document.getElementById('typedSection').style.display='';document.getElementById('mcSection').style.display='none';document.getElementById('sentSection').style.display='none';
+  const ai=document.getElementById('answerInput');ai.value='';ai.className='answer-input';ai.disabled=false;
+  document.getElementById('feedbackBox').className='feedback-box';document.getElementById('feedbackBox').textContent='';
+  document.getElementById('nextBtn').style.display='none';document.getElementById('checkBtn').style.display='';document.getElementById('checkBtn').disabled=false;
+  document.querySelector('.skip-btn').disabled=false;setTimeout(()=>ai.focus(),50);
+}
 
-  if(sessionMode==='review'){
-    document.getElementById('resLabel').textContent = wrongWords.length===0 ? 'Review complete' : 'Round '+round+' complete';
-    document.getElementById('resScore').textContent = score+' / '+total;
-    document.getElementById('resTotal').textContent = pct+'% this round';
-    document.getElementById('resPhrase').textContent = wrongWords.length===0 ? 'Optime! You got everything right.' : (PHRASES.find(([t])=>pct>=t)||PHRASES[PHRASES.length-1])[1];
+function showMCDrillQ(q){
+  document.getElementById('typedSection').style.display='none';document.getElementById('mcSection').style.display='';document.getElementById('sentSection').style.display='none';
+  document.getElementById('mcFeedback').className='feedback-box';document.getElementById('mcFeedback').textContent='';document.getElementById('mcNextBtn').style.display='none';
+  const pool=shuffle([...currentDrillQs.filter(x=>x.form!==q.form)]);
+  const chosen=[];const used=new Set([q.form]);
+  for(const x of pool){if(!used.has(x.form)){used.add(x.form);chosen.push(x);if(chosen.length===3)break;}}
+  const opts=shuffle([q,...chosen.slice(0,3)]);
+  const grid=document.getElementById('mcGrid');grid.innerHTML='';
+  opts.forEach((opt,i)=>{const btn=document.createElement('button');btn.className='mc-btn';btn.innerHTML=`<span class="mc-num">${i+1}</span><span>${opt.form}</span>`;btn.onclick=()=>handleMCDrill(opt,q);grid.appendChild(btn);});
+}
 
-    const banner = document.getElementById('reviewBanner');
-    if(wrongWords.length>0){
-      banner.style.display='flex';
-      document.getElementById('reviewBannerTitle').textContent = wrongWords.length+' word'+(wrongWords.length===1?' needs':'s need')+' more practice';
-      document.getElementById('reviewBannerSub').textContent = 'Round '+(round+1)+' will drill just these words.';
-    } else {
-      banner.style.display='none';
-    }
-  } else {
-    document.getElementById('resLabel').textContent = 'Result';
-    document.getElementById('resScore').textContent = score+' / '+total;
-    document.getElementById('resTotal').textContent = pct+'%';
-    document.getElementById('resPhrase').textContent = (PHRASES.find(([t])=>pct>=t)||PHRASES[PHRASES.length-1])[1];
-    document.getElementById('reviewBanner').style.display='none';
+function checkAnswerDrill(){
+  if(answered)return;const q=currentDrillQs[drillIdx];const val=document.getElementById('answerInput').value.trim().toLowerCase();if(!val)return;
+  answered=true;stopTimer();
+  const correct=val===q.form;const ai=document.getElementById('answerInput');const fb=document.getElementById('feedbackBox');ai.disabled=true;
+  if(correct){score++;ai.className='answer-input correct';fb.className='feedback-box correct';fb.textContent='✓ Correct';}
+  else{ai.className='answer-input wrong';fb.className='feedback-box wrong';fb.textContent='✗ '+q.form;}
+  updateSR(q.word,correct);recordAnswer(q.word,correct);
+  document.getElementById('scorePill').textContent=score+' correct';
+  document.getElementById('checkBtn').style.display='none';
+  document.getElementById('nextBtn').style.display='block';autoNextTimer=setTimeout(nextQ,correct?500:1200);
+}
+
+function skipDrillQ(){
+  if(answered)return;answered=true;stopTimer();const q=currentDrillQs[drillIdx];
+  updateSR(q.word,false);recordAnswer(q.word,false);
+  const ai=document.getElementById('answerInput');ai.className='answer-input wrong';ai.disabled=true;
+  const fb=document.getElementById('feedbackBox');fb.className='feedback-box wrong';fb.textContent='→ '+q.form;
+  document.getElementById('checkBtn').style.display='none';
+  document.getElementById('nextBtn').style.display='block';autoNextTimer=setTimeout(nextQ,1200);
+}
+
+function revealDrillHint(){if(answered)return;document.getElementById('hintBox').textContent='Hint: '+currentDrillQs[drillIdx].form[0].toUpperCase()+'…';}
+
+function handleMCDrill(chosen,correct){
+  if(answered)return;answered=true;stopTimer();
+  const isCorrect=chosen.form===correct.form;
+  const btns=document.getElementById('mcGrid').querySelectorAll('.mc-btn');
+  btns.forEach(b=>{b.disabled=true;const t=b.querySelector('span:last-child').textContent;if(t===correct.form)b.className='mc-btn reveal';if(t===chosen.form&&!isCorrect)b.className='mc-btn wrong';});
+  const fb=document.getElementById('mcFeedback');
+  if(isCorrect){score++;fb.className='feedback-box correct';fb.textContent='✓ Correct';}
+  else{fb.className='feedback-box wrong';fb.textContent='✗ '+correct.form;}
+  updateSR(correct.word,isCorrect);recordAnswer(correct.word,isCorrect);
+  document.getElementById('scorePill').textContent=score+' correct';
+  document.getElementById('mcNextBtn').style.display='block';autoNextTimer=setTimeout(nextQ,isCorrect?500:1200);
+}
+
+/* ── SENTENCES MODE ──────────────────────────────────────────── */
+function startSentences(){
+  clearTimeout(autoNextTimer);stopTimer();
+  isDrillMode=false;isSentMode=true;
+  sentScore=0;sentTotal=0;score=0;answered=false;round=1;
+  showView('quizView');
+  document.getElementById('progFill').style.width='0%';
+  document.getElementById('progLbl').textContent='∞';
+  document.getElementById('scorePill').textContent='0 correct';
+  document.getElementById('roundBadge').innerHTML=`<span>Sentences · ${difficulty}</span>`;
+  loadNextSentence();
+}
+
+function buildVocabList(){
+  const all=[];
+  Object.entries(DATA).forEach(([ck,cat])=>Object.entries(cat.sub).forEach(([sk,sub])=>sub.words.forEach(w=>{
+    all.push(`${w.lat} (${w.eng[0]}) [${ck}]`);
+  })));
+  return all.join(', ');
+}
+
+async function loadNextSentence(){
+  answered=false;
+  document.getElementById('typedSection').style.display='none';
+  document.getElementById('mcSection').style.display='none';
+  document.getElementById('sentSection').style.display='';
+  document.getElementById('sentLoadArea').style.display='block';
+  document.getElementById('sentAnswerArea').style.display='none';
+  document.getElementById('aiFeedback').className='ai-feedback';
+  document.getElementById('aiFeedback').textContent='';
+  document.getElementById('nextSentBtn').style.display='none';
+  document.getElementById('sentInput').value='';
+  document.getElementById('sentInput').className='sentence-textarea';
+  document.getElementById('sentInput').disabled=false;
+
+  const diffDesc={
+    easy:'Simple subject-verb-object sentences. Present tense ONLY. Imperative mood allowed. 5–8 words. Basic vocabulary only.',
+    medium:'More complex grammar. Present tense ONLY (no perfect, imperfect, or any other tense). Imperative mood allowed. Subordinate clauses with quod/quoniam/cum. 9–13 words.',
+    hard:'Complex syntax: indirect statement (accusative + infinitive), relative clauses, multiple subordinate clauses, imperatives. Present tense ONLY — absolutely no perfect, imperfect, future, or any other tense. 14–20 words. NO ablative absolutes.',
+    insane:'Write 2–3 connected sentences forming a coherent short passage. Present tense ONLY throughout — no perfect, imperfect, or any other tense. Complex syntax (indirect speech, relative clauses, imperatives). NO ablative absolutes. Sentences must be thematically linked.'
+  };
+
+  const dirLabel = mode==='el' ? 'English sentence for the user to translate INTO Latin' : 'Latin sentence for the user to translate INTO English';
+  // Pick random elements to nudge variety
+  const allNouns=[];const allVerbs=[];const allAdj=[];
+  Object.entries(DATA.nouns.sub).forEach(([,s])=>s.words.forEach(w=>allNouns.push(w.lat)));
+  Object.entries(DATA.verbs.sub).forEach(([,s])=>s.words.forEach(w=>allVerbs.push(w.lat)));
+  Object.entries(DATA.adjectives.sub).forEach(([,s])=>s.words.forEach(w=>allAdj.push(w.lat)));
+  const rNoun=n=>shuffle([...n]).slice(0,3).join(', ');
+  const seedNouns=rNoun(allNouns);
+  const seedVerbs=rNoun(allVerbs);
+  const seedAdj=rNoun(allAdj);
+  const themes=['a military encounter','a day in Rome','a merchant at market','a scholar reading','a sea voyage','a family dinner','a king giving orders','a slave and master','a farmer at work','a gladiator','a Roman festival','a letter being sent','a night patrol','children at school','a hunt in the forest'];
+  const theme=themes[Math.floor(Math.random()*themes.length)];
+
+  const prompt = `You are a Latin teacher generating a sentence translation exercise.
+
+Difficulty: ${difficulty}
+${diffDesc[difficulty]}
+
+Direction: Provide a ${dirLabel}.
+
+Theme for this sentence: "${theme}" — the sentence must revolve around this theme.
+
+Vocabulary nudge — try to use at least one of these in the sentence (correctly inflected):
+- Nouns: ${seedNouns}
+- Verbs: ${seedVerbs}  
+- Adjectives: ${seedAdj}
+
+Full vocabulary list (ONLY use words from here and their correctly inflected forms):
+${buildVocabList()}
+
+Rules:
+- Strictly follow all Latin grammar rules: noun declensions (1st/2nd/3rd), verb conjugations (1st/2nd/3rd/4th/irregular), adjective agreement in case/number/gender, correct preposition cases.
+- Gender rule: 1st declension words ending -a are FEMININE (except agricola, nauta, poeta which are MASCULINE). 2nd declension (masc) words are MASCULINE. 2nd declension (neut) words are NEUTER. Use correct adjective/pronoun agreement.
+- NO ablative absolutes under any circumstances.
+- Present tense imperative mood is allowed.
+- Do NOT use any vocabulary not in the list above.
+- Make the sentence varied and interesting — avoid generic "X carries Y to Z" patterns.
+
+Respond ONLY with valid JSON, no markdown, no explanation:
+{"${mode==='el'?'english':'latin'}":"<the sentence or passage>","${mode==='el'?'latin':'english'}":"<accurate translation>","wordMap":{"<each Latin word lowercase>":"<English meaning>"}}`;
+
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    const data=await resp.json();
+    const raw=data.content.map(c=>c.text||'').join('').replace(/```json|```/g,'').trim();
+    sentenceData=JSON.parse(raw);
+    showSentence();
+  } catch(e){
+    document.getElementById('sentLoadArea').innerHTML='<div class="loading-shimmer" style="color:var(--red)">Error generating sentence. Try again.</div>';
+    document.getElementById('nextSentBtn').style.display='block';
+    document.getElementById('nextSentBtn').textContent='Try again →';
   }
 }
 
-function continueReview(){
-  round++;
-  quizWords = shuffle([...wrongWords]);
-  wrongWords = [];
-  current = 0; score = 0; answered = false;
-  showView('quizView');
-  showQ();
+function showSentence(){
+  sentenceData._wordMapLower={};
+  if(sentenceData.wordMap){
+    Object.entries(sentenceData.wordMap).forEach(([k,v])=>{sentenceData._wordMapLower[k.toLowerCase()]=v;});
+  }
+  const sourceText=mode==='el'?sentenceData.english:sentenceData.latin;
+  const isLatin=mode==='le';
+
+  document.getElementById('pDir').textContent=mode==='el'?'English → Latin':'Latin → English';
+  document.getElementById('pTags').innerHTML=`<span class="tag diff">${difficulty}</span>`;
+
+  // Build word-hoverable sentence
+  const words=sourceText.split(/(\s+|[,.:;!?])/);
+  let html='';
+  words.forEach(tok=>{
+    if(!tok.trim()||/^[\s,.:;!?]+$/.test(tok)){html+=tok;return;}
+    // strip punctuation for lookup
+    const clean=tok.replace(/[^a-zA-Z]/g,'').toLowerCase();
+    let tip=sentenceData._wordMapLower[clean]||WORD_MAP[clean]?.[0]||null;
+    // also try without trailing s for simple plural
+    if(!tip&&clean.endsWith('s')) tip=WORD_MAP[clean.slice(0,-1)]?.[0]||null;
+    if(tip){html+=`<span class="sword" data-tip="${tip}">${tok}</span>`;}
+    else{html+=`<span class="sword" style="border-bottom:none;cursor:default">${tok}</span>`;}
+  });
+
+  document.getElementById('pWord').innerHTML='';
+  document.getElementById('sentLoadArea').style.display='none';
+  document.getElementById('sentAnswerArea').style.display='block';
+
+  // Put sentence in prompt card
+  const pc=document.getElementById('promptCard');
+  pc.style.animation='none';requestAnimationFrame(()=>{pc.style.animation='fadeIn .22s ease';});
+  document.getElementById('pDir').textContent=mode==='el'?'Translate into Latin':'Translate into English';
+
+  const sp=document.createElement('div');sp.className='sentence-prompt';sp.innerHTML=html;
+  document.getElementById('pWord').appendChild(sp);
+
+  // Tooltip events
+  sp.querySelectorAll('.sword[data-tip]').forEach(el=>{
+    el.addEventListener('click',e=>{
+      e.stopPropagation();
+      // remove any existing tip
+      sp.querySelectorAll('.sword-tip').forEach(t=>t.remove());
+      const tip=document.createElement('span');
+      tip.className='sword-tip';
+      tip.textContent=e.target.dataset.tip;
+      e.target.after(tip);
+      setTimeout(()=>tip.remove(),2500);
+    });
+  });
+
+  document.getElementById('sentCheckBtn').disabled=false;
+  setTimeout(()=>document.getElementById('sentInput').focus(),50);
 }
 
-function retryQuiz(){
-  clearTimeout(autoNextTimer);
-  quizWords = shuffle([...quizWords]);
-  wrongWords = [];
-  current = 0; score = 0; answered = false;
-  round = 1;
-  showView('quizView');
-  showQ();
+async function checkSentence(){
+  if(answered)return;
+  const userAns=document.getElementById('sentInput').value.trim();
+  if(!userAns)return;
+  answered=true;
+  document.getElementById('sentCheckBtn').disabled=true;
+  document.getElementById('sentInput').disabled=true;
+
+  const correctAns=mode==='el'?sentenceData.latin:sentenceData.english;
+  const fb=document.getElementById('aiFeedback');
+  fb.className='ai-feedback info';fb.textContent='Checking…';fb.style.display='block';
+
+  const markPrompt=`You are a strict but fair Latin teacher. The student was asked to translate:
+
+"${mode==='el'?sentenceData.english:sentenceData.latin}"
+
+The model answer is: "${correctAns}"
+The student answered: "${userAns}"
+
+Evaluate the student's translation. Be accepting of reasonable alternative word orders and synonyms. Be strict about grammar (wrong case, wrong person/number/tense = wrong).
+
+Respond ONLY with valid JSON: {"result":"correct"|"partial"|"wrong","score":0-2,"feedback":"<1-2 sentence explanation, mention what was right and what was wrong. Always show the correct answer at the end.>"}`;
+
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,messages:[{role:'user',content:markPrompt}]})});
+    const data=await resp.json();
+    const raw=data.content.map(c=>c.text||'').join('').replace(/```json|```/g,'').trim();
+    const result=JSON.parse(raw);
+    sentTotal++;
+    if(result.result==='correct'){sentScore++;score++;fb.className='ai-feedback correct';}
+    else if(result.result==='partial'){sentScore+=0.5;score++;fb.className='ai-feedback partial';}
+    else{fb.className='ai-feedback wrong';}
+    const icon=result.result==='correct'?'✓ ':result.result==='partial'?'◑ ':'✗ ';
+    fb.textContent=icon+result.feedback;
+    document.getElementById('scorePill').textContent=sentScore+' correct';
+  }catch(e){
+    fb.className='ai-feedback wrong';fb.textContent='Could not mark answer. Correct answer: '+correctAns;
+  }
+  document.getElementById('nextSentBtn').style.display='block';
+  document.getElementById('nextSentBtn').textContent='Next sentence →';
 }
 
-function backToMenu(){
-  clearTimeout(autoNextTimer);
-  showView('selectorView');
+function skipSentence(){
+  if(answered)return;answered=true;stopTimer();
+  document.getElementById('sentCheckBtn').disabled=true;
+  document.getElementById('sentInput').disabled=true;
+  sentTotal++;
+  const fb=document.getElementById('aiFeedback');fb.className='ai-feedback wrong';
+  fb.textContent='→ '+(mode==='el'?sentenceData?.latin:sentenceData?.english)||'(skipped)';
+  fb.style.display='block';
+  document.getElementById('nextSentBtn').style.display='block';
+  document.getElementById('nextSentBtn').textContent='Next sentence →';
 }
 
-document.addEventListener('keydown', e => {
-  if(document.getElementById('quizView').style.display!=='block') return;
+function nextSentence(){loadNextSentence();}
+
+/* ── DISPATCH (typed vs drill) ───────────────────────────────── */
+function dispatchCheck(){if(isDrillMode)checkAnswerDrill();else checkAnswer();}
+function dispatchSkip(){if(isDrillMode)skipDrillQ();else skipQ();}
+
+/* ── STATS ───────────────────────────────────────────────────── */
+function recordAnswer(w,correct){const ck=w.catKey;if(!statsData.catStats[ck])statsData.catStats[ck]={seen:0,correct:0};statsData.catStats[ck].seen++;if(correct)statsData.catStats[ck].correct++;saveStats();}
+function finishSession(){const total=isDrillMode?currentDrillQs.length:isSentMode?sentTotal:quizWords.length;const pct=total>0?Math.round(score/total*100):0;statsData.sessions.push({date:Date.now(),score,total,pct});if(statsData.sessions.length>20)statsData.sessions=statsData.sessions.slice(-20);saveStats();}
+const PHRASES=[[100,"Optime! Perfectly done."],[80,"Bene! Well done."],[60,"Satis bene. Keep going."],[0,"Persevera. Try again."]];
+function showResult(){finishSession();showView('resultView');const total=isDrillMode?currentDrillQs.length:quizWords.length;const pct=total>0?Math.round(score/total*100):0;document.getElementById('resLabel').textContent='Result';document.getElementById('resScore').textContent=score+' / '+total;document.getElementById('resTotal').textContent=pct+'%';document.getElementById('resPhrase').textContent=(PHRASES.find(([t])=>pct>=t)||PHRASES[PHRASES.length-1])[1];const banner=document.getElementById('reviewBanner');if(!isDrillMode&&wrongWords.length>0){banner.style.display='flex';document.getElementById('reviewBannerTitle').textContent=wrongWords.length+' word'+(wrongWords.length===1?' needs':' words need')+' more practice';document.getElementById('reviewBannerSub').textContent='Round '+(round+1)+' will drill just these words.';}else banner.style.display='none';}
+function continueReview(){round++;quizWords=shuffle([...wrongWords]);wrongWords=[];current=0;score=0;answered=false;showView('quizView');showQ();}
+function retryQuiz(){clearTimeout(autoNextTimer);stopTimer();if(isDrillMode){currentDrillQs=shuffle([...currentDrillQs]);drillIdx=0;}else if(isSentMode){startSentences();return;}else quizWords=shuffle([...quizWords]);wrongWords=[];current=0;score=0;answered=false;round=1;showView('quizView');isDrillMode?showDrillQ():showQ();}
+function backToMenu(){clearTimeout(autoNextTimer);stopTimer();document.getElementById('selectorView').style.display='';['quizView','resultView','statsView'].forEach(id=>document.getElementById(id).style.display='none');if(mainTab==='stats')showMainTab('stats');updCount();}
+
+function renderStats(){
+  const sessions=statsData.sessions||[],catStats=statsData.catStats||{};
+  const totalSeen=Object.values(catStats).reduce((a,c)=>a+c.seen,0);const totalCorrect=Object.values(catStats).reduce((a,c)=>a+c.correct,0);
+  const overallAcc=totalSeen>0?Math.round(totalCorrect/totalSeen*100):0;
+  const streak=calcStreak(sessions);
+  const allWords=[];Object.entries(DATA).forEach(([ck,cat])=>Object.keys(cat.sub).forEach(sk=>cat.sub[sk].words.forEach(w=>allWords.push({...w,catKey:ck,subKey:sk}))));
+  const dueAll=getDueCount(allWords);
+  document.getElementById('statCards').innerHTML=`<div class="stat-card"><div class="sc-label">Total answers</div><div class="sc-value">${totalSeen}</div><div class="sc-sub">${sessions.length} sessions</div></div><div class="stat-card"><div class="sc-label">Accuracy</div><div class="sc-value">${overallAcc}%</div><div class="sc-sub">${totalCorrect} correct</div></div><div class="stat-card"><div class="sc-label">Due today</div><div class="sc-value">${dueAll}</div><div class="sc-sub">across all words</div></div><div class="stat-card"><div class="sc-label">Day streak</div><div class="sc-value">${streak}</div><div class="sc-sub">days in a row</div></div>`;
+  const sc=document.getElementById('sessionChart');
+  if(!sessions.length){sc.innerHTML='<p class="no-stats">No sessions yet.</p>';return;}
+  const recent=sessions.slice(-10);const maxP=Math.max(...recent.map(s=>s.pct),1);
+  sc.innerHTML='<div class="bars-wrap">'+recent.map(s=>{const h=Math.max(2,Math.round(s.pct/maxP*72));const d=new Date(s.date);const lbl=d.toLocaleDateString('en',{month:'short',day:'numeric'});return`<div class="bar-col"><div class="bar-fill" style="height:${h}px"></div><div class="bar-lbl">${s.pct}%</div><div class="bar-lbl">${lbl}</div></div>`;}).join('')+'</div>';
+  const cg=document.getElementById('catStatsGrid');cg.innerHTML='';
+  Object.entries(DATA).forEach(([ck,cat])=>{const cs=catStats[ck]||{seen:0,correct:0};const acc=cs.seen>0?Math.round(cs.correct/cs.seen*100):0;const catWords=[];Object.keys(cat.sub).forEach(sk=>cat.sub[sk].words.forEach(w=>catWords.push({...w,catKey:ck,subKey:sk})));const due=getDueCount(catWords);const card=document.createElement('div');card.className='cat-stat-card';card.innerHTML=`<div class="cs-name">${cat.label}${due>0?`<span class="due-badge">${due} due</span>`:''}</div><div class="cs-bar-track"><div class="cs-bar-fill" style="width:${acc}%"></div></div><div class="cs-meta"><span>${cs.seen} answered</span><span class="cs-acc">${acc}%</span></div>`;cg.appendChild(card);});
+}
+function calcStreak(s){if(!s.length)return 0;const days=new Set(s.map(x=>new Date(x.date).toDateString()));let st=0;const t=new Date();for(let i=0;i<365;i++){const d=new Date(t);d.setDate(d.getDate()-i);if(days.has(d.toDateString()))st++;else if(i>0)break;}return st;}
+function showResetConfirm(){document.getElementById('resetConfirm').style.display='block';}
+function cancelReset(){document.getElementById('resetConfirm').style.display='none';}
+async function confirmReset(){srData={};statsData={sessions:[],catStats:{}};Object.keys(DATA).forEach(ck=>{delete statsData.catStats[ck];});try{await window.storage.delete(SR_KEY);}catch(e){}try{await window.storage.delete(STATS_KEY);}catch(e){}document.getElementById('resetConfirm').style.display='none';updCount();renderStats();}
+
+/* ── WORD DRAWER ─────────────────────────────────────────────── */
+function toggleWordDrawer(open){document.getElementById('wordDrawer').classList.toggle('open',open);if(open)renderWordList();}
+function renderWordList(){
+  const list=document.getElementById('wordList');const words=getWords();
+  if(!words.length){list.innerHTML='<div class="word-empty">Choose some categories to see words here.</div>';return;}
+  list.innerHTML=words.map(w=>{const r=getSR(w);const due=isDue(w);return`<div class="word-row"><div class="word-row-lat">${fullLat(w,w.subKey)}</div><div class="word-row-eng">${displayEng(w)}</div><div class="word-row-meta">${DATA[w.catKey].label} · ${w.subKey}</div>${r.seen>0?`<div class="word-row-sr" style="color:${due?'var(--gold)':'var(--green)'}">SR: ${r.seen} seen · ${Math.round(r.correct/r.seen*100)}% · ${due?'due now':'interval '+r.interval+'d'}</div>`:''}</div>`;}).join('');
+}
+
+/* ── KEYBOARD ────────────────────────────────────────────────── */
+document.addEventListener('keydown',e=>{
+  const inQuiz=document.getElementById('quizView').style.display==='block';
+  if(!inQuiz){if(e.key==='?')showShortcuts();return;}
+  if(e.key==='?'){showShortcuts();return;}
+  if(isSentMode){
+    if(e.key==='Escape'){e.preventDefault();if(!answered)skipSentence();}
+    return;
+  }
+  if(inputMode==='mc'&&!answered&&['1','2','3','4'].includes(e.key)){
+    const btns=document.getElementById('mcGrid').querySelectorAll('.mc-btn');const idx=parseInt(e.key)-1;if(btns[idx]){e.preventDefault();btns[idx].click();}return;
+  }
   if(e.key==='Enter'){
-    if(!answered) checkAnswer();
-    else if(document.getElementById('nextBtn').style.display!=='none') nextQ();
+    e.preventDefault();
+    if(inputMode==='typed'){if(!answered)dispatchCheck();else if(document.getElementById('nextBtn').style.display!=='none'||document.getElementById('mcNextBtn').style.display!=='none')nextQ();}
+    else{if(answered)nextQ();}
+    return;
   }
+  if(e.key==='Escape'){e.preventDefault();if(!answered){isDrillMode?skipDrillQ():skipQ();}return;}
+  if(e.key==='Tab'){e.preventDefault();if(!answered){isDrillMode?revealDrillHint():revealHint();}return;}
 });
 
 buildUI();
+loadPersisted();
 </script>
 </body>
 </html>
