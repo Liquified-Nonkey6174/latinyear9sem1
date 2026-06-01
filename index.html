@@ -18,6 +18,7 @@ h1{font-family:var(--serif);font-size:40px;font-weight:400;line-height:1.1}
 h1 em{font-style:italic;color:var(--accent)}
 .sub{font-size:12px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-top:.5rem}
 .masthead-btns{position:absolute;top:2.5rem;right:0;display:flex;gap:8px}
+.masthead-left{position:absolute;top:2.5rem;left:0}
 .icon-btn{width:32px;height:32px;border-radius:999px;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all var(--t)}
 .icon-btn:hover{color:var(--text);background:var(--surface3)}
 .nav-tabs{display:flex;gap:2px;background:var(--surface2);border:1px solid var(--border);border-radius:999px;padding:3px;width:fit-content;margin:0 auto 2rem}
@@ -78,7 +79,6 @@ input[type=range]{flex:1;accent-color:var(--accent)}
 .diff-btn.active{border-color:var(--accent);color:var(--accent);background:var(--accent-bg)}
 .diff-btn.ins.active{border-color:var(--red);color:var(--red);background:var(--red-bg)}
 .sent-notice{font-size:12px;color:var(--text3);background:var(--accent-bg);border:1px solid var(--accent-dim);border-radius:var(--rs);padding:8px 12px;margin-top:10px;text-align:center}
-/* QUIZ */
 .prog-row{display:flex;align-items:center;gap:8px;margin-bottom:1.25rem}
 .prog-track{flex:1;height:2px;background:var(--border);border-radius:2px;overflow:hidden}
 .prog-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .4s ease}
@@ -181,6 +181,7 @@ input[type=range]{flex:1;accent-color:var(--accent)}
 .bar-lbl{font-size:10px;color:var(--text3);white-space:nowrap}
 .no-stats{font-family:var(--serif);font-style:italic;color:var(--text3);text-align:center;padding:3rem 0}
 .sr-clear-btn{font-family:var(--sans);font-size:12px;padding:6px 14px;border-radius:999px;border:1px solid var(--red-bdr);background:var(--red-bg);color:var(--red);cursor:pointer}
+/* OVERLAYS */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;display:flex;align-items:center;justify-content:center}
 .overlay-box{background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:1.5rem 2rem;max-width:380px;width:90%}
 .overlay-title{font-family:var(--serif);font-size:22px;font-weight:400;color:var(--text);margin-bottom:1.25rem}
@@ -189,6 +190,13 @@ input[type=range]{flex:1;accent-color:var(--accent)}
 .shortcut-desc{font-size:13px;color:var(--text2)}
 .kbd{font-family:var(--sans);font-size:11px;font-weight:600;padding:3px 8px;border-radius:5px;border:1px solid var(--border2);background:var(--surface2);color:var(--text)}
 .overlay-close{margin-top:1.25rem;width:100%}
+.about-box{background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:1.75rem 2rem;max-width:340px;width:90%;position:relative;text-align:center}
+.about-close{position:absolute;top:12px;right:14px;width:28px;height:28px;border-radius:999px;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all var(--t)}
+.about-close:hover{color:var(--text);background:var(--surface3)}
+.about-emoji{font-size:36px;margin-bottom:.75rem}
+.about-title{font-family:var(--serif);font-size:22px;font-weight:400;color:var(--text);margin-bottom:.75rem}
+.about-body{font-size:13px;color:var(--text2);line-height:1.6}
+/* WORD DRAWER */
 .word-drawer-tab{position:fixed;right:0;top:50%;transform:translateY(-50%) rotate(-90deg);transform-origin:right bottom;z-index:20;font-family:var(--sans);font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:8px 14px;border:1px solid var(--border2);border-bottom:none;border-radius:8px 8px 0 0;background:var(--surface2);color:var(--accent);cursor:pointer}
 .word-drawer{position:fixed;top:0;right:0;width:min(340px,88vw);height:100vh;background:var(--surface);border-left:1px solid var(--border2);box-shadow:-18px 0 40px rgba(0,0,0,.25);transform:translateX(100%);transition:transform .25s ease;z-index:30;display:flex;flex-direction:column}
 .word-drawer.open{transform:translateX(0)}
@@ -212,9 +220,13 @@ input[type=range]{flex:1;accent-color:var(--accent)}
 <body>
 <div class="app">
 
+<!-- SELECTOR -->
 <div id="selectorView">
   <div class="masthead">
     <div class="ornament">✦ &nbsp; ✦ &nbsp; ✦</div>
+    <div class="masthead-left">
+      <button class="icon-btn" onclick="showAbout()" title="About">🙂</button>
+    </div>
     <h1><em>Latin</em> Trainer</h1>
     <p class="sub">Vocabularium Latinum</p>
     <div class="masthead-btns">
@@ -276,6 +288,7 @@ input[type=range]{flex:1;accent-color:var(--accent)}
   </div>
 </div>
 
+<!-- QUIZ -->
 <div id="quizView" style="display:none">
   <div class="prog-row">
     <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
@@ -325,6 +338,7 @@ input[type=range]{flex:1;accent-color:var(--accent)}
   </div>
 </div>
 
+<!-- RESULT -->
 <div id="resultView" style="display:none">
   <div class="result-wrap">
     <div class="res-label" id="resLabel">Result</div>
@@ -343,6 +357,7 @@ input[type=range]{flex:1;accent-color:var(--accent)}
   </div>
 </div>
 
+<!-- STATS -->
 <div id="statsView" style="display:none">
   <div class="stats-header"><h2>Statistics</h2><p>Your learning progress across all sessions</p></div>
   <div class="stat-cards" id="statCards"></div>
@@ -362,7 +377,20 @@ input[type=range]{flex:1;accent-color:var(--accent)}
   </div>
 </div>
 
-<div class="overlay" id="shortcutsOverlay" style="display:none" onclick="hideShortcuts()">
+</div><!-- .app -->
+
+<!-- ABOUT OVERLAY -->
+<div id="aboutOverlay" class="overlay" style="display:none" onclick="hideAbout()">
+  <div class="about-box" onclick="event.stopPropagation()">
+    <button class="about-close" onclick="hideAbout()">×</button>
+    <div class="about-emoji">🙂</div>
+    <div class="about-title">Latin Trainer</div>
+    <div class="about-body">Made by <strong>Chester Peng</strong>.<br><br>Email me if you see any problems, bugs, or updates needed.</div>
+  </div>
+</div>
+
+<!-- SHORTCUTS OVERLAY -->
+<div id="shortcutsOverlay" class="overlay" style="display:none" onclick="hideShortcuts()">
   <div class="overlay-box" onclick="event.stopPropagation()">
     <div class="overlay-title">Keyboard shortcuts</div>
     <div class="shortcut-row"><span class="shortcut-desc">Check / Next</span><span class="kbd">Enter</span></div>
@@ -374,7 +402,7 @@ input[type=range]{flex:1;accent-color:var(--accent)}
   </div>
 </div>
 
-</div>
+<!-- WORD DRAWER -->
 <button class="word-drawer-tab" onclick="toggleWordDrawer(true)">Word list</button>
 <aside class="word-drawer" id="wordDrawer">
   <div class="word-drawer-head">
@@ -385,17 +413,14 @@ input[type=range]{flex:1;accent-color:var(--accent)}
 </aside>
 
 <script>
-// ── DATA ──────────────────────────────────────────────────────
 const DATA={nouns:{label:"Nouns",sub:{"1st declension":{words:[{lat:"casa",gen:null,gender:"f",eng:["cottage"]},{lat:"puella",gen:null,gender:"f",eng:["girl"]},{lat:"cena",gen:null,gender:"f",eng:["dinner"]},{lat:"terra",gen:null,gender:"f",eng:["land"]},{lat:"femina",gen:null,gender:"f",eng:["woman"]},{lat:"regina",gen:null,gender:"f",eng:["queen"]},{lat:"mensa",gen:null,gender:"f",eng:["table"]},{lat:"silva",gen:null,gender:"f",eng:["forest"]},{lat:"porta",gen:null,gender:"f",eng:["gate"]},{lat:"hasta",gen:null,gender:"f",eng:["spear"]},{lat:"aqua",gen:null,gender:"f",eng:["water"]},{lat:"epistula",gen:null,gender:"f",eng:["letter"]},{lat:"via",gen:null,gender:"f",eng:["road"]},{lat:"ianua",gen:null,gender:"f",eng:["door"]},{lat:"taberna",gen:null,gender:"f",eng:["tavern"]},{lat:"filia",gen:null,gender:"f",eng:["daughter"]},{lat:"fabula",gen:null,gender:"f",eng:["story"]},{lat:"insula",gen:null,gender:"f",eng:["island"]},{lat:"pecunia",gen:null,gender:"f",eng:["money"]},{lat:"pugna",gen:null,gender:"f",eng:["fight"]},{lat:"patria",gen:null,gender:"f",eng:["homeland"]},{lat:"magistra",gen:null,gender:"f",eng:["female teacher"]},{lat:"ancilla",gen:null,gender:"f",eng:["slave girl"]},{lat:"hora",gen:null,gender:"f",eng:["hour"]},{lat:"toga",gen:null,gender:"f",eng:["toga"]},{lat:"statua",gen:null,gender:"f",eng:["statue"]},{lat:"dea",gen:null,gender:"f",eng:["goddess"]},{lat:"schola",gen:null,gender:"f",eng:["classroom"]},{lat:"domina",gen:null,gender:"f",eng:["mistress"]},{lat:"agricola",gen:null,gender:"m",eng:["farmer"]},{lat:"poeta",gen:null,gender:"m",eng:["poet"]},{lat:"nauta",gen:null,gender:"m",eng:["sailor"]}]},"2nd declension (masc)":{words:[{lat:"servus",gen:null,gender:"m",eng:["slave"]},{lat:"discipulus",gen:null,gender:"m",eng:["student"]},{lat:"amicus",gen:null,gender:"m",eng:["friend"]},{lat:"filius",gen:null,gender:"m",eng:["son"]},{lat:"murus",gen:null,gender:"m",eng:["wall"]},{lat:"cibus",gen:null,gender:"m",eng:["food"]},{lat:"hortus",gen:null,gender:"m",eng:["garden"]},{lat:"equus",gen:null,gender:"m",eng:["horse"]},{lat:"campus",gen:null,gender:"m",eng:["plain"]},{lat:"colonus",gen:null,gender:"m",eng:["farmer"]},{lat:"somnus",gen:null,gender:"m",eng:["sleep"]},{lat:"sonus",gen:null,gender:"m",eng:["sound"]},{lat:"nuntius",gen:null,gender:"m",eng:["messenger"]},{lat:"ventus",gen:null,gender:"m",eng:["wind"]},{lat:"gladius",gen:null,gender:"m",eng:["sword"]},{lat:"deus",gen:null,gender:"m",eng:["god"]},{lat:"ludus",gen:null,gender:"m",eng:["school"]},{lat:"annus",gen:null,gender:"m",eng:["year"]},{lat:"barbarus",gen:null,gender:"m",eng:["barbarian"]},{lat:"libertus",gen:null,gender:"m",eng:["freedman"]},{lat:"dominus",gen:null,gender:"m",eng:["master"]},{lat:"medicus",gen:null,gender:"m",eng:["doctor"]},{lat:"vir",gen:null,gender:"m",eng:["man"]},{lat:"puer",gen:null,gender:"m",eng:["boy"]},{lat:"ager",gen:null,gender:"m",eng:["field"]},{lat:"liber",gen:null,gender:"m",eng:["book"]},{lat:"magister",gen:null,gender:"m",eng:["teacher"]}]},"2nd declension (neut)":{words:[{lat:"castra",gen:null,gender:"n",eng:["camp"]},{lat:"bellum",gen:null,gender:"n",eng:["war"]},{lat:"vinum",gen:null,gender:"n",eng:["wine"]},{lat:"proelium",gen:null,gender:"n",eng:["battle"]},{lat:"periculum",gen:null,gender:"n",eng:["danger"]},{lat:"arma",gen:null,gender:"n",eng:["arms"]},{lat:"frumentum",gen:null,gender:"n",eng:["grain"]},{lat:"consilium",gen:null,gender:"n",eng:["plan"]},{lat:"auxilium",gen:null,gender:"n",eng:["help"]},{lat:"donum",gen:null,gender:"n",eng:["gift"]},{lat:"verbum",gen:null,gender:"n",eng:["word"]},{lat:"saxum",gen:null,gender:"n",eng:["rock"]},{lat:"oppidum",gen:null,gender:"n",eng:["town"]},{lat:"moenia",gen:null,gender:"n",eng:["city walls"]}]},"3rd declension":{words:[{lat:"leo",gen:"leonis",gender:"m",eng:["lion"]},{lat:"rex",gen:"regis",gender:"m",eng:["king"]},{lat:"pater",gen:"patris",gender:"m",eng:["father"]},{lat:"frater",gen:"fratris",gender:"m",eng:["brother"]},{lat:"iuvenis",gen:"iuvenis",gender:"m",eng:["young man"]},{lat:"canis",gen:"canis",gender:"m",eng:["dog"]},{lat:"comes",gen:"comitis",gender:"m",eng:["companion"]},{lat:"consul",gen:"consulis",gender:"m",eng:["consul"]},{lat:"dux",gen:"ducis",gender:"m",eng:["leader"]},{lat:"imperator",gen:"imperatoris",gender:"m",eng:["general"]},{lat:"centurio",gen:"centurionis",gender:"m",eng:["centurion"]},{lat:"amor",gen:"amoris",gender:"m",eng:["love"]},{lat:"flos",gen:"floris",gender:"m",eng:["flower"]},{lat:"miles",gen:"militis",gender:"m",eng:["soldier"]},{lat:"labor",gen:"laboris",gender:"m",eng:["work"]},{lat:"viator",gen:"viatoris",gender:"m",eng:["traveller"]},{lat:"senex",gen:"senis",gender:"m",eng:["old man"]},{lat:"senator",gen:"senatoris",gender:"m",eng:["senator"]},{lat:"clamor",gen:"clamoris",gender:"m",eng:["shout"]},{lat:"dolor",gen:"doloris",gender:"m",eng:["pain"]},{lat:"eques",gen:"equitis",gender:"m",eng:["horseman"]},{lat:"pes",gen:"pedis",gender:"m",eng:["foot"]},{lat:"custos",gen:"custodis",gender:"m",eng:["guard"]},{lat:"mons",gen:"montis",gender:"m",eng:["mountain"]},{lat:"civis",gen:"civis",gender:"m",eng:["citizen"]},{lat:"hostis",gen:"hostis",gender:"m",eng:["enemy"]},{lat:"pons",gen:"pontis",gender:"m",eng:["bridge"]},{lat:"dens",gen:"dentis",gender:"m",eng:["tooth"]},{lat:"parens",gen:"parentis",gender:"m",eng:["parent"]},{lat:"vox",gen:"vocis",gender:"f",eng:["voice"]},{lat:"mater",gen:"matris",gender:"f",eng:["mother"]},{lat:"soror",gen:"sororis",gender:"f",eng:["sister"]},{lat:"libertas",gen:"libertatis",gender:"f",eng:["freedom"]},{lat:"tempestas",gen:"tempestatis",gender:"f",eng:["storm"]},{lat:"arbor",gen:"arboris",gender:"f",eng:["tree"]},{lat:"lex",gen:"legis",gender:"f",eng:["law"]},{lat:"pax",gen:"pacis",gender:"f",eng:["peace"]},{lat:"virtus",gen:"virtutis",gender:"f",eng:["courage"]},{lat:"virgo",gen:"virginis",gender:"f",eng:["maiden"]},{lat:"urbs",gen:"urbis",gender:"f",eng:["city"]},{lat:"mors",gen:"mortis",gender:"f",eng:["death"]},{lat:"nox",gen:"noctis",gender:"f",eng:["night"]},{lat:"navis",gen:"navis",gender:"f",eng:["ship"]},{lat:"classis",gen:"classis",gender:"f",eng:["fleet"]},{lat:"nomen",gen:"nominis",gender:"n",eng:["name"]},{lat:"tempus",gen:"temporis",gender:"n",eng:["time"]},{lat:"vulnus",gen:"vulneris",gender:"n",eng:["wound"]},{lat:"litus",gen:"litoris",gender:"n",eng:["shore"]},{lat:"flumen",gen:"fluminis",gender:"n",eng:["river"]},{lat:"foedus",gen:"foederis",gender:"n",eng:["treaty"]},{lat:"carmen",gen:"carminis",gender:"n",eng:["song"]},{lat:"mare",gen:"maris",gender:"n",eng:["sea"]}]}}},adjectives:{label:"Adjectives",sub:{"1st/2nd declension":{words:[{lat:"bonus",eng:["good"]},{lat:"laetus",eng:["happy"]},{lat:"iratus",eng:["angry"]},{lat:"fessus",eng:["tired"]},{lat:"magnus",eng:["great"]},{lat:"parvus",eng:["small"]},{lat:"malus",eng:["bad"]},{lat:"benignus",eng:["kind"]},{lat:"multus",eng:["much"]},{lat:"latus",eng:["wide"]},{lat:"anxius",eng:["anxious"]},{lat:"longus",eng:["long"]},{lat:"sollicitus",eng:["worried"]},{lat:"novus",eng:["new"]},{lat:"optimus",eng:["excellent"]},{lat:"miser",eng:["miserable"]},{lat:"liber",eng:["free"]},{lat:"pulcher",eng:["beautiful"]}]},"3rd declension":{words:[{lat:"fortis",eng:["brave"]},{lat:"gravis",eng:["serious"]},{lat:"levis",eng:["light"]},{lat:"omnis",eng:["every"]},{lat:"incolumis",eng:["safe"]},{lat:"brevis",eng:["short"]},{lat:"crudelis",eng:["cruel"]},{lat:"tristis",eng:["sad"]},{lat:"gracilis",eng:["slender"]},{lat:"facilis",eng:["easy"]},{lat:"difficilis",eng:["difficult"]},{lat:"insignis",eng:["outstanding"]},{lat:"dulcis",eng:["sweet"]}]}}},verbs:{label:"Verbs",sub:{"1st conjugation":{words:[{lat:"porto",eng:["carry"]},{lat:"ceno",eng:["dine"]},{lat:"ambulo",eng:["walk"]},{lat:"navigo",eng:["sail"]},{lat:"amo",eng:["love"]},{lat:"rogo",eng:["ask"]},{lat:"pugno",eng:["fight"]},{lat:"oppugno",eng:["attack"]},{lat:"convoco",eng:["summon"]},{lat:"habito",eng:["live"]},{lat:"exspecto",eng:["wait for"]},{lat:"servo",eng:["save"]},{lat:"laboro",eng:["work"]},{lat:"festino",eng:["hurry"]},{lat:"do",eng:["give"]},{lat:"paro",eng:["prepare"]},{lat:"iuvo",eng:["help"]},{lat:"laudo",eng:["praise"]},{lat:"specto",eng:["watch"]},{lat:"narro",eng:["tell"]},{lat:"saluto",eng:["greet"]},{lat:"voco",eng:["call"]},{lat:"clamo",eng:["shout"]},{lat:"curo",eng:["care for"]},{lat:"intro",eng:["enter"]},{lat:"supero",eng:["overcome"]},{lat:"neco",eng:["kill"]},{lat:"excito",eng:["arouse"]}]},"2nd conjugation":{words:[{lat:"moneo",eng:["warn"]},{lat:"sedeo",eng:["sit"]},{lat:"maneo",eng:["stay"]},{lat:"iaceo",eng:["lie down"]},{lat:"taceo",eng:["be silent"]},{lat:"habeo",eng:["have"]},{lat:"timeo",eng:["fear"]},{lat:"iubeo",eng:["order"]},{lat:"terreo",eng:["terrify"]},{lat:"video",eng:["see"]},{lat:"doceo",eng:["teach"]},{lat:"debeo",eng:["ought"]},{lat:"respondeo",eng:["answer"]},{lat:"persuadeo",eng:["persuade"]}]},"3rd conjugation":{words:[{lat:"procedo",eng:["go forward"]},{lat:"rego",eng:["rule"]},{lat:"lego",eng:["read"]},{lat:"scribo",eng:["write"]},{lat:"duco",eng:["lead"]},{lat:"mitto",eng:["send"]},{lat:"cado",eng:["fall"]},{lat:"resisto",eng:["resist"]},{lat:"dico",eng:["say"]},{lat:"ludo",eng:["play"]},{lat:"occido",eng:["kill"]},{lat:"descendo",eng:["descend"]},{lat:"vinco",eng:["conquer"]},{lat:"trado",eng:["hand over"]},{lat:"pono",eng:["put"]},{lat:"surgo",eng:["rise"]},{lat:"curro",eng:["run"]},{lat:"constituo",eng:["decide"]},{lat:"ascendo",eng:["climb"]},{lat:"defendo",eng:["defend"]},{lat:"dimitto",eng:["dismiss"]},{lat:"bibo",eng:["drink"]},{lat:"reddo",eng:["give back"]},{lat:"accedo",eng:["approach"]},{lat:"relinquo",eng:["abandon"]},{lat:"emo",eng:["buy"]},{lat:"vendo",eng:["sell"]},{lat:"contendo",eng:["march"]},{lat:"traho",eng:["drag"]},{lat:"claudo",eng:["close"]},{lat:"facio",eng:["make"]},{lat:"fugio",eng:["flee"]},{lat:"capio",eng:["capture"]},{lat:"cupio",eng:["desire"]},{lat:"accipio",eng:["receive"]},{lat:"iacio",eng:["throw"]},{lat:"conicio",eng:["hurl"]},{lat:"interficio",eng:["kill"]}]},"4th conjugation":{words:[{lat:"invenio",eng:["find"]},{lat:"dormio",eng:["sleep"]},{lat:"audio",eng:["hear"]},{lat:"venio",eng:["come"]},{lat:"advenio",eng:["arrive"]},{lat:"convenio",eng:["gather"]},{lat:"punio",eng:["punish"]},{lat:"custodio",eng:["guard"]}]},irregular:{words:[{lat:"sum",eng:["be"]},{lat:"adsum",eng:["be present"]},{lat:"absum",eng:["be absent"]},{lat:"possum",eng:["be able"]},{lat:"eo",eng:["go"]},{lat:"transeo",eng:["cross"]},{lat:"abeo",eng:["go away"]},{lat:"exeo",eng:["go out"]},{lat:"redeo",eng:["go back"]},{lat:"ineo",eng:["go into"]}]}}},prepositions:{label:"Prepositions",sub:{"with ablative":{words:[{lat:"sub",eng:["under"]},{lat:"in",eng:["in"]},{lat:"cum",eng:["with"]},{lat:"de",eng:["about"]},{lat:"ex",eng:["out of"]},{lat:"ab",eng:["from"]}]},"with accusative":{words:[{lat:"ad",eng:["to"]},{lat:"in",eng:["into"]},{lat:"trans",eng:["across"]},{lat:"per",eng:["through"]},{lat:"prope",eng:["near"]},{lat:"contra",eng:["against"]},{lat:"circum",eng:["around"]},{lat:"post",eng:["after"]},{lat:"ante",eng:["before"]},{lat:"propter",eng:["because of"]}]}}},conjunctions:{label:"Conjunctions",sub:{conjunctions:{words:[{lat:"nam",eng:["for"]},{lat:"quod",eng:["because"]},{lat:"et",eng:["and"]},{lat:"sed",eng:["but"]},{lat:"tamen",eng:["however"]},{lat:"itaque",eng:["and so"]}]}}},adverbs:{label:"Adverbs",sub:{adverbs:{words:[{lat:"fortiter",eng:["bravely"]},{lat:"bene",eng:["well"]},{lat:"celeriter",eng:["quickly"]},{lat:"diligenter",eng:["carefully"]},{lat:"numquam",eng:["never"]},{lat:"nunc",eng:["now"]},{lat:"iterum",eng:["again"]},{lat:"tandem",eng:["at last"]},{lat:"lente",eng:["slowly"]},{lat:"laete",eng:["happily"]},{lat:"diu",eng:["for a long time"]},{lat:"subito",eng:["suddenly"]},{lat:"iam",eng:["now"]},{lat:"statim",eng:["at once"]},{lat:"saepe",eng:["often"]},{lat:"mox",eng:["soon"]}]}}},interrogatives:{label:"Interrogatives",sub:{interrogatives:{words:[{lat:"quis",eng:["who"]},{lat:"quid",eng:["what"]},{lat:"quando",eng:["when"]},{lat:"ubi",eng:["where"]},{lat:"quo modo",eng:["how"]},{lat:"cur",eng:["why"]},{lat:"quantus",eng:["how big"]},{lat:"nonne",eng:["surely"]},{lat:"num",eng:["surely not"]}]}}},pronouns:{label:"Pronouns",sub:{pronouns:{words:[{lat:"me",eng:["me"]},{lat:"te",eng:["you"]},{lat:"eum",eng:["him"]},{lat:"eam",eng:["her"]},{lat:"eos",eng:["them"]},{lat:"eas",eng:["them"]},{lat:"vos",eng:["you all"]},{lat:"nos",eng:["us"]}]}}}};
 
-// ── WORD LOOKUP ───────────────────────────────────────────────
 const WORD_MAP={};
 (function(){Object.entries(DATA).forEach(([ck,cat])=>Object.entries(cat.sub).forEach(([sk,sub])=>sub.words.forEach(w=>{const k=w.lat.toLowerCase();if(!WORD_MAP[k])WORD_MAP[k]=[];WORD_MAP[k].push(w.eng[0]);})));})();
 
-// ── DECLENSION ────────────────────────────────────────────────
 function decl1F(nom){const s=nom.endsWith('a')?nom.slice(0,-1):nom;return{'nominative singular':nom,'genitive singular':s+'ae','dative singular':s+'ae','accusative singular':s+'am','ablative singular':s+'a','vocative singular':nom,'nominative plural':s+'ae','genitive plural':s+'arum','dative plural':s+'is','accusative plural':s+'as','ablative plural':s+'is','vocative plural':s+'ae'};}
 function decl2MF(nom){const voc=nom.endsWith('ius')?nom.slice(0,-2)+'i':nom.endsWith('us')?nom.slice(0,-2)+'e':nom;const b=nom.endsWith('us')?nom.slice(0,-2):nom;return{'nominative singular':nom,'genitive singular':b+'i','dative singular':b+'o','accusative singular':b+'um','ablative singular':b+'o','vocative singular':voc,'nominative plural':b+'i','genitive plural':b+'orum','dative plural':b+'is','accusative plural':b+'os','ablative plural':b+'is','vocative plural':b+'i'};}
-function decl2NF(nom){const s=nom.endsWith('um')?nom.slice(0,-2):nom;return{'nominative singular':nom,'genitive singular':s+'i','dative singular':s+'o','accusative singular':nom,'ablative singular':s+'o','vocative singular':nom,'nominative plural':s+'a','genitive plural':s+'orum','dative plural':s+'is','accusative plural':s+'a','ablative plural':s+'is','vocative plural':s+'a'};}
+function decl2NF(nom){const isPl=['castra','arma','moenia'].includes(nom);const s=nom.endsWith('um')?nom.slice(0,-2):nom.endsWith('a')?nom.slice(0,-1):nom;if(isPl)return{'nominative plural':nom,'genitive plural':s+'orum','dative plural':s+'is','accusative plural':nom,'ablative plural':s+'is','vocative plural':nom};return{'nominative singular':nom,'genitive singular':s+'i','dative singular':s+'o','accusative singular':nom,'ablative singular':s+'o','vocative singular':nom,'nominative plural':s+'a','genitive plural':s+'orum','dative plural':s+'is','accusative plural':s+'a','ablative plural':s+'is','vocative plural':s+'a'};}
 function decl3F(nom,gen,gender){if(!gen)return null;const s=gen.endsWith('is')?gen.slice(0,-2):gen;const n=gender==='n';const iS=gen.endsWith('ium')||(nom.endsWith('is')&&gen===nom)||nom==='mare';const gPl=iS?s+'ium':s+'um';const aSg=(nom==='mare'||iS)?s+'i':s+'e';if(n){const nPl=(nom.endsWith('e')||nom.endsWith('al')||nom.endsWith('ar'))?s+'ia':s+'a';return{'nominative singular':nom,'genitive singular':gen,'dative singular':s+'i','accusative singular':nom,'ablative singular':aSg,'vocative singular':nom,'nominative plural':nPl,'genitive plural':gPl,'dative plural':s+'ibus','accusative plural':nPl,'ablative plural':s+'ibus','vocative plural':nPl};}return{'nominative singular':nom,'genitive singular':gen,'dative singular':s+'i','accusative singular':s+'em','ablative singular':aSg,'vocative singular':nom,'nominative plural':s+'es','genitive plural':gPl,'dative plural':s+'ibus','accusative plural':iS?s+'is':s+'es','ablative plural':s+'ibus','vocative plural':s+'es'};}
 function adj12F(nom){let mst,fnom,nnom;if(nom.endsWith('us')){mst=nom.slice(0,-2);fnom=mst+'a';nnom=mst+'um';}else if(nom==='miser'){mst='miser';fnom='misera';nnom='miserum';}else if(nom==='liber'){mst='liber';fnom='libera';nnom='liberum';}else if(nom==='pulcher'){mst='pulchr';fnom='pulchra';nnom='pulchrum';}else{mst=nom;fnom=nom+'a';nnom=nom+'um';}const r={};const mf=decl2MF(nom);Object.entries(mf).forEach(([k,v])=>r['m '+k]=v);const ff=decl1F(fnom);Object.entries(ff).forEach(([k,v])=>r['f '+k]=v);const nf=decl2NF(nnom);Object.entries(nf).forEach(([k,v])=>r['n '+k]=v);return r;}
 function adj3F(nom){const s=nom.endsWith('is')?nom.slice(0,-2):nom;const mf={'nominative singular':nom,'genitive singular':s+'is','dative singular':s+'i','accusative singular':s+'em','ablative singular':s+'i','vocative singular':nom,'nominative plural':s+'es','genitive plural':s+'ium','dative plural':s+'ibus','accusative plural':s+'es','ablative plural':s+'ibus','vocative plural':s+'es'};const nf={'nominative singular':s+'e','genitive singular':s+'is','dative singular':s+'i','accusative singular':s+'e','ablative singular':s+'i','vocative singular':s+'e','nominative plural':s+'ia','genitive plural':s+'ium','dative plural':s+'ibus','accusative plural':s+'ia','ablative plural':s+'ibus','vocative plural':s+'ia'};const r={};Object.entries(mf).forEach(([k,v])=>{r['m '+k]=v;r['f '+k]=v;});Object.entries(nf).forEach(([k,v])=>r['n '+k]=v);return r;}
@@ -404,12 +429,10 @@ function getAdjForms(w){const sk=w.subKey;if(sk==='1st/2nd declension')return ad
 function is3rd(sk){return sk==='3rd declension';}
 function fullLat(w){return is3rd(w.subKey)&&w.gen?w.lat+' '+w.gen+' '+w.gender:w.lat;}
 
-// ── CONJUGATION ───────────────────────────────────────────────
 const IRREG={'sum':{'1st singular':'sum','2nd singular':'es','3rd singular':'est','1st plural':'sumus','2nd plural':'estis','3rd plural':'sunt'},'adsum':{'1st singular':'adsum','2nd singular':'ades','3rd singular':'adest','1st plural':'adsumus','2nd plural':'adestis','3rd plural':'adsunt'},'absum':{'1st singular':'absum','2nd singular':'abes','3rd singular':'abest','1st plural':'absumus','2nd plural':'abestis','3rd plural':'absunt'},'possum':{'1st singular':'possum','2nd singular':'potes','3rd singular':'potest','1st plural':'possumus','2nd plural':'potestis','3rd plural':'possunt'},'eo':{'1st singular':'eo','2nd singular':'is','3rd singular':'it','1st plural':'imus','2nd plural':'itis','3rd plural':'eunt'},'transeo':{'1st singular':'transeo','2nd singular':'transis','3rd singular':'transit','1st plural':'transimus','2nd plural':'transitis','3rd plural':'transeunt'},'abeo':{'1st singular':'abeo','2nd singular':'abis','3rd singular':'abit','1st plural':'abimus','2nd plural':'abitis','3rd plural':'abeunt'},'exeo':{'1st singular':'exeo','2nd singular':'exis','3rd singular':'exit','1st plural':'eximus','2nd plural':'exitis','3rd plural':'exeunt'},'redeo':{'1st singular':'redeo','2nd singular':'redis','3rd singular':'redit','1st plural':'redimus','2nd plural':'reditis','3rd plural':'redeunt'},'ineo':{'1st singular':'ineo','2nd singular':'inis','3rd singular':'init','1st plural':'inimus','2nd plural':'initis','3rd plural':'ineunt'}};
 function getVerbConj(w){const inf=w.lat,sk=w.subKey;if(IRREG[inf])return IRREG[inf];if(sk==='1st conjugation'){if(inf==='do')return{'1st singular':'do','2nd singular':'das','3rd singular':'dat','1st plural':'damus','2nd plural':'datis','3rd plural':'dant'};const s=inf.slice(0,-1);return{'1st singular':inf,'2nd singular':s+'as','3rd singular':s+'at','1st plural':s+'amus','2nd plural':s+'atis','3rd plural':s+'ant'};}if(sk==='2nd conjugation'){const s=inf.slice(0,-2);return{'1st singular':inf,'2nd singular':s+'es','3rd singular':s+'et','1st plural':s+'emus','2nd plural':s+'etis','3rd plural':s+'ent'};}if(sk==='3rd conjugation'){const io=['facio','fugio','capio','cupio','accipio','iacio','conicio','interficio'].includes(inf);if(io){const s=inf.slice(0,-2);return{'1st singular':inf,'2nd singular':s+'is','3rd singular':s+'it','1st plural':s+'imus','2nd plural':s+'itis','3rd plural':s+'iunt'};}const s=inf.slice(0,-1);return{'1st singular':inf,'2nd singular':s+'is','3rd singular':s+'it','1st plural':s+'imus','2nd plural':s+'itis','3rd plural':s+'unt'};}if(sk==='4th conjugation'){const s=inf.slice(0,-2);return{'1st singular':inf,'2nd singular':s+'is','3rd singular':s+'it','1st plural':s+'imus','2nd plural':s+'itis','3rd plural':s+'iunt'};}return null;}
 function genDrillQs(words){const qs=[];words.forEach(w=>{if(w.catKey==='nouns'){const f=getNounForms(w);if(f)Object.entries(f).forEach(([k,v])=>qs.push({type:'decl',word:w,key:k,form:v,target:w.lat}));}else if(w.catKey==='adjectives'){const f=getAdjForms(w);if(f)Object.entries(f).forEach(([k,v])=>qs.push({type:'decl',word:w,key:k,form:v,target:w.lat}));}else if(w.catKey==='verbs'){const f=getVerbConj(w);if(f)Object.entries(f).forEach(([p,v])=>qs.push({type:'conj',word:w,key:p,form:v,target:w.lat}));}});return qs;}
 
-// ── SENTENCE BUILDER ──────────────────────────────────────────
 function rnd(arr){if(!arr||!arr.length)throw new Error('empty pool');return arr[Math.floor(Math.random()*arr.length)];}
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 function wordsOf(ck){const ws=[];Object.entries(DATA[ck].sub).forEach(([sk,s])=>s.words.forEach(w=>ws.push({...w,catKey:ck,subKey:sk})));return ws;}
@@ -446,7 +469,6 @@ function sSVOSed(){const s1=sSVOAdv(),s2=sSVOPrep();return{latin:s1.latin.slice(
 function sInsane(){const s=pAnim(),p1=sSVOPrep(s),p2=sSVOAdv(s),c=rnd(['Itaque','Sed','Tamen']),cE={'Itaque':'and so','Sed':'but','Tamen':'however'};return{latin:p1.latin+' '+c+', '+p2.latin[0].toLowerCase()+p2.latin.slice(1),english:p1.english+' '+cE[c]+', '+p2.english[0].toLowerCase()+p2.english.slice(1),wordMap:{...p1.wordMap,...p2.wordMap,[c.toLowerCase()]:cE[c]}};}
 function buildSentence(){if(difficulty==='easy')return rnd([sSVO,sAdjPred,sImp,sAdvIntrans])();if(difficulty==='medium')return rnd([sSVOPrep,sTwoSVO,sSVOAdv,sSVIODO])();if(difficulty==='hard')return rnd([sThreePart,sSVOQuod,sSVOSed])();return sInsane();}
 
-// ── STORAGE / SR ──────────────────────────────────────────────
 const SR_KEY='latin_sr_v2',STATS_KEY='latin_stats_v2',THEME_KEY='latin_theme';
 let srData={},statsData={sessions:[],catStats:{}};
 async function loadPersisted(){try{const r=await window.storage.get(SR_KEY);if(r)srData=JSON.parse(r.value);}catch(e){}try{const r=await window.storage.get(STATS_KEY);if(r)statsData=JSON.parse(r.value);}catch(e){}try{const r=await window.storage.get(THEME_KEY);if(r&&r.value==='light'){document.body.classList.add('light');document.getElementById('themeBtn').textContent='☾';}}catch(e){}updCount();}
@@ -458,7 +480,6 @@ function updateSR(w,ok){const r=getSR(w);r.seen++;if(ok){r.correct++;r.interval=
 function isDue(w){const r=getSR(w);return r.interval===0||r.due<=Date.now();}
 function getDue(ws){return ws.filter(w=>isDue(w)).length;}
 
-// ── STATE ─────────────────────────────────────────────────────
 let mode='el',quizType='vocab',inputMode='typed',difficulty='easy';
 let selected={};
 let quizWords=[],current=0,score=0,answered=false,wrongWords=[],round=1;
@@ -467,42 +488,20 @@ let timerInterval=null,timerRemaining=0;
 let drillQs=[],drillIdx=0,isDrill=false,isSent=false;
 let mainTab='practice',sentData=null,sentScore=0,sentTotal=0,hintUsed=false;
 
-// ── PCT BAR ───────────────────────────────────────────────────
-function updPct(){
-  const done=isDrill?drillIdx:isSent?sentTotal:current;
-  const el=document.getElementById('pctBarFill');
-  const lbl=document.getElementById('pctLabel');
-  if(done===0){el.style.height='0%';el.style.background='var(--accent)';lbl.textContent='–';lbl.style.color='var(--text3)';return;}
-  const pct=Math.round(score/done*100);
-  const col=pct>=80?'var(--green)':pct>=50?'var(--gold)':'var(--red)';
-  el.style.height=pct+'%';
-  el.style.background=col;
-  lbl.textContent=pct+'%';
-  lbl.style.color=col;
-}
-
-// ── THEME ─────────────────────────────────────────────────────
+function updPct(){const done=isDrill?drillIdx:isSent?sentTotal:current;const el=document.getElementById('pctBarFill');const lbl=document.getElementById('pctLabel');if(done===0){el.style.height='0%';el.style.background='var(--accent)';lbl.textContent='–';lbl.style.color='var(--text3)';return;}const pct=Math.round(score/done*100);const col=pct>=80?'var(--green)':pct>=50?'var(--gold)':'var(--red)';el.style.height=pct+'%';el.style.background=col;lbl.textContent=pct+'%';lbl.style.color=col;}
 function toggleTheme(){const l=document.body.classList.toggle('light');document.getElementById('themeBtn').textContent=l?'☾':'☀';try{window.storage.set(THEME_KEY,l?'light':'dark');}catch(e){}}
-
-// ── SPEED ─────────────────────────────────────────────────────
 function toggleSpeed(){speedEnabled=document.getElementById('speedOn').checked;['speedLbl','speedSlider','speedVal'].forEach(id=>document.getElementById(id).style.display=speedEnabled?'':'none');}
 function updSpeedVal(){speedSecs=parseInt(document.getElementById('speedSlider').value);document.getElementById('speedVal').textContent=speedSecs+'s';}
 function startTimer(){if(!speedEnabled){document.getElementById('timerRing').style.display='none';return;}timerRemaining=speedSecs;document.getElementById('timerRing').style.display='';updTimerDisplay();timerInterval=setInterval(()=>{timerRemaining--;updTimerDisplay();if(timerRemaining<=0){clearInterval(timerInterval);timeUp();}},1000);}
 function updTimerDisplay(){const pct=timerRemaining/speedSecs;const arc=document.getElementById('timerArc');arc.style.strokeDashoffset=94.25*(1-pct);arc.className='timer-arc'+(timerRemaining<=3?' urgent':'');document.getElementById('timerTxt').textContent=timerRemaining;}
 function stopTimer(){clearInterval(timerInterval);document.getElementById('timerRing').style.display='none';}
 function timeUp(){if(answered)return;if(isSent)skipSentence();else if(isDrill)skipDrill();else skipQ();}
-
-// ── DIFFICULTY ────────────────────────────────────────────────
 function setDiff(d){difficulty=d;[{i:'dEasy',v:'easy'},{i:'dMed',v:'medium'},{i:'dHard',v:'hard'},{i:'dInsane',v:'insane'}].forEach(({i,v})=>{const b=document.getElementById(i);if(b)b.className='diff-btn'+(v==='insane'?' ins':'')+(d===v?' active':'');});}
-
-// ── SHORTCUTS ─────────────────────────────────────────────────
+function showAbout(){document.getElementById('aboutOverlay').style.display='flex';}
+function hideAbout(){document.getElementById('aboutOverlay').style.display='none';}
 function showShortcuts(){document.getElementById('shortcutsOverlay').style.display='flex';}
 function hideShortcuts(){document.getElementById('shortcutsOverlay').style.display='none';}
-
-// ── TABS ──────────────────────────────────────────────────────
 function showMainTab(t){mainTab=t;document.querySelectorAll('.nav-tab').forEach((b,i)=>b.classList.toggle('active',(i===0&&t==='practice')||(i===1&&t==='stats')));document.getElementById('practicePanel').style.display=t==='practice'?'':'none';document.getElementById('statsView').style.display=t==='stats'?'block':'none';if(t==='stats')renderStats();}
-
-// ── SELECTOR ──────────────────────────────────────────────────
 function selectAll(){Object.entries(DATA).forEach(([ck])=>{Object.keys(DATA[ck].sub).forEach(sk=>{selected[ck][sk]=true;const sc=document.getElementById('sbox_'+ck+'_'+sk);if(sc)sc.className='sbox checked';});updCatBox(ck);});updCount();}
 function deselectAll(){Object.entries(DATA).forEach(([ck])=>{Object.keys(DATA[ck].sub).forEach(sk=>{selected[ck][sk]=false;const sc=document.getElementById('sbox_'+ck+'_'+sk);if(sc)sc.className='sbox';});updCatBox(ck);});updCount();}
 function buildUI(){
@@ -532,8 +531,6 @@ function setQuizType(t){quizType=t;['typeVocab','typeDrill','typeSent'].forEach(
 function setInputMode(t){inputMode=t;document.getElementById('inputTyped').className='mode-btn'+(t==='typed'?' active':'');document.getElementById('inputMC').className='mode-btn'+(t==='mc'?' active':'');}
 function getWords(){const ws=[];Object.entries(selected).forEach(([ck,subs])=>Object.entries(subs).forEach(([sk,on])=>{if(on)DATA[ck].sub[sk].words.forEach(w=>ws.push({...w,catKey:ck,subKey:sk}));}));return ws;}
 function updCount(){const ws=getWords();const n=ws.length;const iS=quizType==='sentences';document.getElementById('wordPill').textContent=iS?'All categories selected':n+(n===1?' word':' words')+' selected';document.getElementById('startBtn').disabled=iS?false:n===0;const due=getDue(ws);document.getElementById('srBtn').disabled=iS||due===0;document.getElementById('srBtn').textContent=due>0&&!iS?'Due ('+due+')':'Due (0)';document.getElementById('wordDrawerCount').textContent=n+' selected';if(document.getElementById('wordDrawer').classList.contains('open'))renderWordList();}
-
-// ── HELPERS ───────────────────────────────────────────────────
 function stripNotes(s){return String(s).replace(/\s*\((?:singular|plural|masculine|feminine|masc|fem)\)\s*/gi,' ').replace(/\b(?:singular|plural)\b/gi,' ').replace(/\s+/g,' ').trim();}
 function displayEng(w){if(w.lat==='eos')return 'them (masc)';if(w.lat==='eas')return 'them (fem)';if(w.lat==='te')return 'you (sg)';if(w.lat==='vos')return 'you (pl)';return w.eng.map(e=>String(e).replace(/[()]/g,'').trim()).join(', ');}
 function normalise(s){let t=String(s).toLowerCase().trim().replace(/[^a-z\s]/g,'').replace(/\s+/g,' ').trim();t=t.replace(/^them\s*(?:masc|fem)?$/i,'them');t=t.replace(/^you\s*(?:sg|pl)?$/i,'you');return t;}
@@ -541,16 +538,10 @@ function checkLat(inp,w){const n=s=>s.toLowerCase().replace(/\s+/g,' ').trim();c
 function checkEng(inp,w){const v=normalise(inp);if((w.lat==='eos'||w.lat==='eas')&&v==='them')return true;if((w.lat==='te'||w.lat==='vos')&&v==='you')return true;return w.eng.some(e=>normalise(e)===v);}
 function correctAns(w){return mode==='el'?fullLat(w):displayEng(w);}
 function posTag(w){if(w.catKey==='nouns')return w.subKey;if(w.catKey==='verbs')return 'verb';if(w.catKey==='adjectives')return 'adjective';if(w.catKey==='adverbs')return 'adverb';if(w.catKey==='prepositions')return 'preposition';if(w.catKey==='conjunctions')return 'conjunction';if(w.catKey==='pronouns')return 'pronoun';if(w.catKey==='interrogatives')return 'interrogative';return null;}
-
-// ── SESSION ───────────────────────────────────────────────────
 function startSession(){if(quizType==='sentences'){startSentences();return;}beginQuiz(shuffle([...getWords()]));}
 function startSR(){const ws=getWords();beginQuiz([...shuffle(ws.filter(w=>isDue(w))),...shuffle(ws.filter(w=>!isDue(w)))]);}
 function beginQuiz(ws){clearTimeout(autoNextTimer);stopTimer();isDrill=quizType==='drill';isSent=false;if(isDrill){drillQs=shuffle(genDrillQs(ws));drillIdx=0;if(!drillQs.length)return;quizWords=ws;}else quizWords=ws;current=0;score=0;answered=false;wrongWords=[];round=1;showView('quizView');isDrill?showDrill():showQ();}
-
-// ── VIEW ──────────────────────────────────────────────────────
 function showView(id){['selectorView','quizView','resultView','statsView'].forEach(v=>{const el=document.getElementById(v);if(el)el.style.display=v===id?(v==='selectorView'?'':'block'):'none';});}
-
-// ── VOCAB QUIZ ────────────────────────────────────────────────
 function showQ(){
   clearTimeout(autoNextTimer);stopTimer();answered=false;hintUsed=false;
   document.getElementById('promptCard').style.display='';document.getElementById('hintBox').style.display='';document.getElementById('sentSection').style.display='none';
@@ -583,8 +574,6 @@ function checkAnswer(){if(answered)return;const w=quizWords[current];const val=d
 function skipQ(){if(answered)return;answered=true;stopTimer();const w=quizWords[current];wrongWords.push(w);updateSR(w,false);recAns(w,false);const ai=document.getElementById('answerInput');ai.className='answer-input wrong';ai.disabled=true;const fb=document.getElementById('feedbackBox');fb.className='feedback-box wrong';fb.textContent='→ '+correctAns(w);document.getElementById('checkBtn').style.display='none';document.getElementById('nextBtn').style.display='block';updPct();autoNextTimer=setTimeout(nextQ,1200);}
 function revealHint(){if(answered)return;hintUsed=true;const w=quizWords[current];document.getElementById('hintBox').textContent='Hint: '+correctAns(w)[0].toUpperCase()+'… (½ point if correct)';}
 function nextQ(){clearTimeout(autoNextTimer);if(isDrill){drillIdx++;if(drillIdx>=drillQs.length){showResult();return;}showDrill();return;}current++;if(current>=quizWords.length){showResult();return;}showQ();}
-
-// ── DRILL ─────────────────────────────────────────────────────
 function showDrill(){clearTimeout(autoNextTimer);stopTimer();answered=false;hintUsed=false;document.getElementById('promptCard').style.display='';document.getElementById('hintBox').style.display='';document.getElementById('sentSection').style.display='none';const q=drillQs[drillIdx],total=drillQs.length;document.getElementById('progFill').style.width=Math.round(drillIdx/total*100)+'%';document.getElementById('progLbl').textContent=(drillIdx+1)+'/'+total;document.getElementById('scorePill').textContent=score+' correct';document.getElementById('roundBadge').innerHTML='<span>Drills · Round '+round+'</span>';document.getElementById('hintBox').textContent='';document.getElementById('pTags').innerHTML='';document.getElementById('pDir').textContent=q.type==='conj'?'Conjugation drill':'Declension drill';document.getElementById('pWord').innerHTML='<span style="font-size:16px;color:var(--text3)">'+q.key.replace(' singular',' sg').replace(' plural',' pl')+' of</span><br>'+q.target;updPct();const pc=document.getElementById('promptCard');pc.style.animation='none';requestAnimationFrame(()=>{pc.style.animation='fadeIn .22s ease';});inputMode==='typed'?showTypedDrill():showMCDrill(q);startTimer();}
 function showTypedDrill(){document.getElementById('typedSection').style.display='';document.getElementById('mcSection').style.display='none';const ai=document.getElementById('answerInput');ai.value='';ai.className='answer-input';ai.disabled=false;document.getElementById('feedbackBox').className='feedback-box';document.getElementById('feedbackBox').textContent='';document.getElementById('nextBtn').style.display='none';document.getElementById('checkBtn').style.display='';setTimeout(()=>ai.focus(),50);}
 function showMCDrill(q){document.getElementById('typedSection').style.display='none';document.getElementById('mcSection').style.display='';document.getElementById('mcFeedback').className='feedback-box';document.getElementById('mcFeedback').textContent='';document.getElementById('mcNextBtn').style.display='none';const pool=shuffle([...drillQs.filter(x=>x.form!==q.form)]);const chosen=[];const used=new Set([q.form]);for(const x of pool){if(!used.has(x.form)){used.add(x.form);chosen.push(x);if(chosen.length===3)break;}}const opts=shuffle([q,...chosen.slice(0,3)]);const grid=document.getElementById('mcGrid');grid.innerHTML='';opts.forEach((opt,i)=>{const btn=document.createElement('button');btn.className='mc-btn';btn.innerHTML='<span class="mc-num">'+(i+1)+'</span><span>'+opt.form+'</span>';btn.onclick=()=>handleMCDrill(opt,q);grid.appendChild(btn);});}
@@ -594,35 +583,26 @@ function revealDrillHint(){if(answered)return;hintUsed=true;document.getElementB
 function handleMCDrill(chosen,correct){if(answered)return;answered=true;stopTimer();const ok=chosen.form===correct.form;const btns=document.getElementById('mcGrid').querySelectorAll('.mc-btn');btns.forEach(b=>{b.disabled=true;const t=b.querySelector('span:last-child').textContent;if(t===correct.form)b.className='mc-btn reveal';if(t===chosen.form&&!ok)b.className='mc-btn wrong';});const fb=document.getElementById('mcFeedback');if(ok){if(hintUsed){score+=0.5;fb.className='feedback-box correct';fb.textContent='✓ Correct (½ point — hint used)';}else{score++;fb.className='feedback-box correct';fb.textContent='✓ Correct';}}else{fb.className='feedback-box wrong';fb.textContent='✗ '+correct.form;}updateSR(correct.word,ok&&!hintUsed);recAns(correct.word,ok);document.getElementById('scorePill').textContent=score+' correct';updPct();document.getElementById('mcNextBtn').style.display='block';autoNextTimer=setTimeout(nextQ,ok?500:1200);}
 function dispatchCheck(){if(isDrill)checkDrill();else checkAnswer();}
 function dispatchSkip(){if(isDrill)skipDrill();else skipQ();}
-
-// ── SENTENCES ─────────────────────────────────────────────────
 function startSentences(){clearTimeout(autoNextTimer);stopTimer();isDrill=false;isSent=true;sentScore=0;sentTotal=0;score=0;answered=false;round=1;showView('quizView');document.getElementById('promptCard').style.display='none';document.getElementById('hintBox').style.display='none';document.getElementById('typedSection').style.display='none';document.getElementById('mcSection').style.display='none';document.getElementById('sentSection').style.display='block';document.getElementById('progFill').style.width='0%';document.getElementById('progLbl').textContent='∞';document.getElementById('scorePill').textContent='0 correct';document.getElementById('roundBadge').innerHTML='<span>Sentences · '+difficulty+'</span>';updPct();renderSentence();}
 function renderSentence(){answered=false;const inp=document.getElementById('sentInput');inp.value='';inp.disabled=false;document.getElementById('sentCheckBtn').disabled=false;document.getElementById('sentNext').style.display='none';const fb=document.getElementById('sentFb');fb.className='sent-fb';fb.textContent='';let sd;try{sd=buildSentence();}catch(e){document.getElementById('sentDir').textContent='Error: '+e.message;document.getElementById('sentWords').textContent='';return;}sentData=sd;const src=mode==='el'?sd.english:sd.latin;document.getElementById('sentDir').textContent=mode==='el'?'Translate into Latin':'Translate into English';document.getElementById('sentTags').innerHTML='<span class="tag diff">'+difficulty+'</span>';const container=document.getElementById('sentWords');container.innerHTML='';const wmap=sd.wordMap||{};src.split(' ').forEach((tok,i)=>{if(i>0)container.appendChild(document.createTextNode(' '));const m=tok.match(/^([a-zA-Z]*)([^a-zA-Z]*)$/);const word=m?m[1]:'',punct=m?m[2]:'';if(word){const tip=wmap[word.toLowerCase()]||WORD_MAP[word.toLowerCase()]?.[0]||null;const span=document.createElement('span');span.textContent=word;if(tip){span.className='sw';const t=tip;span.onclick=function(e){e.stopPropagation();container.querySelectorAll('.sent-tip').forEach(x=>x.remove());const el=document.createElement('span');el.className='sent-tip';el.textContent=t;span.insertAdjacentElement('afterend',el);setTimeout(()=>el.remove(),2500);};}container.appendChild(span);}if(punct)container.appendChild(document.createTextNode(punct));});setTimeout(()=>inp.focus(),50);}
-function checkSentence(){if(answered)return;const ua=document.getElementById('sentInput').value.trim();if(!ua)return;answered=true;document.getElementById('sentCheckBtn').disabled=true;document.getElementById('sentInput').disabled=true;const ca=mode==='el'?sentData.latin:sentData.english;const norm=s=>s.toLowerCase().replace(/[.,!?;:]/g,'').replace(/\s+/g,' ').trim();const ok=norm(ua)===norm(ca);const fb=document.getElementById('sentFb');if(ok){sentScore++;score++;fb.className='sent-fb ok';fb.textContent='✓ Correct!';}else{fb.className='sent-fb no';fb.textContent='✗ '+ca;}sentTotal++;document.getElementById('scorePill').textContent=sentScore+' correct';updPct();document.getElementById('sentNext').style.display='block';}
-function skipSentence(){if(answered)return;answered=true;document.getElementById('sentCheckBtn').disabled=true;document.getElementById('sentInput').disabled=true;const ca=mode==='el'?sentData.latin:sentData.english;const fb=document.getElementById('sentFb');fb.className='sent-fb no';fb.textContent='→ '+ca;sentTotal++;updPct();document.getElementById('sentNext').style.display='block';}
+function saveSessionSnapshot(){if(sentTotal===0)return;const pct=Math.round(sentScore/sentTotal*100);const today=new Date().toDateString();const last=statsData.sessions[statsData.sessions.length-1];if(last&&new Date(last.date).toDateString()===today&&last.isSent){last.score=sentScore;last.total=sentTotal;last.pct=pct;}else{statsData.sessions.push({date:Date.now(),score:sentScore,total:sentTotal,pct,isSent:true});if(statsData.sessions.length>20)statsData.sessions=statsData.sessions.slice(-20);}saveStats();}
+function checkSentence(){if(answered)return;const ua=document.getElementById('sentInput').value.trim();if(!ua)return;answered=true;document.getElementById('sentCheckBtn').disabled=true;document.getElementById('sentInput').disabled=true;const ca=mode==='el'?sentData.latin:sentData.english;const norm=s=>s.toLowerCase().replace(/[.,!?;:]/g,'').replace(/\s+/g,' ').trim();const ok=norm(ua)===norm(ca);const fb=document.getElementById('sentFb');if(ok){sentScore++;score++;fb.className='sent-fb ok';fb.textContent='✓ Correct!';}else{fb.className='sent-fb no';fb.textContent='✗ '+ca;}sentTotal++;document.getElementById('scorePill').textContent=sentScore+' correct';updPct();saveSessionSnapshot();document.getElementById('sentNext').style.display='block';}
+function skipSentence(){if(answered)return;answered=true;document.getElementById('sentCheckBtn').disabled=true;document.getElementById('sentInput').disabled=true;const ca=mode==='el'?sentData.latin:sentData.english;const fb=document.getElementById('sentFb');fb.className='sent-fb no';fb.textContent='→ '+ca;sentTotal++;updPct();saveSessionSnapshot();document.getElementById('sentNext').style.display='block';}
 function nextSentence(){renderSentence();}
-
-// ── RESULT ────────────────────────────────────────────────────
 function recAns(w,ok){const ck=w.catKey;if(!statsData.catStats[ck])statsData.catStats[ck]={seen:0,correct:0};statsData.catStats[ck].seen++;if(ok)statsData.catStats[ck].correct++;saveStats();}
 function finishSession(){const total=isDrill?drillQs.length:isSent?sentTotal:quizWords.length;const pct=total>0?Math.round(score/total*100):0;statsData.sessions.push({date:Date.now(),score,total,pct});if(statsData.sessions.length>20)statsData.sessions=statsData.sessions.slice(-20);saveStats();}
 const PHRASES=[[100,'Optime! Perfectly done.'],[80,'Bene! Well done.'],[60,'Satis bene. Keep going.'],[0,'Persevera. Try again.']];
 function showResult(){finishSession();showView('resultView');const total=isDrill?drillQs.length:quizWords.length;const pct=total>0?Math.round(score/total*100):0;document.getElementById('resLabel').textContent='Result';document.getElementById('resScore').textContent=score+' / '+total;document.getElementById('resTotal').textContent=pct+'%';document.getElementById('resPhrase').textContent=(PHRASES.find(([t])=>pct>=t)||PHRASES[PHRASES.length-1])[1];const banner=document.getElementById('reviewBanner');if(!isDrill&&wrongWords.length>0){banner.style.display='flex';document.getElementById('reviewBannerTitle').textContent=wrongWords.length+' word'+(wrongWords.length===1?' needs':' words need')+' more practice';document.getElementById('reviewBannerSub').textContent='Round '+(round+1)+' will drill just these words.';}else banner.style.display='none';}
 function continueReview(){round++;quizWords=shuffle([...wrongWords]);wrongWords=[];current=0;score=0;answered=false;showView('quizView');showQ();}
 function retryQuiz(){clearTimeout(autoNextTimer);stopTimer();if(isSent){startSentences();return;}if(isDrill){drillQs=shuffle([...drillQs]);drillIdx=0;}else quizWords=shuffle([...quizWords]);wrongWords=[];current=0;score=0;answered=false;round=1;showView('quizView');isDrill?showDrill():showQ();}
-function backToMenu(){clearTimeout(autoNextTimer);stopTimer();document.getElementById('promptCard').style.display='';document.getElementById('hintBox').style.display='';showView('selectorView');if(mainTab==='stats')showMainTab('stats');updCount();}
-
-// ── STATS ─────────────────────────────────────────────────────
+function backToMenu(){clearTimeout(autoNextTimer);stopTimer();if(isSent&&sentTotal>0)saveSessionSnapshot();document.getElementById('promptCard').style.display='';document.getElementById('hintBox').style.display='';showView('selectorView');if(mainTab==='stats')showMainTab('stats');updCount();}
 function renderStats(){const sessions=statsData.sessions||[],cs=statsData.catStats||{};const ts=Object.values(cs).reduce((a,c)=>a+c.seen,0),tc=Object.values(cs).reduce((a,c)=>a+c.correct,0);const acc=ts>0?Math.round(tc/ts*100):0;const streak=calcStreak(sessions);const allWs=[];Object.entries(DATA).forEach(([ck,cat])=>Object.keys(cat.sub).forEach(sk=>cat.sub[sk].words.forEach(w=>allWs.push({...w,catKey:ck,subKey:sk}))));const dueAll=getDue(allWs);document.getElementById('statCards').innerHTML='<div class="stat-card"><div class="sc-label">Total answers</div><div class="sc-value">'+ts+'</div><div class="sc-sub">'+sessions.length+' sessions</div></div><div class="stat-card"><div class="sc-label">Accuracy</div><div class="sc-value">'+acc+'%</div><div class="sc-sub">'+tc+' correct</div></div><div class="stat-card"><div class="sc-label">Due today</div><div class="sc-value">'+dueAll+'</div><div class="sc-sub">across all words</div></div><div class="stat-card"><div class="sc-label">Day streak</div><div class="sc-value">'+streak+'</div><div class="sc-sub">days in a row</div></div>';const sc=document.getElementById('sessionChart');if(!sessions.length){sc.innerHTML='<p class="no-stats">No sessions yet.</p>';return;}const recent=sessions.slice(-10);const maxP=Math.max(...recent.map(s=>s.pct),1);sc.innerHTML='<div class="bars-wrap">'+recent.map(s=>{const h=Math.max(2,Math.round(s.pct/maxP*72));const d=new Date(s.date);const lbl=d.toLocaleDateString('en',{month:'short',day:'numeric'});return'<div class="bar-col"><div class="bar-fill" style="height:'+h+'px"></div><div class="bar-lbl">'+s.pct+'%</div><div class="bar-lbl">'+lbl+'</div></div>';}).join('')+'</div>';const cg=document.getElementById('catStatsGrid');cg.innerHTML='';Object.entries(DATA).forEach(([ck,cat])=>{const c=cs[ck]||{seen:0,correct:0};const a=c.seen>0?Math.round(c.correct/c.seen*100):0;const cws=[];Object.keys(cat.sub).forEach(sk=>cat.sub[sk].words.forEach(w=>cws.push({...w,catKey:ck,subKey:sk})));const due=getDue(cws);const card=document.createElement('div');card.className='cat-stat-card';card.innerHTML='<div class="cs-name">'+cat.label+(due>0?'<span class="due-badge">'+due+' due</span>':'')+'</div><div class="cs-bar-track"><div class="cs-bar-fill" style="width:'+a+'%"></div></div><div class="cs-meta"><span>'+c.seen+' answered</span><span class="cs-acc">'+a+'%</span></div>';cg.appendChild(card);});}
 function calcStreak(s){if(!s.length)return 0;const days=new Set(s.map(x=>new Date(x.date).toDateString()));let st=0;const t=new Date();for(let i=0;i<365;i++){const d=new Date(t);d.setDate(d.getDate()-i);if(days.has(d.toDateString()))st++;else if(i>0)break;}return st;}
 function showResetConfirm(){document.getElementById('resetConfirm').style.display='block';}
 function cancelReset(){document.getElementById('resetConfirm').style.display='none';}
 async function confirmReset(){srData={};statsData={sessions:[],catStats:{}};try{await window.storage.delete(SR_KEY);}catch(e){}try{await window.storage.delete(STATS_KEY);}catch(e){}document.getElementById('resetConfirm').style.display='none';updCount();renderStats();}
-
-// ── WORD DRAWER ───────────────────────────────────────────────
 function toggleWordDrawer(open){document.getElementById('wordDrawer').classList.toggle('open',open);if(open)renderWordList();}
 function renderWordList(){const list=document.getElementById('wordList');const ws=getWords();if(!ws.length){list.innerHTML='<div class="word-empty">Choose some categories to see words here.</div>';return;}list.innerHTML=ws.map(w=>{const r=getSR(w);const due=isDue(w);return'<div class="word-row"><div class="word-row-lat">'+fullLat(w)+'</div><div class="word-row-eng">'+displayEng(w)+'</div><div class="word-row-meta">'+DATA[w.catKey].label+' · '+w.subKey+'</div>'+(r.seen>0?'<div class="word-row-sr" style="color:'+(due?'var(--gold)':'var(--green)')+'">SR: '+r.seen+' seen · '+Math.round(r.correct/r.seen*100)+'% · '+(due?'due now':'interval '+r.interval+'d')+'</div>':'')+'</div>';}).join('');}
-
-// ── KEYBOARD ──────────────────────────────────────────────────
 document.addEventListener('keydown',e=>{
   const inQ=document.getElementById('quizView').style.display==='block';
   if(!inQ){if(e.key==='?')showShortcuts();return;}
@@ -633,9 +613,9 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){e.preventDefault();if(!answered)dispatchSkip();return;}
   if(e.key==='Tab'){e.preventDefault();if(!answered){isDrill?revealDrillHint():revealHint();}return;}
 });
-
 buildUI();
 loadPersisted();
+try{if(!localStorage.getItem('latin_visited')){showAbout();localStorage.setItem('latin_visited','1');}}catch(e){}
 </script>
 </body>
 </html>
