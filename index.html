@@ -143,7 +143,17 @@ input[type=range]{flex:1;accent-color:var(--accent)}
 .sent-fb.no{display:block;color:var(--red);background:var(--red-bg);border:1px solid var(--red-bdr)}
 .sent-next{width:100%;font-family:var(--sans);font-size:14px;font-weight:500;padding:11px;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface);color:var(--text);cursor:pointer;margin-top:4px;display:none}
 .sent-next:hover{background:var(--surface2)}
-#resultView{display:none}
+.info-section{display:flex;flex-direction:column;gap:16px;margin-bottom:2rem}
+.info-heading{font-family:var(--serif);font-size:26px;font-weight:400;color:var(--text);margin-bottom:4px}
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px}
+.info-subheading{font-family:var(--serif);font-size:18px;font-weight:400;color:var(--accent);margin-bottom:8px}
+.info-body{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:12px}
+.info-hi{color:var(--accent);font-weight:600}
+.info-table{display:flex;flex-direction:column;gap:4px}
+.info-row{display:flex;align-items:baseline;gap:12px;padding:5px 0;border-bottom:1px solid var(--border)}
+.info-row:last-child{border-bottom:none}
+.info-lat{font-family:var(--serif);font-size:16px;color:var(--text);min-width:200px}
+.info-eng{font-size:13px;color:var(--text2)}
 .result-wrap{text-align:center;padding:3rem 0}
 .res-label{font-family:var(--serif);font-size:13px;color:var(--text3);letter-spacing:.12em;margin-bottom:1rem}
 .res-score{font-family:var(--serif);font-size:60px;color:var(--accent);line-height:1;margin-bottom:.4rem}
@@ -181,7 +191,6 @@ input[type=range]{flex:1;accent-color:var(--accent)}
 .bar-lbl{font-size:10px;color:var(--text3);white-space:nowrap}
 .no-stats{font-family:var(--serif);font-style:italic;color:var(--text3);text-align:center;padding:3rem 0}
 .sr-clear-btn{font-family:var(--sans);font-size:12px;padding:6px 14px;border-radius:999px;border:1px solid var(--red-bdr);background:var(--red-bg);color:var(--red);cursor:pointer}
-/* OVERLAYS */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;display:flex;align-items:center;justify-content:center}
 .overlay-box{background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:1.5rem 2rem;max-width:380px;width:90%}
 .overlay-title{font-family:var(--serif);font-size:22px;font-weight:400;color:var(--text);margin-bottom:1.25rem}
@@ -196,7 +205,6 @@ input[type=range]{flex:1;accent-color:var(--accent)}
 .about-emoji{font-size:36px;margin-bottom:.75rem}
 .about-title{font-family:var(--serif);font-size:22px;font-weight:400;color:var(--text);margin-bottom:.75rem}
 .about-body{font-size:13px;color:var(--text2);line-height:1.6}
-/* WORD DRAWER */
 .word-drawer-tab{position:fixed;right:0;top:50%;transform:translateY(-50%) rotate(-90deg);transform-origin:right bottom;z-index:20;font-family:var(--sans);font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:8px 14px;border:1px solid var(--border2);border-bottom:none;border-radius:8px 8px 0 0;background:var(--surface2);color:var(--accent);cursor:pointer}
 .word-drawer{position:fixed;top:0;right:0;width:min(340px,88vw);height:100vh;background:var(--surface);border-left:1px solid var(--border2);box-shadow:-18px 0 40px rgba(0,0,0,.25);transform:translateX(100%);transition:transform .25s ease;z-index:30;display:flex;flex-direction:column}
 .word-drawer.open{transform:translateX(0)}
@@ -226,7 +234,7 @@ input[type=range]{flex:1;accent-color:var(--accent)}
     <div class="ornament">✦ &nbsp; ✦ &nbsp; ✦</div>
     <div class="masthead-left">
       <button class="icon-btn" onclick="showAbout()" title="About">🙂</button>
-      <span style="font-size:11px;color:var(--text3);font-family:var(--sans);margin-left:4px">v135</span>
+      <span style="font-size:11px;color:var(--text3);font-family:var(--sans);margin-left:4px">v178</span>
     </div>
     <h1><em>Latin</em> Trainer</h1>
     <p class="sub">Vocabularium Latinum</p>
@@ -238,6 +246,7 @@ input[type=range]{flex:1;accent-color:var(--accent)}
   <div class="nav-tabs">
     <button class="nav-tab active" onclick="showMainTab('practice')">Practice</button>
     <button class="nav-tab" onclick="showMainTab('stats')">Stats</button>
+    <button class="nav-tab" onclick="showMainTab('info')">Information</button>
   </div>
   <div id="practicePanel">
     <div class="mode-toggle">
@@ -256,6 +265,7 @@ input[type=range]{flex:1;accent-color:var(--accent)}
     <div class="sel-header">
       <span style="font-size:12px;color:var(--text3)">Categories</span>
       <div style="display:flex;gap:6px">
+        <button class="sel-small-btn" onclick="showCustomList()">Custom words</button>
         <button class="sel-small-btn" onclick="selectAll()">Select all</button>
         <button class="sel-small-btn" onclick="deselectAll()">Deselect all</button>
       </div>
@@ -378,6 +388,100 @@ input[type=range]{flex:1;accent-color:var(--accent)}
   </div>
 </div>
 
+<!-- INFO -->
+<div id="infoView" style="display:none">
+  <div class="stats-header"><h2>Information</h2><p>Grammar notes and special cases</p></div>
+  <div class="info-section">
+    <div class="info-card">
+      <div class="info-subheading">Verbs that take the dative</div>
+      <p class="info-body">These verbs are followed by a dative object rather than an accusative:</p>
+      <div class="info-table">
+        <div class="info-row"><span class="info-lat">persuadeo</span><span class="info-eng">I persuade</span></div>
+        <div class="info-row"><span class="info-lat">resisto</span><span class="info-eng">I resist</span></div>
+      </div>
+    </div>
+    <div class="info-card">
+      <div class="info-subheading">-io verbs (3rd conjugation)</div>
+      <p class="info-body">These 3rd conjugation verbs end in <span class="info-hi">-io</span> and follow a slightly different pattern — their stem vowel is <em>i</em> throughout the present tense:</p>
+      <div class="info-table">
+        <div class="info-row"><span class="info-lat">facio</span><span class="info-eng">do, make</span></div>
+        <div class="info-row"><span class="info-lat">fugio</span><span class="info-eng">flee</span></div>
+        <div class="info-row"><span class="info-lat">capio</span><span class="info-eng">capture</span></div>
+        <div class="info-row"><span class="info-lat">cupio</span><span class="info-eng">desire</span></div>
+        <div class="info-row"><span class="info-lat">accipio</span><span class="info-eng">receive</span></div>
+        <div class="info-row"><span class="info-lat">iacio</span><span class="info-eng">throw</span></div>
+        <div class="info-row"><span class="info-lat">conicio</span><span class="info-eng">hurl</span></div>
+        <div class="info-row"><span class="info-lat">interficio</span><span class="info-eng">kill</span></div>
+      </div>
+    </div>
+    <div class="info-card">
+      <div class="info-subheading">3rd declension -ium words</div>
+      <p class="info-body">These nouns have <span class="info-hi">-ium</span> in the genitive plural instead of the usual -um. The ablative singular is the normal <span class="info-hi">-e</span>.</p>
+      <div class="info-table">
+        <div class="info-row"><span class="info-lat">urbs, urbis f.</span><span class="info-eng">city</span></div>
+        <div class="info-row"><span class="info-lat">mors, mortis f.</span><span class="info-eng">death</span></div>
+        <div class="info-row"><span class="info-lat">nox, noctis f.</span><span class="info-eng">night</span></div>
+        <div class="info-row"><span class="info-lat">parens, parentis m.</span><span class="info-eng">parent</span></div>
+        <div class="info-row"><span class="info-lat">dens, dentis m.</span><span class="info-eng">tooth</span></div>
+        <div class="info-row"><span class="info-lat">pons, pontis m.</span><span class="info-eng">bridge</span></div>
+        <div class="info-row"><span class="info-lat">mons, montis m.</span><span class="info-eng">mountain</span></div>
+      </div>
+    </div>
+    <div class="info-card">
+      <div class="info-subheading">3rd declension -ium words: same nominative &amp; genitive singular</div>
+      <p class="info-body">These nouns share their nominative and genitive singular form, and take <span class="info-hi">-ium</span> in the genitive plural:</p>
+      <div class="info-table">
+        <div class="info-row"><span class="info-lat">hostis, hostis m.</span><span class="info-eng">enemy</span></div>
+        <div class="info-row"><span class="info-lat">navis, navis f.</span><span class="info-eng">ship</span></div>
+        <div class="info-row"><span class="info-lat">classis, classis f.</span><span class="info-eng">fleet</span></div>
+        <div class="info-row"><span class="info-lat">civis, civis m.</span><span class="info-eng">citizen</span></div>
+      </div>
+    </div>
+    <div class="info-card">
+      <div class="info-subheading">Same nominative &amp; genitive singular — but <em>not</em> -ium</div>
+      <p class="info-body">These nouns also share their nominative and genitive singular, but their genitive plural ends in <span class="info-hi">-um</span>, not -ium:</p>
+      <div class="info-table">
+        <div class="info-row"><span class="info-lat">canis, canis m.</span><span class="info-eng">dog</span></div>
+        <div class="info-row"><span class="info-lat">iuvenis, iuvenis m.</span><span class="info-eng">young man</span></div>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <div class="info-subheading">mare, maris n. — sea</div>
+      <p class="info-body">A neuter i-stem noun with an irregular pattern: the ablative singular ends in <span class="info-hi">-i</span> (not -e), and the plural uses i-stem endings throughout.</p>
+      <div style="display:grid;grid-template-columns:auto 1fr 1fr;gap:0;margin-top:4px">
+        <div style="padding:6px 8px 6px 0;border-bottom:1px solid var(--border2);font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.07em"></div>
+        <div style="padding:6px 0;border-bottom:1px solid var(--border2);font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.07em">Singular</div>
+        <div style="padding:6px 0;border-bottom:1px solid var(--border2);font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.07em">Plural</div>
+
+        <div style="padding:5px 10px 5px 0;border-bottom:1px solid var(--border);font-size:11px;color:var(--text3);white-space:nowrap">nominative</div>
+        <div style="padding:5px 0;border-bottom:1px solid var(--border);font-family:var(--serif);font-size:15px;color:var(--text)">mare</div>
+        <div style="padding:5px 0;border-bottom:1px solid var(--border);font-family:var(--serif);font-size:15px;color:var(--text)">maria</div>
+
+        <div style="padding:5px 10px 5px 0;border-bottom:1px solid var(--border);font-size:11px;color:var(--text3);white-space:nowrap">vocative</div>
+        <div style="padding:5px 0;border-bottom:1px solid var(--border);font-family:var(--serif);font-size:15px;color:var(--text)">mare</div>
+        <div style="padding:5px 0;border-bottom:1px solid var(--border);font-family:var(--serif);font-size:15px;color:var(--text)">maria</div>
+
+        <div style="padding:5px 10px 5px 0;border-bottom:1px solid var(--border);font-size:11px;color:var(--text3);white-space:nowrap">accusative</div>
+        <div style="padding:5px 0;border-bottom:1px solid var(--border);font-family:var(--serif);font-size:15px;color:var(--text)">mare</div>
+        <div style="padding:5px 0;border-bottom:1px solid var(--border);font-family:var(--serif);font-size:15px;color:var(--text)">maria</div>
+
+        <div style="padding:5px 10px 5px 0;border-bottom:1px solid var(--border);font-size:11px;color:var(--text3);white-space:nowrap">genitive</div>
+        <div style="padding:5px 0;border-bottom:1px solid var(--border);font-family:var(--serif);font-size:15px;color:var(--text)">maris</div>
+        <div style="padding:5px 0;border-bottom:1px solid var(--border);font-family:var(--serif);font-size:15px;color:var(--text)">marium</div>
+
+        <div style="padding:5px 10px 5px 0;border-bottom:1px solid var(--border);font-size:11px;color:var(--text3);white-space:nowrap">dative</div>
+        <div style="padding:5px 0;border-bottom:1px solid var(--border);font-family:var(--serif);font-size:15px;color:var(--text)">mari</div>
+        <div style="padding:5px 0;border-bottom:1px solid var(--border);font-family:var(--serif);font-size:15px;color:var(--text)">maribus</div>
+
+        <div style="padding:5px 10px 5px 0;font-size:11px;color:var(--text3);white-space:nowrap">ablative</div>
+        <div style="padding:5px 0;font-family:var(--serif);font-size:15px;color:var(--accent)">mari</div>
+        <div style="padding:5px 0;font-family:var(--serif);font-size:15px;color:var(--text)">maribus</div>
+      </div>
+    </div>
+  </div>
+</div>
+
 </div><!-- .app -->
 
 <!-- ABOUT OVERLAY -->
@@ -387,6 +491,90 @@ input[type=range]{flex:1;accent-color:var(--accent)}
     <div class="about-emoji">🙂</div>
     <div class="about-title">Latin Trainer</div>
     <div class="about-body">Made by <strong>Chester Peng</strong>.<br><br>Email me if you see any problems, bugs, or updates needed.</div>
+  </div>
+</div>
+
+<!-- IMPORT OVERLAY -->
+<div id="importOverlay" class="overlay" style="display:none" onclick="hideImport()">
+  <div class="about-box" style="max-width:420px;text-align:left" onclick="event.stopPropagation()">
+    <button class="about-close" onclick="hideImport()">×</button>
+    <div class="about-title" style="text-align:center">Add word</div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:4px">Category</div>
+        <select id="impCat" onchange="impCatChange()" style="width:100%;padding:8px 12px;border-radius:var(--rs);border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-family:var(--sans);font-size:13px">
+          <option value="nouns">Noun</option>
+          <option value="verbs">Verb</option>
+          <option value="adjectives">Adjective</option>
+          <option value="adverbs">Adverb</option>
+          <option value="prepositions">Preposition</option>
+          <option value="conjunctions">Conjunction</option>
+          <option value="interrogatives">Interrogative</option>
+          <option value="pronouns">Pronoun</option>
+        </select>
+      </div>
+      <div id="impDeclRow">
+        <div style="font-size:12px;color:var(--text3);margin-bottom:4px">Declension</div>
+        <select id="impDecl" style="width:100%;padding:8px 12px;border-radius:var(--rs);border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-family:var(--sans);font-size:13px">
+          <option value="1st declension">1st declension</option>
+          <option value="2nd declension (masc)">2nd declension (masc)</option>
+          <option value="2nd declension (neut)">2nd declension (neut)</option>
+          <option value="3rd declension">3rd declension</option>
+        </select>
+      </div>
+      <div id="impConjRow" style="display:none">
+        <div style="font-size:12px;color:var(--text3);margin-bottom:4px">Conjugation</div>
+        <select id="impConj" style="width:100%;padding:8px 12px;border-radius:var(--rs);border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-family:var(--sans);font-size:13px">
+          <option value="1st conjugation">1st conjugation</option>
+          <option value="2nd conjugation">2nd conjugation</option>
+          <option value="3rd conjugation">3rd conjugation</option>
+          <option value="4th conjugation">4th conjugation</option>
+          <option value="irregular">Irregular</option>
+        </select>
+      </div>
+      <div id="impAdjRow" style="display:none">
+        <div style="font-size:12px;color:var(--text3);margin-bottom:4px">Adjective type</div>
+        <select id="impAdj" style="width:100%;padding:8px 12px;border-radius:var(--rs);border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-family:var(--sans);font-size:13px">
+          <option value="1st/2nd declension">1st/2nd declension</option>
+          <option value="3rd declension">3rd declension</option>
+        </select>
+      </div>
+      <div id="impGenderRow">
+        <div style="font-size:12px;color:var(--text3);margin-bottom:4px">Gender</div>
+        <select id="impGender" style="width:100%;padding:8px 12px;border-radius:var(--rs);border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-family:var(--sans);font-size:13px">
+          <option value="m">Masculine</option>
+          <option value="f">Feminine</option>
+          <option value="n">Neuter</option>
+        </select>
+      </div>
+      <div id="impGenRow" style="display:none">
+        <div style="font-size:12px;color:var(--text3);margin-bottom:4px">Genitive (3rd declension only, e.g. "leonis")</div>
+        <input id="impGen" type="text" placeholder="e.g. leonis" style="width:100%;padding:8px 12px;border-radius:var(--rs);border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-family:var(--sans);font-size:13px" autocomplete="off"/>
+      </div>
+      <div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:4px">Latin word (nominative / 1st person sg)</div>
+        <input id="impLat" type="text" placeholder="e.g. puella" style="width:100%;padding:8px 12px;border-radius:var(--rs);border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-family:var(--sans);font-size:13px" autocomplete="off"/>
+      </div>
+      <div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:4px">English meaning(s), comma-separated</div>
+        <input id="impEng" type="text" placeholder="e.g. girl, maiden" style="width:100%;padding:8px 12px;border-radius:var(--rs);border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-family:var(--sans);font-size:13px" autocomplete="off"/>
+      </div>
+      <div id="impMsg" style="font-size:12px;min-height:18px"></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-primary" onclick="addImportWord()" style="flex:1">Add word</button>
+        <button class="btn-secondary" onclick="hideImport()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CUSTOM WORDS LIST -->
+<div id="customListOverlay" class="overlay" style="display:none" onclick="hideCustomList()">
+  <div class="about-box" style="max-width:460px;text-align:left;max-height:80vh;display:flex;flex-direction:column" onclick="event.stopPropagation()">
+    <button class="about-close" onclick="hideCustomList()">×</button>
+    <div class="about-title" style="text-align:center">Custom words</div>
+    <div id="customListBody" style="overflow-y:auto;flex:1;margin-bottom:12px"></div>
+    <button class="btn-primary" onclick="hideCustomList();showImport()" style="width:100%">+ Add word</button>
   </div>
 </div>
 
@@ -414,7 +602,7 @@ input[type=range]{flex:1;accent-color:var(--accent)}
 </aside>
 
 <script>
-const DATA={nouns:{label:"Nouns",sub:{"1st declension":{words:[{lat:"casa",gen:null,gender:"f",eng:["cottage"]},{lat:"puella",gen:null,gender:"f",eng:["girl"]},{lat:"cena",gen:null,gender:"f",eng:["dinner"]},{lat:"terra",gen:null,gender:"f",eng:["land","country","ground","earth"]},{lat:"femina",gen:null,gender:"f",eng:["woman"]},{lat:"regina",gen:null,gender:"f",eng:["queen"]},{lat:"mensa",gen:null,gender:"f",eng:["table"]},{lat:"silva",gen:null,gender:"f",eng:["forest","woods"]},{lat:"porta",gen:null,gender:"f",eng:["gate"]},{lat:"hasta",gen:null,gender:"f",eng:["spear"]},{lat:"aqua",gen:null,gender:"f",eng:["water"]},{lat:"epistula",gen:null,gender:"f",eng:["letter"]},{lat:"via",gen:null,gender:"f",eng:["road","street"]},{lat:"ianua",gen:null,gender:"f",eng:["door"]},{lat:"taberna",gen:null,gender:"f",eng:["tavern"]},{lat:"filia",gen:null,gender:"f",eng:["daughter"]},{lat:"fabula",gen:null,gender:"f",eng:["story"]},{lat:"insula",gen:null,gender:"f",eng:["island"]},{lat:"pecunia",gen:null,gender:"f",eng:["money"]},{lat:"pugna",gen:null,gender:"f",eng:["fight"]},{lat:"patria",gen:null,gender:"f",eng:["homeland"]},{lat:"magistra",gen:null,gender:"f",eng:["female teacher"]},{lat:"ancilla",gen:null,gender:"f",eng:["slave girl"]},{lat:"hora",gen:null,gender:"f",eng:["hour"]},{lat:"toga",gen:null,gender:"f",eng:["toga"]},{lat:"statua",gen:null,gender:"f",eng:["statue"]},{lat:"dea",gen:null,gender:"f",eng:["goddess"]},{lat:"schola",gen:null,gender:"f",eng:["class","classroom"]},{lat:"domina",gen:null,gender:"f",eng:["mistress"]},{lat:"agricola",gen:null,gender:"m",eng:["farmer"]},{lat:"poeta",gen:null,gender:"m",eng:["poet"]},{lat:"nauta",gen:null,gender:"m",eng:["sailor"]},{lat:"Roma",gen:null,gender:"f",eng:["Rome"]},{lat:"Italia",gen:null,gender:"f",eng:["Italy"]},{lat:"Hispania",gen:null,gender:"f",eng:["Spain"]},{lat:"Germania",gen:null,gender:"f",eng:["Germany"]},{lat:"Britannia",gen:null,gender:"f",eng:["England"]},{lat:"Gallia",gen:null,gender:"f",eng:["Gaul"]},{lat:"Athenae",gen:null,gender:"f",eng:["Athens"]},{lat:"Graecia",gen:null,gender:"f",eng:["Greece"]},{lat:"Troia",gen:null,gender:"f",eng:["Troy"]}]},"2nd declension (masc)":{words:[{lat:"servus",gen:null,gender:"m",eng:["slave"]},{lat:"discipulus",gen:null,gender:"m",eng:["student"]},{lat:"amicus",gen:null,gender:"m",eng:["friend"]},{lat:"filius",gen:null,gender:"m",eng:["son"]},{lat:"murus",gen:null,gender:"m",eng:["wall"]},{lat:"cibus",gen:null,gender:"m",eng:["food"]},{lat:"hortus",gen:null,gender:"m",eng:["garden"]},{lat:"equus",gen:null,gender:"m",eng:["horse"]},{lat:"campus",gen:null,gender:"m",eng:["plain"]},{lat:"colonus",gen:null,gender:"m",eng:["farmer"]},{lat:"somnus",gen:null,gender:"m",eng:["sleep"]},{lat:"sonus",gen:null,gender:"m",eng:["sound"]},{lat:"nuntius",gen:null,gender:"m",eng:["messenger"]},{lat:"ventus",gen:null,gender:"m",eng:["wind"]},{lat:"gladius",gen:null,gender:"m",eng:["sword"]},{lat:"deus",gen:null,gender:"m",eng:["god"]},{lat:"ludus",gen:null,gender:"m",eng:["school"]},{lat:"annus",gen:null,gender:"m",eng:["year"]},{lat:"barbarus",gen:null,gender:"m",eng:["barbarian"]},{lat:"libertus",gen:null,gender:"m",eng:["freedman"]},{lat:"dominus",gen:null,gender:"m",eng:["master"]},{lat:"medicus",gen:null,gender:"m",eng:["doctor"]},{lat:"vir",gen:null,gender:"m",eng:["man"]},{lat:"puer",gen:null,gender:"m",eng:["boy"]},{lat:"ager",gen:null,gender:"m",eng:["field"]},{lat:"liber",gen:null,gender:"m",eng:["book"]},{lat:"magister",gen:null,gender:"m",eng:["teacher"]},{lat:"ludi",gen:null,gender:"m",eng:["games"]},{lat:"Gallus",gen:null,gender:"m",eng:["a Gaul"]},{lat:"Romanus",gen:null,gender:"m",eng:["a Roman"]}]},"2nd declension (neut)":{words:[{lat:"castra",gen:null,gender:"n",eng:["camp"]},{lat:"bellum",gen:null,gender:"n",eng:["war"]},{lat:"vinum",gen:null,gender:"n",eng:["wine"]},{lat:"proelium",gen:null,gender:"n",eng:["battle"]},{lat:"periculum",gen:null,gender:"n",eng:["danger"]},{lat:"arma",gen:null,gender:"n",eng:["arms","weapons"]},{lat:"frumentum",gen:null,gender:"n",eng:["wheat","grain"]},{lat:"consilium",gen:null,gender:"n",eng:["plan"]},{lat:"auxilium",gen:null,gender:"n",eng:["help"]},{lat:"donum",gen:null,gender:"n",eng:["gift"]},{lat:"verbum",gen:null,gender:"n",eng:["word"]},{lat:"saxum",gen:null,gender:"n",eng:["rock"]},{lat:"oppidum",gen:null,gender:"n",eng:["town"]}]},"3rd declension":{words:[{lat:"leo",gen:"leonis",gender:"m",eng:["lion"]},{lat:"rex",gen:"regis",gender:"m",eng:["king"]},{lat:"pater",gen:"patris",gender:"m",eng:["father"]},{lat:"frater",gen:"fratris",gender:"m",eng:["brother"]},{lat:"iuvenis",gen:"iuvenis",gender:"m",eng:["young man"]},{lat:"canis",gen:"canis",gender:"m",eng:["dog"]},{lat:"comes",gen:"comitis",gender:"m",eng:["companion"]},{lat:"consul",gen:"consulis",gender:"m",eng:["consul"]},{lat:"dux",gen:"ducis",gender:"m",eng:["leader"]},{lat:"imperator",gen:"imperatoris",gender:"m",eng:["general"]},{lat:"centurio",gen:"centurionis",gender:"m",eng:["centurion"]},{lat:"amor",gen:"amoris",gender:"m",eng:["love"]},{lat:"flos",gen:"floris",gender:"m",eng:["flower"]},{lat:"miles",gen:"militis",gender:"m",eng:["soldier"]},{lat:"labor",gen:"laboris",gender:"m",eng:["work"]},{lat:"viator",gen:"viatoris",gender:"m",eng:["traveller"]},{lat:"senex",gen:"senis",gender:"m",eng:["old man"]},{lat:"senator",gen:"senatoris",gender:"m",eng:["senator"]},{lat:"clamor",gen:"clamoris",gender:"m",eng:["shout"]},{lat:"dolor",gen:"doloris",gender:"m",eng:["pain","grief"]},{lat:"eques",gen:"equitis",gender:"m",eng:["horseman"]},{lat:"pes",gen:"pedis",gender:"m",eng:["foot"]},{lat:"custos",gen:"custodis",gender:"m",eng:["guard"]},{lat:"mons",gen:"montis",gender:"m",eng:["mountain"]},{lat:"civis",gen:"civis",gender:"m",eng:["citizen"]},{lat:"hostis",gen:"hostis",gender:"m",eng:["enemy"]},{lat:"pons",gen:"pontis",gender:"m",eng:["bridge"]},{lat:"dens",gen:"dentis",gender:"m",eng:["tooth"]},{lat:"parens",gen:"parentis",gender:"m",eng:["parent"]},{lat:"vox",gen:"vocis",gender:"f",eng:["voice"]},{lat:"mater",gen:"matris",gender:"f",eng:["mother"]},{lat:"soror",gen:"sororis",gender:"f",eng:["sister"]},{lat:"libertas",gen:"libertatis",gender:"f",eng:["freedom"]},{lat:"tempestas",gen:"tempestatis",gender:"f",eng:["storm"]},{lat:"arbor",gen:"arboris",gender:"f",eng:["tree"]},{lat:"lex",gen:"legis",gender:"f",eng:["law"]},{lat:"pax",gen:"pacis",gender:"f",eng:["peace"]},{lat:"virtus",gen:"virtutis",gender:"f",eng:["courage","virtue"]},{lat:"virgo",gen:"virginis",gender:"f",eng:["maiden","virgin"]},{lat:"urbs",gen:"urbis",gender:"f",eng:["city"]},{lat:"mors",gen:"mortis",gender:"f",eng:["death"]},{lat:"nox",gen:"noctis",gender:"f",eng:["night"]},{lat:"navis",gen:"navis",gender:"f",eng:["ship"]},{lat:"classis",gen:"classis",gender:"f",eng:["fleet"]},{lat:"nomen",gen:"nominis",gender:"n",eng:["name"]},{lat:"tempus",gen:"temporis",gender:"n",eng:["time"]},{lat:"vulnus",gen:"vulneris",gender:"n",eng:["wound"]},{lat:"litus",gen:"litoris",gender:"n",eng:["shore","beach"]},{lat:"flumen",gen:"fluminis",gender:"n",eng:["river"]},{lat:"foedus",gen:"foederis",gender:"n",eng:["treaty"]},{lat:"carmen",gen:"carminis",gender:"n",eng:["poem","song"]},{lat:"mare",gen:"maris",gender:"n",eng:["sea"]},{lat:"moenia",gen:"moenium",gender:"n",eng:["city walls"]}]}}},adjectives:{label:"Adjectives",sub:{"1st/2nd declension":{words:[{lat:"bonus",eng:["good"]},{lat:"laetus",eng:["happy"]},{lat:"iratus",eng:["angry"]},{lat:"fessus",eng:["tired"]},{lat:"magnus",eng:["big","great"]},{lat:"parvus",eng:["small"]},{lat:"malus",eng:["bad"]},{lat:"benignus",eng:["kind"]},{lat:"multus",eng:["much"]},{lat:"latus",eng:["wide"]},{lat:"anxius",eng:["anxious"]},{lat:"longus",eng:["long"]},{lat:"sollicitus",eng:["worried"]},{lat:"novus",eng:["new"]},{lat:"optimus",eng:["best","excellent"]},{lat:"miser",eng:["miserable"]},{lat:"liber",eng:["free"]},{lat:"pulcher",eng:["beautiful"]},{lat:"sacer",eng:["sacred"]},{lat:"Romanus",eng:["Roman"]},{lat:"reliquus",eng:["remaining","the remaining"]},{lat:"pauci",eng:["a few"]},{lat:"ceteri",eng:["the rest of"]},{lat:"unus",eng:["one"]},{lat:"duo",eng:["two"]},{lat:"tres",eng:["three"]}]},"3rd declension":{words:[{lat:"fortis",eng:["brave"]},{lat:"gravis",eng:["heavy","serious"]},{lat:"levis",eng:["light"]},{lat:"omnis",eng:["all","every"]},{lat:"incolumis",eng:["safe","unharmed"]},{lat:"brevis",eng:["short"]},{lat:"crudelis",eng:["cruel"]},{lat:"tristis",eng:["sad"]},{lat:"gracilis",eng:["slender","slim"]},{lat:"facilis",eng:["easy"]},{lat:"difficilis",eng:["difficult"]},{lat:"insignis",eng:["outstanding"]},{lat:"dulcis",eng:["sweet"]}]}}},verbs:{label:"Verbs",sub:{"1st conjugation":{words:[{lat:"porto",eng:["carry"]},{lat:"ceno",eng:["dine"]},{lat:"ambulo",eng:["walk"]},{lat:"navigo",eng:["sail"]},{lat:"amo",eng:["love"]},{lat:"rogo",eng:["ask"]},{lat:"pugno",eng:["fight"]},{lat:"oppugno",eng:["attack"]},{lat:"convoco",eng:["call together","assemble"]},{lat:"habito",eng:["live"]},{lat:"exspecto",eng:["wait for"]},{lat:"servo",eng:["save"]},{lat:"laboro",eng:["work"]},{lat:"festino",eng:["hurry"]},{lat:"do",eng:["give"]},{lat:"paro",eng:["prepare"]},{lat:"iuvo",eng:["help"]},{lat:"laudo",eng:["praise"]},{lat:"specto",eng:["watch","look at"]},{lat:"narro",eng:["tell"]},{lat:"saluto",eng:["greet"]},{lat:"voco",eng:["call"]},{lat:"clamo",eng:["shout"]},{lat:"curo",eng:["care for","look after"]},{lat:"intro",eng:["enter"]},{lat:"supero",eng:["overcome"]},{lat:"neco",eng:["kill"]},{lat:"excito",eng:["wake up","arouse"]}]},"2nd conjugation":{words:[{lat:"moneo",eng:["warn","advise"]},{lat:"sedeo",eng:["sit"]},{lat:"maneo",eng:["stay","remain"]},{lat:"iaceo",eng:["lie down"]},{lat:"taceo",eng:["be quiet","be silent"]},{lat:"habeo",eng:["have","own","possess"]},{lat:"timeo",eng:["fear"]},{lat:"iubeo",eng:["order"]},{lat:"terreo",eng:["terrify"]},{lat:"video",eng:["see"]},{lat:"doceo",eng:["teach"]},{lat:"debeo",eng:["ought","owe"]},{lat:"respondeo",eng:["answer","reply"]},{lat:"persuadeo",eng:["persuade"]}]},"3rd conjugation":{words:[{lat:"procedo",eng:["go forward"]},{lat:"rego",eng:["rule"]},{lat:"lego",eng:["read"]},{lat:"scribo",eng:["write"]},{lat:"duco",eng:["lead"]},{lat:"mitto",eng:["send"]},{lat:"cado",eng:["fall"]},{lat:"resisto",eng:["resist"]},{lat:"dico",eng:["say","speak"]},{lat:"ludo",eng:["play"]},{lat:"occido",eng:["slaughter","kill"]},{lat:"descendo",eng:["go down"]},{lat:"vinco",eng:["conquer"]},{lat:"trado",eng:["hand over"]},{lat:"pono",eng:["place","put"]},{lat:"surgo",eng:["arise","get up"]},{lat:"curro",eng:["run"]},{lat:"constituo",eng:["decide"]},{lat:"ascendo",eng:["go up","climb"]},{lat:"defendo",eng:["defend"]},{lat:"dimitto",eng:["send away"]},{lat:"bibo",eng:["drink"]},{lat:"reddo",eng:["give back"]},{lat:"accedo",eng:["approach"]},{lat:"relinquo",eng:["leave behind","abandon"]},{lat:"emo",eng:["buy"]},{lat:"vendo",eng:["sell"]},{lat:"contendo",eng:["hurry","march"]},{lat:"traho",eng:["drag"]},{lat:"claudo",eng:["close","shut"]},{lat:"facio",eng:["do","make"]},{lat:"fugio",eng:["flee"]},{lat:"capio",eng:["take","capture"]},{lat:"cupio",eng:["desire"]},{lat:"accipio",eng:["receive"]},{lat:"iacio",eng:["throw"]},{lat:"conicio",eng:["hurl"]},{lat:"interficio",eng:["kill"]}]},"4th conjugation":{words:[{lat:"invenio",eng:["find"]},{lat:"dormio",eng:["sleep"]},{lat:"audio",eng:["hear"]},{lat:"venio",eng:["come"]},{lat:"advenio",eng:["arrive","come to"]},{lat:"convenio",eng:["come together"]},{lat:"punio",eng:["punish"]},{lat:"custodio",eng:["guard"]}]},irregular:{words:[{lat:"sum",eng:["be"]},{lat:"adsum",eng:["I am present"]},{lat:"absum",eng:["I am absent"]},{lat:"possum",eng:["be able","can"]},{lat:"eo",eng:["go"]},{lat:"transeo",eng:["cross"]},{lat:"abeo",eng:["go away"]},{lat:"exeo",eng:["go out"]},{lat:"redeo",eng:["go back"]},{lat:"ineo",eng:["go into"]}]}}},prepositions:{label:"Prepositions",sub:{"with ablative":{words:[{lat:"sub",eng:["under"]},{lat:"in",eng:["in","on"]},{lat:"cum",eng:["with"]},{lat:"de",eng:["about","down from"]},{lat:"ex",eng:["out of","from"]},{lat:"ab",eng:["from"]}]},"with accusative":{words:[{lat:"ad",eng:["to"]},{lat:"in",eng:["into","onto"]},{lat:"trans",eng:["across"]},{lat:"per",eng:["through"]},{lat:"prope",eng:["near"]},{lat:"contra",eng:["against"]},{lat:"circum",eng:["around"]},{lat:"post",eng:["after"]},{lat:"ante",eng:["before"]},{lat:"propter",eng:["on account of"]}]}}},conjunctions:{label:"Conjunctions",sub:{conjunctions:{words:[{lat:"nam",eng:["for"]},{lat:"quod",eng:["because"]},{lat:"et",eng:["and"]},{lat:"sed",eng:["but"]},{lat:"tamen",eng:["however","nevertheless"]},{lat:"itaque",eng:["and so"]}]}}},adverbs:{label:"Adverbs",sub:{adverbs:{words:[{lat:"fortiter",eng:["bravely"]},{lat:"bene",eng:["well"]},{lat:"celeriter",eng:["quickly"]},{lat:"diligenter",eng:["carefully","diligently"]},{lat:"numquam",eng:["never"]},{lat:"nunc",eng:["now"]},{lat:"iterum",eng:["again"]},{lat:"tandem",eng:["at last"]},{lat:"lente",eng:["slowly"]},{lat:"laete",eng:["happily"]},{lat:"diu",eng:["for a long time"]},{lat:"subito",eng:["suddenly"]},{lat:"iam",eng:["now","already"]},{lat:"statim",eng:["at once"]},{lat:"saepe",eng:["often"]},{lat:"mox",eng:["soon"]}]}}},interrogatives:{label:"Interrogatives",sub:{interrogatives:{words:[{lat:"quis",eng:["who"]},{lat:"quid",eng:["what"]},{lat:"quando",eng:["when"]},{lat:"ubi",eng:["where"]},{lat:"quo modo",eng:["how"]},{lat:"cur",eng:["why"]},{lat:"quantus",eng:["how big"]},{lat:"-ne",eng:["question marker","question signal","question"]},{lat:"nonne",eng:["surely"]},{lat:"num",eng:["surely not"]}]}}},pronouns:{label:"Pronouns",sub:{pronouns:{words:[{lat:"me",eng:["me"]},{lat:"te",eng:["you"]},{lat:"eum",eng:["him"]},{lat:"eam",eng:["her"]},{lat:"eos",eng:["them"]},{lat:"eas",eng:["them"]},{lat:"vos",eng:["you all"]},{lat:"nos",eng:["us"]}]}}}};
+const DATA={nouns:{label:"Nouns",sub:{"1st declension":{words:[{lat:"casa",gen:null,gender:"f",eng:["cottage"]},{lat:"puella",gen:null,gender:"f",eng:["girl"]},{lat:"cena",gen:null,gender:"f",eng:["dinner"]},{lat:"terra",gen:null,gender:"f",eng:["land","country","ground","earth"]},{lat:"femina",gen:null,gender:"f",eng:["woman"]},{lat:"regina",gen:null,gender:"f",eng:["queen"]},{lat:"mensa",gen:null,gender:"f",eng:["table"]},{lat:"silva",gen:null,gender:"f",eng:["forest","woods"]},{lat:"porta",gen:null,gender:"f",eng:["gate"]},{lat:"hasta",gen:null,gender:"f",eng:["spear"]},{lat:"aqua",gen:null,gender:"f",eng:["water"]},{lat:"epistula",gen:null,gender:"f",eng:["letter"]},{lat:"via",gen:null,gender:"f",eng:["road","street"]},{lat:"ianua",gen:null,gender:"f",eng:["door"]},{lat:"taberna",gen:null,gender:"f",eng:["tavern"]},{lat:"filia",gen:null,gender:"f",eng:["daughter"]},{lat:"fabula",gen:null,gender:"f",eng:["story"]},{lat:"insula",gen:null,gender:"f",eng:["island"]},{lat:"pecunia",gen:null,gender:"f",eng:["money"]},{lat:"pugna",gen:null,gender:"f",eng:["fight"]},{lat:"patria",gen:null,gender:"f",eng:["homeland"]},{lat:"magistra",gen:null,gender:"f",eng:["female teacher"]},{lat:"ancilla",gen:null,gender:"f",eng:["slave girl"]},{lat:"hora",gen:null,gender:"f",eng:["hour"]},{lat:"toga",gen:null,gender:"f",eng:["toga"]},{lat:"statua",gen:null,gender:"f",eng:["statue"]},{lat:"dea",gen:null,gender:"f",eng:["goddess"]},{lat:"schola",gen:null,gender:"f",eng:["class","classroom"]},{lat:"domina",gen:null,gender:"f",eng:["mistress"]},{lat:"agricola",gen:null,gender:"m",eng:["farmer"]},{lat:"poeta",gen:null,gender:"m",eng:["poet"]},{lat:"nauta",gen:null,gender:"m",eng:["sailor"]},{lat:"Roma",gen:null,gender:"f",eng:["Rome"]},{lat:"Italia",gen:null,gender:"f",eng:["Italy"]},{lat:"Hispania",gen:null,gender:"f",eng:["Spain"]},{lat:"Germania",gen:null,gender:"f",eng:["Germany"]},{lat:"Britannia",gen:null,gender:"f",eng:["England"]},{lat:"Gallia",gen:null,gender:"f",eng:["Gaul"]},{lat:"Athenae",gen:null,gender:"f",eng:["Athens"]},{lat:"Graecia",gen:null,gender:"f",eng:["Greece"]},{lat:"Troia",gen:null,gender:"f",eng:["Troy"]}]},"2nd declension (masc)":{words:[{lat:"servus",gen:null,gender:"m",eng:["slave"]},{lat:"discipulus",gen:null,gender:"m",eng:["student"]},{lat:"amicus",gen:null,gender:"m",eng:["friend"]},{lat:"filius",gen:null,gender:"m",eng:["son"]},{lat:"murus",gen:null,gender:"m",eng:["wall"]},{lat:"cibus",gen:null,gender:"m",eng:["food"]},{lat:"hortus",gen:null,gender:"m",eng:["garden"]},{lat:"equus",gen:null,gender:"m",eng:["horse"]},{lat:"campus",gen:null,gender:"m",eng:["plain"]},{lat:"colonus",gen:null,gender:"m",eng:["farmer"]},{lat:"somnus",gen:null,gender:"m",eng:["sleep"]},{lat:"sonus",gen:null,gender:"m",eng:["sound"]},{lat:"nuntius",gen:null,gender:"m",eng:["messenger"]},{lat:"ventus",gen:null,gender:"m",eng:["wind"]},{lat:"gladius",gen:null,gender:"m",eng:["sword"]},{lat:"deus",gen:null,gender:"m",eng:["god"]},{lat:"ludus",gen:null,gender:"m",eng:["school"]},{lat:"annus",gen:null,gender:"m",eng:["year"]},{lat:"barbarus",gen:null,gender:"m",eng:["barbarian"]},{lat:"libertus",gen:null,gender:"m",eng:["freedman"]},{lat:"dominus",gen:null,gender:"m",eng:["master"]},{lat:"medicus",gen:null,gender:"m",eng:["doctor"]},{lat:"vir",gen:null,gender:"m",eng:["man"]},{lat:"puer",gen:null,gender:"m",eng:["boy"]},{lat:"ager",gen:null,gender:"m",eng:["field"]},{lat:"liber",gen:null,gender:"m",eng:["book"]},{lat:"magister",gen:null,gender:"m",eng:["teacher"]},{lat:"ludi",gen:null,gender:"m",eng:["games"]},{lat:"Gallus",gen:null,gender:"m",eng:["a Gaul"]},{lat:"Romanus",gen:null,gender:"m",eng:["a Roman"]}]},"2nd declension (neut)":{words:[{lat:"castra",gen:null,gender:"n",eng:["camp"]},{lat:"bellum",gen:null,gender:"n",eng:["war"]},{lat:"vinum",gen:null,gender:"n",eng:["wine"]},{lat:"proelium",gen:null,gender:"n",eng:["battle"]},{lat:"periculum",gen:null,gender:"n",eng:["danger"]},{lat:"arma",gen:null,gender:"n",eng:["arms","weapons"]},{lat:"frumentum",gen:null,gender:"n",eng:["wheat","grain"]},{lat:"consilium",gen:null,gender:"n",eng:["plan"]},{lat:"auxilium",gen:null,gender:"n",eng:["help"]},{lat:"donum",gen:null,gender:"n",eng:["gift"]},{lat:"verbum",gen:null,gender:"n",eng:["word"]},{lat:"saxum",gen:null,gender:"n",eng:["rock"]},{lat:"oppidum",gen:null,gender:"n",eng:["town"]}]},"3rd declension":{words:[{lat:"leo",gen:"leonis",gender:"m",eng:["lion"]},{lat:"rex",gen:"regis",gender:"m",eng:["king"]},{lat:"pater",gen:"patris",gender:"m",eng:["father"]},{lat:"frater",gen:"fratris",gender:"m",eng:["brother"]},{lat:"iuvenis",gen:"iuvenis",gender:"m",eng:["young man"]},{lat:"canis",gen:"canis",gender:"m",eng:["dog"]},{lat:"comes",gen:"comitis",gender:"m",eng:["companion"]},{lat:"consul",gen:"consulis",gender:"m",eng:["consul"]},{lat:"dux",gen:"ducis",gender:"m",eng:["leader"]},{lat:"imperator",gen:"imperatoris",gender:"m",eng:["general"]},{lat:"centurio",gen:"centurionis",gender:"m",eng:["centurion"]},{lat:"amor",gen:"amoris",gender:"m",eng:["love"]},{lat:"flos",gen:"floris",gender:"m",eng:["flower"]},{lat:"miles",gen:"militis",gender:"m",eng:["soldier"]},{lat:"labor",gen:"laboris",gender:"m",eng:["work"]},{lat:"viator",gen:"viatoris",gender:"m",eng:["traveller"]},{lat:"senex",gen:"senis",gender:"m",eng:["old man"]},{lat:"senator",gen:"senatoris",gender:"m",eng:["senator"]},{lat:"clamor",gen:"clamoris",gender:"m",eng:["shout"]},{lat:"dolor",gen:"doloris",gender:"m",eng:["pain","grief"]},{lat:"eques",gen:"equitis",gender:"m",eng:["horseman"]},{lat:"pes",gen:"pedis",gender:"m",eng:["foot"]},{lat:"custos",gen:"custodis",gender:"m",eng:["guard"]},{lat:"mons",gen:"montis",gender:"m",eng:["mountain"]},{lat:"civis",gen:"civis",gender:"m",eng:["citizen"]},{lat:"hostis",gen:"hostis",gender:"m",eng:["enemy"]},{lat:"pons",gen:"pontis",gender:"m",eng:["bridge"]},{lat:"dens",gen:"dentis",gender:"m",eng:["tooth"]},{lat:"parens",gen:"parentis",gender:"m",eng:["parent"]},{lat:"vox",gen:"vocis",gender:"f",eng:["voice"]},{lat:"mater",gen:"matris",gender:"f",eng:["mother"]},{lat:"soror",gen:"sororis",gender:"f",eng:["sister"]},{lat:"libertas",gen:"libertatis",gender:"f",eng:["freedom"]},{lat:"tempestas",gen:"tempestatis",gender:"f",eng:["storm"]},{lat:"arbor",gen:"arboris",gender:"f",eng:["tree"]},{lat:"lex",gen:"legis",gender:"f",eng:["law"]},{lat:"pax",gen:"pacis",gender:"f",eng:["peace"]},{lat:"virtus",gen:"virtutis",gender:"f",eng:["courage","virtue"]},{lat:"virgo",gen:"virginis",gender:"f",eng:["maiden","virgin"]},{lat:"urbs",gen:"urbis",gender:"f",eng:["city"]},{lat:"mors",gen:"mortis",gender:"f",eng:["death"]},{lat:"nox",gen:"noctis",gender:"f",eng:["night"]},{lat:"navis",gen:"navis",gender:"f",eng:["ship"]},{lat:"classis",gen:"classis",gender:"f",eng:["fleet"]},{lat:"nomen",gen:"nominis",gender:"n",eng:["name"]},{lat:"tempus",gen:"temporis",gender:"n",eng:["time"]},{lat:"vulnus",gen:"vulneris",gender:"n",eng:["wound"]},{lat:"litus",gen:"litoris",gender:"n",eng:["shore","beach"]},{lat:"flumen",gen:"fluminis",gender:"n",eng:["river"]},{lat:"foedus",gen:"foederis",gender:"n",eng:["treaty"]},{lat:"carmen",gen:"carminis",gender:"n",eng:["poem","song"]},{lat:"mare",gen:"maris",gender:"n",eng:["sea"]},{lat:"moenia",gen:"moenium",gender:"n",eng:["city walls"]}]}}},adjectives:{label:"Adjectives",sub:{"1st/2nd declension":{words:[{lat:"bonus",eng:["good"]},{lat:"laetus",eng:["happy"]},{lat:"iratus",eng:["angry"]},{lat:"fessus",eng:["tired"]},{lat:"magnus",eng:["big","great"]},{lat:"parvus",eng:["small"]},{lat:"malus",eng:["bad"]},{lat:"benignus",eng:["kind"]},{lat:"multus",eng:["much"]},{lat:"latus",eng:["wide"]},{lat:"anxius",eng:["anxious"]},{lat:"longus",eng:["long"]},{lat:"sollicitus",eng:["worried"]},{lat:"novus",eng:["new"]},{lat:"optimus",eng:["best","excellent"]},{lat:"miser",eng:["miserable"]},{lat:"liber",eng:["free"]},{lat:"pulcher",eng:["beautiful"]},{lat:"sacer",eng:["sacred"]},{lat:"Romanus",eng:["Roman"]},{lat:"reliquus",eng:["remaining","the remaining"]},{lat:"pauci",eng:["a few"]},{lat:"ceteri",eng:["the rest of"]},{lat:"unus",eng:["one"]},{lat:"duo",eng:["two"]},{lat:"tres",eng:["three"]},{lat:"tuus",eng:["your"]},{lat:"vester",eng:["your (plural)"]},{lat:"meus",eng:["my"]},{lat:"multi",eng:["many"]},{lat:"decimus",eng:["tenth"]}]},"3rd declension":{words:[{lat:"fortis",eng:["brave"]},{lat:"gravis",eng:["heavy","serious"]},{lat:"levis",eng:["light"]},{lat:"omnis",eng:["all","every"]},{lat:"incolumis",eng:["safe","unharmed"]},{lat:"brevis",eng:["short"]},{lat:"crudelis",eng:["cruel"]},{lat:"tristis",eng:["sad"]},{lat:"gracilis",eng:["slender","slim"]},{lat:"facilis",eng:["easy"]},{lat:"difficilis",eng:["difficult"]},{lat:"insignis",eng:["outstanding"]},{lat:"dulcis",eng:["sweet"]}]}}},verbs:{label:"Verbs",sub:{"1st conjugation":{words:[{lat:"porto",eng:["carry"]},{lat:"ceno",eng:["dine"]},{lat:"ambulo",eng:["walk"]},{lat:"navigo",eng:["sail"]},{lat:"amo",eng:["love"]},{lat:"rogo",eng:["ask"]},{lat:"pugno",eng:["fight"]},{lat:"oppugno",eng:["attack"]},{lat:"convoco",eng:["call together","assemble"]},{lat:"habito",eng:["live"]},{lat:"exspecto",eng:["wait for"]},{lat:"servo",eng:["save"]},{lat:"laboro",eng:["work"]},{lat:"festino",eng:["hurry"]},{lat:"do",eng:["give"]},{lat:"paro",eng:["prepare"]},{lat:"iuvo",eng:["help"]},{lat:"laudo",eng:["praise"]},{lat:"specto",eng:["watch","look at"]},{lat:"narro",eng:["tell"]},{lat:"saluto",eng:["greet"]},{lat:"voco",eng:["call"]},{lat:"clamo",eng:["shout"]},{lat:"curo",eng:["care for","look after"]},{lat:"intro",eng:["enter"]},{lat:"supero",eng:["overcome"]},{lat:"neco",eng:["kill"]},{lat:"excito",eng:["wake up","arouse"]}]},"2nd conjugation":{words:[{lat:"moneo",eng:["warn","advise"]},{lat:"sedeo",eng:["sit"]},{lat:"maneo",eng:["stay","remain"]},{lat:"iaceo",eng:["lie down"]},{lat:"taceo",eng:["be quiet","be silent"]},{lat:"habeo",eng:["have","own","possess"]},{lat:"timeo",eng:["fear"]},{lat:"iubeo",eng:["order"]},{lat:"terreo",eng:["terrify"]},{lat:"video",eng:["see"]},{lat:"doceo",eng:["teach"]},{lat:"debeo",eng:["ought","owe"]},{lat:"respondeo",eng:["answer","reply"]},{lat:"persuadeo",eng:["persuade"]}]},"3rd conjugation":{words:[{lat:"procedo",eng:["go forward"]},{lat:"rego",eng:["rule"]},{lat:"lego",eng:["read"]},{lat:"scribo",eng:["write"]},{lat:"duco",eng:["lead"]},{lat:"mitto",eng:["send"]},{lat:"cado",eng:["fall"]},{lat:"resisto",eng:["resist"]},{lat:"dico",eng:["say","speak"]},{lat:"ludo",eng:["play"]},{lat:"occido",eng:["slaughter","kill"]},{lat:"descendo",eng:["go down"]},{lat:"vinco",eng:["conquer"]},{lat:"trado",eng:["hand over"]},{lat:"pono",eng:["place","put"]},{lat:"surgo",eng:["arise","get up"]},{lat:"curro",eng:["run"]},{lat:"constituo",eng:["decide"]},{lat:"ascendo",eng:["go up","climb"]},{lat:"defendo",eng:["defend"]},{lat:"dimitto",eng:["send away"]},{lat:"bibo",eng:["drink"]},{lat:"reddo",eng:["give back"]},{lat:"accedo",eng:["approach"]},{lat:"relinquo",eng:["leave behind","abandon"]},{lat:"emo",eng:["buy"]},{lat:"vendo",eng:["sell"]},{lat:"contendo",eng:["hurry","march"]},{lat:"traho",eng:["drag"]},{lat:"claudo",eng:["close","shut"]},{lat:"facio",eng:["do","make"]},{lat:"fugio",eng:["flee"]},{lat:"capio",eng:["take","capture"]},{lat:"cupio",eng:["desire"]},{lat:"accipio",eng:["receive"]},{lat:"iacio",eng:["throw"]},{lat:"conicio",eng:["hurl"]},{lat:"interficio",eng:["kill"]}]},"4th conjugation":{words:[{lat:"invenio",eng:["find"]},{lat:"dormio",eng:["sleep"]},{lat:"audio",eng:["hear"]},{lat:"venio",eng:["come"]},{lat:"advenio",eng:["arrive","come to"]},{lat:"convenio",eng:["come together"]},{lat:"punio",eng:["punish"]},{lat:"custodio",eng:["guard"]}]},irregular:{words:[{lat:"sum",eng:["be"]},{lat:"adsum",eng:["I am present"]},{lat:"absum",eng:["I am absent"]},{lat:"possum",eng:["be able","can"]},{lat:"eo",eng:["go"]},{lat:"transeo",eng:["cross"]},{lat:"abeo",eng:["go away"]},{lat:"exeo",eng:["go out"]},{lat:"redeo",eng:["go back"]},{lat:"ineo",eng:["go into"]}]}}},prepositions:{label:"Prepositions",sub:{"with ablative":{words:[{lat:"sub",eng:["under"]},{lat:"in",eng:["in","on"]},{lat:"cum",eng:["with"]},{lat:"de",eng:["about","down from"]},{lat:"ex",eng:["out of","from"]},{lat:"ab",eng:["from"]}]},"with accusative":{words:[{lat:"ad",eng:["to"]},{lat:"in",eng:["into","onto"]},{lat:"trans",eng:["across"]},{lat:"per",eng:["through"]},{lat:"prope",eng:["near"]},{lat:"contra",eng:["against"]},{lat:"circum",eng:["around"]},{lat:"post",eng:["after"]},{lat:"ante",eng:["before"]},{lat:"propter",eng:["on account of"]}]}}},conjunctions:{label:"Conjunctions",sub:{conjunctions:{words:[{lat:"nam",eng:["for"]},{lat:"quod",eng:["because"]},{lat:"et",eng:["and"]},{lat:"sed",eng:["but"]},{lat:"tamen",eng:["however","nevertheless"]},{lat:"itaque",eng:["and so"]}]}}},adverbs:{label:"Adverbs",sub:{adverbs:{words:[{lat:"fortiter",eng:["bravely"]},{lat:"bene",eng:["well"]},{lat:"celeriter",eng:["quickly"]},{lat:"diligenter",eng:["carefully","diligently"]},{lat:"numquam",eng:["never"]},{lat:"nunc",eng:["now"]},{lat:"iterum",eng:["again"]},{lat:"tandem",eng:["at last"]},{lat:"lente",eng:["slowly"]},{lat:"laete",eng:["happily"]},{lat:"diu",eng:["for a long time"]},{lat:"subito",eng:["suddenly"]},{lat:"iam",eng:["now","already"]},{lat:"statim",eng:["at once"]},{lat:"saepe",eng:["often"]},{lat:"mox",eng:["soon"]}]}}},interrogatives:{label:"Interrogatives",sub:{interrogatives:{words:[{lat:"quis",eng:["who"]},{lat:"quid",eng:["what"]},{lat:"quando",eng:["when"]},{lat:"ubi",eng:["where"]},{lat:"quo modo",eng:["how"]},{lat:"cur",eng:["why"]},{lat:"quantus",eng:["how big"]},{lat:"-ne",eng:["question marker","question signal","question"]},{lat:"nonne",eng:["surely"]},{lat:"num",eng:["surely not"]}]}}},pronouns:{label:"Pronouns",sub:{pronouns:{words:[{lat:"me",eng:["me"]},{lat:"te",eng:["you"]},{lat:"eum",eng:["him"]},{lat:"eam",eng:["her"]},{lat:"eos",eng:["them"]},{lat:"eas",eng:["them"]},{lat:"vos",eng:["you all"]},{lat:"nos",eng:["us"]}]}}}};
 
 const WORD_MAP={};
 (function(){Object.entries(DATA).forEach(([ck,cat])=>Object.entries(cat.sub).forEach(([sk,sub])=>sub.words.forEach(w=>{const k=w.lat.toLowerCase();if(!WORD_MAP[k])WORD_MAP[k]=[];WORD_MAP[k].push(w.eng[0]);})));})();
@@ -502,7 +690,15 @@ function showAbout(){document.getElementById('aboutOverlay').style.display='flex
 function hideAbout(){document.getElementById('aboutOverlay').style.display='none';}
 function showShortcuts(){document.getElementById('shortcutsOverlay').style.display='flex';}
 function hideShortcuts(){document.getElementById('shortcutsOverlay').style.display='none';}
-function showMainTab(t){mainTab=t;document.querySelectorAll('.nav-tab').forEach((b,i)=>b.classList.toggle('active',(i===0&&t==='practice')||(i===1&&t==='stats')));document.getElementById('practicePanel').style.display=t==='practice'?'':'none';document.getElementById('statsView').style.display=t==='stats'?'block':'none';if(t==='stats')renderStats();}
+function showMainTab(t){
+  mainTab=t;
+  document.querySelectorAll('.nav-tab').forEach((b,i)=>b.classList.toggle('active',(i===0&&t==='practice')||(i===1&&t==='stats')||(i===2&&t==='info')));
+  document.getElementById('practicePanel').style.display=t==='practice'?'':'none';
+  document.getElementById('statsView').style.display=t==='stats'?'block':'none';
+  const iv=document.getElementById('infoView');
+  if(iv)iv.style.display=t==='info'?'block':'none';
+  if(t==='stats')renderStats();
+}
 function selectAll(){Object.entries(DATA).forEach(([ck])=>{Object.keys(DATA[ck].sub).forEach(sk=>{selected[ck][sk]=true;const sc=document.getElementById('sbox_'+ck+'_'+sk);if(sc)sc.className='sbox checked';});updCatBox(ck);});updCount();}
 function deselectAll(){Object.entries(DATA).forEach(([ck])=>{Object.keys(DATA[ck].sub).forEach(sk=>{selected[ck][sk]=false;const sc=document.getElementById('sbox_'+ck+'_'+sk);if(sc)sc.className='sbox';});updCatBox(ck);});updCount();}
 function buildUI(){
@@ -532,11 +728,10 @@ function setQuizType(t){quizType=t;['typeVocab','typeDrill','typeSent'].forEach(
 function setInputMode(t){inputMode=t;document.getElementById('inputTyped').className='mode-btn'+(t==='typed'?' active':'');document.getElementById('inputMC').className='mode-btn'+(t==='mc'?' active':'');}
 function getWords(){const ws=[];Object.entries(selected).forEach(([ck,subs])=>Object.entries(subs).forEach(([sk,on])=>{if(on)DATA[ck].sub[sk].words.forEach(w=>ws.push({...w,catKey:ck,subKey:sk}));}));return ws;}
 function updCount(){const ws=getWords();const n=ws.length;const iS=quizType==='sentences';document.getElementById('wordPill').textContent=iS?'All categories selected':n+(n===1?' word':' words')+' selected';document.getElementById('startBtn').disabled=iS?false:n===0;const due=getDue(ws);document.getElementById('srBtn').disabled=iS||due===0;document.getElementById('srBtn').textContent=due>0&&!iS?'Due ('+due+')':'Due (0)';document.getElementById('wordDrawerCount').textContent=n+' selected';if(document.getElementById('wordDrawer').classList.contains('open'))renderWordList();}
-function stripNotes(s){return String(s).replace(/\s*\((?:singular|plural|masculine|feminine|masc|fem)\)\s*/gi,' ').replace(/\b(?:singular|plural)\b/gi,' ').replace(/\s+/g,' ').trim();}
-function displayEng(w){if(w.lat==='eos')return 'them (masc)';if(w.lat==='eas')return 'them (fem)';if(w.lat==='te')return 'you (sg)';if(w.lat==='vos')return 'you (pl)';return w.eng.map(e=>String(e).replace(/[()]/g,'').trim()).join(', ');}
+function displayEng(w){if(w.lat==='eos')return 'them (masc)';if(w.lat==='eas')return 'them (fem)';if(w.lat==='te')return 'you (sg)';if(w.lat==='vos')return 'you (pl)';if(w.lat==='vester')return 'your (plural)';return w.eng.map(e=>String(e).replace(/[()]/g,'').trim()).join(', ');}
 function normalise(s){let t=String(s).toLowerCase().trim().replace(/[^a-z\s]/g,'').replace(/\s+/g,' ').trim();t=t.replace(/^them\s*(?:masc|fem)?$/i,'them');t=t.replace(/^you\s*(?:sg|pl)?$/i,'you');return t;}
 function checkLat(inp,w){const n=s=>s.toLowerCase().replace(/\s+/g,' ').trim();const v=n(inp);if(!v)return false;if(w.lat==='-ne')return v.includes('ne');return v===n(fullLat(w))||v===n(w.lat);}
-function checkEng(inp,w){const v=normalise(inp);if(w.lat==='-ne')return v.includes('question');if((w.lat==='eos'||w.lat==='eas')&&v==='them')return true;if((w.lat==='te'||w.lat==='vos')&&v==='you')return true;return w.eng.some(e=>normalise(e)===v);}
+function checkEng(inp,w){const v=normalise(inp);if(w.lat==='-ne')return v.includes('question');if((w.lat==='eos'||w.lat==='eas')&&v==='them')return true;if((w.lat==='te'||w.lat==='vos')&&v==='you')return true;if(w.lat==='vester'&&v==='your')return true;return w.eng.some(e=>normalise(e)===v);}
 function correctAns(w){return mode==='el'?fullLat(w):displayEng(w);}
 function posTag(w){if(w.catKey==='nouns'){const sk=w.subKey;if(sk.startsWith('1st'))return '1st declension';if(sk.startsWith('2nd'))return '2nd declension';if(sk.startsWith('3rd'))return '3rd declension';return 'noun';}if(w.catKey==='verbs')return 'verb';if(w.catKey==='adjectives')return 'adjective';if(w.catKey==='adverbs')return 'adverb';if(w.catKey==='prepositions')return 'preposition';if(w.catKey==='conjunctions')return 'conjunction';if(w.catKey==='pronouns')return 'pronoun';if(w.catKey==='interrogatives')return 'interrogative';return null;}
 function startSession(){if(quizType==='sentences'){startSentences();return;}beginQuiz(shuffle([...getWords()]));}
@@ -556,16 +751,12 @@ function showQ(){
   if(mode==='el'){
     document.getElementById('pDir').textContent='English → Latin';
     document.getElementById('pWord').textContent=displayEng(w);
-    // Show POS tag so user knows which word type
     const pos=posTag(w);
     if(pos){const d=document.createElement('span');d.className='tag decl';d.textContent=pos;tags.appendChild(d);}
-    // Disambiguation: if another word shares this English meaning, show first letter hint
     const myEng=w.eng[0].toLowerCase();
     const allWords=getWords().length>0?getWords():wordsOf('nouns').concat(wordsOf('verbs'),wordsOf('adjectives'),wordsOf('adverbs'));
     const dupes=allWords.filter(x=>x.lat!==w.lat&&x.eng.some(e=>e.toLowerCase()===myEng));
-    if(dupes.length>0){
-      document.getElementById('hintBox').textContent='Starts with "'+w.lat[0]+'"';
-    }
+    if(dupes.length>0)document.getElementById('hintBox').textContent='Starts with "'+w.lat[0]+'"';
     if(is3rd(w.subKey)&&w.gen)document.getElementById('hintBox').textContent=(dupes.length>0?'Starts with "'+w.lat[0]+'" · ':'')+'Give: nominative genitive gender';
   } else {
     document.getElementById('pDir').textContent='Latin → English';
@@ -614,6 +805,19 @@ function cancelReset(){document.getElementById('resetConfirm').style.display='no
 async function confirmReset(){srData={};statsData={sessions:[],catStats:{}};try{await window.storage.delete(SR_KEY);}catch(e){}try{await window.storage.delete(STATS_KEY);}catch(e){}document.getElementById('resetConfirm').style.display='none';updCount();renderStats();}
 function toggleWordDrawer(open){document.getElementById('wordDrawer').classList.toggle('open',open);if(open)renderWordList();}
 function renderWordList(){const list=document.getElementById('wordList');const ws=getWords();if(!ws.length){list.innerHTML='<div class="word-empty">Choose some categories to see words here.</div>';return;}list.innerHTML=ws.map(w=>{const r=getSR(w);const due=isDue(w);return'<div class="word-row"><div class="word-row-lat">'+fullLat(w)+'</div><div class="word-row-eng">'+displayEng(w)+'</div><div class="word-row-meta">'+DATA[w.catKey].label+' · '+w.subKey+'</div>'+(r.seen>0?'<div class="word-row-sr" style="color:'+(due?'var(--gold)':'var(--green)')+'">SR: '+r.seen+' seen · '+Math.round(r.correct/r.seen*100)+'% · '+(due?'due now':'interval '+r.interval+'d')+'</div>':'')+'</div>';}).join('');}
+const CUSTOM_KEY='latin_custom_v1';
+let customWords=[];
+async function loadCustomWords(){try{const r=await window.storage.get(CUSTOM_KEY);if(r)customWords=JSON.parse(r.value);}catch(e){}customWords.forEach(w=>addWordToData(w));}
+async function saveCustomWords(){try{await window.storage.set(CUSTOM_KEY,JSON.stringify(customWords));}catch(e){}}
+function addWordToData(w){const cat=DATA[w.catKey];if(!cat)return;const sub=cat.sub[w.subKey];if(!sub)return;if(sub.words.some(x=>x.lat===w.lat))return;sub.words.push(w);}
+function showImport(){document.getElementById('importOverlay').style.display='flex';document.getElementById('impLat').value='';document.getElementById('impEng').value='';document.getElementById('impGen').value='';document.getElementById('impMsg').textContent='';document.getElementById('impMsg').style.color='';impCatChange();}
+function hideImport(){document.getElementById('importOverlay').style.display='none';}
+function impCatChange(){const cat=document.getElementById('impCat').value;const isNoun=cat==='nouns';const isVerb=cat==='verbs';const isAdj=cat==='adjectives';document.getElementById('impDeclRow').style.display=isNoun?'':'none';document.getElementById('impConjRow').style.display=isVerb?'':'none';document.getElementById('impAdjRow').style.display=isAdj?'':'none';document.getElementById('impGenderRow').style.display=isNoun?'':'none';const decl=document.getElementById('impDecl').value;document.getElementById('impGenRow').style.display=(isNoun&&decl==='3rd declension')?'':'none';if(isNoun){document.getElementById('impDecl').onchange=function(){document.getElementById('impGenRow').style.display=(this.value==='3rd declension')?'':'none';};}}
+function addImportWord(){const cat=document.getElementById('impCat').value;const lat=document.getElementById('impLat').value.trim();const engRaw=document.getElementById('impEng').value.trim();const msg=document.getElementById('impMsg');if(!lat){msg.textContent='Enter a Latin word.';msg.style.color='var(--red)';return;}if(!engRaw){msg.textContent='Enter English meaning(s).';msg.style.color='var(--red)';return;}const eng=engRaw.split(',').map(s=>s.trim()).filter(Boolean);if(!eng.length){msg.textContent='Enter English meaning(s).';msg.style.color='var(--red)';return;}let subKey,gender=null,gen=null;if(cat==='nouns'){subKey=document.getElementById('impDecl').value;gender=document.getElementById('impGender').value;if(subKey==='3rd declension'){gen=document.getElementById('impGen').value.trim();if(!gen){msg.textContent='Enter the genitive for 3rd declension nouns.';msg.style.color='var(--red)';return;}}}else if(cat==='verbs'){subKey=document.getElementById('impConj').value;}else if(cat==='adjectives'){subKey=document.getElementById('impAdj').value;}else{const subKeys=Object.keys(DATA[cat].sub);subKey=subKeys[0];}const w={lat,gen,gender,eng,catKey:cat,subKey};const sub=DATA[cat].sub[subKey];if(sub&&sub.words.some(x=>x.lat===lat)){msg.textContent='This word already exists.';msg.style.color='var(--red)';return;}addWordToData(w);customWords.push(w);saveCustomWords();const k=lat.toLowerCase();if(!WORD_MAP[k])WORD_MAP[k]=[];WORD_MAP[k].push(eng[0]);msg.textContent='✓ Added "'+lat+'" ('+eng.join(', ')+')';msg.style.color='var(--green)';document.getElementById('impLat').value='';document.getElementById('impEng').value='';document.getElementById('impGen').value='';buildUI();}
+function showCustomList(){document.getElementById('customListOverlay').style.display='flex';renderCustomList();}
+function hideCustomList(){document.getElementById('customListOverlay').style.display='none';}
+function renderCustomList(){const body=document.getElementById('customListBody');if(!customWords.length){body.innerHTML='<div style="font-family:var(--serif);font-style:italic;color:var(--text3);text-align:center;padding:2rem 0">No custom words added yet.</div>';return;}body.innerHTML=customWords.map((w,i)=>{const catLabel=DATA[w.catKey]?DATA[w.catKey].label:w.catKey;const gen3=w.gen?' ('+w.gen+', '+w.gender+')':'';const genderTag=w.gender&&w.catKey==='nouns'?' · '+(w.gender==='m'?'masc':w.gender==='f'?'fem':'neut'):'';return'<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)"><div style="flex:1"><div style="font-family:var(--serif);font-size:16px;color:var(--text)">'+w.lat+gen3+'</div><div style="font-size:12px;color:var(--text2);margin-top:2px">'+w.eng.join(', ')+'</div><div style="font-size:10px;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:.06em">'+catLabel+' · '+w.subKey+genderTag+'</div></div><button onclick="removeCustomWord('+i+')" style="width:28px;height:28px;border-radius:999px;border:1px solid var(--red-bdr);background:var(--red-bg);color:var(--red);cursor:pointer;font-size:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center" title="Remove">×</button></div>';}).join('');}
+function removeCustomWord(idx){const w=customWords[idx];if(!w)return;const sub=DATA[w.catKey]&&DATA[w.catKey].sub[w.subKey];if(sub){sub.words=sub.words.filter(x=>x.lat!==w.lat);}const k=w.lat.toLowerCase();if(WORD_MAP[k])WORD_MAP[k]=WORD_MAP[k].filter(e=>e!==w.eng[0]);customWords.splice(idx,1);saveCustomWords();renderCustomList();buildUI();}
 document.addEventListener('keydown',e=>{
   const inQ=document.getElementById('quizView').style.display==='block';
   if(!inQ){if(e.key==='?')showShortcuts();return;}
@@ -626,6 +830,7 @@ document.addEventListener('keydown',e=>{
 });
 buildUI();
 loadPersisted();
+loadCustomWords().then(()=>buildUI());
 try{if(!localStorage.getItem('latin_visited')){showAbout();localStorage.setItem('latin_visited','1');}}catch(e){}
 </script>
 </body>
