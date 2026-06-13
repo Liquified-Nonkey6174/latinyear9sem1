@@ -408,6 +408,7 @@ input[type=range]{flex:1;accent-color:var(--accent)}
     <button class="mode-btn active" id="infoTabSpecial" onclick="showInfoTab('special')">Special cases</button>
     <button class="mode-btn" id="infoTabDecl" onclick="showInfoTab('declension')">Declension</button>
     <button class="mode-btn" id="infoTabConj" onclick="showInfoTab('conjugation')">Conjugation</button>
+    <button class="mode-btn" id="infoTabAdj" onclick="showInfoTab('adjectives')">Adjectives</button>
   </div>
 
   <!-- SPECIAL CASES PANEL -->
@@ -678,6 +679,184 @@ input[type=range]{flex:1;accent-color:var(--accent)}
       </div>
     </div>
   </div><!-- /infoConjPanel -->
+
+  <!-- ADJECTIVES PANEL -->
+  <div id="infoAdjPanel" style="display:none">
+    <div class="info-section">
+
+      <!-- 1/2 DECLENSION -->
+      <div class="info-card">
+        <div class="info-subheading">1st / 2nd declension — e.g. <em>bonus, bona, bonum</em> (good)</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:8px">
+
+          <div>
+            <div class="decl-group-head">1/2 — masc.</div>
+            <table class="decl-table" style="table-layout:fixed">
+              <thead><tr><th class="dt-left" style="width:42px"></th><th class="dt-sg">Sg.</th><th class="dt-pl">Pl.</th></tr></thead>
+              <tbody>
+                <tr><td class="dt-case">nom.</td><td class="dt-sg">bonus</td><td class="dt-pl">boni</td></tr>
+                <tr><td class="dt-case">voc.</td><td class="dt-sg">bone</td><td class="dt-pl">boni</td></tr>
+                <tr><td class="dt-case">acc.</td><td class="dt-sg">bonum</td><td class="dt-pl">bonos</td></tr>
+                <tr><td class="dt-case">gen.</td><td class="dt-sg">boni</td><td class="dt-pl">bonorum</td></tr>
+                <tr><td class="dt-case">dat.</td><td class="dt-sg">bono</td><td class="dt-pl">bonis</td></tr>
+                <tr><td class="dt-case">abl.</td><td class="dt-sg">bono</td><td class="dt-pl">bonis</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div>
+            <div class="decl-group-head">1/2 — fem.</div>
+            <table class="decl-table" style="table-layout:fixed">
+              <thead><tr><th class="dt-left" style="width:42px"></th><th class="dt-sg">Sg.</th><th class="dt-pl">Pl.</th></tr></thead>
+              <tbody>
+                <tr><td class="dt-case">nom.</td><td class="dt-sg">bona</td><td class="dt-pl">bonae</td></tr>
+                <tr><td class="dt-case">voc.</td><td class="dt-sg">bona</td><td class="dt-pl">bonae</td></tr>
+                <tr><td class="dt-case">acc.</td><td class="dt-sg">bonam</td><td class="dt-pl">bonas</td></tr>
+                <tr><td class="dt-case">gen.</td><td class="dt-sg">bonae</td><td class="dt-pl">bonarum</td></tr>
+                <tr><td class="dt-case">dat.</td><td class="dt-sg">bonae</td><td class="dt-pl">bonis</td></tr>
+                <tr><td class="dt-case">abl.</td><td class="dt-sg">bona</td><td class="dt-pl">bonis</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div>
+            <div class="decl-group-head">1/2 — neuter</div>
+            <table class="decl-table" style="table-layout:fixed">
+              <thead><tr><th class="dt-left" style="width:42px"></th><th class="dt-sg">Sg.</th><th class="dt-pl">Pl.</th></tr></thead>
+              <tbody>
+                <tr><td class="dt-case">nom.</td><td class="dt-sg">bonum</td><td class="dt-pl dt-hi">bona</td></tr>
+                <tr><td class="dt-case">voc.</td><td class="dt-sg">bonum</td><td class="dt-pl dt-hi">bona</td></tr>
+                <tr><td class="dt-case">acc.</td><td class="dt-sg">bonum</td><td class="dt-pl dt-hi">bona</td></tr>
+                <tr><td class="dt-case">gen.</td><td class="dt-sg">boni</td><td class="dt-pl">bonorum</td></tr>
+                <tr><td class="dt-case">dat.</td><td class="dt-sg">bono</td><td class="dt-pl">bonis</td></tr>
+                <tr><td class="dt-case">abl.</td><td class="dt-sg">bono</td><td class="dt-pl">bonis</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+        <p class="info-body" style="margin-top:10px;margin-bottom:0">Masc. follows 2nd declension nouns; fem. follows 1st declension; neut. follows 2nd declension with nom./voc./acc. always identical.</p>
+      </div>
+
+      <!-- 3-2 TWO-TERMINATION -->
+      <div class="info-card">
+        <div class="info-subheading">3rd decl. — two-termination — e.g. <em>fortis, forte</em> (brave)</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px">
+
+          <div>
+            <div class="decl-group-head">3-2 — m./f.</div>
+            <table class="decl-table" style="table-layout:fixed">
+              <thead><tr><th class="dt-left" style="width:42px"></th><th class="dt-sg">Sg.</th><th class="dt-pl">Pl.</th></tr></thead>
+              <tbody>
+                <tr><td class="dt-case">nom.</td><td class="dt-sg">fortis</td><td class="dt-pl">fortes</td></tr>
+                <tr><td class="dt-case">voc.</td><td class="dt-sg">fortis</td><td class="dt-pl">fortes</td></tr>
+                <tr><td class="dt-case">acc.</td><td class="dt-sg">fortem</td><td class="dt-pl">fortes</td></tr>
+                <tr><td class="dt-case">gen.</td><td class="dt-sg">fortis</td><td class="dt-pl">fortium</td></tr>
+                <tr><td class="dt-case">dat.</td><td class="dt-sg">forti</td><td class="dt-pl">fortibus</td></tr>
+                <tr><td class="dt-case">abl.</td><td class="dt-sg">forti</td><td class="dt-pl">fortibus</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div>
+            <div class="decl-group-head">3-2 — neuter</div>
+            <table class="decl-table" style="table-layout:fixed">
+              <thead><tr><th class="dt-left" style="width:42px"></th><th class="dt-sg">Sg.</th><th class="dt-pl">Pl.</th></tr></thead>
+              <tbody>
+                <tr><td class="dt-case">nom.</td><td class="dt-sg">forte</td><td class="dt-pl dt-hi">fortia</td></tr>
+                <tr><td class="dt-case">voc.</td><td class="dt-sg">forte</td><td class="dt-pl dt-hi">fortia</td></tr>
+                <tr><td class="dt-case">acc.</td><td class="dt-sg">forte</td><td class="dt-pl dt-hi">fortia</td></tr>
+                <tr><td class="dt-case">gen.</td><td class="dt-sg">fortis</td><td class="dt-pl">fortium</td></tr>
+                <tr><td class="dt-case">dat.</td><td class="dt-sg">forti</td><td class="dt-pl">fortibus</td></tr>
+                <tr><td class="dt-case">abl.</td><td class="dt-sg">forti</td><td class="dt-pl">fortibus</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+        <p class="info-body" style="margin-top:10px;margin-bottom:0">Masc. and fem. identical throughout. Abl. sg. <span class="info-hi">-i</span> and gen. pl. <span class="info-hi">-ium</span> mark all 3rd decl. adjectives as i-stems. Other examples: <em>omnis/omne</em>, <em>brevis/breve</em>, <em>levis/leve</em>.</p>
+      </div>
+
+      <!-- 3-1 ONE-TERMINATION -->
+      <div class="info-card">
+        <div class="info-subheading">3rd decl. — one-termination — e.g. <em>ingens, ingentis</em> (huge)</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px">
+
+          <div>
+            <div class="decl-group-head">3-1 — m./f.</div>
+            <table class="decl-table" style="table-layout:fixed">
+              <thead><tr><th class="dt-left" style="width:42px"></th><th class="dt-sg">Sg.</th><th class="dt-pl">Pl.</th></tr></thead>
+              <tbody>
+                <tr><td class="dt-case">nom.</td><td class="dt-sg dt-dim">ingens</td><td class="dt-pl">ingentes</td></tr>
+                <tr><td class="dt-case">voc.</td><td class="dt-sg dt-dim">ingens</td><td class="dt-pl">ingentes</td></tr>
+                <tr><td class="dt-case">acc.</td><td class="dt-sg">ingentem</td><td class="dt-pl">ingentes</td></tr>
+                <tr><td class="dt-case">gen.</td><td class="dt-sg">ingentis</td><td class="dt-pl">ingentium</td></tr>
+                <tr><td class="dt-case">dat.</td><td class="dt-sg">ingenti</td><td class="dt-pl">ingentibus</td></tr>
+                <tr><td class="dt-case">abl.</td><td class="dt-sg">ingenti</td><td class="dt-pl">ingentibus</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div>
+            <div class="decl-group-head">3-1 — neuter</div>
+            <table class="decl-table" style="table-layout:fixed">
+              <thead><tr><th class="dt-left" style="width:42px"></th><th class="dt-sg">Sg.</th><th class="dt-pl">Pl.</th></tr></thead>
+              <tbody>
+                <tr><td class="dt-case">nom.</td><td class="dt-sg dt-dim">ingens</td><td class="dt-pl dt-hi">ingentia</td></tr>
+                <tr><td class="dt-case">voc.</td><td class="dt-sg dt-dim">ingens</td><td class="dt-pl dt-hi">ingentia</td></tr>
+                <tr><td class="dt-case">acc.</td><td class="dt-sg dt-dim">ingens</td><td class="dt-pl dt-hi">ingentia</td></tr>
+                <tr><td class="dt-case">gen.</td><td class="dt-sg">ingentis</td><td class="dt-pl">ingentium</td></tr>
+                <tr><td class="dt-case">dat.</td><td class="dt-sg">ingenti</td><td class="dt-pl">ingentibus</td></tr>
+                <tr><td class="dt-case">abl.</td><td class="dt-sg">ingenti</td><td class="dt-pl">ingentibus</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+        <p class="info-body" style="margin-top:10px;margin-bottom:0">All three genders share the same nom. sg. (shown in grey). Drop <span class="info-hi">-is</span> from gen. sg. to get the stem (<em>ingent-</em>); everything else follows two-termination exactly. Other examples: <em>felix/felicis</em> (happy), <em>audax/audacis</em> (bold), <em>potens/potentis</em> (powerful).</p>
+      </div>
+
+      <!-- 3-3 THREE-TERMINATION -->
+      <div class="info-card">
+        <div class="info-subheading">3rd decl. — three-termination — e.g. <em>acer, acris, acre</em> (sharp/keen)</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px">
+
+          <div>
+            <div class="decl-group-head">3-3 — m./f.</div>
+            <table class="decl-table" style="table-layout:fixed">
+              <thead><tr><th class="dt-left" style="width:42px"></th><th class="dt-sg">Sg.</th><th class="dt-pl">Pl.</th></tr></thead>
+              <tbody>
+                <tr><td class="dt-case">nom.</td><td class="dt-sg" style="font-size:13px">acer / acris</td><td class="dt-pl">acres</td></tr>
+                <tr><td class="dt-case">voc.</td><td class="dt-sg" style="font-size:13px">acer / acris</td><td class="dt-pl">acres</td></tr>
+                <tr><td class="dt-case">acc.</td><td class="dt-sg">acrem</td><td class="dt-pl">acres</td></tr>
+                <tr><td class="dt-case">gen.</td><td class="dt-sg">acris</td><td class="dt-pl">acrium</td></tr>
+                <tr><td class="dt-case">dat.</td><td class="dt-sg">acri</td><td class="dt-pl">acribus</td></tr>
+                <tr><td class="dt-case">abl.</td><td class="dt-sg">acri</td><td class="dt-pl">acribus</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div>
+            <div class="decl-group-head">3-3 — neuter</div>
+            <table class="decl-table" style="table-layout:fixed">
+              <thead><tr><th class="dt-left" style="width:42px"></th><th class="dt-sg">Sg.</th><th class="dt-pl">Pl.</th></tr></thead>
+              <tbody>
+                <tr><td class="dt-case">nom.</td><td class="dt-sg">acre</td><td class="dt-pl dt-hi">acria</td></tr>
+                <tr><td class="dt-case">voc.</td><td class="dt-sg">acre</td><td class="dt-pl dt-hi">acria</td></tr>
+                <tr><td class="dt-case">acc.</td><td class="dt-sg">acre</td><td class="dt-pl dt-hi">acria</td></tr>
+                <tr><td class="dt-case">gen.</td><td class="dt-sg">acris</td><td class="dt-pl">acrium</td></tr>
+                <tr><td class="dt-case">dat.</td><td class="dt-sg">acri</td><td class="dt-pl">acribus</td></tr>
+                <tr><td class="dt-case">abl.</td><td class="dt-sg">acri</td><td class="dt-pl">acribus</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+        <p class="info-body" style="margin-top:10px;margin-bottom:0">Nom./voc. sg. only: masc. ends in <span class="info-hi">-er</span>, fem. in <span class="info-hi">-is</span> — the only point of distinction. From acc. sg. onward, masc. and fem. are identical. Other examples: <em>celer/celeris/celere</em> (swift), <em>alacer/alacris/alacre</em> (eager).</p>
+      </div>
+
+    </div>
+  </div><!-- /infoAdjPanel -->
 </div>
 
 </div><!-- .app -->
@@ -939,9 +1118,11 @@ function showInfoTab(t){
   document.getElementById('infoTabSpecial').className='mode-btn'+(t==='special'?' active':'');
   document.getElementById('infoTabDecl').className='mode-btn'+(t==='declension'?' active':'');
   document.getElementById('infoTabConj').className='mode-btn'+(t==='conjugation'?' active':'');
+  document.getElementById('infoTabAdj').className='mode-btn'+(t==='adjectives'?' active':'');
   document.getElementById('infoSpecialPanel').style.display=t==='special'?'':'none';
   document.getElementById('infoDeclPanel').style.display=t==='declension'?'':'none';
   document.getElementById('infoConjPanel').style.display=t==='conjugation'?'':'none';
+  document.getElementById('infoAdjPanel').style.display=t==='adjectives'?'':'none';
 }
 function showMainTab(t){
   mainTab=t;
