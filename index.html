@@ -9,17 +9,50 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#161412;--surface:#1e1b18;--surface2:#252118;--surface3:#2c271f;--border:#35302a;--border2:#4a4238;--text:#e8e0d5;--text2:#9e9080;--text3:#665e52;--accent:#c4935a;--accent-dim:#8a6035;--accent-bg:#231e16;--green:#7dbf95;--green-bg:#131f18;--green-bdr:#2a4535;--red:#c97a7a;--red-bg:#1f1313;--red-bdr:#4a2525;--gold:#c4a35a;--gold-bg:#1e1a10;--gold-bdr:#4a3d18;--serif:'IM Fell English',Georgia,serif;--sans:'Instrument Sans',system-ui,sans-serif;--r:10px;--rs:6px;--t:0.18s ease}
-body.light{--bg:#f5f0e8;--surface:#fffdf8;--surface2:#f0ebe0;--surface3:#e8e0d0;--border:#d8d0c0;--border2:#c0b8a8;--text:#2a2318;--text2:#6b5f4e;--text3:#9e9080;--accent:#a0682a;--accent-dim:#c4935a;--accent-bg:#fdf5e8;--green:#2d7a4a;--green-bg:#eaf5ee;--green-bdr:#a0d4b4;--red:#9a3030;--red-bg:#faeaea;--red-bdr:#e0a0a0;--gold:#8a6010;--gold-bg:#fdf5e0;--gold-bdr:#d4b860}
+body.light{--bg:#f0ebe0;--surface:#f8f4ea;--surface2:#e8e0d2;--surface3:#ddd5c5;--border:#ccc4b0;--border2:#b0a890;--text:#1a1510;--text2:#4a4030;--text3:#8a7e6a;--accent:#8a5820;--accent-dim:#b07830;--accent-bg:#f5ead8;--green:#1a6030;--green-bg:#e0f0e5;--green-bdr:#90c8a0;--red:#8a2020;--red-bg:#f5e0e0;--red-bdr:#d09090;--gold:#705010;--gold-bg:#f5edd0;--gold-bdr:#c8b050}
 body.midnight{--bg:#0e1117;--surface:#161b26;--surface2:#1c2333;--surface3:#232b3e;--border:#2a3348;--border2:#3a4560;--text:#d4dae8;--text2:#8090b0;--text3:#4e5d7a;--accent:#6a9fd8;--accent-dim:#3d6ea0;--accent-bg:#141c2c;--green:#6dbf8a;--green-bg:#0f1f1a;--green-bdr:#244535;--red:#d07070;--red-bg:#1f1015;--red-bdr:#4a2028;--gold:#d0a840;--gold-bg:#1a1808;--gold-bdr:#4a4018}
 body.forest{--bg:#0f1610;--surface:#162018;--surface2:#1c2a1e;--surface3:#233024;--border:#2c3e2e;--border2:#3e5840;--text:#d0e0d2;--text2:#80a885;--text3:#4e6e52;--accent:#6ab870;--accent-dim:#3a7840;--accent-bg:#142018;--green:#7dbf95;--green-bg:#121f18;--green-bdr:#2a4535;--red:#c97a7a;--red-bg:#1f1313;--red-bdr:#4a2525;--gold:#c4a35a;--gold-bg:#1e1a10;--gold-bdr:#4a3d18}
 body.rose{--bg:#1a1015;--surface:#241820;--surface2:#2e1e28;--surface3:#382630;--border:#4a3040;--border2:#604858;--text:#e8d8e0;--text2:#a88898;--text3:#6e5060;--accent:#d08098;--accent-dim:#984060;--accent-bg:#281820;--green:#7dbf95;--green-bg:#121f18;--green-bdr:#2a4535;--red:#d07070;--red-bg:#281518;--red-bdr:#4a2528;--gold:#d0a858;--gold-bg:#201a10;--gold-bdr:#4a3d18}
 body.ocean{--bg:#0a1418;--surface:#101e25;--surface2:#162830;--surface3:#1c3038;--border:#284048;--border2:#385868;--text:#d0e4e8;--text2:#78a8b8;--text3:#486878;--accent:#50b8c8;--accent-dim:#2a7888;--accent-bg:#102028;--green:#60c890;--green-bg:#0f2018;--green-bdr:#245040;--red:#d07878;--red-bg:#201015;--red-bdr:#4a2828;--gold:#c8b040;--gold-bg:#1a1808;--gold-bdr:#484010}
+body.violet{--bg:#14101a;--surface:#1c1625;--surface2:#241e30;--surface3:#2c2538;--border:#3a3048;--border2:#504468;--text:#dcd4e8;--text2:#9888b8;--text3:#5e4e7a;--accent:#a878d8;--accent-dim:#6a4898;--accent-bg:#1c1428;--green:#70bf8a;--green-bg:#101f18;--green-bdr:#284538;--red:#d07878;--red-bg:#201018;--red-bdr:#4a2028;--gold:#d0a850;--gold-bg:#1c1808;--gold-bdr:#483c18}
+body.slate{--bg:#151618;--surface:#1c1d20;--surface2:#232428;--surface3:#2a2c30;--border:#383a40;--border2:#4a4d55;--text:#d8dae0;--text2:#8a8e98;--text3:#585c65;--accent:#80a0c8;--accent-dim:#4a6888;--accent-bg:#161c28;--green:#70b880;--green-bg:#101f15;--green-bdr:#285035;--red:#c87878;--red-bg:#201015;--red-bdr:#482028;--gold:#c8a848;--gold-bg:#1a1808;--gold-bdr:#484010}
+body.parchment{--bg:#f2eadb;--surface:#faf5e8;--surface2:#e8e0cc;--surface3:#ddd4be;--border:#c8bea5;--border2:#b0a488;--text:#1c1808;--text2:#4a4028;--text3:#887860;--accent:#8a5018;--accent-dim:#a86820;--accent-bg:#f5e8d0;--green:#1a5828;--green-bg:#e0ede2;--green-bdr:#88c098;--red:#882020;--red-bg:#f2dede;--red-bdr:#c89090;--gold:#685010;--gold-bg:#f2e8c8;--gold-bdr:#c0a848}
+body.mist{--bg:#e8ecf0;--surface:#f2f5f8;--surface2:#dce2e8;--surface3:#d0d8e0;--border:#b8c4d0;--border2:#98a8b8;--text:#181c20;--text2:#3a4858;--text3:#708090;--accent:#4070a8;--accent-dim:#5888c0;--accent-bg:#e0eaf5;--green:#1a6838;--green-bg:#ddf0e5;--green-bdr:#88c8a0;--red:#882828;--red-bg:#f0dede;--red-bdr:#c89898;--gold:#685818;--gold-bg:#f0e8d0;--gold-bdr:#c0a850}
 body.sepia{--bg:#1c1610;--surface:#281e14;--surface2:#322418;--surface3:#3c2e20;--border:#4e3e2c;--border2:#6a5440;--text:#e8d8c0;--text2:#b09878;--text3:#7a6850;--accent:#d4a050;--accent-dim:#9a6820;--accent-bg:#2a1e10;--green:#70b878;--green-bg:#142010;--green-bdr:#305028;--red:#c87070;--red-bg:#281410;--red-bdr:#4a2820;--gold:#d4b040;--gold-bg:#221c08;--gold-bdr:#504418}
-.theme-picker{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+keyframes cinnaFloat{0%,100%{transform:translateY(0) rotate(0deg)}25%{transform:translateY(-8px) rotate(5deg)}50%{transform:translateY(-4px) rotate(-3deg)}75%{transform:translateY(-10px) rotate(4deg)}}
+
+
+
+
+.theme-picker{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
 .theme-swatch{width:100%;aspect-ratio:1.6;border-radius:8px;border:2px solid var(--border2);cursor:pointer;position:relative;overflow:hidden;transition:all var(--t)}
 .theme-swatch:hover{border-color:var(--accent);transform:scale(1.04)}
 .theme-swatch.active{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
 .theme-swatch-label{position:absolute;bottom:4px;left:0;right:0;text-align:center;font-family:var(--sans);font-size:10px;font-weight:600;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.7)}
+.spot-overlay{position:fixed;inset:0;z-index:300;pointer-events:auto}
+.spot-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:300;transition:opacity .2s}
+.spot-hole{position:absolute;z-index:301;border-radius:8px;box-shadow:0 0 0 9999px rgba(0,0,0,.35);border:2px solid var(--accent);pointer-events:none;transition:all .3s ease}
+.spot-card{position:fixed;z-index:302;background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:22px 24px;max-width:360px;width:90%;box-shadow:0 12px 40px rgba(0,0,0,.4);animation:fadeIn .2s ease}
+.spot-step{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.spot-title{font-family:var(--serif);font-size:20px;color:var(--text);margin-bottom:8px}
+.spot-body{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:16px}
+.spot-btns{display:flex;gap:8px;justify-content:flex-end}
+.spot-skip{font-family:var(--sans);font-size:12px;color:var(--text3);background:none;border:none;cursor:pointer;padding:6px 10px;margin-right:auto}
+.spot-skip:hover{color:var(--text2)}
+.help-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.help-opt{display:flex;flex-direction:column;align-items:center;gap:6px;padding:18px 12px;border-radius:var(--r);border:1px solid var(--border2);background:var(--surface2);cursor:pointer;transition:all var(--t);text-align:center}
+.help-opt:hover{border-color:var(--accent-dim);background:var(--accent-bg)}
+.help-opt-icon{font-size:24px}
+.help-opt-label{font-size:13px;font-weight:500;color:var(--text)}
+.help-opt-sub{font-size:11px;color:var(--text3)}
+.guide-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center}
+.guide-box{background:var(--surface);border:1px solid var(--border2);border-radius:14px;max-width:640px;width:94%;max-height:85vh;display:flex;flex-direction:column;position:relative}
+.guide-head{padding:20px 24px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.guide-head h2{font-family:var(--serif);font-size:24px;font-weight:400;color:var(--text)}
+.guide-scroll{overflow-y:auto;padding:20px 24px 28px}
+.guide-section{margin-bottom:24px}
+.guide-section h3{font-family:var(--serif);font-size:17px;color:var(--accent);margin-bottom:8px}
+.guide-section p{font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:8px}
 body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;transition:background .2s,color .2s}
 .app{max-width:760px;margin:0 auto;padding:2rem 1.5rem 5rem}
 .masthead{text-align:center;padding:2.5rem 0 2rem;border-bottom:1px solid var(--border);margin-bottom:2rem;position:relative}
@@ -31,6 +64,10 @@ h1 em{font-style:italic;color:var(--accent)}
 .masthead-left{position:absolute;top:2.5rem;left:0;display:flex;align-items:center;gap:4px}
 .icon-btn{width:32px;height:32px;border-radius:999px;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all var(--t)}
 .icon-btn:hover{color:var(--text);background:var(--surface3)}
+.help-btn{width:36px;height:36px;border-radius:999px;border:2px solid var(--accent);background:var(--accent-bg);color:var(--accent);cursor:pointer;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;transition:all var(--t);font-family:var(--serif)}
+.help-btn:hover{background:var(--accent);color:var(--bg)}
+.help-btn.pulse{animation:helpPulse 2s ease-in-out 3}
+@keyframes helpPulse{0%,100%{box-shadow:0 0 0 0 rgba(196,147,90,0)}50%{box-shadow:0 0 0 8px rgba(196,147,90,.3)}}
 .nav-tabs{display:flex;gap:2px;background:var(--surface2);border:1px solid var(--border);border-radius:999px;padding:3px;width:fit-content;margin:0 auto 2rem}
 .nav-tab{font-family:var(--sans);font-size:13px;font-weight:500;padding:7px 18px;border-radius:999px;border:none;background:transparent;color:var(--text2);cursor:pointer;transition:all var(--t)}
 .nav-tab.active{background:var(--surface3);color:var(--accent);border:1px solid var(--border2)}
@@ -276,7 +313,7 @@ input[type=range]{flex:1;accent-color:var(--accent)}
     </div>
     <div class="masthead-btns">
       <button class="icon-btn" id="themeBtn" onclick="toggleTheme()">☀</button>
-      <button class="icon-btn" onclick="showShortcuts()">?</button>
+      <button class="help-btn pulse" id="helpBtn" onclick="showHelp()">?</button>
     </div>
   </div>
   <div class="nav-tabs">
@@ -285,11 +322,11 @@ input[type=range]{flex:1;accent-color:var(--accent)}
     <button class="nav-tab" onclick="showMainTab('info')">Information</button>
   </div>
   <div id="practicePanel">
-    <div class="mode-toggle">
+    <div class="mode-toggle" id="directionToggle">
       <button class="mode-btn active" id="modeEL" onclick="setMode('el')">English → Latin</button>
       <button class="mode-btn" id="modeLE" onclick="setMode('le')">Latin → English</button>
     </div>
-    <div class="mode-toggle" style="flex-wrap:wrap">
+    <div class="mode-toggle" id="quizTypeToggle" style="flex-wrap:wrap">
       <button class="mode-btn active" id="typeVocab" onclick="setQuizType('vocab')">Vocabulary</button>
       <button class="mode-btn" id="typeNounDecl" onclick="setQuizType('nounDecl')">Noun declension</button>
       <button class="mode-btn" id="typeAdjDecl" onclick="setQuizType('adjDecl')">Adjective declension</button>
@@ -304,7 +341,7 @@ input[type=range]{flex:1;accent-color:var(--accent)}
     <div class="sel-header">
       <span style="font-size:12px;color:var(--text3)">Categories</span>
       <div style="display:flex;gap:6px">
-        <button class="sel-small-btn" onclick="showCustomList()">Custom words</button>
+        <button class="sel-small-btn" id="customWordsBtn" onclick="showCustomList()">Custom words</button>
         <button class="sel-small-btn" onclick="selectAll()">Select all</button>
         <button class="sel-small-btn" onclick="deselectAll()">Deselect all</button>
       </div>
@@ -342,31 +379,16 @@ input[type=range]{flex:1;accent-color:var(--accent)}
         </div>
       </div>
     </div>
-    <!-- DAILY PRACTICE BOXES -->
-    <div id="dailyBox2" style="background:var(--surface);border:1px solid var(--gold-bdr);border-radius:var(--r);padding:14px 18px;margin-top:12px">
-      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="var c=document.getElementById('dailyContent2');c.style.display=c.style.display==='none'?'':'none';this.querySelector('.chevron').classList.toggle('open')">
-        <span style="font-family:var(--serif);font-size:15px;color:var(--gold)">📅 4 August 2026</span>
-        <span class="chevron" style="color:var(--gold)">⌄</span>
+    <!-- DAILY PRACTICE -->
+    <div style="background:var(--surface);border:1px solid var(--gold-bdr);border-radius:var(--r);padding:14px 18px;margin-top:12px" id="dailySection">
+      <div style="font-family:var(--serif);font-size:15px;color:var(--gold);margin-bottom:10px">📅 Daily Practice</div>
+      <div id="dailyDays" style="display:flex;flex-direction:column;gap:4px;margin-bottom:12px"></div>
+      <div id="dailyExpanded" style="display:none;border-top:1px solid var(--border);padding-top:10px;margin-bottom:10px">
+        <div id="dailyCatsAll" style="display:flex;flex-direction:column;gap:4px;margin-bottom:10px"></div>
       </div>
-      <div id="dailyContent2" style="display:none;margin-top:10px">
-        <div id="dailyCats2" style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px"></div>
-        <div style="display:flex;align-items:center;gap:10px">
-          <span style="font-family:var(--serif);font-size:13px;color:var(--text2);flex:1" id="dailyCount2">0 words</span>
-          <button class="btn-primary" id="dailyStartBtn2" onclick="startDaily2()" disabled style="font-size:12px;padding:6px 16px">Practice these</button>
-        </div>
-      </div>
-    </div>
-    <div style="background:var(--surface);border:1px solid var(--gold-bdr);border-radius:var(--r);padding:14px 18px;margin-top:8px">
-      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="var c=document.getElementById('dailyContent');c.style.display=c.style.display==='none'?'':'none';this.querySelector('.chevron').classList.toggle('open')">
-        <span style="font-family:var(--serif);font-size:15px;color:var(--gold)">📅 28 July 2026</span>
-        <span class="chevron" style="color:var(--gold)">⌄</span>
-      </div>
-      <div id="dailyContent" style="display:none;margin-top:10px">
-        <div id="dailyCats" style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px"></div>
-        <div style="display:flex;align-items:center;gap:10px">
-          <span style="font-family:var(--serif);font-size:13px;color:var(--text2);flex:1" id="dailyCount">0 words</span>
-          <button class="btn-primary" id="dailyStartBtn" onclick="startDaily()" disabled style="font-size:12px;padding:6px 16px">Practice these</button>
-        </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-family:var(--serif);font-size:13px;color:var(--text2);flex:1" id="dailyCountAll">0 words</span>
+        <button class="btn-primary" id="dailyStartAll" onclick="startDailyAll()" disabled style="font-size:12px;padding:6px 16px">Practice</button>
       </div>
     </div>
   </div>
@@ -1310,6 +1332,57 @@ input[type=range]{flex:1;accent-color:var(--accent)}
 
 </div><!-- .app -->
 
+<!-- HELP MENU -->
+<div id="helpOverlay" class="overlay" style="display:none" onclick="hideHelp()">
+  <div class="about-box" style="max-width:340px" onclick="event.stopPropagation()">
+    <button class="about-close" onclick="hideHelp()">×</button>
+    <div class="about-title">Help</div>
+    <div class="help-grid">
+      <div class="help-opt" onclick="hideHelp();startTour('basic')"><span class="help-opt-icon">🎯</span><span class="help-opt-label">Basic tour</span><span class="help-opt-sub">Learn the basics</span></div>
+      <div class="help-opt" onclick="hideHelp();startTour('advanced')"><span class="help-opt-icon">⚡</span><span class="help-opt-label">Advanced tour</span><span class="help-opt-sub">Power features</span></div>
+      <div class="help-opt" onclick="hideHelp();showGuide()"><span class="help-opt-icon">📖</span><span class="help-opt-label">User guide</span><span class="help-opt-sub">Full reference</span></div>
+      <div class="help-opt" onclick="hideHelp();showShortcuts()"><span class="help-opt-icon">⌨</span><span class="help-opt-label">Shortcuts</span><span class="help-opt-sub">Keyboard keys</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- USER GUIDE -->
+<div id="guideOverlay" class="guide-overlay" style="display:none" onclick="hideGuide()">
+  <div class="guide-box" onclick="event.stopPropagation()">
+    <div class="guide-head"><h2>User Guide</h2><button class="about-close" onclick="hideGuide()">×</button></div>
+    <div class="guide-scroll">
+      <div class="guide-section"><h3>Getting started</h3><p>Choose a direction (English → Latin or Latin → English), select a quiz type, tick the categories you want to practise, and press Begin. The trainer pulls words from every ticked subcategory and shuffles them into a quiz.</p></div>
+      <div class="guide-section"><h3>Quiz types</h3><p><strong>Vocabulary</strong> tests word meanings. <strong>Noun / Adjective / Pronoun declension</strong> drills case forms. <strong>Verb conjugation</strong> drills person/number forms with optional tense selection (present / imperfect). <strong>Sentences</strong> generates full Latin sentences to translate, with four difficulty levels.</p></div>
+      <div class="guide-section"><h3>Answer modes &amp; scoring</h3><p><strong>Typed</strong> — type your answer and press Enter or click Check. <strong>Multiple choice</strong> — click one of four options (or press 1–4). Correct = 1 point. Press Tab for a hint: if you then answer correctly you get ½ point. Skip (Escape) = 0 points.</p></div>
+      <div class="guide-section"><h3>Spaced repetition</h3><p>Every word tracks how often you've seen it and your accuracy. Words you get wrong come back sooner; words you know well are spaced further apart. The "Due" button starts a session with overdue words first. Progress persists across sessions.</p></div>
+      <div class="guide-section"><h3>Speed mode</h3><p>Toggle speed mode in the start bar. A countdown timer appears — if it hits zero, your current typed text is auto-submitted (correct if right, wrong if wrong). Empty input counts as a skip. For sentences, the timer goes up to 60 seconds.</p></div>
+      <div class="guide-section"><h3>Verb tenses</h3><p>In verb conjugation mode, checkboxes let you choose Present, Imperfect, or both. Present drills forms like <em>porto, portas, portat</em>. Imperfect drills forms like <em>portabam, portabas, portabat</em>.</p></div>
+      <div class="guide-section"><h3>Daily practice</h3><p>Date-stamped boxes at the bottom of the Practice tab contain curated word sets for specific lessons. Each has category checkboxes and a "Practice these" button for a focused vocab quiz with just those words.</p></div>
+      <div class="guide-section"><h3>Custom words</h3><p>Click "Custom words" above the category grid to add your own vocabulary. Choose a category, enter the Latin and English, and the word is added to the relevant subcategory. Custom words persist across sessions and can be removed individually.</p></div>
+      <div class="guide-section"><h3>Statistics</h3><p>The Stats tab shows total answers, accuracy percentage, day streak, recent session chart, and per-category breakdowns with accuracy bars and due-word counts. Use "Reset all data" to clear everything.</p></div>
+      <div class="guide-section"><h3>Information tab</h3><p>Reference tables for all grammar: noun declensions (1st–5th), adjective declensions, verb conjugations (present &amp; imperfect), pronoun paradigms, number declensions, and special cases (dative verbs, time expressions, relative pronoun rules, cum+pronoun forms).</p></div>
+      <div class="guide-section"><h3>Themes</h3><p>Click the ☀/☾ button to open the theme picker. Choose from 11 themes: Dark, Light, Parchment, Mist (light themes), Midnight, Forest, Rose, Ocean, Violet, Slate, and Sepia (dark themes). Your choice persists across sessions.</p></div>
+      <div class="guide-section"><h3>Sentences — eius vs suus</h3><p>Sentences distinguish possessives: <strong>[own]</strong> means reflexive (<em>suus/sua/suum</em> — refers back to the subject). <strong>[someone else's]</strong> means <em>eius</em> (indeclinable — refers to a different person).</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- SPOTLIGHT TOUR -->
+<div id="spotOverlay" style="display:none">
+  <div class="spot-backdrop" id="spotBackdrop"></div>
+  <div class="spot-hole" id="spotHole"></div>
+  <div class="spot-card" id="spotCard">
+    <div class="spot-step" id="spotStep"></div>
+    <div class="spot-title" id="spotTitle"></div>
+    <div class="spot-body" id="spotBody"></div>
+    <div class="spot-btns">
+      <button class="spot-skip" id="spotSkipBtn" onclick="endTour()">Skip</button>
+      <button class="btn-secondary" id="spotBackBtn" onclick="tourBack()" style="font-size:12px;padding:6px 14px">Back</button>
+      <button class="btn-primary" id="spotNextBtn" onclick="tourNext()" style="font-size:12px;padding:6px 16px">Next</button>
+    </div>
+  </div>
+</div>
+
 <!-- THEME PICKER -->
 <div id="themeOverlay" class="overlay" style="display:none" onclick="hideThemePicker()">
   <div class="about-box" style="max-width:360px" onclick="event.stopPropagation()">
@@ -1457,7 +1530,7 @@ input[type=range]{flex:1;accent-color:var(--accent)}
 </aside>
 
 <script>
-const DATA={nouns:{label:"Nouns",sub:{"1st declension":{words:[{lat:"casa",gen:null,gender:"f",eng:["cottage"]},{lat:"puella",gen:null,gender:"f",eng:["girl"]},{lat:"cena",gen:null,gender:"f",eng:["dinner"]},{lat:"terra",gen:null,gender:"f",eng:["land","country","ground","earth"]},{lat:"femina",gen:null,gender:"f",eng:["woman"]},{lat:"regina",gen:null,gender:"f",eng:["queen"]},{lat:"mensa",gen:null,gender:"f",eng:["table"]},{lat:"silva",gen:null,gender:"f",eng:["forest","woods"]},{lat:"porta",gen:null,gender:"f",eng:["gate"]},{lat:"hasta",gen:null,gender:"f",eng:["spear"]},{lat:"aqua",gen:null,gender:"f",eng:["water"]},{lat:"epistula",gen:null,gender:"f",eng:["letter"]},{lat:"via",gen:null,gender:"f",eng:["road","street"]},{lat:"ianua",gen:null,gender:"f",eng:["door"]},{lat:"taberna",gen:null,gender:"f",eng:["tavern"]},{lat:"filia",gen:null,gender:"f",eng:["daughter"]},{lat:"fabula",gen:null,gender:"f",eng:["story"]},{lat:"insula",gen:null,gender:"f",eng:["island"]},{lat:"pecunia",gen:null,gender:"f",eng:["money"]},{lat:"pugna",gen:null,gender:"f",eng:["fight"]},{lat:"patria",gen:null,gender:"f",eng:["homeland"]},{lat:"magistra",gen:null,gender:"f",eng:["female teacher"]},{lat:"ancilla",gen:null,gender:"f",eng:["slave girl"]},{lat:"hora",gen:null,gender:"f",eng:["hour"]},{lat:"toga",gen:null,gender:"f",eng:["toga"]},{lat:"statua",gen:null,gender:"f",eng:["statue"]},{lat:"dea",gen:null,gender:"f",eng:["goddess"]},{lat:"schola",gen:null,gender:"f",eng:["class","classroom"]},{lat:"domina",gen:null,gender:"f",eng:["mistress"]},{lat:"agricola",gen:null,gender:"m",eng:["farmer"]},{lat:"poeta",gen:null,gender:"m",eng:["poet"]},{lat:"nauta",gen:null,gender:"m",eng:["sailor"]},{lat:"Roma",gen:null,gender:"f",eng:["Rome"]},{lat:"Italia",gen:null,gender:"f",eng:["Italy"]},{lat:"Hispania",gen:null,gender:"f",eng:["Spain"]},{lat:"Germania",gen:null,gender:"f",eng:["Germany"]},{lat:"Britannia",gen:null,gender:"f",eng:["England"]},{lat:"Gallia",gen:null,gender:"f",eng:["Gaul"]},{lat:"Athenae",gen:null,gender:"f",eng:["Athens"]},{lat:"Graecia",gen:null,gender:"f",eng:["Greece"]},{lat:"Troia",gen:null,gender:"f",eng:["Troy"]},{lat:"unda",gen:null,gender:"f",eng:["wave"]},{lat:"villa",gen:null,gender:"f",eng:["villa"]},{lat:"familia",gen:null,gender:"f",eng:["family"]},{lat:"gloria",gen:null,gender:"f",eng:["glory"]}]},"2nd declension (masc)":{words:[{lat:"servus",gen:null,gender:"m",eng:["slave"]},{lat:"discipulus",gen:null,gender:"m",eng:["student"]},{lat:"amicus",gen:null,gender:"m",eng:["friend"]},{lat:"filius",gen:null,gender:"m",eng:["son"]},{lat:"murus",gen:null,gender:"m",eng:["wall"]},{lat:"cibus",gen:null,gender:"m",eng:["food"]},{lat:"hortus",gen:null,gender:"m",eng:["garden"]},{lat:"equus",gen:null,gender:"m",eng:["horse"]},{lat:"campus",gen:null,gender:"m",eng:["plain"]},{lat:"colonus",gen:null,gender:"m",eng:["farmer"]},{lat:"somnus",gen:null,gender:"m",eng:["sleep"]},{lat:"sonus",gen:null,gender:"m",eng:["sound"]},{lat:"nuntius",gen:null,gender:"m",eng:["messenger"]},{lat:"ventus",gen:null,gender:"m",eng:["wind"]},{lat:"gladius",gen:null,gender:"m",eng:["sword"]},{lat:"deus",gen:null,gender:"m",eng:["god"]},{lat:"ludus",gen:null,gender:"m",eng:["school"]},{lat:"annus",gen:null,gender:"m",eng:["year"]},{lat:"barbarus",gen:null,gender:"m",eng:["barbarian"]},{lat:"libertus",gen:null,gender:"m",eng:["freedman"]},{lat:"dominus",gen:null,gender:"m",eng:["master"]},{lat:"medicus",gen:null,gender:"m",eng:["doctor"]},{lat:"vir",gen:null,gender:"m",eng:["man"]},{lat:"puer",gen:null,gender:"m",eng:["boy"]},{lat:"ager",gen:"agri",gender:"m",eng:["field"]},{lat:"liber",gen:"libri",gender:"m",eng:["book"]},{lat:"magister",gen:"magistri",gender:"m",eng:["teacher"]},{lat:"ludi",gen:null,gender:"m",eng:["games"]},{lat:"Gallus",gen:null,gender:"m",eng:["a Gaul"]},{lat:"Romanus",gen:null,gender:"m",eng:["a Roman"]},{lat:"locus",gen:null,gender:"m",eng:["place"]},{lat:"populus",gen:null,gender:"m",eng:["people"]}]},"2nd declension (neut)":{words:[{lat:"castra",gen:null,gender:"n",eng:["camp"]},{lat:"bellum",gen:null,gender:"n",eng:["war"]},{lat:"vinum",gen:null,gender:"n",eng:["wine"]},{lat:"proelium",gen:null,gender:"n",eng:["battle"]},{lat:"periculum",gen:null,gender:"n",eng:["danger"]},{lat:"arma",gen:null,gender:"n",eng:["arms","weapons"]},{lat:"frumentum",gen:null,gender:"n",eng:["wheat","grain"]},{lat:"consilium",gen:null,gender:"n",eng:["plan"]},{lat:"auxilium",gen:null,gender:"n",eng:["help"]},{lat:"donum",gen:null,gender:"n",eng:["gift"]},{lat:"verbum",gen:null,gender:"n",eng:["word"]},{lat:"saxum",gen:null,gender:"n",eng:["rock"]},{lat:"oppidum",gen:null,gender:"n",eng:["town"]},{lat:"exemplum",gen:null,gender:"n",eng:["example"]},{lat:"praesidium",gen:null,gender:"n",eng:["garrison"]}]},"5th declension":{words:[{lat:"dies",gen:"diei",gender:"m",eng:["day"]}]},"3rd declension":{words:[{lat:"leo",gen:"leonis",gender:"m",eng:["lion"]},{lat:"rex",gen:"regis",gender:"m",eng:["king"]},{lat:"pater",gen:"patris",gender:"m",eng:["father"]},{lat:"frater",gen:"fratris",gender:"m",eng:["brother"]},{lat:"iuvenis",gen:"iuvenis",gender:"m",eng:["young man"]},{lat:"canis",gen:"canis",gender:"m",eng:["dog"]},{lat:"comes",gen:"comitis",gender:"m",eng:["companion"]},{lat:"consul",gen:"consulis",gender:"m",eng:["consul"]},{lat:"dux",gen:"ducis",gender:"m",eng:["leader"]},{lat:"imperator",gen:"imperatoris",gender:"m",eng:["general"]},{lat:"centurio",gen:"centurionis",gender:"m",eng:["centurion"]},{lat:"amor",gen:"amoris",gender:"m",eng:["love"]},{lat:"flos",gen:"floris",gender:"m",eng:["flower"]},{lat:"miles",gen:"militis",gender:"m",eng:["soldier"]},{lat:"labor",gen:"laboris",gender:"m",eng:["work"]},{lat:"viator",gen:"viatoris",gender:"m",eng:["traveller"]},{lat:"senex",gen:"senis",gender:"m",eng:["old man"]},{lat:"senator",gen:"senatoris",gender:"m",eng:["senator"]},{lat:"clamor",gen:"clamoris",gender:"m",eng:["shout"]},{lat:"dolor",gen:"doloris",gender:"m",eng:["pain","grief"]},{lat:"eques",gen:"equitis",gender:"m",eng:["horseman"]},{lat:"pes",gen:"pedis",gender:"m",eng:["foot"]},{lat:"custos",gen:"custodis",gender:"m",eng:["guard"]},{lat:"mons",gen:"montis",gender:"m",eng:["mountain"]},{lat:"civis",gen:"civis",gender:"m",eng:["citizen"]},{lat:"hostis",gen:"hostis",gender:"m",eng:["enemy"]},{lat:"pons",gen:"pontis",gender:"m",eng:["bridge"]},{lat:"dens",gen:"dentis",gender:"m",eng:["tooth"]},{lat:"parens",gen:"parentis",gender:"m",eng:["parent"]},{lat:"vox",gen:"vocis",gender:"f",eng:["voice"]},{lat:"mater",gen:"matris",gender:"f",eng:["mother"]},{lat:"soror",gen:"sororis",gender:"f",eng:["sister"]},{lat:"libertas",gen:"libertatis",gender:"f",eng:["freedom"]},{lat:"tempestas",gen:"tempestatis",gender:"f",eng:["storm"]},{lat:"arbor",gen:"arboris",gender:"f",eng:["tree"]},{lat:"lex",gen:"legis",gender:"f",eng:["law"]},{lat:"pax",gen:"pacis",gender:"f",eng:["peace"]},{lat:"virtus",gen:"virtutis",gender:"f",eng:["courage","virtue"]},{lat:"virgo",gen:"virginis",gender:"f",eng:["maiden","virgin"]},{lat:"urbs",gen:"urbis",gender:"f",eng:["city"]},{lat:"mors",gen:"mortis",gender:"f",eng:["death"]},{lat:"nox",gen:"noctis",gender:"f",eng:["night"]},{lat:"navis",gen:"navis",gender:"f",eng:["ship"]},{lat:"classis",gen:"classis",gender:"f",eng:["fleet"]},{lat:"nomen",gen:"nominis",gender:"n",eng:["name"]},{lat:"tempus",gen:"temporis",gender:"n",eng:["time"]},{lat:"vulnus",gen:"vulneris",gender:"n",eng:["wound"]},{lat:"litus",gen:"litoris",gender:"n",eng:["shore","beach"]},{lat:"flumen",gen:"fluminis",gender:"n",eng:["river"]},{lat:"foedus",gen:"foederis",gender:"n",eng:["treaty"]},{lat:"carmen",gen:"carminis",gender:"n",eng:["poem","song"]},{lat:"mare",gen:"maris",gender:"n",eng:["sea"]},{lat:"moenia",gen:"moenium",gender:"n",eng:["city walls"]},{lat:"legio",gen:"legionis",gender:"f",eng:["legion"]},{lat:"dictator",gen:"dictatoris",gender:"m",eng:["dictator"]},{lat:"obses",gen:"obsidis",gender:"m",eng:["hostage"]},{lat:"mensis",gen:"mensis",gender:"m",eng:["month"]},{lat:"uxor",gen:"uxoris",gender:"f",eng:["wife"]}]}}},adjectives:{label:"Adjectives",sub:{"1st/2nd declension":{words:[{lat:"bonus",eng:["good"]},{lat:"laetus",eng:["happy"]},{lat:"iratus",eng:["angry"]},{lat:"fessus",eng:["tired"]},{lat:"magnus",eng:["big","great"]},{lat:"parvus",eng:["small"]},{lat:"malus",eng:["bad"]},{lat:"benignus",eng:["kind"]},{lat:"multus",eng:["much"]},{lat:"latus",eng:["wide"]},{lat:"anxius",eng:["anxious"]},{lat:"longus",eng:["long"]},{lat:"sollicitus",eng:["worried"]},{lat:"novus",eng:["new"]},{lat:"optimus",eng:["best","excellent"]},{lat:"miser",eng:["miserable"]},{lat:"liber",eng:["free"]},{lat:"pulcher",eng:["beautiful"]},{lat:"sacer",eng:["sacred"]},{lat:"Romanus",eng:["Roman"]},{lat:"reliquus",eng:["remaining","the remaining"]},{lat:"pauci",eng:["a few"]},{lat:"ceteri",eng:["the rest of"]},{lat:"unus",eng:["one"]},{lat:"duo",eng:["two"]},{lat:"tres",eng:["three"]},{lat:"tuus",eng:["your"]},{lat:"vester",eng:["your (plural)"]},{lat:"meus",eng:["my"]},{lat:"multi",eng:["many"]},{lat:"decimus",eng:["tenth"]},{lat:"altus",eng:["high"]},{lat:"territus",eng:["terrified"]},{lat:"carus",eng:["dear"]},{lat:"paratus",eng:["prepared"]},{lat:"dignus",eng:["worthy"]},{lat:"summus",eng:["greatest","utmost","on top of"]},{lat:"suus",eng:["his own","her own","their own"]},{lat:"noster",eng:["our"]},{lat:"pessimus",eng:["worst","very bad"]},{lat:"primus",eng:["first"]},{lat:"secundus",eng:["second"]},{lat:"tertius",eng:["third"]},{lat:"quartus",eng:["fourth"]},{lat:"quintus",eng:["fifth"]},{lat:"sextus",eng:["sixth"]},{lat:"septimus",eng:["seventh"]},{lat:"octavus",eng:["eighth"]},{lat:"nonus",eng:["ninth"]}]},"5th declension":{words:[{lat:"dies",gen:"diei",gender:"m",eng:["day"]}]},"3rd declension":{words:[{lat:"fortis",eng:["brave"]},{lat:"gravis",eng:["heavy","serious"]},{lat:"levis",eng:["light"]},{lat:"omnis",eng:["all","every"]},{lat:"incolumis",eng:["safe","unharmed"]},{lat:"brevis",eng:["short"]},{lat:"crudelis",eng:["cruel"]},{lat:"tristis",eng:["sad"]},{lat:"gracilis",eng:["slender","slim"]},{lat:"facilis",eng:["easy"]},{lat:"difficilis",eng:["difficult"]},{lat:"insignis",eng:["outstanding"]},{lat:"dulcis",eng:["sweet"]}]}}},verbs:{label:"Verbs",sub:{"1st conjugation":{words:[{lat:"porto",eng:["carry"]},{lat:"ceno",eng:["dine"]},{lat:"ambulo",eng:["walk"]},{lat:"navigo",eng:["sail"]},{lat:"amo",eng:["love"]},{lat:"rogo",eng:["ask"]},{lat:"pugno",eng:["fight"]},{lat:"oppugno",eng:["attack"]},{lat:"convoco",eng:["call together","assemble"]},{lat:"habito",eng:["live"]},{lat:"exspecto",eng:["wait for"]},{lat:"servo",eng:["save"]},{lat:"laboro",eng:["work"]},{lat:"festino",eng:["hurry"]},{lat:"do",eng:["give"]},{lat:"paro",eng:["prepare"]},{lat:"iuvo",eng:["help"]},{lat:"laudo",eng:["praise"]},{lat:"specto",eng:["watch","look at"]},{lat:"narro",eng:["tell"]},{lat:"saluto",eng:["greet"]},{lat:"voco",eng:["call"]},{lat:"clamo",eng:["shout"]},{lat:"curo",eng:["care for","look after"]},{lat:"intro",eng:["enter"]},{lat:"supero",eng:["overcome"]},{lat:"neco",eng:["kill"]},{lat:"excito",eng:["wake up","arouse"]},{lat:"canto",eng:["sing"]},{lat:"lavo",eng:["wash"]},{lat:"libero",eng:["free","set free"]},{lat:"postulo",eng:["demand"]}]},"2nd conjugation":{words:[{lat:"moneo",eng:["warn","advise"]},{lat:"sedeo",eng:["sit"]},{lat:"maneo",eng:["stay","remain"]},{lat:"iaceo",eng:["lie down"]},{lat:"taceo",eng:["be quiet","be silent"]},{lat:"habeo",eng:["have","own","possess"]},{lat:"timeo",eng:["fear"]},{lat:"iubeo",eng:["order"]},{lat:"terreo",eng:["terrify"]},{lat:"video",eng:["see"]},{lat:"doceo",eng:["teach"]},{lat:"debeo",eng:["ought","owe"]},{lat:"respondeo",eng:["answer","reply"]},{lat:"persuadeo",eng:["persuade"]},{lat:"exerceo",eng:["exercise","train"]}]},"3rd conjugation":{words:[{lat:"procedo",eng:["go forward"]},{lat:"rego",eng:["rule"]},{lat:"lego",eng:["read"]},{lat:"scribo",eng:["write"]},{lat:"duco",eng:["lead"]},{lat:"mitto",eng:["send"]},{lat:"cado",eng:["fall"]},{lat:"resisto",eng:["resist"]},{lat:"dico",eng:["say","speak"]},{lat:"ludo",eng:["play"]},{lat:"occido",eng:["slaughter","kill"]},{lat:"descendo",eng:["go down"]},{lat:"vinco",eng:["conquer"]},{lat:"trado",eng:["hand over"]},{lat:"pono",eng:["place","put"]},{lat:"surgo",eng:["arise","get up"]},{lat:"curro",eng:["run"]},{lat:"constituo",eng:["decide"]},{lat:"ascendo",eng:["go up","climb"]},{lat:"defendo",eng:["defend"]},{lat:"dimitto",eng:["send away"]},{lat:"bibo",eng:["drink"]},{lat:"reddo",eng:["give back"]},{lat:"accedo",eng:["approach"]},{lat:"relinquo",eng:["leave behind","abandon"]},{lat:"emo",eng:["buy"]},{lat:"vendo",eng:["sell"]},{lat:"contendo",eng:["hurry","march"]},{lat:"traho",eng:["drag"]},{lat:"claudo",eng:["close","shut"]},{lat:"facio",eng:["do","make"]},{lat:"fugio",eng:["flee"]},{lat:"capio",eng:["take","capture"]},{lat:"cupio",eng:["desire"]},{lat:"accipio",eng:["receive"]},{lat:"iacio",eng:["throw"]},{lat:"conicio",eng:["hurl"]},{lat:"interficio",eng:["kill"]},{lat:"gero",eng:["carry on","wage","wear"]},{lat:"dedo",eng:["surrender"]},{lat:"posco",eng:["demand"]},{lat:"rumpo",eng:["burst through","break"]},{lat:"cano",eng:["sing"]},{lat:"evado",eng:["escape"]},{lat:"repello",eng:["drive back"]}]},"4th conjugation":{words:[{lat:"invenio",eng:["find"]},{lat:"dormio",eng:["sleep"]},{lat:"audio",eng:["hear"]},{lat:"venio",eng:["come"]},{lat:"advenio",eng:["arrive","come to"]},{lat:"convenio",eng:["come together"]},{lat:"punio",eng:["punish"]},{lat:"custodio",eng:["guard"]}]},irregular:{words:[{lat:"esse",eng:["to be"]},{lat:"adesse",eng:["to be present"]},{lat:"abesse",eng:["to be absent"]},{lat:"posse",eng:["to be able","can"]},{lat:"eo",eng:["go"]},{lat:"transeo",eng:["cross"]},{lat:"abeo",eng:["go away"]},{lat:"exeo",eng:["go out"]},{lat:"redeo",eng:["go back"]},{lat:"ineo",eng:["go into"]},{lat:"esto",eng:["be (imperative)"]},{lat:"este",eng:["be (plural imperative)"]},{lat:"volo",eng:["want","wish"]},{lat:"nolo",eng:["not want","refuse"]}]}}},prepositions:{label:"Prepositions",sub:{"with ablative":{words:[{lat:"sub",eng:["under"]},{lat:"in",eng:["in","on"]},{lat:"cum",eng:["with"]},{lat:"de",eng:["about","down from"]},{lat:"ex",eng:["out of","from"]},{lat:"ab",eng:["from"]},{lat:"sine",eng:["without"]},{lat:"mecum",eng:["with me"]},{lat:"tecum",eng:["with you (sg)"]},{lat:"nobiscum",eng:["with us"]},{lat:"vobiscum",eng:["with you (pl)"]},{lat:"secum",eng:["with himself","with herself","with themselves"]}]},"with accusative":{words:[{lat:"ad",eng:["to"]},{lat:"in",eng:["into","onto"]},{lat:"trans",eng:["across"]},{lat:"per",eng:["through"]},{lat:"prope",eng:["near"]},{lat:"contra",eng:["against"]},{lat:"circum",eng:["around"]},{lat:"post",eng:["after"]},{lat:"ante",eng:["before"]},{lat:"propter",eng:["on account of"]}]}}},conjunctions:{label:"Conjunctions",sub:{conjunctions:{words:[{lat:"nam",eng:["for"]},{lat:"quod",eng:["because"]},{lat:"et",eng:["and"]},{lat:"sed",eng:["but"]},{lat:"tamen",eng:["however","nevertheless"]},{lat:"itaque",eng:["and so"]},{lat:"non solum...sed etiam",eng:["not only...but also"]},{lat:"et...et",eng:["both...and"]}]}}},adverbs:{label:"Adverbs",sub:{adverbs:{words:[{lat:"fortiter",eng:["bravely"]},{lat:"bene",eng:["well"]},{lat:"celeriter",eng:["quickly"]},{lat:"diligenter",eng:["carefully","diligently"]},{lat:"numquam",eng:["never"]},{lat:"nunc",eng:["now"]},{lat:"iterum",eng:["again"]},{lat:"tandem",eng:["at last"]},{lat:"lente",eng:["slowly"]},{lat:"laete",eng:["happily"]},{lat:"diu",eng:["for a long time"]},{lat:"subito",eng:["suddenly"]},{lat:"iam",eng:["now","already"]},{lat:"statim",eng:["at once"]},{lat:"saepe",eng:["often"]},{lat:"mox",eng:["soon"]},{lat:"semper",eng:["always"]},{lat:"postea",eng:["afterwards"]},{lat:"postridie",eng:["on the next day"]}]}}},numbers:{label:"Numbers",sub:{"cardinal":{words:[{lat:"quattuor",eng:["four"]},{lat:"quinque",eng:["five"]},{lat:"sex",eng:["six"]},{lat:"septem",eng:["seven"]},{lat:"octo",eng:["eight"]},{lat:"novem",eng:["nine"]},{lat:"decem",eng:["ten"]},{lat:"centum",eng:["hundred"]},{lat:"mille",eng:["thousand"]}]}}},interrogatives:{label:"Interrogatives",sub:{interrogatives:{words:[{lat:"quis",eng:["who"]},{lat:"quid",eng:["what"]},{lat:"quando",eng:["when"]},{lat:"ubi",eng:["where"]},{lat:"quo modo",eng:["how"]},{lat:"cur",eng:["why"]},{lat:"quantus",eng:["how big"]},{lat:"-ne",eng:["question marker","question signal","question"]},{lat:"nonne",eng:["surely"]},{lat:"num",eng:["surely not"]}]}}},pronouns:{label:"Pronouns",sub:{"personal pronouns":{words:[{lat:"ego",eng:["I"]},{lat:"tu",eng:["you (sg)"]},{lat:"nos",eng:["we","us"]},{lat:"vos",eng:["you (pl)"]},{lat:"is",eng:["he"]},{lat:"ea",eng:["she"]},{lat:"id",eng:["it"]}]},"reflexive pronouns":{words:[{lat:"se",eng:["himself","herself","itself","themselves"]}]},"demonstrative: hic (this)":{words:[{lat:"hic",eng:["this (masc)"]},{lat:"haec",eng:["this (fem)"]},{lat:"hoc",eng:["this (neut)"]}]},"demonstrative: ille (that)":{words:[{lat:"ille",eng:["that (masc)"]},{lat:"illa",eng:["that (fem)"]},{lat:"illud",eng:["that (neut)"]}]},"emphatic: ipse (himself)":{words:[{lat:"ipse",eng:["himself"]},{lat:"ipsa",eng:["herself"]},{lat:"ipsum",eng:["itself"]}]},"relative: qui (who)":{words:[{lat:"qui",eng:["who","which","whom","whose"]},{lat:"quae",eng:["who","which"]},{lat:"quod",eng:["which","that"]}]}}}};
+const DATA={nouns:{label:"Nouns",sub:{"1st declension":{words:[{lat:"casa",gen:null,gender:"f",eng:["cottage"]},{lat:"puella",gen:null,gender:"f",eng:["girl"]},{lat:"cena",gen:null,gender:"f",eng:["dinner"]},{lat:"terra",gen:null,gender:"f",eng:["land","country","ground","earth"]},{lat:"femina",gen:null,gender:"f",eng:["woman"]},{lat:"regina",gen:null,gender:"f",eng:["queen"]},{lat:"mensa",gen:null,gender:"f",eng:["table"]},{lat:"silva",gen:null,gender:"f",eng:["forest","woods"]},{lat:"porta",gen:null,gender:"f",eng:["gate"]},{lat:"hasta",gen:null,gender:"f",eng:["spear"]},{lat:"aqua",gen:null,gender:"f",eng:["water"]},{lat:"epistula",gen:null,gender:"f",eng:["letter"]},{lat:"via",gen:null,gender:"f",eng:["road","street"]},{lat:"ianua",gen:null,gender:"f",eng:["door"]},{lat:"taberna",gen:null,gender:"f",eng:["tavern"]},{lat:"filia",gen:null,gender:"f",eng:["daughter"]},{lat:"fabula",gen:null,gender:"f",eng:["story"]},{lat:"insula",gen:null,gender:"f",eng:["island"]},{lat:"pecunia",gen:null,gender:"f",eng:["money"]},{lat:"pugna",gen:null,gender:"f",eng:["fight"]},{lat:"patria",gen:null,gender:"f",eng:["homeland"]},{lat:"magistra",gen:null,gender:"f",eng:["female teacher"]},{lat:"ancilla",gen:null,gender:"f",eng:["slave girl"]},{lat:"hora",gen:null,gender:"f",eng:["hour"]},{lat:"toga",gen:null,gender:"f",eng:["toga"]},{lat:"statua",gen:null,gender:"f",eng:["statue"]},{lat:"dea",gen:null,gender:"f",eng:["goddess"]},{lat:"schola",gen:null,gender:"f",eng:["class","classroom"]},{lat:"domina",gen:null,gender:"f",eng:["mistress"]},{lat:"agricola",gen:null,gender:"m",eng:["farmer"]},{lat:"poeta",gen:null,gender:"m",eng:["poet"]},{lat:"nauta",gen:null,gender:"m",eng:["sailor"]},{lat:"Roma",gen:null,gender:"f",eng:["Rome"]},{lat:"Italia",gen:null,gender:"f",eng:["Italy"]},{lat:"Hispania",gen:null,gender:"f",eng:["Spain"]},{lat:"Germania",gen:null,gender:"f",eng:["Germany"]},{lat:"Britannia",gen:null,gender:"f",eng:["England"]},{lat:"Gallia",gen:null,gender:"f",eng:["Gaul"]},{lat:"Athenae",gen:null,gender:"f",eng:["Athens"]},{lat:"Graecia",gen:null,gender:"f",eng:["Greece"]},{lat:"Troia",gen:null,gender:"f",eng:["Troy"]},{lat:"unda",gen:null,gender:"f",eng:["wave"]},{lat:"villa",gen:null,gender:"f",eng:["villa"]},{lat:"familia",gen:null,gender:"f",eng:["family"]},{lat:"gloria",gen:null,gender:"f",eng:["glory"]}]},"2nd declension (masc)":{words:[{lat:"servus",gen:null,gender:"m",eng:["slave"]},{lat:"discipulus",gen:null,gender:"m",eng:["student"]},{lat:"amicus",gen:null,gender:"m",eng:["friend"]},{lat:"filius",gen:null,gender:"m",eng:["son"]},{lat:"murus",gen:null,gender:"m",eng:["wall"]},{lat:"cibus",gen:null,gender:"m",eng:["food"]},{lat:"hortus",gen:null,gender:"m",eng:["garden"]},{lat:"equus",gen:null,gender:"m",eng:["horse"]},{lat:"campus",gen:null,gender:"m",eng:["plain"]},{lat:"colonus",gen:null,gender:"m",eng:["farmer"]},{lat:"somnus",gen:null,gender:"m",eng:["sleep"]},{lat:"sonus",gen:null,gender:"m",eng:["sound"]},{lat:"nuntius",gen:null,gender:"m",eng:["messenger"]},{lat:"ventus",gen:null,gender:"m",eng:["wind"]},{lat:"gladius",gen:null,gender:"m",eng:["sword"]},{lat:"deus",gen:null,gender:"m",eng:["god"]},{lat:"ludus",gen:null,gender:"m",eng:["school"]},{lat:"annus",gen:null,gender:"m",eng:["year"]},{lat:"barbarus",gen:null,gender:"m",eng:["barbarian"]},{lat:"libertus",gen:null,gender:"m",eng:["freedman"]},{lat:"dominus",gen:null,gender:"m",eng:["master"]},{lat:"medicus",gen:null,gender:"m",eng:["doctor"]},{lat:"vir",gen:null,gender:"m",eng:["man"]},{lat:"puer",gen:null,gender:"m",eng:["boy"]},{lat:"ager",gen:"agri",gender:"m",eng:["field"]},{lat:"liber",gen:"libri",gender:"m",eng:["book"]},{lat:"magister",gen:"magistri",gender:"m",eng:["teacher"]},{lat:"ludi",gen:null,gender:"m",eng:["games"]},{lat:"Gallus",gen:null,gender:"m",eng:["a Gaul"]},{lat:"Romanus",gen:null,gender:"m",eng:["a Roman"]},{lat:"locus",gen:null,gender:"m",eng:["place"]},{lat:"populus",gen:null,gender:"m",eng:["people"]}]},"2nd declension (neut)":{words:[{lat:"castra",gen:null,gender:"n",eng:["camp"]},{lat:"bellum",gen:null,gender:"n",eng:["war"]},{lat:"vinum",gen:null,gender:"n",eng:["wine"]},{lat:"proelium",gen:null,gender:"n",eng:["battle"]},{lat:"periculum",gen:null,gender:"n",eng:["danger"]},{lat:"arma",gen:null,gender:"n",eng:["arms","weapons"]},{lat:"frumentum",gen:null,gender:"n",eng:["wheat","grain"]},{lat:"consilium",gen:null,gender:"n",eng:["plan"]},{lat:"auxilium",gen:null,gender:"n",eng:["help"]},{lat:"donum",gen:null,gender:"n",eng:["gift"]},{lat:"verbum",gen:null,gender:"n",eng:["word"]},{lat:"saxum",gen:null,gender:"n",eng:["rock"]},{lat:"oppidum",gen:null,gender:"n",eng:["town"]},{lat:"exemplum",gen:null,gender:"n",eng:["example"]},{lat:"praesidium",gen:null,gender:"n",eng:["garrison"]}]},"5th declension":{words:[{lat:"dies",gen:"diei",gender:"m",eng:["day"]}]},"cardinal numbers":{words:[{lat:"quattuor",gen:null,gender:null,eng:["four"]},{lat:"quinque",gen:null,gender:null,eng:["five"]},{lat:"sex",gen:null,gender:null,eng:["six"]},{lat:"septem",gen:null,gender:null,eng:["seven"]},{lat:"octo",gen:null,gender:null,eng:["eight"]},{lat:"novem",gen:null,gender:null,eng:["nine"]},{lat:"decem",gen:null,gender:null,eng:["ten"]},{lat:"centum",gen:null,gender:null,eng:["hundred"]},{lat:"mille",gen:null,gender:null,eng:["thousand"]}]},"3rd declension":{words:[{lat:"leo",gen:"leonis",gender:"m",eng:["lion"]},{lat:"rex",gen:"regis",gender:"m",eng:["king"]},{lat:"pater",gen:"patris",gender:"m",eng:["father"]},{lat:"frater",gen:"fratris",gender:"m",eng:["brother"]},{lat:"iuvenis",gen:"iuvenis",gender:"m",eng:["young man"]},{lat:"canis",gen:"canis",gender:"m",eng:["dog"]},{lat:"comes",gen:"comitis",gender:"m",eng:["companion"]},{lat:"consul",gen:"consulis",gender:"m",eng:["consul"]},{lat:"dux",gen:"ducis",gender:"m",eng:["leader"]},{lat:"imperator",gen:"imperatoris",gender:"m",eng:["general"]},{lat:"centurio",gen:"centurionis",gender:"m",eng:["centurion"]},{lat:"amor",gen:"amoris",gender:"m",eng:["love"]},{lat:"flos",gen:"floris",gender:"m",eng:["flower"]},{lat:"miles",gen:"militis",gender:"m",eng:["soldier"]},{lat:"labor",gen:"laboris",gender:"m",eng:["work"]},{lat:"viator",gen:"viatoris",gender:"m",eng:["traveller"]},{lat:"senex",gen:"senis",gender:"m",eng:["old man"]},{lat:"senator",gen:"senatoris",gender:"m",eng:["senator"]},{lat:"clamor",gen:"clamoris",gender:"m",eng:["shout"]},{lat:"dolor",gen:"doloris",gender:"m",eng:["pain","grief"]},{lat:"eques",gen:"equitis",gender:"m",eng:["horseman"]},{lat:"pes",gen:"pedis",gender:"m",eng:["foot"]},{lat:"custos",gen:"custodis",gender:"m",eng:["guard"]},{lat:"mons",gen:"montis",gender:"m",eng:["mountain"]},{lat:"civis",gen:"civis",gender:"m",eng:["citizen"]},{lat:"hostis",gen:"hostis",gender:"m",eng:["enemy"]},{lat:"pons",gen:"pontis",gender:"m",eng:["bridge"]},{lat:"dens",gen:"dentis",gender:"m",eng:["tooth"]},{lat:"parens",gen:"parentis",gender:"m",eng:["parent"]},{lat:"vox",gen:"vocis",gender:"f",eng:["voice"]},{lat:"mater",gen:"matris",gender:"f",eng:["mother"]},{lat:"soror",gen:"sororis",gender:"f",eng:["sister"]},{lat:"libertas",gen:"libertatis",gender:"f",eng:["freedom"]},{lat:"tempestas",gen:"tempestatis",gender:"f",eng:["storm"]},{lat:"arbor",gen:"arboris",gender:"f",eng:["tree"]},{lat:"lex",gen:"legis",gender:"f",eng:["law"]},{lat:"pax",gen:"pacis",gender:"f",eng:["peace"]},{lat:"virtus",gen:"virtutis",gender:"f",eng:["courage","virtue"]},{lat:"virgo",gen:"virginis",gender:"f",eng:["maiden","virgin"]},{lat:"urbs",gen:"urbis",gender:"f",eng:["city"]},{lat:"mors",gen:"mortis",gender:"f",eng:["death"]},{lat:"nox",gen:"noctis",gender:"f",eng:["night"]},{lat:"navis",gen:"navis",gender:"f",eng:["ship"]},{lat:"classis",gen:"classis",gender:"f",eng:["fleet"]},{lat:"nomen",gen:"nominis",gender:"n",eng:["name"]},{lat:"tempus",gen:"temporis",gender:"n",eng:["time"]},{lat:"vulnus",gen:"vulneris",gender:"n",eng:["wound"]},{lat:"litus",gen:"litoris",gender:"n",eng:["shore","beach"]},{lat:"flumen",gen:"fluminis",gender:"n",eng:["river"]},{lat:"foedus",gen:"foederis",gender:"n",eng:["treaty"]},{lat:"carmen",gen:"carminis",gender:"n",eng:["poem","song"]},{lat:"mare",gen:"maris",gender:"n",eng:["sea"]},{lat:"moenia",gen:"moenium",gender:"n",eng:["city walls"]},{lat:"legio",gen:"legionis",gender:"f",eng:["legion"]},{lat:"dictator",gen:"dictatoris",gender:"m",eng:["dictator"]},{lat:"obses",gen:"obsidis",gender:"m",eng:["hostage"]},{lat:"mensis",gen:"mensis",gender:"m",eng:["month"]},{lat:"uxor",gen:"uxoris",gender:"f",eng:["wife"]}]}}},adjectives:{label:"Adjectives",sub:{"1st/2nd declension":{words:[{lat:"bonus",eng:["good"]},{lat:"laetus",eng:["happy"]},{lat:"iratus",eng:["angry"]},{lat:"fessus",eng:["tired"]},{lat:"magnus",eng:["big","great"]},{lat:"parvus",eng:["small"]},{lat:"malus",eng:["bad"]},{lat:"benignus",eng:["kind"]},{lat:"multus",eng:["much"]},{lat:"latus",eng:["wide"]},{lat:"anxius",eng:["anxious"]},{lat:"longus",eng:["long"]},{lat:"sollicitus",eng:["worried"]},{lat:"novus",eng:["new"]},{lat:"optimus",eng:["best","excellent"]},{lat:"miser",eng:["miserable"]},{lat:"liber",eng:["free"]},{lat:"pulcher",eng:["beautiful"]},{lat:"sacer",eng:["sacred"]},{lat:"Romanus",eng:["Roman"]},{lat:"reliquus",eng:["remaining","the remaining"]},{lat:"pauci",eng:["a few"]},{lat:"ceteri",eng:["the rest of"]},{lat:"unus",eng:["one"]},{lat:"duo",eng:["two"]},{lat:"tres",eng:["three"]},{lat:"tuus",eng:["your"]},{lat:"vester",eng:["your (plural)"]},{lat:"meus",eng:["my"]},{lat:"multi",eng:["many"]},{lat:"decimus",eng:["tenth"]},{lat:"altus",eng:["high"]},{lat:"territus",eng:["terrified"]},{lat:"carus",eng:["dear"]},{lat:"paratus",eng:["prepared"]},{lat:"dignus",eng:["worthy"]},{lat:"summus",eng:["greatest","utmost","on top of"]},{lat:"suus",eng:["his [own]","her [own]","their [own]"]},{lat:"noster",eng:["our"]},{lat:"pessimus",eng:["worst","very bad"]},{lat:"primus",eng:["first"]},{lat:"secundus",eng:["second"]},{lat:"tertius",eng:["third"]},{lat:"quartus",eng:["fourth"]},{lat:"quintus",eng:["fifth"]},{lat:"sextus",eng:["sixth"]},{lat:"septimus",eng:["seventh"]},{lat:"octavus",eng:["eighth"]},{lat:"nonus",eng:["ninth"]},{lat:"stultus",eng:["stupid"]},{lat:"mortuus",eng:["dead"]}]},"3rd declension":{words:[{lat:"fortis",eng:["brave"]},{lat:"gravis",eng:["heavy","serious"]},{lat:"levis",eng:["light"]},{lat:"omnis",eng:["all","every"]},{lat:"incolumis",eng:["safe","unharmed"]},{lat:"brevis",eng:["short"]},{lat:"crudelis",eng:["cruel"]},{lat:"tristis",eng:["sad"]},{lat:"gracilis",eng:["slender","slim"]},{lat:"facilis",eng:["easy"]},{lat:"difficilis",eng:["difficult"]},{lat:"insignis",eng:["outstanding"]},{lat:"dulcis",eng:["sweet"]}]}}},verbs:{label:"Verbs",sub:{"1st conjugation":{words:[{lat:"porto",eng:["carry"]},{lat:"ceno",eng:["dine"]},{lat:"ambulo",eng:["walk"]},{lat:"navigo",eng:["sail"]},{lat:"amo",eng:["love"]},{lat:"rogo",eng:["ask"]},{lat:"pugno",eng:["fight"]},{lat:"oppugno",eng:["attack"]},{lat:"convoco",eng:["call together","assemble"]},{lat:"habito",eng:["live"]},{lat:"exspecto",eng:["wait for"]},{lat:"servo",eng:["save"]},{lat:"laboro",eng:["work"]},{lat:"festino",eng:["hurry"]},{lat:"do",eng:["give"]},{lat:"paro",eng:["prepare"]},{lat:"iuvo",eng:["help"]},{lat:"laudo",eng:["praise"]},{lat:"specto",eng:["watch","look at"]},{lat:"narro",eng:["tell"]},{lat:"saluto",eng:["greet"]},{lat:"voco",eng:["call"]},{lat:"clamo",eng:["shout"]},{lat:"curo",eng:["care for","look after"]},{lat:"intro",eng:["enter"]},{lat:"supero",eng:["overcome"]},{lat:"neco",eng:["kill"]},{lat:"excito",eng:["wake up","arouse"]},{lat:"canto",eng:["sing"]},{lat:"lavo",eng:["wash"]},{lat:"libero",eng:["free","set free"]},{lat:"postulo",eng:["demand"]},{lat:"sto",eng:["stand"]},{lat:"evigilo",eng:["wake"]}]},"2nd conjugation":{words:[{lat:"moneo",eng:["warn","advise"]},{lat:"sedeo",eng:["sit"]},{lat:"maneo",eng:["stay","remain"]},{lat:"iaceo",eng:["lie down"]},{lat:"taceo",eng:["be quiet","be silent"]},{lat:"habeo",eng:["have","own","possess"]},{lat:"timeo",eng:["fear"]},{lat:"iubeo",eng:["order"]},{lat:"terreo",eng:["terrify"]},{lat:"video",eng:["see"]},{lat:"doceo",eng:["teach"]},{lat:"debeo",eng:["ought","owe"]},{lat:"respondeo",eng:["answer","reply"]},{lat:"persuadeo",eng:["persuade"]},{lat:"exerceo",eng:["exercise","train"]}]},"3rd conjugation":{words:[{lat:"procedo",eng:["go forward"]},{lat:"rego",eng:["rule"]},{lat:"lego",eng:["read"]},{lat:"scribo",eng:["write"]},{lat:"duco",eng:["lead"]},{lat:"mitto",eng:["send"]},{lat:"cado",eng:["fall"]},{lat:"resisto",eng:["resist"]},{lat:"dico",eng:["say","speak"]},{lat:"ludo",eng:["play"]},{lat:"occido",eng:["slaughter","kill"]},{lat:"descendo",eng:["go down"]},{lat:"vinco",eng:["conquer"]},{lat:"trado",eng:["hand over"]},{lat:"pono",eng:["place","put"]},{lat:"surgo",eng:["arise","get up"]},{lat:"curro",eng:["run"]},{lat:"constituo",eng:["decide"]},{lat:"ascendo",eng:["go up","climb"]},{lat:"defendo",eng:["defend"]},{lat:"dimitto",eng:["send away"]},{lat:"bibo",eng:["drink"]},{lat:"reddo",eng:["give back"]},{lat:"accedo",eng:["approach"]},{lat:"relinquo",eng:["leave behind","abandon"]},{lat:"emo",eng:["buy"]},{lat:"vendo",eng:["sell"]},{lat:"contendo",eng:["hurry","march"]},{lat:"traho",eng:["drag"]},{lat:"claudo",eng:["close","shut"]},{lat:"facio",eng:["do","make"]},{lat:"fugio",eng:["flee"]},{lat:"capio",eng:["take","capture"]},{lat:"cupio",eng:["desire"]},{lat:"accipio",eng:["receive"]},{lat:"iacio",eng:["throw"]},{lat:"conicio",eng:["hurl"]},{lat:"interficio",eng:["kill"]},{lat:"gero",eng:["carry on","wage","wear"]},{lat:"dedo",eng:["surrender"]},{lat:"posco",eng:["demand"]},{lat:"rumpo",eng:["burst through","break"]},{lat:"cano",eng:["sing"]},{lat:"evado",eng:["escape"]},{lat:"repello",eng:["drive back"]},{lat:"tollo",eng:["lift"]},{lat:"colo",eng:["worship"]},]},"4th conjugation":{words:[{lat:"invenio",eng:["find"]},{lat:"dormio",eng:["sleep"]},{lat:"audio",eng:["hear"]},{lat:"venio",eng:["come"]},{lat:"advenio",eng:["arrive","come to"]},{lat:"convenio",eng:["come together"]},{lat:"punio",eng:["punish"]},{lat:"custodio",eng:["guard"]}]},irregular:{words:[{lat:"esse",eng:["to be"]},{lat:"adesse",eng:["to be present"]},{lat:"abesse",eng:["to be absent"]},{lat:"posse",eng:["to be able","can"]},{lat:"eo",eng:["go"]},{lat:"transeo",eng:["cross"]},{lat:"abeo",eng:["go away"]},{lat:"exeo",eng:["go out"]},{lat:"redeo",eng:["go back"]},{lat:"ineo",eng:["go into"]},{lat:"esto",eng:["be (imperative)"]},{lat:"este",eng:["be (plural imperative)"]},{lat:"volo",eng:["want","wish"]},{lat:"nolo",eng:["not want","refuse"]},{lat:"fero",eng:["bear","carry","bring"]}]}}},prepositions:{label:"Prepositions",sub:{"with ablative":{words:[{lat:"sub",eng:["under"]},{lat:"in",eng:["in","on"]},{lat:"cum",eng:["with"]},{lat:"de",eng:["about","down from"]},{lat:"ex",eng:["out of","from"]},{lat:"ab",eng:["from"]},{lat:"sine",eng:["without"]},{lat:"mecum",eng:["with me"]},{lat:"tecum",eng:["with you (sg)"]},{lat:"nobiscum",eng:["with us"]},{lat:"vobiscum",eng:["with you (pl)"]},{lat:"secum",eng:["with himself","with herself","with themselves"]}]},"with accusative":{words:[{lat:"ad",eng:["to"]},{lat:"in",eng:["into","onto"]},{lat:"trans",eng:["across"]},{lat:"per",eng:["through"]},{lat:"prope",eng:["near"]},{lat:"contra",eng:["against"]},{lat:"circum",eng:["around"]},{lat:"post",eng:["after"]},{lat:"ante",eng:["before"]},{lat:"propter",eng:["on account of"]},{lat:"inter",eng:["between","among"]}]}}},conjunctions:{label:"Conjunctions",sub:{conjunctions:{words:[{lat:"nam",eng:["for"]},{lat:"quod",eng:["because"]},{lat:"et",eng:["and"]},{lat:"sed",eng:["but"]},{lat:"tamen",eng:["however","nevertheless"]},{lat:"itaque",eng:["and so"]},{lat:"non solum...sed etiam",eng:["not only...but also"]},{lat:"et...et",eng:["both...and"]}]}}},adverbs:{label:"Adverbs",sub:{adverbs:{words:[{lat:"fortiter",eng:["bravely"]},{lat:"bene",eng:["well"]},{lat:"celeriter",eng:["quickly"]},{lat:"diligenter",eng:["carefully","diligently"]},{lat:"numquam",eng:["never"]},{lat:"nunc",eng:["now"]},{lat:"iterum",eng:["again"]},{lat:"tandem",eng:["at last"]},{lat:"lente",eng:["slowly"]},{lat:"laete",eng:["happily"]},{lat:"diu",eng:["for a long time"]},{lat:"subito",eng:["suddenly"]},{lat:"iam",eng:["now","already"]},{lat:"statim",eng:["at once"]},{lat:"saepe",eng:["often"]},{lat:"mox",eng:["soon"]},{lat:"semper",eng:["always"]},{lat:"postea",eng:["afterwards"]},{lat:"postridie",eng:["on the next day"]}]}}},interrogatives:{label:"Interrogatives",sub:{interrogatives:{words:[{lat:"quis",eng:["who"]},{lat:"quid",eng:["what"]},{lat:"quando",eng:["when"]},{lat:"ubi",eng:["where"]},{lat:"quo modo",eng:["how"]},{lat:"cur",eng:["why"]},{lat:"quantus",eng:["how big"]},{lat:"-ne",eng:["question marker","question signal","question"]},{lat:"nonne",eng:["surely"]},{lat:"num",eng:["surely not"]}]}}},pronouns:{label:"Pronouns",sub:{"personal pronouns":{words:[{lat:"ego",eng:["I"]},{lat:"tu",eng:["you (sg)"]},{lat:"nos",eng:["we","us"]},{lat:"vos",eng:["you (pl)"]},{lat:"is",eng:["he"]},{lat:"ea",eng:["she"]},{lat:"id",eng:["it"]}]},"reflexive pronouns":{words:[{lat:"se",eng:["himself","herself","itself","themselves"]}]},"demonstrative: hic (this)":{words:[{lat:"hic",eng:["this (masc)"]},{lat:"haec",eng:["this (fem)"]},{lat:"hoc",eng:["this (neut)"]}]},"demonstrative: ille (that)":{words:[{lat:"ille",eng:["that (masc)"]},{lat:"illa",eng:["that (fem)"]},{lat:"illud",eng:["that (neut)"]}]},"emphatic: ipse (himself)":{words:[{lat:"ipse",eng:["himself"]},{lat:"ipsa",eng:["herself"]},{lat:"ipsum",eng:["itself"]}]},"relative: qui (who)":{words:[{lat:"qui",eng:["who","which","whom","whose"]},{lat:"quae",eng:["who","which"]},{lat:"quod",eng:["which","that"]}]}}}};
 
 const WORD_MAP={};
 (function(){Object.entries(DATA).forEach(([ck,cat])=>Object.entries(cat.sub).forEach(([sk,sub])=>sub.words.forEach(w=>{const k=w.lat.toLowerCase();if(!WORD_MAP[k])WORD_MAP[k]=[];WORD_MAP[k].push(w.eng[0]);})));})();
@@ -1499,8 +1572,8 @@ function getAdjForms(w){const sk=w.subKey;if(sk==='1st/2nd declension')return ad
 function is3rd(sk){return sk==='3rd declension';}
 function fullLat(w){return is3rd(w.subKey)&&w.gen?w.lat+' '+w.gen+' '+w.gender:w.lat;}
 
-const IRREG={'esse':{'1st singular':'sum','2nd singular':'es','3rd singular':'est','1st plural':'sumus','2nd plural':'estis','3rd plural':'sunt'},'adesse':{'1st singular':'adsum','2nd singular':'ades','3rd singular':'adest','1st plural':'adsumus','2nd plural':'adestis','3rd plural':'adsunt'},'abesse':{'1st singular':'absum','2nd singular':'abes','3rd singular':'abest','1st plural':'absumus','2nd plural':'abestis','3rd plural':'absunt'},'posse':{'1st singular':'possum','2nd singular':'potes','3rd singular':'potest','1st plural':'possumus','2nd plural':'potestis','3rd plural':'possunt'},'eo':{'1st singular':'eo','2nd singular':'is','3rd singular':'it','1st plural':'imus','2nd plural':'itis','3rd plural':'eunt'},'transeo':{'1st singular':'transeo','2nd singular':'transis','3rd singular':'transit','1st plural':'transimus','2nd plural':'transitis','3rd plural':'transeunt'},'abeo':{'1st singular':'abeo','2nd singular':'abis','3rd singular':'abit','1st plural':'abimus','2nd plural':'abitis','3rd plural':'abeunt'},'exeo':{'1st singular':'exeo','2nd singular':'exis','3rd singular':'exit','1st plural':'eximus','2nd plural':'exitis','3rd plural':'exeunt'},'redeo':{'1st singular':'redeo','2nd singular':'redis','3rd singular':'redit','1st plural':'redimus','2nd plural':'reditis','3rd plural':'redeunt'},'ineo':{'1st singular':'ineo','2nd singular':'inis','3rd singular':'init','1st plural':'inimus','2nd plural':'initis','3rd plural':'ineunt'},'volo':{'1st singular':'volo','2nd singular':'vis','3rd singular':'vult','1st plural':'volumus','2nd plural':'vultis','3rd plural':'volunt'},'nolo':{'1st singular':'nolo','2nd singular':'non vis','3rd singular':'non vult','1st plural':'nolumus','2nd plural':'non vultis','3rd plural':'nolunt'}};
-const IRREG_IMPF={'esse':{'1st singular':'eram','2nd singular':'eras','3rd singular':'erat','1st plural':'eramus','2nd plural':'eratis','3rd plural':'erant'},'adesse':{'1st singular':'aderam','2nd singular':'aderas','3rd singular':'aderat','1st plural':'aderamus','2nd plural':'aderatis','3rd plural':'aderant'},'abesse':{'1st singular':'aberam','2nd singular':'aberas','3rd singular':'aberat','1st plural':'aberamus','2nd plural':'aberatis','3rd plural':'aberant'},'posse':{'1st singular':'poteram','2nd singular':'poteras','3rd singular':'poterat','1st plural':'poteramus','2nd plural':'poteratis','3rd plural':'poterant'},'eo':{'1st singular':'ibam','2nd singular':'ibas','3rd singular':'ibat','1st plural':'ibamus','2nd plural':'ibatis','3rd plural':'ibant'},'transeo':{'1st singular':'transibam','2nd singular':'transibas','3rd singular':'transibat','1st plural':'transibamus','2nd plural':'transibatis','3rd plural':'transibant'},'abeo':{'1st singular':'abibam','2nd singular':'abibas','3rd singular':'abibat','1st plural':'abibamus','2nd plural':'abibatis','3rd plural':'abibant'},'exeo':{'1st singular':'exibam','2nd singular':'exibas','3rd singular':'exibat','1st plural':'exibamus','2nd plural':'exibatis','3rd plural':'exibant'},'redeo':{'1st singular':'redibam','2nd singular':'redibas','3rd singular':'redibat','1st plural':'redibamus','2nd plural':'redibatis','3rd plural':'redibant'},'ineo':{'1st singular':'inibam','2nd singular':'inibas','3rd singular':'inibat','1st plural':'inibamus','2nd plural':'inibatis','3rd plural':'inibant'},'volo':{'1st singular':'volebam','2nd singular':'volebas','3rd singular':'volebat','1st plural':'volebamus','2nd plural':'volebatis','3rd plural':'volebant'},'nolo':{'1st singular':'nolebam','2nd singular':'nolebas','3rd singular':'nolebat','1st plural':'nolebamus','2nd plural':'nolebatis','3rd plural':'nolebant'}};
+const IRREG={'esse':{'1st singular':'sum','2nd singular':'es','3rd singular':'est','1st plural':'sumus','2nd plural':'estis','3rd plural':'sunt'},'adesse':{'1st singular':'adsum','2nd singular':'ades','3rd singular':'adest','1st plural':'adsumus','2nd plural':'adestis','3rd plural':'adsunt'},'abesse':{'1st singular':'absum','2nd singular':'abes','3rd singular':'abest','1st plural':'absumus','2nd plural':'abestis','3rd plural':'absunt'},'posse':{'1st singular':'possum','2nd singular':'potes','3rd singular':'potest','1st plural':'possumus','2nd plural':'potestis','3rd plural':'possunt'},'eo':{'1st singular':'eo','2nd singular':'is','3rd singular':'it','1st plural':'imus','2nd plural':'itis','3rd plural':'eunt'},'transeo':{'1st singular':'transeo','2nd singular':'transis','3rd singular':'transit','1st plural':'transimus','2nd plural':'transitis','3rd plural':'transeunt'},'abeo':{'1st singular':'abeo','2nd singular':'abis','3rd singular':'abit','1st plural':'abimus','2nd plural':'abitis','3rd plural':'abeunt'},'exeo':{'1st singular':'exeo','2nd singular':'exis','3rd singular':'exit','1st plural':'eximus','2nd plural':'exitis','3rd plural':'exeunt'},'redeo':{'1st singular':'redeo','2nd singular':'redis','3rd singular':'redit','1st plural':'redimus','2nd plural':'reditis','3rd plural':'redeunt'},'ineo':{'1st singular':'ineo','2nd singular':'inis','3rd singular':'init','1st plural':'inimus','2nd plural':'initis','3rd plural':'ineunt'},'fero':{'1st singular':'fero','2nd singular':'fers','3rd singular':'fert','1st plural':'ferimus','2nd plural':'fertis','3rd plural':'ferunt'},'fero':{'1st singular':'ferebam','2nd singular':'ferebas','3rd singular':'ferebat','1st plural':'ferebamus','2nd plural':'ferebatis','3rd plural':'ferebant'},'volo':{'1st singular':'volo','2nd singular':'vis','3rd singular':'vult','1st plural':'volumus','2nd plural':'vultis','3rd plural':'volunt'},'nolo':{'1st singular':'nolo','2nd singular':'non vis','3rd singular':'non vult','1st plural':'nolumus','2nd plural':'non vultis','3rd plural':'nolunt'}};
+const IRREG_IMPF={'esse':{'1st singular':'eram','2nd singular':'eras','3rd singular':'erat','1st plural':'eramus','2nd plural':'eratis','3rd plural':'erant'},'adesse':{'1st singular':'aderam','2nd singular':'aderas','3rd singular':'aderat','1st plural':'aderamus','2nd plural':'aderatis','3rd plural':'aderant'},'abesse':{'1st singular':'aberam','2nd singular':'aberas','3rd singular':'aberat','1st plural':'aberamus','2nd plural':'aberatis','3rd plural':'aberant'},'posse':{'1st singular':'poteram','2nd singular':'poteras','3rd singular':'poterat','1st plural':'poteramus','2nd plural':'poteratis','3rd plural':'poterant'},'eo':{'1st singular':'ibam','2nd singular':'ibas','3rd singular':'ibat','1st plural':'ibamus','2nd plural':'ibatis','3rd plural':'ibant'},'transeo':{'1st singular':'transibam','2nd singular':'transibas','3rd singular':'transibat','1st plural':'transibamus','2nd plural':'transibatis','3rd plural':'transibant'},'abeo':{'1st singular':'abibam','2nd singular':'abibas','3rd singular':'abibat','1st plural':'abibamus','2nd plural':'abibatis','3rd plural':'abibant'},'exeo':{'1st singular':'exibam','2nd singular':'exibas','3rd singular':'exibat','1st plural':'exibamus','2nd plural':'exibatis','3rd plural':'exibant'},'redeo':{'1st singular':'redibam','2nd singular':'redibas','3rd singular':'redibat','1st plural':'redibamus','2nd plural':'redibatis','3rd plural':'redibant'},'ineo':{'1st singular':'inibam','2nd singular':'inibas','3rd singular':'inibat','1st plural':'inibamus','2nd plural':'inibatis','3rd plural':'inibant'},'fero':{'1st singular':'ferebam','2nd singular':'ferebas','3rd singular':'ferebat','1st plural':'ferebamus','2nd plural':'ferebatis','3rd plural':'ferebant'},'volo':{'1st singular':'volebam','2nd singular':'volebas','3rd singular':'volebat','1st plural':'volebamus','2nd plural':'volebatis','3rd plural':'volebant'},'nolo':{'1st singular':'nolebam','2nd singular':'nolebas','3rd singular':'nolebat','1st plural':'nolebamus','2nd plural':'nolebatis','3rd plural':'nolebant'}};
 function getVerbImpf(w){const inf=w.lat,sk=w.subKey;if(IRREG_IMPF[inf])return IRREG_IMPF[inf];const IO=['facio','fugio','capio','cupio','accipio','iacio','conicio','interficio'];const pers=['1st singular','2nd singular','3rd singular','1st plural','2nd plural','3rd plural'];const ends=['bam','bas','bat','bamus','batis','bant'];let stem;if(sk==='1st conjugation'){stem=inf==='do'?'da':inf.slice(0,-1)+'a';}else if(sk==='2nd conjugation'){stem=inf.slice(0,-2)+'e';}else if(sk==='3rd conjugation'){stem=IO.includes(inf)?inf.slice(0,-2)+'ie':inf.slice(0,-1)+'e';}else if(sk==='4th conjugation'){stem=inf.slice(0,-2)+'ie';}if(!stem)return null;const r={};pers.forEach((p,i)=>{r[p]=stem+ends[i];});return r;}
 function getVerbConj(w){const inf=w.lat,sk=w.subKey;if(IRREG[inf])return IRREG[inf];if(sk==='1st conjugation'){if(inf==='do')return{'1st singular':'do','2nd singular':'das','3rd singular':'dat','1st plural':'damus','2nd plural':'datis','3rd plural':'dant'};const s=inf.slice(0,-1);return{'1st singular':inf,'2nd singular':s+'as','3rd singular':s+'at','1st plural':s+'amus','2nd plural':s+'atis','3rd plural':s+'ant'};}if(sk==='2nd conjugation'){const s=inf.slice(0,-2);return{'1st singular':inf,'2nd singular':s+'es','3rd singular':s+'et','1st plural':s+'emus','2nd plural':s+'etis','3rd plural':s+'ent'};}if(sk==='3rd conjugation'){const io=['facio','fugio','capio','cupio','accipio','iacio','conicio','interficio'].includes(inf);if(io){const s=inf.slice(0,-2);return{'1st singular':inf,'2nd singular':s+'is','3rd singular':s+'it','1st plural':s+'imus','2nd plural':s+'itis','3rd plural':s+'iunt'};}const s=inf.slice(0,-1);return{'1st singular':inf,'2nd singular':s+'is','3rd singular':s+'it','1st plural':s+'imus','2nd plural':s+'itis','3rd plural':s+'unt'};}if(sk==='4th conjugation'){const s=inf.slice(0,-2);return{'1st singular':inf,'2nd singular':s+'is','3rd singular':s+'it','1st plural':s+'imus','2nd plural':s+'itis','3rd plural':s+'iunt'};}return null;}
 // ── PRONOUN PARADIGMS ─────────────────────────────────────────────────────────
@@ -1682,7 +1755,7 @@ function wordsOf(ck){const ws=[];Object.entries(DATA[ck].sub).forEach(([sk,s])=>
 function declineN(w,cas,num){try{const f=getNounForms(w);if(!f)return w.lat;return f[cas+' '+num]||w.lat;}catch(e){return w.lat;}}
 function conjV(w,p,num){try{const f=getVerbConj(w);if(!f)return w.lat;return f[p+' '+num]||w.lat;}catch(e){return w.lat;}}
 function declineA(w,g,cas,num){try{const f=getAdjForms(w);if(!f)return w.lat;return f[(g||'m')+' '+cas+' '+num]||w.lat;}catch(e){return w.lat;}}
-const INTRANS=['ambulo','sedeo','maneo','iaceo','taceo','dormio','laboro','festino','ceno','navigo','pugno','curro','surgo','procedo','descendo','fugio','contendo','esse','adesse','abesse','posse','eo','transeo','abeo','exeo','redeo','ineo','esto','este','venio','advenio','convenio','ludo','accedo','intro','respondeo','persuadeo','resisto','volo','nolo'];
+const INTRANS=['ambulo','sedeo','maneo','iaceo','taceo','dormio','laboro','festino','ceno','navigo','pugno','curro','surgo','procedo','descendo','fugio','contendo','esse','adesse','abesse','posse','eo','transeo','abeo','exeo','redeo','ineo','esto','este','venio','advenio','convenio','ludo','accedo','intro','respondeo','persuadeo','resisto','volo','nolo','sto','evigilo','fero'];
 const ANIMATE=['agricola','poeta','nauta','puella','femina','regina','magistra','ancilla','domina','servus','discipulus','amicus','filius','colonus','nuntius','barbarus','libertus','dominus','medicus','vir','puer','magister','leo','rex','pater','frater','iuvenis','canis','comes','consul','dux','imperator','centurio','miles','viator','senex','senator','eques','custos','civis','hostis','parens','mater','soror','virgo'];
 const OBJECTS=['hasta','aqua','epistula','gladius','cibus','toga','statua','donum','verbum','frumentum','vinum','saxum','pecunia','arma','fabula','mensa','consilium','auxilium','carmen','unda','villa'];
 const PLACES=['casa','silva','via','ianua','taberna','schola','hortus','campus','ludus','oppidum','urbs','insula','terra','patria','litus','porta','murus','castra','mare','flumen','mons','pons'];
@@ -1756,6 +1829,17 @@ function sTimeDuration(){const s=pAnim(),v=pIntrans(),dur=rnd(TIME_DURATIONS),un
 function sTimeWhen(){const s=pAnim(),v=pTrans(),ord=rnd(ORDINALS_ABL),unit=rnd(TIME_UNITS_ABL);const o=pickObjForVerb(v,[s.lat]);const sN=declineN(s,'nominative','singular'),oA=declineN(o,'accusative','singular'),vF=conjVI(v);return{latin:cap(sN)+' '+ord.lat+' '+unit.lat+' '+oA+' '+vF+'.',english:'The '+eN(s)+' was '+ePast(v).replace('was ','')+'ing the '+eN(o)+' in the '+ord.eng+' '+unit.eng+'.',wordMap:{[sN.toLowerCase()]:s.eng[0],[oA.toLowerCase()]:o.eng[0],[vF.toLowerCase()]:v.eng[0],[ord.lat]:ord.eng,[unit.lat]:unit.eng}};}
 function sTimeWithin(){const s=pAnim(),v=pTrans(),dur=rnd(TIME_DURATIONS),unit=rnd(TIME_UNITS_ABL.map(u=>({lat:u.lat.endsWith('o')?u.lat.slice(0,-1)+'is':u.lat.endsWith('e')?u.lat+'bus':u.lat,eng:u.eng+'s'})));const o=pickObjForVerb(v,[s.lat]);const sN=declineN(s,'nominative','singular'),oA=declineN(o,'accusative','singular'),vF=conjVI(v);return{latin:cap(sN)+' '+dur.lat+' '+unit.lat+' '+oA+' '+vF+'.',english:'The '+eN(s)+' was '+ePast(v).replace('was ','')+'ing the '+eN(o)+' within '+dur.eng+' '+unit.eng+'.',wordMap:{[sN.toLowerCase()]:s.eng[0],[oA.toLowerCase()]:o.eng[0],[vF.toLowerCase()]:v.eng[0],[dur.lat]:dur.eng,[unit.lat]:unit.eng}};}
 
+// ── RELATIVE CLAUSE SENTENCES ──────────────────────────────────────────────────
+function relPron(gender,cas){const t={'m':{'nom':'qui','acc':'quem','gen':'cuius','dat':'cui','abl':'quo'},'f':{'nom':'quae','acc':'quam','gen':'cuius','dat':'cui','abl':'qua'},'n':{'nom':'quod','acc':'quod','gen':'cuius','dat':'cui','abl':'quo'}};return(t[gender]||t['m'])[cas]||'qui';}
+function sRelSubj(){const s=pAnim(),v1=pIntrans(),v2=pTrans();const o=pickObjForVerb(v2,[s.lat]);const g=s.gender||'m';const rel=relPron(g,'nom');const sN=declineN(s,'nominative','singular'),oA=declineN(o,'accusative','singular'),vF1=conjV(v1,'3rd','singular'),vF2=conjV(v2,'3rd','singular');return{latin:cap(sN)+' '+rel+' '+vF1+' '+oA+' '+vF2+'.',english:'The '+eN(s)+' who '+eV3(v1)+' '+eV3(v2)+' the '+eN(o)+'.',wordMap:{[sN.toLowerCase()]:s.eng[0],[rel]:g==='f'?'who (f)':'who',[vF1.toLowerCase()]:v1.eng[0],[oA.toLowerCase()]:o.eng[0],[vF2.toLowerCase()]:v2.eng[0]}};}
+function sRelObj(){const s1=pAnim(),s2=pAnim([s1.lat]),v1=pTrans(),v2=pIntrans();const g=s1.gender||'m';const rel=relPron(g,'acc');const sN1=declineN(s1,'nominative','singular'),sN2=declineN(s2,'nominative','singular'),vF1=conjV(v1,'3rd','singular'),vF2=conjV(v2,'3rd','singular');return{latin:cap(sN1)+' '+rel+' '+sN2+' '+vF1+' '+vF2+'.',english:'The '+eN(s1)+' whom the '+eN(s2)+' '+eV3(v1)+' '+eV3(v2)+'.',wordMap:{[sN1.toLowerCase()]:s1.eng[0],[rel]:g==='f'?'whom (f)':'whom',[sN2.toLowerCase()]:s2.eng[0],[vF1.toLowerCase()]:v1.eng[0],[vF2.toLowerCase()]:v2.eng[0]}};}
+function sRelSubjPast(){const s=pAnim(),v1=pIntrans(),v2=pTrans();const o=pickObjForVerb(v2,[s.lat]);const g=s.gender||'m';const rel=relPron(g,'nom');const sN=declineN(s,'nominative','singular'),oA=declineN(o,'accusative','singular'),vF1=conjVI(v1),vF2=conjVI(v2);return{latin:cap(sN)+' '+rel+' '+vF1+' '+oA+' '+vF2+'.',english:'The '+eN(s)+' who '+ePast(v1)+' '+ePast(v2)+' the '+eN(o)+'.',wordMap:{[sN.toLowerCase()]:s.eng[0],[rel]:g==='f'?'who (f)':'who',[vF1.toLowerCase()]:v1.eng[0],[oA.toLowerCase()]:o.eng[0],[vF2.toLowerCase()]:v2.eng[0]}};}
+
+// ── EIUS vs SUUS SENTENCES ─────────────────────────────────────────────────────
+function sSuus(){const s=pAnim(),v=pTrans();const o=pObj([s.lat]);const oG=o.gender||'m';const suumF=declineA({lat:'suus',subKey:'1st/2nd declension'},oG,'accusative','singular');const sN=declineN(s,'nominative','singular'),oA=declineN(o,'accusative','singular'),vF=conjV(v,'3rd','singular');return{latin:cap(sN)+' '+oA+' '+suumF+' '+vF+'.',english:'The '+eN(s)+' '+eV3(v)+' '+({m:'his',f:'her',n:'its'}[s.gender||'m'])+' [own] '+eN(o)+'.',wordMap:{[sN.toLowerCase()]:s.eng[0],[oA.toLowerCase()]:o.eng[0],[suumF.toLowerCase()]:'his/her [own]',[vF.toLowerCase()]:v.eng[0]}};}
+function sEius(){const s=pAnim(),v=pTrans();const o=pObj([s.lat]);const sN=declineN(s,'nominative','singular'),oA=declineN(o,'accusative','singular'),vF=conjV(v,'3rd','singular');return{latin:cap(sN)+' '+oA+' eius '+vF+'.',english:'The '+eN(s)+' '+eV3(v)+' '+({m:'his',f:'her',n:'its'}[s.gender||'m'])+' [someone else\'s] '+eN(o)+'.',wordMap:{[sN.toLowerCase()]:s.eng[0],[oA.toLowerCase()]:o.eng[0],eius:'his/her [someone else\'s]',[vF.toLowerCase()]:v.eng[0]}};}
+function sSuusPast(){const s=pAnim(),v=pTrans();const o=pObj([s.lat]);const oG=o.gender||'m';const suumF=declineA({lat:'suus',subKey:'1st/2nd declension'},oG,'accusative','singular');const sN=declineN(s,'nominative','singular'),oA=declineN(o,'accusative','singular'),vF=conjVI(v);return{latin:cap(sN)+' '+oA+' '+suumF+' '+vF+'.',english:'The '+eN(s)+' '+ePast(v)+' '+({m:'his',f:'her',n:'its'}[s.gender||'m'])+' [own] '+eN(o)+'.',wordMap:{[sN.toLowerCase()]:s.eng[0],[oA.toLowerCase()]:o.eng[0],[suumF.toLowerCase()]:'his/her [own]',[vF.toLowerCase()]:v.eng[0]}};}
+
 // ── NEW EASY ───────────────────────────────────────────────────────────────────
 function sIntrans(){const s=pAnim(),v=pIntrans();const sN=declineN(s,'nominative','singular'),vF=conjV(v,'3rd','singular');return{latin:cap(sN)+' '+vF+'.',english:'The '+eN(s)+' '+eV3(v)+'.',wordMap:{[sN.toLowerCase()]:s.eng[0],[vF.toLowerCase()]:v.eng[0]}};}
 function sIntransLoc(){const s=pAnim(),v=pIntrans(),pl=pPlace();const sN=declineN(s,'nominative','singular'),vF=conjV(v,'3rd','singular'),pA=declineN(pl,'ablative','singular');return{latin:cap(sN)+' in '+pA+' '+vF+'.',english:'The '+eN(s)+' '+eV3(v)+' in the '+eN(pl)+'.',wordMap:{[sN.toLowerCase()]:s.eng[0],[vF.toLowerCase()]:v.eng[0],in:'in',[pA.toLowerCase()]:pl.eng[0]}};}
@@ -1783,15 +1867,15 @@ function sInsaneAdjConj(){const s1=sSVOPrep();const s2=pAnim(),a=pPredAdj();cons
 function sInsaneDatPrep(){const s1=sSVOPrep();const DATV=wordsOf('verbs').filter(w=>['persuadeo','resisto'].includes(w.lat));const v=rnd(DATV),s2=pAnim(),obj=pAnim([s2.lat]);const sN=declineN(s2,'nominative','singular'),objD=declineN(obj,'dative','singular'),vF=conjV(v,'3rd','singular');return{latin:s1.latin.slice(0,-1)+', itaque '+sN+' '+objD+' '+vF+'.',english:s1.english.slice(0,-1)+', and so the '+eN(s2)+' '+eV3(v)+' the '+eN(obj)+'.',wordMap:{...s1.wordMap,itaque:'and so',[sN.toLowerCase()]:s2.eng[0],[objD.toLowerCase()]:obj.eng[0],[vF.toLowerCase()]:v.eng[0]}};}
 
 function buildSentence(){
-  if(difficulty==='easy')return rnd([sSVO,sAdjPred,sImp,sAdvIntrans,sDativeVO,sIntrans,sIntransLoc,sAdjSVO,sEstLoc,sSVOPast,sIntransPast,sAdjPredPast,sEstLocPast,sAdvIntransPast,sIntransLocPast])();
-  if(difficulty==='medium')return rnd([sSVOPrep,sTwoSVO,sSVOAdv,sSVIODO,sDativeVOAdv,sAdjObjSVO,sIntransPrep,sImpPrep,sTwoIntrans,sSVOPrepPast,sSVOAdvPast,sSVIODOPast,sIntransPrepPast,sAdjSVOPast,sTimeDuration,sTimeWhen])();
-  if(difficulty==='hard')return rnd([sThreePart,sSVOQuod,sSVOSed,sSVOTamenAdj,sAdvSVOPrep,sIntransSedSVO,sAdjSVOPrep,sSVIODOQuod,sSVOQuodPast,sTimeWithin])();
+  if(difficulty==='easy')return rnd([sSVO,sAdjPred,sImp,sAdvIntrans,sDativeVO,sIntrans,sIntransLoc,sAdjSVO,sEstLoc,sSVOPast,sIntransPast,sAdjPredPast,sEstLocPast,sAdvIntransPast,sIntransLocPast,sSuus,sEius])();
+  if(difficulty==='medium')return rnd([sSVOPrep,sTwoSVO,sSVOAdv,sSVIODO,sDativeVOAdv,sAdjObjSVO,sIntransPrep,sImpPrep,sTwoIntrans,sSVOPrepPast,sSVOAdvPast,sSVIODOPast,sIntransPrepPast,sAdjSVOPast,sTimeDuration,sTimeWhen,sRelSubj,sSuusPast,sEius])();
+  if(difficulty==='hard')return rnd([sThreePart,sSVOQuod,sSVOSed,sSVOTamenAdj,sAdvSVOPrep,sIntransSedSVO,sAdjSVOPrep,sSVIODOQuod,sSVOQuodPast,sTimeWithin,sRelObj,sRelSubjPast])();
   return rnd([sInsane,sTriple,sInsanePrep,sInsaneAdjConj,sInsaneDatPrep])();
 }
 
 const SR_KEY='latin_sr_v2',STATS_KEY='latin_stats_v2',THEME_KEY='latin_theme';
 let srData={},statsData={sessions:[],catStats:{}};
-async function loadPersisted(){try{const r=await window.storage.get(SR_KEY);if(r)srData=JSON.parse(r.value);}catch(e){}try{const r=await window.storage.get(STATS_KEY);if(r)statsData=JSON.parse(r.value);}catch(e){}try{const r=await window.storage.get(THEME_KEY);if(r&&r.value){currentTheme=r.value;if(r.value!=='dark')document.body.className=r.value;document.getElementById('themeBtn').textContent=r.value==='light'?'☾':'☀';}}catch(e){}updCount();}
+async function loadPersisted(){try{const r=await window.storage.get(SR_KEY);if(r)srData=JSON.parse(r.value);}catch(e){}try{const r=await window.storage.get(STATS_KEY);if(r)statsData=JSON.parse(r.value);}catch(e){}try{const r=await window.storage.get(THEME_KEY);if(r&&r.value){currentTheme=r.value;if(r.value!=='dark')document.body.className=r.value;document.getElementById('themeBtn').textContent=['light','parchment','mist'].includes(r.value)?'☾':'☀';}}catch(e){}updCount();}
 async function saveSR(){try{await window.storage.set(SR_KEY,JSON.stringify(srData));}catch(e){}}
 async function saveStats(){try{await window.storage.set(STATS_KEY,JSON.stringify(statsData));}catch(e){}}
 function srKey(w){return w.catKey+'|'+w.subKey+'|'+w.lat;}
@@ -1814,12 +1898,16 @@ function fmtScore(s){return s%1!==0?(s-0.5)+'½':String(s);}
 function updScorePill(n){document.getElementById('scorePill').textContent=fmtScore(n!==undefined?n:score)+' correct';}
 const THEMES=[
   {id:'dark',label:'Dark',bg:'#161412',surface:'#1e1b18',accent:'#c4935a'},
-  {id:'light',label:'Light',bg:'#f5f0e8',surface:'#fffdf8',accent:'#a0682a'},
+  {id:'light',label:'Light',bg:'#f0ebe0',surface:'#f8f4ea',accent:'#8a5820'},
+  {id:'parchment',label:'Parchment',bg:'#f2eadb',surface:'#faf5e8',accent:'#8a5018'},
+  {id:'mist',label:'Mist',bg:'#e8ecf0',surface:'#f2f5f8',accent:'#4070a8'},
   {id:'midnight',label:'Midnight',bg:'#0e1117',surface:'#161b26',accent:'#6a9fd8'},
   {id:'forest',label:'Forest',bg:'#0f1610',surface:'#162018',accent:'#6ab870'},
   {id:'rose',label:'Rose',bg:'#1a1015',surface:'#241820',accent:'#d08098'},
   {id:'ocean',label:'Ocean',bg:'#0a1418',surface:'#101e25',accent:'#50b8c8'},
-  {id:'sepia',label:'Sepia',bg:'#1c1610',surface:'#281e14',accent:'#d4a050'}
+  {id:'violet',label:'Violet',bg:'#14101a',surface:'#1c1625',accent:'#a878d8'},
+  {id:'slate',label:'Slate',bg:'#151618',surface:'#1c1d20',accent:'#80a0c8'},
+  {id:'sepia',label:'Sepia',bg:'#1c1610',surface:'#281e14',accent:'#d4a050'},
 ];
 let currentTheme='dark';
 function buildThemePicker(){
@@ -1829,13 +1917,15 @@ function buildThemePicker(){
     sw.style.background='linear-gradient(135deg,'+t.bg+' 0%,'+t.bg+' 40%,'+t.surface+' 40%,'+t.surface+' 70%,'+t.accent+' 70%)';
     sw.innerHTML='<span class="theme-swatch-label">'+t.label+'</span>';
     sw.onclick=()=>setTheme(t.id);
+    sw.onmouseenter=()=>{document.body.className=t.id==='dark'?'':t.id;};
+    sw.onmouseleave=()=>{document.body.className=currentTheme==='dark'?'':currentTheme;};
     grid.appendChild(sw);
   });
 }
 function setTheme(id){
   currentTheme=id;
   document.body.className=id==='dark'?'':id;
-  document.getElementById('themeBtn').textContent=id==='light'?'☾':'☀';
+  document.getElementById('themeBtn').textContent=['light','parchment','mist'].includes(id)?'☾':'☀';
   THEMES.forEach(t=>{const sw=document.getElementById('ts_'+t.id);if(sw)sw.className='theme-swatch'+(t.id===id?' active':'');});
   try{window.storage.set(THEME_KEY,id);}catch(e){}
 }
@@ -1848,8 +1938,51 @@ function startTimer(){if(!speedEnabled){document.getElementById('timerRing').sty
 function updTimerDisplay(){const pct=timerRemaining/speedSecs;const arc=document.getElementById('timerArc');arc.style.strokeDashoffset=94.25*(1-pct);arc.className='timer-arc'+(timerRemaining<=3?' urgent':'');document.getElementById('timerTxt').textContent=timerRemaining;if(isSent){const row=document.getElementById('sentTimerRow');const num=document.getElementById('sentTimerNum');if(row&&num){row.style.display='';num.textContent=timerRemaining;row.style.color=timerRemaining<=5?'var(--red)':'var(--text3)';}}}
 
 function stopTimer(){clearInterval(timerInterval);document.getElementById('timerRing').style.display='none';const row=document.getElementById('sentTimerRow');if(row)row.style.display='none';}
-function timeUp(){if(answered)return;if(isSent)skipSentence();else if(isDrill)skipDrill();else skipQ();}
+function timeUp(){if(answered)return;if(isSent){const val=document.getElementById('sentInput').value.trim();if(val){checkSentence();}else{skipSentence();}}else if(isDrill){if(inputMode==='typed'){const val=document.getElementById('answerInput').value.trim();if(val){checkDrill();}else{skipDrill();}}else{skipDrill();}}else{if(inputMode==='typed'){const val=document.getElementById('answerInput').value.trim();if(val){dispatchCheck();}else{skipQ();}}else{skipQ();}}}
 function setDiff(d){difficulty=d;[{i:'dEasy',v:'easy'},{i:'dMed',v:'medium'},{i:'dHard',v:'hard'},{i:'dInsane',v:'insane'}].forEach(({i,v})=>{const b=document.getElementById(i);if(b)b.className='diff-btn'+(v==='insane'?' ins':'')+(d===v?' active':'');});}
+function showHelp(){document.getElementById('helpOverlay').style.display='flex';}
+function hideHelp(){document.getElementById('helpOverlay').style.display='none';}
+function showGuide(){document.getElementById('guideOverlay').style.display='flex';}
+function hideGuide(){document.getElementById('guideOverlay').style.display='none';}
+const TOUR_BASIC=[
+  {el:null,title:'Welcome to Latin Trainer',body:'This quick tour shows you around. Use arrow keys or Next/Back. Press Escape to exit.'},
+  {el:'.nav-tabs',title:'Navigation tabs',body:'Three tabs: Practice for quizzes, Stats for progress tracking, Information for grammar reference.',pre:()=>{showMainTab('practice');setQuizType('vocab');}},
+  {el:'#directionToggle',title:'Direction toggle',body:'Choose English \u2192 Latin (translate into Latin) or Latin \u2192 English (identify meanings).'},
+  {el:'#quizTypeToggle',title:'Quiz types',body:'Vocabulary tests word meanings. The declension and conjugation modes drill grammatical forms. Sentences generates full translations.'},
+  {el:'#inputModeToggle',title:'Answer mode',body:'Typed: type your answer and press Enter. Multiple choice: click an option or press 1\u20134.'},
+  {el:'.sel-grid',title:'Categories',body:'Tick the categories you want. Click a card header to expand and select individual subcategories.'},
+  {el:'.start-bar',title:'Start a session',body:'Begin starts with all selected words shuffled. Due prioritises overdue words. Wrong answers get a review round.'},
+  {el:null,title:'Let\'s try a question!',body:'Starting a demo question so you can see the quiz interface\u2026',pre:()=>{selectAll();mode='le';beginQuiz(shuffle([...getWords()]).slice(0,3));}},
+  {el:'.prompt-card',title:'The prompt',body:'This card shows the word or form you need to answer. Tags below show the part of speech, declension, or gender.'},
+  {el:'.answer-input',title:'Your answer',body:'Type your answer here and press Enter or click Check. Press Tab for a hint (costs \xbd point). Press Escape to skip.'},
+  {el:'.prog-row',title:'Progress bar',body:'Shows how far through the quiz you are, your score, your accuracy percentage, and a Menu button to exit early.'},
+  {el:null,title:'Back to setup',body:'That\u2019s the quiz interface! Let\u2019s look at a few more features.',pre:()=>{backToMenu();showMainTab('practice');setQuizType('vocab');}},
+  {el:'#speedOn',title:'Speed mode',body:'Enable for a timed challenge. When time runs out, your typed text is auto-submitted \u2014 correct text still counts!'},
+  {el:'.word-drawer-tab',title:'Word drawer',body:'Opens a side panel showing all selected words with their spaced-repetition stats.'},
+  {el:null,title:'You\'re all set!',body:'That covers the basics. Want to learn about advanced features? <div style="margin-top:12px"><button class="btn-primary" style="font-size:12px;padding:6px 16px" onclick="endTour();setTimeout(()=>startTour(\'advanced\'),300)">Start advanced tour \u2192</button></div>'}
+];
+const TOUR_ADV=[
+  {el:null,title:'Advanced features',body:'Let\'s explore the power features. Arrow keys to navigate, Escape to exit.'},
+  {el:'#quizTypeToggle',title:'Sentence mode',body:'Generates Latin sentences with present and past tense, relative clauses, time expressions, and eius/suus distinction.',pre:()=>{showMainTab('practice');setQuizType('sentences');}},
+  {el:'#dMed',title:'Sentence difficulty',body:'Easy: simple SVO. Medium: prepositions, time durations. Hard: multi-clause with quod/sed. Insane: three-clause compounds.'},
+  {el:'#quizTypeToggle',title:'Verb conjugation',body:'Drill all person and number forms. Only verb subcategories are shown.',pre:()=>{setQuizType('verbConj');}},
+  {el:'#tenseRow',title:'Tense selection',body:'Choose Present (porto, portas, portat\u2026), Imperfect (portabam, portabas\u2026), or both to mix them.'},
+  {el:'#quizTypeToggle',title:'Pronoun declension',body:'Drill pronoun paradigms: personal, reflexive, demonstratives, emphatic ipse, and relative qui.',pre:()=>{setQuizType('pronDecl');}},
+  {el:'#customWordsBtn',title:'Custom words',body:'Add your own vocabulary. Choose a category, enter Latin and English, and it joins the word pool.',pre:()=>{setQuizType('vocab');}},
+  {el:'#dailyBox2',title:'Daily practice',body:'Date-stamped word sets for specific lessons. Each has category checkboxes and a focused \u201cPractice these\u201d button.'},
+  {el:null,title:'Keyboard shortcuts',body:'During a quiz: <strong>Enter</strong> = check/next, <strong>Escape</strong> = skip, <strong>Tab</strong> = hint (\xbd point if correct), <strong>1\u20134</strong> = MC options.'},
+  {el:'#themeBtn',title:'11 Themes',body:'3 light and 8 dark themes. Hover a swatch to preview it live, click to apply.'},
+  {el:'.nav-tab:nth-child(3)',title:'Information reference',body:'Grammar tables across six sub-tabs: declensions, conjugations, adjectives, pronouns, and special cases.',pre:()=>{showMainTab('info');}},
+  {el:null,title:'Tour complete!',body:'Open the help menu (?) any time for tours, the user guide, or shortcuts.',pre:()=>{showMainTab('practice');setQuizType('vocab');}}
+];
+let tourSteps=null,tourIdx=0;
+function startTour(type){showMainTab('practice');setQuizType('vocab');tourSteps=type==='advanced'?TOUR_ADV:TOUR_BASIC;tourIdx=0;showTourStep();}
+function showTourStep(){if(!tourSteps||tourIdx>=tourSteps.length){endTour();return;}const step=tourSteps[tourIdx];if(step.pre)step.pre();document.getElementById('spotOverlay').style.display='';const hole=document.getElementById('spotHole'),card=document.getElementById('spotCard'),bd=document.getElementById('spotBackdrop');document.getElementById('spotStep').textContent='Step '+(tourIdx+1)+' of '+tourSteps.length;document.getElementById('spotTitle').textContent=step.title;document.getElementById('spotBody').innerHTML=step.body;document.getElementById('spotBackBtn').style.display=tourIdx>0?'':'none';document.getElementById('spotNextBtn').textContent=tourIdx===tourSteps.length-1?'Finish':'Next →';card.style.transform='none';card.style.top='';card.style.left='';card.style.bottom='';card.style.right='';if(step.el){const target=document.querySelector(step.el);if(target){bd.style.display='none';target.scrollIntoView({behavior:'smooth',block:'nearest'});setTimeout(()=>{const r=target.getBoundingClientRect(),pad=8;hole.style.display='';hole.style.position='fixed';hole.style.left=(r.left-pad)+'px';hole.style.top=(r.top-pad)+'px';hole.style.width=(r.width+pad*2)+'px';hole.style.height=(r.height+pad*2)+'px';const cw=Math.min(340,window.innerWidth-24);const spaceBelow=window.innerHeight-r.bottom;const spaceAbove=r.top;const spaceRight=window.innerWidth-r.right;const spaceLeft=r.left;let ct,cl;if(spaceBelow>=240){ct=r.bottom+14;cl=Math.max(12,Math.min(r.left,window.innerWidth-cw-12));}else if(spaceAbove>=240){ct=r.top-240;cl=Math.max(12,Math.min(r.left,window.innerWidth-cw-12));}else if(spaceRight>=cw+20){ct=Math.max(12,r.top);cl=r.right+14;}else if(spaceLeft>=cw+20){ct=Math.max(12,r.top);cl=r.left-cw-14;}else{ct=window.innerHeight/2-120;cl=(window.innerWidth-cw)/2;}card.style.position='fixed';card.style.top=Math.max(8,ct)+'px';card.style.left=Math.max(8,cl)+'px';card.style.maxWidth=cw+'px';},250);}else{showCentered();};}else{showCentered();}function showCentered(){bd.style.display='';hole.style.display='none';card.style.position='fixed';card.style.top='50%';card.style.left='50%';card.style.transform='translate(-50%,-50%)';card.style.maxWidth='340px';}}
+function tourNext(){tourIdx++;if(tourIdx>=tourSteps.length)endTour();else showTourStep();}
+function tourBack(){if(tourIdx>0){tourIdx--;showTourStep();}}
+function endTour(){document.getElementById('spotOverlay').style.display='none';tourSteps=null;}
+window.addEventListener('scroll',()=>{if(tourSteps)showTourStep();},{passive:true});
+window.addEventListener('resize',()=>{if(tourSteps)showTourStep();});
 function showAbout(){document.getElementById('aboutOverlay').style.display='flex';}
 function hideAbout(){document.getElementById('aboutOverlay').style.display='none';}
 function showShortcuts(){document.getElementById('shortcutsOverlay').style.display='flex';}
@@ -2079,6 +2212,7 @@ function hideCustomList(){document.getElementById('customListOverlay').style.dis
 function renderCustomList(){const body=document.getElementById('customListBody');if(!customWords.length){body.innerHTML='<div style="font-family:var(--serif);font-style:italic;color:var(--text3);text-align:center;padding:2rem 0">No custom words added yet.</div>';return;}body.innerHTML=customWords.map((w,i)=>{const catLabel=DATA[w.catKey]?DATA[w.catKey].label:w.catKey;const gen3=w.gen?' ('+w.gen+', '+w.gender+')':'';const genderTag=w.gender&&w.catKey==='nouns'?' · '+(w.gender==='m'?'masc':w.gender==='f'?'fem':'neut'):'';return'<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)"><div style="flex:1"><div style="font-family:var(--serif);font-size:16px;color:var(--text)">'+w.lat+gen3+'</div><div style="font-size:12px;color:var(--text2);margin-top:2px">'+w.eng.join(', ')+'</div><div style="font-size:10px;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:.06em">'+catLabel+' · '+w.subKey+genderTag+'</div></div><button onclick="removeCustomWord('+i+')" style="width:28px;height:28px;border-radius:999px;border:1px solid var(--red-bdr);background:var(--red-bg);color:var(--red);cursor:pointer;font-size:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center" title="Remove">×</button></div>';}).join('');}
 function removeCustomWord(idx){const w=customWords[idx];if(!w)return;const sub=DATA[w.catKey]&&DATA[w.catKey].sub[w.subKey];if(sub){sub.words=sub.words.filter(x=>x.lat!==w.lat);}const k=w.lat.toLowerCase();if(WORD_MAP[k])WORD_MAP[k]=WORD_MAP[k].filter(e=>e!==w.eng[0]);customWords.splice(idx,1);saveCustomWords();renderCustomList();buildUI();}
 document.addEventListener('keydown',e=>{
+  if(tourSteps){if(e.key==='ArrowRight'||e.key==='Enter'){e.preventDefault();tourNext();}else if(e.key==='ArrowLeft'){e.preventDefault();tourBack();}else if(e.key==='Escape'){e.preventDefault();endTour();}return;}
   const inQ=document.getElementById('quizView').style.display==='block';
   if(!inQ){if(e.key==='?')showShortcuts();return;}
   if(e.key==='?'){showShortcuts();return;}
@@ -2147,9 +2281,9 @@ function cancelDescEdit(){
   document.getElementById('descEditState').style.display='none';
 }
 
-// ── DAILY PRACTICE ────────────────────────────────────────────────────────────
-const DAILY_WORDS={
-  nouns:[
+// ── DAILY PRACTICE (unified, multi-day selectable) ───────────────────────────
+const ALL_DAILY=[
+  {id:'28jul',label:'28 July 2026',words:[
     {lat:'familia',gen:null,gender:'f',eng:['family'],catKey:'nouns',subKey:'1st declension'},
     {lat:'gloria',gen:null,gender:'f',eng:['glory'],catKey:'nouns',subKey:'1st declension'},
     {lat:'locus',gen:null,gender:'m',eng:['place'],catKey:'nouns',subKey:'2nd declension (masc)'},
@@ -2157,11 +2291,9 @@ const DAILY_WORDS={
     {lat:'exemplum',gen:null,gender:'n',eng:['example'],catKey:'nouns',subKey:'2nd declension (neut)'},
     {lat:'praesidium',gen:null,gender:'n',eng:['garrison'],catKey:'nouns',subKey:'2nd declension (neut)'},
     {lat:'dictator',gen:'dictatoris',gender:'m',eng:['dictator'],catKey:'nouns',subKey:'3rd declension'},
-    {lat:'obses',gen:'obsidis',gender:'m',eng:['hostage'],catKey:'nouns',subKey:'3rd declension'}],
-  adjectives:[
+    {lat:'obses',gen:'obsidis',gender:'m',eng:['hostage'],catKey:'nouns',subKey:'3rd declension'},
     {lat:'dignus',eng:['worthy'],catKey:'adjectives',subKey:'1st/2nd declension'},
-    {lat:'summus',eng:['greatest','utmost','on top of'],catKey:'adjectives',subKey:'1st/2nd declension'}],
-  verbs:[
+    {lat:'summus',eng:['greatest','utmost','on top of'],catKey:'adjectives',subKey:'1st/2nd declension'},
     {lat:'volo',eng:['want','wish'],catKey:'verbs',subKey:'irregular'},
     {lat:'nolo',eng:['not want','refuse'],catKey:'verbs',subKey:'irregular'},
     {lat:'canto',eng:['sing'],catKey:'verbs',subKey:'1st conjugation'},
@@ -2175,49 +2307,18 @@ const DAILY_WORDS={
     {lat:'rumpo',eng:['burst through','break'],catKey:'verbs',subKey:'3rd conjugation'},
     {lat:'cano',eng:['sing'],catKey:'verbs',subKey:'3rd conjugation'},
     {lat:'evado',eng:['escape'],catKey:'verbs',subKey:'3rd conjugation'},
-    {lat:'repello',eng:['drive back'],catKey:'verbs',subKey:'3rd conjugation'}],
-  conjunctions:[
+    {lat:'repello',eng:['drive back'],catKey:'verbs',subKey:'3rd conjugation'},
     {lat:'non solum...sed etiam',eng:['not only...but also'],catKey:'conjunctions',subKey:'conjunctions'},
-    {lat:'et...et',eng:['both...and'],catKey:'conjunctions',subKey:'conjunctions'}],
-  prepositions:[
-    {lat:'sine',eng:['without'],catKey:'prepositions',subKey:'with ablative'}],
-  adverbs:[
+    {lat:'et...et',eng:['both...and'],catKey:'conjunctions',subKey:'conjunctions'},
+    {lat:'sine',eng:['without'],catKey:'prepositions',subKey:'with ablative'},
     {lat:'postea',eng:['afterwards'],catKey:'adverbs',subKey:'adverbs'},
-    {lat:'postridie',eng:['on the next day'],catKey:'adverbs',subKey:'adverbs'}]
-};
-const DAILY_CAT_LABELS={nouns:'Nouns',adjectives:'Adjectives',verbs:'Verbs',conjunctions:'Conjunctions',prepositions:'Prepositions',adverbs:'Adverbs'};
-let dailySelected={};
-function buildDailyBox(){
-  const container=document.getElementById('dailyCats');if(!container)return;container.innerHTML='';
-  Object.entries(DAILY_WORDS).forEach(([ck,words])=>{
-    dailySelected[ck]=true;
-    const row=document.createElement('div');
-    row.style.cssText='display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);cursor:pointer;user-select:none';
-    const cb=document.createElement('div');cb.className='sbox checked';cb.id='dcb_'+ck;
-    cb.innerHTML='<svg viewBox="0 0 9 9" fill="none" stroke="#161412" stroke-width="1.8" stroke-linecap="round"><polyline points="1,4.5 3.5,7 8,2"/></svg>';
-    const lbl=document.createElement('span');lbl.style.cssText='font-size:13px;color:var(--text);flex:1';lbl.textContent=DAILY_CAT_LABELS[ck]+' ('+words.length+')';
-    const preview=document.createElement('span');preview.style.cssText='font-size:11px;color:var(--text3);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
-    preview.textContent=words.map(w=>w.lat).join(', ');
-    row.appendChild(cb);row.appendChild(lbl);row.appendChild(preview);
-    row.addEventListener('click',()=>{dailySelected[ck]=!dailySelected[ck];cb.className='sbox'+(dailySelected[ck]?' checked':'');updDailyCount();});
-    container.appendChild(row);
-  });
-  updDailyCount();
-}
-function updDailyCount(){let n=0;Object.entries(dailySelected).forEach(([ck,on])=>{if(on)n+=DAILY_WORDS[ck].length;});document.getElementById('dailyCount').textContent=n+' words';document.getElementById('dailyStartBtn').disabled=n===0;}
-function startDaily(){const ws=[];Object.entries(dailySelected).forEach(([ck,on])=>{if(on)DAILY_WORDS[ck].forEach(w=>ws.push(w));});if(!ws.length)return;quizType='vocab';isDrill=false;isSent=false;quizWords=shuffle([...ws]);current=0;score=0;answered=false;wrongWords=[];round=1;showView('quizView');showQ();}
-
-buildUI();
-buildDailyBox();
-
-// ── DAILY 2: 4 August 2026 ──────────────────────────────────────────────────
-const DAILY_WORDS_2={
-  nouns:[
+    {lat:'postridie',eng:['on the next day'],catKey:'adverbs',subKey:'adverbs'}]},
+  {id:'4aug',label:'4 August 2026',words:[
     {lat:'dies',gen:'diei',gender:'m',eng:['day'],catKey:'nouns',subKey:'5th declension'},
     {lat:'mensis',gen:'mensis',gender:'m',eng:['month'],catKey:'nouns',subKey:'3rd declension'},
-    {lat:'uxor',gen:'uxoris',gender:'f',eng:['wife'],catKey:'nouns',subKey:'3rd declension'}],
-  adjectives:[
+    {lat:'uxor',gen:'uxoris',gender:'f',eng:['wife'],catKey:'nouns',subKey:'3rd declension'},
     {lat:'pessimus',eng:['worst','very bad'],catKey:'adjectives',subKey:'1st/2nd declension'},
+    {lat:'stultus',eng:['stupid'],catKey:'adjectives',subKey:'1st/2nd declension'},
     {lat:'primus',eng:['first'],catKey:'adjectives',subKey:'1st/2nd declension'},
     {lat:'secundus',eng:['second'],catKey:'adjectives',subKey:'1st/2nd declension'},
     {lat:'tertius',eng:['third'],catKey:'adjectives',subKey:'1st/2nd declension'},
@@ -2226,50 +2327,76 @@ const DAILY_WORDS_2={
     {lat:'sextus',eng:['sixth'],catKey:'adjectives',subKey:'1st/2nd declension'},
     {lat:'septimus',eng:['seventh'],catKey:'adjectives',subKey:'1st/2nd declension'},
     {lat:'octavus',eng:['eighth'],catKey:'adjectives',subKey:'1st/2nd declension'},
-    {lat:'nonus',eng:['ninth'],catKey:'adjectives',subKey:'1st/2nd declension'}],
-  numbers:[
-    {lat:'quattuor',eng:['four'],catKey:'numbers',subKey:'cardinal'},
-    {lat:'quinque',eng:['five'],catKey:'numbers',subKey:'cardinal'},
-    {lat:'sex',eng:['six'],catKey:'numbers',subKey:'cardinal'},
-    {lat:'septem',eng:['seven'],catKey:'numbers',subKey:'cardinal'},
-    {lat:'octo',eng:['eight'],catKey:'numbers',subKey:'cardinal'},
-    {lat:'novem',eng:['nine'],catKey:'numbers',subKey:'cardinal'},
-    {lat:'decem',eng:['ten'],catKey:'numbers',subKey:'cardinal'},
-    {lat:'centum',eng:['hundred'],catKey:'numbers',subKey:'cardinal'},
-    {lat:'mille',eng:['thousand'],catKey:'numbers',subKey:'cardinal'}],
-  prepositions:[
+    {lat:'nonus',eng:['ninth'],catKey:'adjectives',subKey:'1st/2nd declension'},
+    {lat:'unus',eng:['one'],catKey:'adjectives',subKey:'1st/2nd declension'},
+    {lat:'duo',eng:['two'],catKey:'adjectives',subKey:'1st/2nd declension'},
+    {lat:'tres',eng:['three'],catKey:'adjectives',subKey:'1st/2nd declension'},
+    {lat:'quattuor',eng:['four'],catKey:'nouns',subKey:'cardinal numbers'},
+    {lat:'quinque',eng:['five'],catKey:'nouns',subKey:'cardinal numbers'},
+    {lat:'sex',eng:['six'],catKey:'nouns',subKey:'cardinal numbers'},
+    {lat:'septem',eng:['seven'],catKey:'nouns',subKey:'cardinal numbers'},
+    {lat:'octo',eng:['eight'],catKey:'nouns',subKey:'cardinal numbers'},
+    {lat:'novem',eng:['nine'],catKey:'nouns',subKey:'cardinal numbers'},
+    {lat:'decem',eng:['ten'],catKey:'nouns',subKey:'cardinal numbers'},
+    {lat:'centum',eng:['hundred'],catKey:'nouns',subKey:'cardinal numbers'},
+    {lat:'mille',eng:['thousand'],catKey:'nouns',subKey:'cardinal numbers'},
     {lat:'mecum',eng:['with me'],catKey:'prepositions',subKey:'with ablative'},
     {lat:'tecum',eng:['with you (sg)'],catKey:'prepositions',subKey:'with ablative'},
     {lat:'nobiscum',eng:['with us'],catKey:'prepositions',subKey:'with ablative'},
     {lat:'vobiscum',eng:['with you (pl)'],catKey:'prepositions',subKey:'with ablative'},
-    {lat:'secum',eng:['with himself','with themselves'],catKey:'prepositions',subKey:'with ablative'}]
-};
-let dailySelected2={};
-function buildDailyBox2(){
-  const container=document.getElementById('dailyCats2');if(!container)return;container.innerHTML='';
-  const labels={nouns:'Nouns',adjectives:'Adjectives / Ordinals',numbers:'Cardinal numbers',prepositions:'Prepositions (cum forms)'};
-  Object.entries(DAILY_WORDS_2).forEach(([ck,words])=>{
-    dailySelected2[ck]=true;
+    {lat:'secum',eng:['with himself','with themselves'],catKey:'prepositions',subKey:'with ablative'},
+    {lat:'inter',eng:['between','among'],catKey:'prepositions',subKey:'with accusative'}]},
+  {id:'5aug',label:'5 August 2026',words:[
+    {lat:'tollo',eng:['lift'],catKey:'verbs',subKey:'3rd conjugation'},
+    {lat:'colo',eng:['worship'],catKey:'verbs',subKey:'3rd conjugation'},
+    {lat:'fero',eng:['bear','carry','bring'],catKey:'verbs',subKey:'irregular'},
+    {lat:'sto',eng:['stand'],catKey:'verbs',subKey:'1st conjugation'},
+    {lat:'circumvenio',eng:['surround'],catKey:'verbs',subKey:'4th conjugation'},
+    {lat:'evigilo',eng:['wake'],catKey:'verbs',subKey:'1st conjugation'},
+    {lat:'mortuus',eng:['dead'],catKey:'adjectives',subKey:'1st/2nd declension'}]}
+];
+let dailySel={};
+function buildDailyUI(){
+  const daysDiv=document.getElementById('dailyDays');if(!daysDiv)return;daysDiv.innerHTML='';
+  ALL_DAILY.forEach(day=>{
+    dailySel[day.id]=false;
     const row=document.createElement('div');
-    row.style.cssText='display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);cursor:pointer;user-select:none';
-    const cb=document.createElement('div');cb.className='sbox checked';cb.id='dcb2_'+ck;
+    row.style.cssText='display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);cursor:pointer;user-select:none;transition:all .15s';
+    const cb=document.createElement('div');cb.className='sbox';cb.id='dday_'+day.id;
     cb.innerHTML='<svg viewBox="0 0 9 9" fill="none" stroke="#161412" stroke-width="1.8" stroke-linecap="round"><polyline points="1,4.5 3.5,7 8,2"/></svg>';
-    const lbl=document.createElement('span');lbl.style.cssText='font-size:13px;color:var(--text);flex:1';lbl.textContent=(labels[ck]||ck)+' ('+words.length+')';
-    const preview=document.createElement('span');preview.style.cssText='font-size:11px;color:var(--text3);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
-    preview.textContent=words.map(w=>w.lat).join(', ');
-    row.appendChild(cb);row.appendChild(lbl);row.appendChild(preview);
-    row.addEventListener('click',()=>{dailySelected2[ck]=!dailySelected2[ck];cb.className='sbox'+(dailySelected2[ck]?' checked':'');updDailyCount2();});
-    container.appendChild(row);
+    const lbl=document.createElement('span');lbl.style.cssText='font-size:13px;font-weight:500;color:var(--text);flex:1';lbl.textContent=day.label;
+    const cnt=document.createElement('span');cnt.style.cssText='font-size:11px;color:var(--text3)';cnt.textContent=day.words.length+' words';
+    row.appendChild(cb);row.appendChild(lbl);row.appendChild(cnt);
+    row.addEventListener('click',()=>{
+      dailySel[day.id]=!dailySel[day.id];
+      cb.className='sbox'+(dailySel[day.id]?' checked':'');
+      row.style.borderColor=dailySel[day.id]?'var(--accent-dim)':'var(--border)';
+      updDailyAll();
+    });
+    daysDiv.appendChild(row);
   });
-  updDailyCount2();
+  updDailyAll();
 }
-function updDailyCount2(){let n=0;Object.entries(dailySelected2).forEach(([ck,on])=>{if(on)n+=DAILY_WORDS_2[ck].length;});document.getElementById('dailyCount2').textContent=n+' words';document.getElementById('dailyStartBtn2').disabled=n===0;}
-function startDaily2(){const ws=[];Object.entries(dailySelected2).forEach(([ck,on])=>{if(on)DAILY_WORDS_2[ck].forEach(w=>ws.push(w));});if(!ws.length)return;quizType='vocab';isDrill=false;isSent=false;quizWords=shuffle([...ws]);current=0;score=0;answered=false;wrongWords=[];round=1;showView('quizView');showQ();}
-buildDailyBox2();
+function updDailyAll(){
+  let n=0;ALL_DAILY.forEach(d=>{if(dailySel[d.id])n+=d.words.length;});
+  document.getElementById('dailyCountAll').textContent=n+' words selected';
+  document.getElementById('dailyStartAll').disabled=n===0;
+}
+function startDailyAll(){
+  const ws=[];const seen=new Set();
+  ALL_DAILY.forEach(d=>{if(dailySel[d.id])d.words.forEach(w=>{const k=w.lat;if(!seen.has(k)){seen.add(k);ws.push(w);}});});
+  if(!ws.length)return;
+  quizType='vocab';isDrill=false;isSent=false;
+  quizWords=shuffle([...ws]);current=0;score=0;answered=false;wrongWords=[];round=1;
+  showView('quizView');showQ();
+}
+
+buildUI();
+buildDailyUI();
 loadPersisted();
 loadCustomWords().then(()=>buildUI());
 loadDescription();
-try{if(!localStorage.getItem('latin_visited')){showAbout();localStorage.setItem('latin_visited','1');}}catch(e){(async()=>{try{const r=await window.storage.get('latin_visited');if(!r){showAbout();await window.storage.set('latin_visited','1');}}catch(e2){showAbout();}})();}
+try{if(!localStorage.getItem('latin_visited')){showHelp();localStorage.setItem('latin_visited','1');}}catch(e){(async()=>{try{const r=await window.storage.get('latin_visited');if(!r){showHelp();await window.storage.set('latin_visited','1');}}catch(e2){showHelp();}})();}
 </script>
 </body>
 </html>
