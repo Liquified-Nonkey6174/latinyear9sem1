@@ -1485,7 +1485,7 @@ input[type=range]{flex:1;accent-color:var(--accent)}
       <div class="guide-section"><h3>Getting started</h3><p>Choose a direction (English → Latin or Latin → English), select a quiz type, tick the categories you want to practise, and press Begin. The trainer pulls words from every ticked subcategory and shuffles them into a quiz. First time here? The help menu (?) has a basic tour and an advanced tour.</p></div>
       <div class="guide-section"><h3>Quiz types</h3><p><strong>Vocabulary</strong> tests word meanings. <strong>Noun / Adjective / Pronoun declension</strong> drills case forms. <strong>Verb conjugation</strong> drills person/number forms in the tenses you choose. <strong>Sentences</strong> generates full Latin or English sentences to translate, with five difficulty levels.</p></div>
       <div class="guide-section"><h3>Answer modes &amp; scoring</h3><p><strong>Typed</strong> — type your answer and press Enter or click Check. <strong>Multiple choice</strong> — click one of four options (or press 1–4). Correct = 1 point. Press Tab for a hint: if you then answer correctly you get ½ point. Skip (Escape) = 0 points.</p></div>
-      <div class="guide-section"><h3>Typing tips &amp; tags</h3><p>When typing a Latin <strong>verb</strong> you can add <strong>dat</strong> or <strong>acc</strong> to the end to show the case it takes (<em>credo dat</em>, <em>porto acc</em>); after a <strong>preposition</strong> add <strong>abl</strong> or <strong>acc</strong>. Anything in (brackets) in an English meaning is optional. When two words share a meaning, an extra tag on the prompt (like “1st declension” or “starts with a”) tells you which word is wanted. For 3rd-declension nouns give nominative, genitive and gender.</p></div>
+      <div class="guide-section"><h3>Typing tips &amp; tags</h3><p>When typing a Latin <strong>verb</strong> you can add <strong>dat</strong> or <strong>acc</strong> to the end to show the case it takes (<em>credo dat</em>, <em>porto acc</em>); after a <strong>preposition</strong> add <strong>abl</strong> or <strong>acc</strong>. Anything in (brackets) in an English meaning is optional. When two words share a meaning, an extra tag on the prompt (like “1st declension” or “starts with a”) tells you which word is wanted. For 3rd-declension nouns give nominative, genitive and gender. If you make a small slip in spelling (for example <em>ancills</em> instead of <em>ancilla</em>), you get one free retry with no penalty — but a genuine wrong ending or wrong word still counts as wrong.</p></div>
       <div class="guide-section"><h3>Spaced repetition</h3><p>Every word tracks how often you've seen it and your accuracy. Words you get wrong come back sooner; words you know well are spaced further apart. The “Due” button starts a session with overdue words first.</p></div>
       <div class="guide-section"><h3>Mark as hard (★ Starred)</h3><p>Tap the <strong>☆</strong> in the top-left of a question card to flag that word as hard. You can also star words in the word list and in the forms popup. Press <strong>★ Starred</strong> on the setup screen to practise only those words in the selected quiz type (for the declension and conjugation drills, only starred words of that type are used). Tap the star again to remove a word.</p></div>
       <div class="guide-section"><h3>Word list &amp; search</h3><p>The <strong>Word list</strong> tab on the right edge opens a drawer showing your selected words with their spaced-repetition stats. Type in the search box to look through <strong>every</strong> word by Latin or English — results show its category and any daily box it belongs to. The <strong>★ Starred</strong> button in the drawer lists only your hard words.</p></div>
@@ -2242,7 +2242,7 @@ const TOUR_BASIC=[
   {el:'.start-bar',title:'Start a session',body:'<b>Begin</b> starts with all selected words shuffled. <b>Due</b> prioritises words your spaced-repetition record says are overdue. <b>Starred</b> practises only the words you marked as hard. Wrong answers get a review round.'},
   {el:null,title:'Let\'s try a question!',body:'Starting a demo question so you can see the quiz interface…',pre:()=>{selectAll();mode='le';beginQuiz(shuffle([...getWords()]).slice(0,3));}},
   {el:'.prompt-card',title:'The prompt',body:'This card shows the word or form you need to answer. Tags below show the part of speech, declension, or gender. If two words share a meaning, an extra tag (like <i>1st declension</i> or <i>starts with a</i>) tells them apart.'},
-  {el:'.answer-input',title:'Your answer',body:'Type your answer here and press Enter or click Check. Press Tab for a hint (costs \xbd point). Press Escape to skip. When typing a Latin verb you can add <b>dat</b> or <b>acc</b> to the end (e.g. <i>credo dat</i>, <i>porto acc</i>) to show which case it takes, and likewise <b>abl</b> or <b>acc</b> after a preposition. Anything in (brackets) in an English meaning is optional.'},
+  {el:'.answer-input',title:'Your answer',body:'Type your answer here and press Enter or click Check. Press Tab for a hint (costs \xbd point). Press Escape to skip. When typing a Latin verb you can add <b>dat</b> or <b>acc</b> to the end (e.g. <i>credo dat</i>, <i>porto acc</i>) to show which case it takes, and likewise <b>abl</b> or <b>acc</b> after a preposition. Anything in (brackets) in an English meaning is optional. A small typo (e.g. <i>ancills</i> for <i>ancilla</i>) gets one free retry with no penalty.'},
   {el:'#starBtn',title:'Mark as hard ★',body:'Tap the star on any question to flag that word as hard. Starred words are saved and collected under the <b>★ Starred</b> button on the setup screen, so you can drill just your trouble words.'},
   {el:'#formsBtn',title:'See every form',body:'After you answer (or any time in Latin → English), <b>Forms</b> opens the full declension or conjugation table for the word, with its category and any daily boxes it appears in.'},
   {el:'.prog-row',title:'Progress bar',body:'Shows how far through the quiz you are, your score, your accuracy percentage, and a Menu button to exit early. Even a quiz you leave early is recorded in your stats.'},
@@ -2958,6 +2958,43 @@ document.addEventListener('keydown',e=>{
   if(fo&&fo.style.display!=='none'&&e.key==='Escape'){e.stopImmediatePropagation();e.preventDefault();hideForms();return;}
   const t=e.target;if(t&&(t.id==='wordSearch'||t.id==='backupText')){if(e.key==='Escape'&&t.id==='wordSearch'){t.value='';renderWordList();}e.stopImmediatePropagation();}
 },true);
+
+/* ---------- typo tolerance (one free retry) ---------- */
+let typoUsed=false;
+function dmg(a,b){const m=a.length,n=b.length;const d=[];for(let i=0;i<=m;i++){d[i]=[i];}for(let j=0;j<=n;j++)d[0][j]=j;for(let i=1;i<=m;i++)for(let j=1;j<=n;j++){const c=a[i-1]===b[j-1]?0:1;d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+c);if(i>1&&j>1&&a[i-1]===b[j-2]&&a[i-2]===b[j-1])d[i][j]=Math.min(d[i][j],d[i-2][j-2]+1);}return d[m][n];}
+function nrmT(s){return String(s).toLowerCase().replace(/[.,!?;:()]/g,'').replace(/\s+/g,' ').trim();}
+let _known=null;
+function knownForms(){if(_known)return _known;const s=new Set();const add=f=>{if(f)Object.values(f).forEach(v=>String(v).toLowerCase().split(/[\s\/]+/).forEach(x=>s.add(x)));};
+  allWordsFlat().forEach(w=>{String(w.lat).toLowerCase().split(/[\s\/]+/).forEach(x=>s.add(x));try{if(w.catKey==='nouns')add(NUMBER_FORMS[w.lat]||getNounForms(w));else if(w.catKey==='adjectives')add(NUMBER_FORMS[w.lat]||getAdjForms(w));else if(w.catKey==='verbs')[getVerbConj,getVerbImpf,getVerbFut,getVerbImp].forEach(fn=>{try{add(fn(w));}catch(e){}});}catch(e){}});
+  Object.values(PRONOUN_FORMS).forEach(add);_known=s;return s;}
+function nearMiss(typed,cands,latin){const t=nrmT(typed).split(' ');if(!t[0])return false;
+  for(const c of cands){if(!c)continue;const cc=nrmT(c).split(' ');if(cc.length!==t.length)continue;let bad=0,ok=true;
+    for(let i=0;i<t.length;i++){if(t[i]===cc[i])continue;const L=Math.max(t[i].length,cc[i].length);const lim=L>=9?2:L>=5?1:0;if(!lim||dmg(t[i],cc[i])>lim){ok=false;break;}if(latin&&knownForms().has(t[i])){ok=false;break;}bad++;}
+    if(ok&&bad>0&&bad<=2)return true;}
+  return false;}
+function showTypo(fbId,inp,cls){const fb=document.getElementById(fbId);fb.className=cls;fb.textContent='≈ Very close — check your spelling and try again (no penalty).';inp.focus();try{inp.select();}catch(e){}}
+(function(){
+  const rs=s=>{const f=window[s];window[s]=function(){typoUsed=false;return f.apply(this,arguments);};};
+  const _sq=showQ,_sd=showDrill,_rs=renderSentence;
+  showQ=function(){typoUsed=false;return _sq.apply(this,arguments);};
+  showDrill=function(){typoUsed=false;return _sd.apply(this,arguments);};
+  renderSentence=function(){typoUsed=false;return _rs.apply(this,arguments);};
+  const _ca=checkAnswer;
+  checkAnswer=function(){if(answered)return _ca();const w=quizWords[current];const inp=document.getElementById('answerInput');const val=inp.value.trim();
+    if(val&&!typoUsed){const ok=mode==='el'?checkLat(val,w):checkEng(val,w);
+      if(!ok){let cands=[];if(mode==='el'){cands=[w.lat,fullLat(w)];if(w.lat.includes('/'))cands.push(...w.lat.split('/'));}else{quizWords.filter(x=>x.lat===w.lat).forEach(x=>x.eng.forEach(e=>{cands.push(String(e));cands.push(String(e).replace(/\([^)]*\)/g,''));}));}
+        if(nearMiss(val,cands,mode==='el')){typoUsed=true;showTypo('feedbackBox',inp,'feedback-box wrong');return;}}}
+    return _ca();};
+  const _cd=checkDrill;
+  checkDrill=function(){if(answered)return _cd();const q=drillQs[drillIdx];const inp=document.getElementById('answerInput');const val=inp.value.trim().toLowerCase();
+    if(val&&!typoUsed&&mode!=='le'){const ok=val===q.form.toLowerCase()||drillAlt(q)===val;if(!ok&&nearMiss(val,[q.form,drillAlt(q)],true)){typoUsed=true;showTypo('feedbackBox',inp,'feedback-box wrong');return;}}
+    return _cd();};
+  const _cs=checkSentence;
+  checkSentence=function(){if(answered)return _cs();const inp=document.getElementById('sentInput');const val=inp.value.trim();
+    if(val&&!typoUsed){const ca=mode==='el'?sentData.latin:sentData.english;
+      if(!checkWithSynonyms(val,ca)&&nearMiss(val,[ca],mode==='el')){typoUsed=true;showTypo('sentFb',inp,'sent-fb no');return;}}
+    return _cs();};
+})();
 
 loadStarred();
 
