@@ -1543,7 +1543,7 @@ input[type=range]{flex:1;accent-color:var(--accent)}
       <div class="guide-section"><h3>Quiz types</h3><p><strong>Vocabulary</strong> tests word meanings. <strong>Noun / Adjective / Pronoun declension</strong> drills case forms. <strong>Verb conjugation</strong> drills person/number forms in the tenses you choose. <strong>Sentences</strong> generates full Latin or English sentences to translate, with five difficulty levels.</p></div>
       <div class="guide-section"><h3>Answer modes &amp; scoring</h3><p><strong>Typed</strong> — type your answer and press Enter or click Check. <strong>Multiple choice</strong> — click one of four options (or press 1–4). Correct = 1 point. Press Tab for a hint: if you then answer correctly you get ½ point. Skip (Escape) = 0 points. <strong>Matching</strong> (vocabulary only) — click an English word and its Latin partner from two columns of five. Matched words vanish and are replaced in the same slots by halves of different pairs, so partners turn up later; nothing reshuffles. Matching on the first try scores a point; a wrong click marks the word for review.</p></div>
       <div class="guide-section"><h3>Typing tips &amp; tags</h3><p>When typing a Latin <strong>verb</strong> you can add <strong>dat</strong> or <strong>acc</strong> to the end to show the case it takes (<em>credo dat</em>, <em>porto acc</em>); after a <strong>preposition</strong> add <strong>abl</strong> or <strong>acc</strong>. Anything in (brackets) in an English meaning is optional. When two words share a meaning, an extra tag on the prompt (like “1st declension” or “starts with a”) tells you which word is wanted. For 3rd-declension nouns give nominative, genitive and gender. If you make a small slip in spelling (for example <em>ancills</em> instead of <em>ancilla</em>), you get one free retry with no penalty — but a genuine wrong ending or wrong word still counts as wrong.</p></div>
-      <div class="guide-section"><h3>Unfinished quizzes</h3><p>If you leave a quiz part-way (with Menu, or by closing the page), the trainer remembers exactly where you were. Next time you open it you'll be asked <strong>“Finish a quiz?”</strong>, and an <strong>Unfinished quizzes</strong> list stays at the top of the Practice tab until you finish or discard each one. The <strong>last 5</strong> unfinished quizzes are kept (starting a sixth drops the oldest). Matching and Sentences aren't resumed. Questions you already answered are saved and are not asked again; your score carries on and the whole quiz is counted as one session. </p></div>
+      <div class="guide-section"><h3>Unfinished quizzes</h3><p>If you leave a quiz part-way (with Menu, or by closing the page), the trainer remembers exactly where you were. Next time you open it you'll be asked <strong>“Finish a quiz?”</strong>, and an <strong>Unfinished quizzes</strong> list stays at the top of the Practice tab until you finish or discard each one. The <strong>last 5</strong> unfinished quizzes are kept (starting a sixth drops the oldest). Sentences aren't resumed. Questions you already answered are saved and are not asked again; your score carries on and the whole quiz is counted as one session. </p></div>
       <div class="guide-section"><h3>Spaced repetition</h3><p>Every word tracks how often you've seen it and your accuracy. Words you get wrong come back sooner; words you know well are spaced further apart. The “Due” button starts a session with overdue words first.</p></div>
       <div class="guide-section"><h3>Mark as hard (★ Starred)</h3><p>Tap the <strong>☆</strong> in the top-left of a question card to flag that word as hard. You can also star words in the word list and in the forms popup. Press <strong>★ Starred</strong> on the setup screen to practise only those words in the selected quiz type (for the declension and conjugation drills, only starred words of that type are used). Tap the star again to remove a word.</p></div>
       <div class="guide-section"><h3>Word list &amp; search</h3><p>The <strong>Word list</strong> tab on the right edge opens a drawer showing your selected words with their spaced-repetition stats. Type in the search box to look through <strong>every</strong> word by Latin or English — results show its category and any daily box it belongs to. The <strong>★ Starred</strong> button in the drawer lists only your hard words.</p></div>
@@ -3086,7 +3086,7 @@ function saveQuizState(){
   curSnap=snap;snaps=snaps.filter(x=>x.id!==snap.id);snaps.unshift(snap);snaps=snaps.slice(0,RESUME_MAX);snapPersist();updResumeUI();}
 function resumeAge(t){const m=Math.round((Date.now()-t)/60000);if(m<1)return 'just now';if(m<60)return m+' min ago';const h=Math.round(m/60);if(h<24)return h+' h ago';const d=Math.round(h/24);return d+(d===1?' day ago':' days ago');}
 function resumeLabel(s){return (QT_NAME[s.t]||'Quiz')+' · '+(s.mode==='el'?'English → Latin':'Latin → English')+' · '+s.idx+' of '+s.total+' answered';}
-function resumeRows(){return snaps.map(s=>'<div class="resume-banner"><div class="rb-main"><strong>'+(QT_NAME[s.t]||'Quiz')+' · '+(s.mode==='el'?'English → Latin':'Latin → English')+'</strong><span>'+s.idx+' of '+s.total+' answered, '+(s.total-s.idx)+' left · '+resumeAge(s.saved||Date.now())+'</span></div><div class="rb-btns"><button class="btn-primary" onclick="resumeQuiz(\''+s.id+'\')">Finish it</button><button class="btn-secondary" onclick="discardResume(\''+s.id+'\')">Discard</button></div></div>').join('');}
+function resumeRows(){return snaps.map(s=>'<div class="resume-banner"><div class="rb-main"><strong>'+(QT_NAME[s.t]||'Quiz')+' · '+(s.match?'Matching':(s.mode==='el'?'English → Latin':'Latin → English')+' · '+(s.inputMode==='mc'?'Multiple choice':'Typed'))+'</strong><span>'+s.idx+' of '+s.total+' answered, '+(s.total-s.idx)+' left · '+resumeAge(s.saved||Date.now())+'</span></div><div class="rb-btns"><button class="btn-primary" onclick="resumeQuiz(\''+s.id+'\')">Finish it</button><button class="btn-secondary" onclick="discardResume(\''+s.id+'\')">Discard</button></div></div>').join('');}
 function updResumeUI(){const b=document.getElementById('resumeBanner');if(!b)return;if(!snaps.length){b.style.display='none';return;}document.getElementById('resumeBannerList').innerHTML=resumeRows();b.style.display='block';const ml=document.getElementById('resumeModalList');if(ml&&document.getElementById('resumeOverlay').style.display!=='none')ml.innerHTML=resumeRows();}
 function resumeQuiz(id){const s=snaps.find(x=>x.id===id)||snaps[0];if(!s)return;curSnap=s;hideResumeModal();
   clearTimeout(autoNextTimer);stopTimer();
@@ -3105,8 +3105,8 @@ async function loadResume(){const ok=x=>x&&x.v===1&&x.total>x.idx&&Array.isArray
   const after=(name,fn)=>{const f=window[name];window[name]=function(){const r=f.apply(this,arguments);try{fn.apply(this,arguments);}catch(e){}return r;};};
   ['showQ','showDrill','checkAnswer','handleMC','skipQ','checkDrill','handleMCDrill','handleMCDrillLE','skipDrill'].forEach(n=>{if(typeof window[n]==='function')after(n,()=>{if(typeof answered!=='undefined')saveQuizState();});});
   const _bq=beginQuiz;beginQuiz=function(){window.resumeDate=null;curSnap=null;return _bq.apply(this,arguments);};
-  const _sr=showResult;showResult=function(){const r=_sr.apply(this,arguments);if(!isMatch)clearResume();return r;};
-  const _bm=backToMenu;backToMenu=function(){const active=!isSent&&!isMatch&&!sessionFinished&&curSnap;window.lastSessDate=null;const r=_bm.apply(this,arguments);if(active&&curSnap&&window.lastSessDate){curSnap.sessDate=window.lastSessDate;snapPersist();}updResumeUI();return r;};
+  const _sr=showResult;showResult=function(){const r=_sr.apply(this,arguments);clearResume();return r;};
+  const _bm=backToMenu;backToMenu=function(){const active=!isSent&&!sessionFinished&&curSnap;window.lastSessDate=null;const r=_bm.apply(this,arguments);if(active&&curSnap&&window.lastSessDate){curSnap.sessDate=window.lastSessDate;snapPersist();}updResumeUI();return r;};
 })();
 
 /* ---------- Matching mode ---------- */
@@ -3121,23 +3121,33 @@ function mOrphans(){const E=mE.filter(Boolean),L=mL.filter(Boolean);return {e:E.
 function mRefill(ei,li){
   const o=mOrphans();
   // o.e = English words waiting for their Latin; o.l = Latin words waiting for their English
-  let engNew=null,latNew=null;
+  const complete=mE.filter(w=>w&&mL.includes(w)).length;
+  let engNew=null,latNew=null,eQ=false,lQ=false;
   const forceOrph=o.e.length>=2||o.l.length>=2||!mQueue.length;
-  const useOrphE=o.l.length&&(forceOrph||Math.random()<.5);   // English slot completes a waiting Latin word
-  const useOrphL=o.e.length&&(forceOrph||Math.random()<.5);   // Latin slot completes a waiting English word
+  let useOrphE=o.l.length>0&&(forceOrph||Math.random()<.5);   // English slot completes a waiting Latin word
+  let useOrphL=o.e.length>0&&(forceOrph||Math.random()<.5);   // Latin slot completes a waiting English word
+  if(complete===0){if(o.l.length)useOrphE=true;if(o.e.length)useOrphL=true;} // never leave a board with no matchable pair
   if(useOrphE)engNew=o.l[Math.floor(Math.random()*o.l.length)];
   if(useOrphL){const c=o.e.filter(w=>w!==engNew);latNew=(c.length?c:o.e)[Math.floor(Math.random()*(c.length||o.e.length))];}
-  if(!engNew){engNew=mTake(latNew);}
-  if(!latNew){latNew=mTake(engNew);}
-  if(engNew&&engNew===latNew&&mQueue.length){/* would make a fresh matching pair: swap latin for another word */const alt=mTake(engNew);if(alt){mQueue.push(latNew);latNew=alt;}}
+  if(!engNew){engNew=mTake(latNew);eQ=!!engNew;}
+  if(!latNew){latNew=mTake(engNew);lQ=!!latNew;}
+  if(engNew&&engNew===latNew&&mQueue.length){const alt=mTake(engNew);if(alt){mQueue.push(latNew);latNew=alt;}}
+  // a brand-new word is only placed if the other side also gets something (keeps both columns the same size)
+  if(eQ&&engNew&&!latNew){mQueue.unshift(engNew);engNew=null;}
+  if(lQ&&latNew&&!engNew){mQueue.unshift(latNew);latNew=null;}
+  const cAfter=complete+(engNew&&mL.includes(engNew)?1:0)+(latNew&&latNew!==engNew&&mE.includes(latNew)?1:0)+(engNew&&engNew===latNew?1:0);
+  if(cAfter===0&&(engNew||latNew)){ // would leave no matchable pair: place one real pair instead
+    const w=engNew||latNew;if(engNew&&latNew&&engNew!==latNew)mQueue.unshift(latNew);engNew=latNew=w;}
   mE[ei]=engNew||null;mL[li]=latNew||null;
-  if(engNew)mFresh.add('e'+ei);if(latNew)mFresh.add('l'+li);
+  if(!mVis().length&&mQueue.length){const w=mQueue.shift();mE[ei]=w;mL[li]=w;engNew=latNew=w;}
+  if(mE[ei])mFresh.add('e'+ei);if(mL[li])mFresh.add('l'+li);
 }
 function mDerange(n){let a,b,t=0;do{a=shuffle([...Array(n).keys()]);b=shuffle([...Array(n).keys()]);t++;}while(n>1&&t<30&&a.some((x,i)=>x===b[i]&&false));return [a,b];}
 function startMatch(ws,keepRound){
   clearTimeout(autoNextTimer);stopTimer();
   const seen=new Set();const list=[];(ws||[]).forEach(w=>{const k=mKey(w);if(!seen.has(k)){seen.add(k);list.push(w);}});
-  if(list.length<2){toast('Pick a few more words first — matching needs at least 2.');return;}
+  if(!list.length)return;
+  curSnap=null;window.resumeDate=null;
   isMatch=true;isDrill=false;isSent=false;sessionFinished=false;answered=false;
   quizWords=list;current=0;score=0;wrongWords=[];if(!keepRound)round=1;
   mQueue=shuffle([...list]);mE=[];mL=[];mMissed=new Set();mSel={e:null,l:null};mFirst=null;mLock=false;mTotal=list.length;mFresh=new Set();
@@ -3145,6 +3155,8 @@ function startMatch(ws,keepRound){
   let a,b,t=0;const n=first.length;
   do{a=shuffle([...first]);b=shuffle([...first]);t++;}while(n>1&&t<30&&a.some((w,i)=>b[i]===w));
   mE=a;mL=b;
+  matchUI();saveMatch();}
+function matchUI(){
   showView('quizView');
   ['promptCard','hintBox'].forEach(id=>document.getElementById(id).style.display='none');
   ['typedSection','mcSection','sentSection'].forEach(id=>document.getElementById(id).style.display='none');
@@ -3179,14 +3191,30 @@ function matchPick(side,w,idx){
       mRefill(ei,li);
       mLock=false;
       if(!mVis().length){updMatchHeader();showResult();return;}
-      updMatchHeader();renderMatch();
+      updMatchHeader();renderMatch();saveMatch();
     },320);
   }else{
     if(eb)eb.classList.add('bad');if(lb)lb.classList.add('bad');
-    mMiss(mFirst||we);
+    mMiss(mFirst||we);saveMatch();
     setTimeout(()=>{mSel={e:null,l:null};mFirst=null;mLock=false;renderMatch();updPct();},450);
   }
 }
+function saveMatch(){
+  if(!isMatch||!mVis().length)return;
+  const snap={v:1,id:(curSnap&&curSnap.id)||('q'+Date.now()+Math.random().toString(36).slice(2,6)),t:'vocab',mode,inputMode:'match',match:true,round,score,idx:current,total:mTotal,saved:Date.now(),sessDate:(curSnap&&curSnap.sessDate)||window.resumeDate||null,drill:false,
+    words:quizWords.map(wCopy),q:mQueue.map(mKey),e:mE.map(w=>w?mKey(w):null),l:mL.map(w=>w?mKey(w):null),missed:[...mMissed],wrong:wrongWords.map(wCopy)};
+  curSnap=snap;snaps=snaps.filter(x=>x.id!==snap.id);snaps.unshift(snap);snaps=snaps.slice(0,RESUME_MAX);snapPersist();updResumeUI();}
+function restoreMatch(s){
+  clearTimeout(autoNextTimer);stopTimer();
+  setQuizType('vocab');setInputMode('match');
+  const ws=s.words.map(wRestore),map={};ws.forEach(w=>{map[mKey(w)]=w;});
+  const get=k=>k?(map[k]||null):null;
+  isMatch=true;isDrill=false;isSent=false;sessionFinished=false;answered=false;
+  quizWords=ws;current=s.idx;score=s.score;round=s.round||1;mTotal=s.total;wrongWords=(s.wrong||[]).map(wRestore);
+  mQueue=(s.q||[]).map(get).filter(Boolean);mE=(s.e||[]).map(get);mL=(s.l||[]).map(get);
+  mMissed=new Set(s.missed||[]);mSel={e:null,l:null};mFirst=null;mLock=false;mFresh=new Set();
+  window.resumeDate=s.sessDate||null;
+  matchUI();}
 (function(){
   const syncM=()=>{const v=quizType==='vocab';const mb=document.getElementById('inputMatch');if(mb)mb.style.display=v?'':'none';
     if(!v&&inputMode==='match'){setInputMode('typed');return;}
@@ -3194,6 +3222,7 @@ function matchPick(side,w,idx){
     const sn=document.getElementById('matchNotice');if(sn)sn.style.display=on?'block':'none';};
   const _sq=setQuizType;setQuizType=function(t){const r=_sq.apply(this,arguments);syncM();return r;};
   const _si=setInputMode;setInputMode=function(t){const r=_si.apply(this,arguments);const mb=document.getElementById('inputMatch');if(mb)mb.className='mode-btn'+(t==='match'?' active':'');syncM();return r;};
+  const _rq=resumeQuiz;resumeQuiz=function(id){const s=snaps.find(x=>x.id===id)||snaps[0];if(s&&s.match){curSnap=s;hideResumeModal();restoreMatch(s);return;}return _rq.apply(this,arguments);};
   const _bq=beginQuiz;beginQuiz=function(ws){if(quizType==='vocab'&&inputMode==='match'){startMatch(ws);return;}isMatch=false;return _bq.apply(this,arguments);};
   const _cr=continueReview;continueReview=function(){if(isMatch){round++;const w=shuffle([...wrongWords]);startMatch(w,true);return;}return _cr.apply(this,arguments);};
   const hide=()=>{const m=document.getElementById('matchSection');if(m)m.style.display='none';};
