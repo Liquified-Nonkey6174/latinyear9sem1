@@ -2708,8 +2708,10 @@ function removeCustomWord(idx){const w=customWords[idx];if(!w)return;const sub=D
 document.addEventListener('keydown',e=>{
   if(tourSteps){if(e.key==='ArrowRight'||e.key==='Enter'){e.preventDefault();tourNext();}else if(e.key==='ArrowLeft'){e.preventDefault();tourBack();}else if(e.key==='Escape'){e.preventDefault();endTour();}return;}
   const inQ=document.getElementById('quizView').style.display==='block';
-  if(!inQ){if(e.key==='?')showShortcuts();return;}
-  if(e.key==='?'){showShortcuts();return;}
+  // "?" shows the shortcuts, except while typing in a text box (chat, answers, names…).
+  const t=e.target,typing=t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'||t.isContentEditable);
+  if(e.key==='?'&&!typing){showShortcuts();return;}
+  if(!inQ)return;
   if(isSent){if(e.key==='Escape'&&!answered){e.preventDefault();skipSentence();}return;}
   if(inputMode==='mc'&&!answered&&['1','2','3','4'].includes(e.key)){const btns=document.getElementById('mcGrid').querySelectorAll('.mc-btn');const idx=parseInt(e.key)-1;if(btns[idx]){e.preventDefault();btns[idx].click();}return;}
   if(e.key==='Enter'){e.preventDefault();if(inputMode==='typed'){if(!answered)dispatchCheck();else if(document.getElementById('nextBtn').style.display!=='none'||document.getElementById('mcNextBtn').style.display!=='none')nextQ();}else if(answered)nextQ();return;}
@@ -2732,11 +2734,13 @@ let playerAuth=null,adminAuth=null,playerAuthP=null;
 const APPCHECK_SITE_KEY='6Ldfow8uAAAAAFpGfzRbrsinQRKk-42QY_qacg_1';
 const FB_CONFIG={apiKey:FB_API_KEY,authDomain:'latinleaderboard.firebaseapp.com',databaseURL:FB_DB,projectId:'latinleaderboard',appId:'1:721497695741:web:cc9064d08d1c68d26a6594'};
 const FB_SDK='https://www.gstatic.com/firebasejs/10.14.1/';
-let appCheckP=null,acHeaderOK=true,acFailUntil=0;
+let appCheckP=null,acHeaderOK=true,acFailUntil=0,acInflight=null,acSlow=false;
 async function appCheckToken(){if(!APPCHECK_SITE_KEY||Date.now()<acFailUntil)return null;
-  // If reCAPTCHA can't load (e.g. blocked by a network filter), don't hold every request up: give up after 4s for a minute.
-  const t=appCheckTokenNow();const r=await Promise.race([t,new Promise(res=>setTimeout(()=>res(undefined),4000))]);
-  if(!r)acFailUntil=Date.now()+60000;return r||null;}
+  // One token request at a time; every caller waits on it. The first wait is generous (slow first load);
+  // if reCAPTCHA is still not ready, later callers wait only briefly, but the token is used as soon as it arrives.
+  if(!acInflight)acInflight=appCheckTokenNow().then(tok=>{acSlow=false;if(!tok)acFailUntil=Date.now()+30000;return tok;}).finally(()=>{acInflight=null;});
+  const r=await Promise.race([acInflight,new Promise(res=>setTimeout(()=>res(undefined),acSlow?2000:12000))]);
+  if(r===undefined){acSlow=true;return null;}return r;}
 async function appCheckTokenNow(){
   try{if(!appCheckP)appCheckP=(async()=>{const [{initializeApp},ac]=await Promise.all([import(FB_SDK+'firebase-app.js'),import(FB_SDK+'firebase-app-check.js')]);
       return{ac,inst:ac.initializeAppCheck(initializeApp(FB_CONFIG),{provider:new ac.ReCaptchaEnterpriseProvider(APPCHECK_SITE_KEY),isTokenAutoRefreshEnabled:true})};})();
