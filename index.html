@@ -2727,8 +2727,8 @@ const AUTH_KEY='latin_auth_v1';
 // Firebase Authentication over REST. Players get an automatic anonymous account (kept in this
 // browser); the admin signs in with email + password, which Firebase checks. No passwords in the code.
 let playerAuth=null,adminAuth=null,playerAuthP=null;
-// App Check: proves requests come from this website (via invisible reCAPTCHA v3), so Firebase can
-// reject scripts and other sites. Every request carries the token in the X-Firebase-AppCheck header.
+// App Check: proves requests come from this website (via invisible reCAPTCHA), so Firebase can
+// reject scripts and other sites. Uses a reCAPTCHA Enterprise (score-based) site key. Every request carries the token in the X-Firebase-AppCheck header.
 const APPCHECK_SITE_KEY='';
 const FB_CONFIG={apiKey:FB_API_KEY,authDomain:'latinleaderboard.firebaseapp.com',databaseURL:FB_DB,projectId:'latinleaderboard',appId:'1:721497695741:web:cc9064d08d1c68d26a6594'};
 const FB_SDK='https://www.gstatic.com/firebasejs/10.14.1/';
@@ -2739,7 +2739,7 @@ async function appCheckToken(){if(!APPCHECK_SITE_KEY||Date.now()<acFailUntil)ret
   if(!r)acFailUntil=Date.now()+60000;return r||null;}
 async function appCheckTokenNow(){
   try{if(!appCheckP)appCheckP=(async()=>{const [{initializeApp},ac]=await Promise.all([import(FB_SDK+'firebase-app.js'),import(FB_SDK+'firebase-app-check.js')]);
-      return{ac,inst:ac.initializeAppCheck(initializeApp(FB_CONFIG),{provider:new ac.ReCaptchaV3Provider(APPCHECK_SITE_KEY),isTokenAutoRefreshEnabled:true})};})();
+      return{ac,inst:ac.initializeAppCheck(initializeApp(FB_CONFIG),{provider:new ac.ReCaptchaEnterpriseProvider(APPCHECK_SITE_KEY),isTokenAutoRefreshEnabled:true})};})();
     const{ac,inst}=await appCheckP;return(await ac.getToken(inst,false)).token;}
   catch(e){appCheckP=null;return null;}}
 async function acHeaders(){const t=acHeaderOK?await appCheckToken():null;return t?{'X-Firebase-AppCheck':t}:{};}
