@@ -2727,7 +2727,28 @@ const AUTH_KEY='latin_auth_v1';
 // Firebase Authentication over REST. Players get an automatic anonymous account (kept in this
 // browser); the admin signs in with email + password, which Firebase checks. No passwords in the code.
 let playerAuth=null,adminAuth=null,playerAuthP=null;
-async function authPost(url,body,form){const r=await fetch(url+'?key='+FB_API_KEY,{method:'POST',headers:{'Content-Type':form?'application/x-www-form-urlencoded':'application/json'},body:form?body:JSON.stringify(body)});
+// App Check: proves requests come from this website (via invisible reCAPTCHA), so Firebase can
+// reject scripts and other sites. Uses a reCAPTCHA Enterprise (score-based) site key. Every request carries the token in the X-Firebase-AppCheck header.
+const APPCHECK_SITE_KEY='6Ldfow8uAAAAAFpGfzRbrsinQRKk-42QY_qacg_1';
+const FB_CONFIG={apiKey:FB_API_KEY,authDomain:'latinleaderboard.firebaseapp.com',databaseURL:FB_DB,projectId:'latinleaderboard',appId:'1:721497695741:web:cc9064d08d1c68d26a6594'};
+const FB_SDK='https://www.gstatic.com/firebasejs/10.14.1/';
+let appCheckP=null,acHeaderOK=true,acFailUntil=0;
+async function appCheckToken(){if(!APPCHECK_SITE_KEY||Date.now()<acFailUntil)return null;
+  // If reCAPTCHA can't load (e.g. blocked by a network filter), don't hold every request up: give up after 4s for a minute.
+  const t=appCheckTokenNow();const r=await Promise.race([t,new Promise(res=>setTimeout(()=>res(undefined),4000))]);
+  if(!r)acFailUntil=Date.now()+60000;return r||null;}
+async function appCheckTokenNow(){
+  try{if(!appCheckP)appCheckP=(async()=>{const [{initializeApp},ac]=await Promise.all([import(FB_SDK+'firebase-app.js'),import(FB_SDK+'firebase-app-check.js')]);
+      return{ac,inst:ac.initializeAppCheck(initializeApp(FB_CONFIG),{provider:new ac.ReCaptchaEnterpriseProvider(APPCHECK_SITE_KEY),isTokenAutoRefreshEnabled:true})};})();
+    const{ac,inst}=await appCheckP;return(await ac.getToken(inst,false)).token;}
+  catch(e){appCheckP=null;return null;}}
+async function acHeaders(){const t=acHeaderOK?await appCheckToken():null;return t?{'X-Firebase-AppCheck':t}:{};}
+// fetch with the App Check header. If the browser refuses the extra header (a network-level error),
+// stop sending it rather than breaking the app.
+async function acFetch(url,init){const h=await acHeaders();
+  try{return await fetch(url,{...init,headers:{...(init&&init.headers||{}),...h}});}
+  catch(e){if(e.name!=='TypeError'||!h['X-Firebase-AppCheck'])throw e;acHeaderOK=false;return fetch(url,init);}}
+async function authPost(url,body,form){const r=await acFetch(url+'?key='+FB_API_KEY,{method:'POST',headers:{'Content-Type':form?'application/x-www-form-urlencoded':'application/json'},body:form?body:JSON.stringify(body)});
   const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error((d.error&&d.error.message)||('HTTP '+r.status));return d;}
 function authFrom(d){return{uid:d.localId||d.user_id,idToken:d.idToken||d.id_token,refreshToken:d.refreshToken||d.refresh_token,exp:Date.now()+((+(d.expiresIn||d.expires_in)||3600)-120)*1000};}
 const refreshAuth=a=>authPost('https://securetoken.googleapis.com/v1/token','grant_type=refresh_token&refresh_token='+encodeURIComponent(a.refreshToken),true).then(authFrom);
@@ -2746,7 +2767,7 @@ let isAdmin=false;
 
 async function loadDescription(){
   try{
-    const r=await fetch(FB_DESC);
+    const r=await acFetch(FB_DESC);
     if(!r.ok)return;
     const data=await r.json();
     if(data)document.getElementById('descText').textContent=data;
@@ -2788,7 +2809,7 @@ function startDescEdit(){
 async function saveDesc(){
   const text=document.getElementById('descEditArea').value.trim();
   try{
-    const r=await fetch(FB_DESC+'?auth='+encodeURIComponent(await adminToken()),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(text)});
+    const r=await acFetch(FB_DESC+'?auth='+encodeURIComponent(await adminToken()),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(text)});
     if(!r.ok)throw new Error('HTTP '+r.status);
     document.getElementById('descText').textContent=text;
   }catch(e){alert('Could not save: '+e.message);}
@@ -3121,22 +3142,30 @@ let lbMe=null,lbPending=0,lbInFlight=0,lbInFlightBase=0,lbFlushTimer=null,lbPlay
 const fbUrl=path=>FB_ROOT+'/'+path+'.json';
 async function fbReq(method,path,body,opts){opts=opts||{};const tok=opts.admin?await adminToken():await playerToken();
   if(!opts.admin&&lbMe&&lbMe.pid!==playerAuth.uid){lbMe=null;saveLbMe();renderLbProfile();}
-  const q=opts.query||'';const r=await fetch(fbUrl(path)+q+(q?'&':'?')+'auth='+encodeURIComponent(tok),{method,headers:body?{'Content-Type':'application/json'}:undefined,body:body?JSON.stringify(body):undefined,keepalive:!!opts.keepalive});if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}
+  const q=opts.query||'';const r=await acFetch(fbUrl(path)+q+(q?'&':'?')+'auth='+encodeURIComponent(tok),{method,headers:body?{'Content-Type':'application/json'}:undefined,body:body?JSON.stringify(body):undefined,keepalive:!!opts.keepalive});if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}
 
 // Live updates: Firebase pushes only what changed (put/patch events), instead of the page re-downloading.
 function applyAt(root,path,data,isPatch){if(isPatch){Object.entries(data||{}).forEach(([k,v])=>{root=applyAt(root,path.replace(/\/$/,'')+'/'+k,v,false);});return root;}
   const segs=path.split('/').filter(Boolean);if(!segs.length)return data&&typeof data==='object'?data:{};
   root=root||{};let o=root;segs.slice(0,-1).forEach(k=>{if(!o[k]||typeof o[k]!=='object')o[k]={};o=o[k];});
   const last=segs[segs.length-1];if(data===null)delete o[last];else o[last]=data;return root;}
-function fbStream(path,query,onChange,onFail){let es=null,timer=null,delay=2000;
-  const retry=()=>{if(es)es.close();es=null;clearTimeout(timer);timer=setTimeout(open,delay);delay=Math.min(delay*2,60000);};
+function fbStream(path,query,onChange,onFail){let ctrl=null,timer=null,delay=2000;
+  const retry=()=>{if(ctrl)ctrl.abort();ctrl=null;clearTimeout(timer);timer=setTimeout(open,delay);delay=Math.min(delay*2,60000);};
+  const handle=(type,data)=>{if(type==='put'||type==='patch'){try{const d=JSON.parse(data);onChange(d.path,d.data,type==='patch');delay=2000;}catch(e){}}
+    else if(type==='cancel'){onFail();retry();}else if(type==='auth_revoked')retry();};
   async function open(){let tok;try{tok=await playerToken();}catch(e){onFail();retry();return;}
-    es=new EventSource(fbUrl(path)+'?'+(query?query+'&':'')+'auth='+encodeURIComponent(tok));
-    const h=ev=>{try{const d=JSON.parse(ev.data);onChange(d.path,d.data,ev.type==='patch');delay=2000;}catch(e){}};
-    es.addEventListener('put',h);es.addEventListener('patch',h);
-    es.addEventListener('cancel',()=>{onFail();retry();});es.addEventListener('auth_revoked',retry);es.onerror=retry;
-    // Reconnect with a fresh sign-in shortly before the current one expires.
-    clearTimeout(timer);timer=setTimeout(()=>{if(es)es.close();open();},Math.max(60000,playerAuth.exp-Date.now()));}
+    const c=ctrl=new AbortController();
+    // Reconnect with fresh sign-in and App Check tokens shortly before the current ones expire.
+    clearTimeout(timer);timer=setTimeout(()=>{c.abort();open();},Math.min(50*60000,Math.max(60000,playerAuth.exp-Date.now())));
+    try{const r=await acFetch(fbUrl(path)+'?'+(query?query+'&':'')+'auth='+encodeURIComponent(tok),{headers:{Accept:'text/event-stream'},signal:c.signal});
+      if(!r.ok||!r.body)throw new Error('HTTP '+r.status);
+      const rd=r.body.getReader(),dec=new TextDecoder();let buf='';
+      for(;;){const{value,done}=await rd.read();if(done)break;buf+=dec.decode(value,{stream:true}).replace(/\r\n?/g,'\n');let i;
+        while((i=buf.indexOf('\n\n'))>=0){const block=buf.slice(0,i);buf=buf.slice(i+2);let type='message',data=[];
+          block.split('\n').forEach(l=>{if(l.startsWith('event:'))type=l.slice(6).trim();else if(l.startsWith('data:'))data.push(l.slice(5).replace(/^ /,''));});
+          handle(type,data.join('\n'));}}
+      if(c===ctrl)retry();}
+    catch(e){if(c===ctrl&&!c.signal.aborted){onFail();retry();}}}
   open();}
 
 function saveLbMe(){try{if(lbMe)window.storage.set(LB_KEY,JSON.stringify(lbMe));else window.storage.delete(LB_KEY);}catch(e){}}
