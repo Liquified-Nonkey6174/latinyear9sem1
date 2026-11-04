@@ -351,41 +351,89 @@ input[type=range]{flex:1;accent-color:var(--accent)}
 .match-btn.m-empty{visibility:hidden;pointer-events:none}
 @keyframes mshake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
 .match-foot{text-align:center;font-size:12px;color:var(--text3);margin-top:14px}
-/* Leaderboard & chat */
-.lb-profile{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 18px;margin-bottom:1.5rem;font-size:13px;color:var(--text2)}
+/* Leaderboard & chat sidebar */
+.layout{display:flex;justify-content:center;align-items:flex-start;gap:28px;padding:0 20px}
+.layout>.app{flex:0 1 760px;min-width:0;margin:0}
+.side{flex:0 0 320px;position:sticky;top:16px;height:calc(100vh - 32px);margin-top:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.side-sec{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.side-lb{flex:0 1 auto;max-height:46%}
+.side-chat{flex:1 1 0}
+.side-h{display:flex;align-items:baseline;justify-content:space-between;gap:8px;padding:12px 14px 8px}
+.side-h>span:first-child{font-family:var(--serif);font-size:19px;color:var(--text)}
+.side-sub{font-size:11px;color:var(--text3);text-align:right}
+.lb-profile{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;font-size:13px;color:var(--text2)}
 .lb-profile b{color:var(--text);font-weight:600}
-.lb-profile .lb-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
-.lb-profile input,.chat-form input{flex:1;min-width:0;font-family:var(--sans);font-size:14px;padding:8px 14px;border-radius:999px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);outline:none}
+.lb-profile .lb-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:8px}
+.lb-profile input,.chat-form input{flex:1;min-width:0;font-family:var(--sans);font-size:13px;padding:7px 12px;border-radius:999px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);outline:none}
 .lb-profile input:focus,.chat-form input:focus{border-color:var(--accent-dim);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 12%,transparent)}
+.lb-profile .btn-primary,.lb-profile .btn-secondary,.chat-form .btn-primary{padding:7px 14px;font-size:12px}
+.lb-pts{color:var(--gold);font-weight:600}
 .lb-link{background:none;border:none;font-family:var(--sans);font-size:12px;color:var(--accent);cursor:pointer;padding:2px 4px;text-decoration:underline;text-underline-offset:2px}
 .lb-link.muted{color:var(--text3)}
-.lb-msg{font-size:12px;margin-top:8px;min-height:1em}
-.lb-msg.err{color:var(--red)}
+.lb-msg{font-size:12px;margin-top:6px}
 .lb-msg:empty{display:none}
-.lb-periods{display:flex;gap:2px;background:var(--surface2);border:1px solid var(--border);border-radius:999px;padding:3px;width:fit-content;margin:0 auto 1.25rem;flex-wrap:wrap;justify-content:center}
-.lb-list{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
-.lb-item{display:flex;align-items:center;gap:12px;padding:10px 16px;border-top:1px solid var(--border);font-size:14px}
+.lb-msg.err{color:var(--red)}
+.side-chat .lb-msg{margin:0 14px 10px}
+.lb-periods{display:flex;gap:2px;background:var(--surface2);border:1px solid var(--border);border-radius:999px;padding:3px;margin:0 14px 10px;justify-content:space-between}
+.lb-periods .mode-btn{flex:1;padding:5px 6px;font-size:12px}
+.lb-list{overflow-y:auto;min-height:0;border-top:1px solid var(--border)}
+.lb-item{display:flex;align-items:center;gap:10px;padding:7px 14px;border-top:1px solid var(--border);font-size:13px}
 .lb-item:first-child{border-top:none}
 .lb-item.me{background:var(--accent-bg)}
-.lb-rank{width:2.2em;font-family:var(--serif);font-size:17px;color:var(--text3);text-align:right;flex-shrink:0}
+.lb-rank{width:1.8em;font-variant-numeric:tabular-nums;font-family:var(--sans);font-size:12px;font-weight:600;color:var(--text3);text-align:right;flex-shrink:0}
 .lb-item.top .lb-rank{color:var(--gold)}
 .lb-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)}
 .lb-item.me .lb-name{font-weight:600}
-.lb-count{font-family:var(--serif);font-size:18px;color:var(--accent)}
-.lb-empty{padding:22px 16px;text-align:center;font-size:13px;color:var(--text3)}
-.lb-del{background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:0 4px}
-.lb-del:hover{color:var(--red)}
-.chat-list{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);height:min(55vh,460px);overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:10px}
-.chat-m{font-size:14px;line-height:1.45;color:var(--text);overflow-wrap:anywhere}
+.lb-count{font-variant-numeric:tabular-nums;font-family:var(--sans);font-size:14px;font-weight:600;color:var(--accent)}
+.lb-empty{padding:18px 14px;text-align:center;font-size:12px;color:var(--text3)}
+.lb-act{background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:0 3px;line-height:1}
+.lb-act:hover{color:var(--accent)}
+.lb-act.del:hover{color:var(--red)}
+.chat-list{flex:1 1 0;min-height:0;overflow-y:auto;padding:10px 14px;display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--border)}
+.chat-m{font-size:13px;line-height:1.45;color:var(--text);overflow-wrap:anywhere}
 .chat-m .chat-who{font-weight:600;color:var(--text2);margin-right:6px}
 .chat-m.me .chat-who{color:var(--accent)}
-.chat-m .chat-time{font-size:11px;color:var(--text3);margin-left:6px}
-.chat-form{display:flex;gap:8px;margin-top:10px}
-.lb-note{font-size:12px;color:var(--text3);margin-top:10px;text-align:center}
+.chat-m .chat-time{font-size:10px;color:var(--text3);margin-left:6px}
+.chat-form{display:flex;gap:6px;padding:10px 14px;border-top:1px solid var(--border)}
+.points-pill{font-size:12px;color:var(--gold);background:var(--gold-bg);padding:3px 10px;border-radius:999px;border:1px solid var(--gold-bdr);white-space:nowrap}
+.points-pill.bump{animation:ptsBump .35s ease}
+@keyframes ptsBump{50%{transform:scale(1.18)}}
+.nav-side{display:none}
+@media(max-width:1180px){
+  .layout{flex-direction:column;align-items:stretch;padding:0}
+  .layout>.app{margin:0 auto;width:100%;max-width:760px}
+  .side{order:2;position:static;height:auto;width:100%;max-width:760px;margin:0 auto 4rem;padding:0 1.5rem}
+  .side-lb{max-height:none}.side-lb .lb-list{max-height:340px}
+  .side-chat{flex:none}.chat-list{flex:none;height:380px}
+  .nav-side{display:inline-block}
+}
 @media(max-width:560px){.nav-tab{padding:7px 10px;font-size:12px}.nav-tabs{flex-wrap:wrap;justify-content:center}}
 </style>
 </head>
 <body>
+<div class="layout">
+<aside class="side" id="sidePanel">
+  <div class="lb-profile"></div>
+  <section class="side-sec side-lb">
+    <div class="side-h"><span>Leaderboard</span><span class="side-sub">correct answers</span></div>
+    <div class="lb-periods">
+      <button class="mode-btn active" data-period="d" onclick="setLbPeriod('d')">Today</button>
+      <button class="mode-btn" data-period="w" onclick="setLbPeriod('w')">Week</button>
+      <button class="mode-btn" data-period="m" onclick="setLbPeriod('m')">Month</button>
+      <button class="mode-btn" data-period="all" onclick="setLbPeriod('all')">All time</button>
+    </div>
+    <div class="lb-list" id="lbList"><div class="lb-empty">Loading…</div></div>
+  </section>
+  <section class="side-sec side-chat">
+    <div class="side-h"><span>Chat</span><span class="side-sub">everyone can read this, so be kind</span></div>
+    <div class="chat-list" id="chatList"><div class="lb-empty">Loading…</div></div>
+    <form class="chat-form" onsubmit="event.preventDefault();sendChat()">
+      <input id="chatInput" maxlength="300" autocomplete="off" placeholder="Join above to chat" disabled>
+      <button class="btn-primary" id="chatSend" disabled>Send</button>
+    </form>
+    <p class="lb-msg err" id="chatErr"></p>
+  </section>
+</aside>
 <div class="app">
 
 <!-- SELECTOR -->
@@ -416,8 +464,7 @@ input[type=range]{flex:1;accent-color:var(--accent)}
     <button class="nav-tab active" onclick="showMainTab('practice')">Practice</button>
     <button class="nav-tab" onclick="showMainTab('stats')">Stats</button>
     <button class="nav-tab" onclick="showMainTab('info')">Information</button>
-    <button class="nav-tab" onclick="showMainTab('leaderboard')">Leaderboard</button>
-    <button class="nav-tab" onclick="showMainTab('chat')">Chat</button>
+    <button class="nav-tab nav-side" onclick="document.getElementById('sidePanel').scrollIntoView({behavior:'smooth'})">Leaderboard &amp; chat</button>
   </div>
   <div id="practicePanel">
     <div id="resumeBanner" style="display:none"><div class="rb-head">Unfinished quizzes</div><div id="resumeBannerList"></div></div>
@@ -520,6 +567,7 @@ input[type=range]{flex:1;accent-color:var(--accent)}
     <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
     <span class="prog-lbl" id="progLbl">1/10</span>
     <span class="score-pill" id="scorePill">0 correct</span>
+    <span class="points-pill" id="pointsPill" style="display:none" title="Your leaderboard points: one per correct answer">⭐ 0</span>
     <div class="pct-bar-wrap">
       <div class="pct-bar-track"><div class="pct-bar-fill" id="pctBarFill" style="height:0%"></div></div>
       <div class="pct-bar-label" id="pctLabel">–</div>
@@ -1581,31 +1629,9 @@ input[type=range]{flex:1;accent-color:var(--accent)}
   </div><!-- /infoPronPanel -->
 </div>
 
-<div id="lbView" style="display:none">
-  <div class="stats-header"><h2>Leaderboard</h2><p>Questions answered by everyone using Latin Trainer</p></div>
-  <div class="lb-profile"></div>
-  <div class="lb-periods">
-    <button class="mode-btn active" data-period="d" onclick="setLbPeriod('d')">Today</button>
-    <button class="mode-btn" data-period="w" onclick="setLbPeriod('w')">This week</button>
-    <button class="mode-btn" data-period="m" onclick="setLbPeriod('m')">This month</button>
-    <button class="mode-btn" data-period="all" onclick="setLbPeriod('all')">All time</button>
-  </div>
-  <div class="lb-list" id="lbList"><div class="lb-empty">Loading…</div></div>
-  <p class="lb-note">Updates every 30 seconds. Every answered question counts, right or wrong.</p>
-</div>
-
-<div id="chatView" style="display:none">
-  <div class="stats-header"><h2>Chat</h2><p>Everyone with the link can read this, so be kind.</p></div>
-  <div class="lb-profile"></div>
-  <div class="chat-list" id="chatList"><div class="lb-empty">Loading…</div></div>
-  <form class="chat-form" onsubmit="event.preventDefault();sendChat()">
-    <input id="chatInput" maxlength="300" autocomplete="off" placeholder="Join above to chat" disabled>
-    <button class="btn-primary" id="chatSend" disabled>Send</button>
-  </form>
-  <p class="lb-msg err" id="chatErr"></p>
-</div>
 
 </div><!-- .app -->
+</div><!-- .layout -->
 
 <!-- HELP MENU -->
 <div id="helpOverlay" class="overlay" style="display:none" onclick="hideHelp()">
@@ -2393,7 +2419,7 @@ function showGuide(){document.getElementById('guideOverlay').style.display='flex
 function hideGuide(){document.getElementById('guideOverlay').style.display='none';}
 const TOUR_BASIC=[
   {el:null,title:'Welcome to Latin Trainer',body:'This quick tour shows you around. Use arrow keys or Next/Back. Press Escape to exit. You can replay it any time from the help menu (?).'},
-  {el:'.nav-tabs',title:'Navigation tabs',body:'<b>Practice</b> for quizzes, <b>Stats</b> for progress tracking (and backing up your progress), <b>Leaderboard</b> and <b>Chat</b> to see and talk to everyone else, <b>Information</b> for grammar reference tables.',pre:()=>{showMainTab('practice');setQuizType('vocab');}},
+  {el:'.nav-tabs',title:'Navigation tabs',body:'<b>Practice</b> for quizzes, <b>Stats</b> for progress tracking (and backing up your progress), <b>Information</b> for grammar reference tables.',pre:()=>{showMainTab('practice');setQuizType('vocab');}},
   {el:'#directionToggle',title:'Direction toggle',body:'Choose English → Latin (translate into Latin) or Latin → English (identify meanings).'},
   {el:'#quizTypeToggle',title:'Quiz types',body:'Vocabulary tests word meanings. The declension and conjugation modes drill grammatical forms. Sentences generates full translations in present, past, future and command forms.'},
   {el:'#inputModeToggle',title:'Answer mode',body:'Typed: type your answer and press Enter. Multiple choice: click an option or press 1–4. Matching (vocabulary only): click an English word and its Latin partner from two columns of five.'},
@@ -2451,9 +2477,6 @@ function showInfoTab(t){
 function showMainTab(t){
   mainTab=t;
   document.querySelectorAll('.nav-tab').forEach(b=>b.classList.toggle('active',b.getAttribute('onclick')==="showMainTab('"+t+"')"));
-  document.getElementById('lbView').style.display=t==='leaderboard'?'block':'none';
-  document.getElementById('chatView').style.display=t==='chat'?'block':'none';
-  lbTabChanged(t);
   document.getElementById('practicePanel').style.display=t==='practice'?'':'none';
   document.getElementById('statsView').style.display=t==='stats'?'block':'none';
   const iv=document.getElementById('infoView');
@@ -2641,10 +2664,10 @@ function dispatchSkip(){if(isDrill)skipDrill();else skipQ();}
 function startSentences(){clearTimeout(autoNextTimer);stopTimer();isDrill=false;isSent=true;sentScore=0;sentTotal=0;score=0;answered=false;round=1;showView('quizView');document.getElementById('promptCard').style.display='none';document.getElementById('hintBox').style.display='none';document.getElementById('typedSection').style.display='none';document.getElementById('mcSection').style.display='none';document.getElementById('sentSection').style.display='block';document.getElementById('progFill').style.width='0%';document.getElementById('progLbl').textContent='∞';document.getElementById('scorePill').textContent='0 correct';document.getElementById('roundBadge').innerHTML='<span>Sentences · '+difficulty+'</span>';updPct();renderSentence();}
 function renderSentence(){answered=false;const inp=document.getElementById('sentInput');inp.value='';inp.disabled=false;document.getElementById('sentCheckBtn').disabled=false;document.getElementById('sentNext').style.display='none';const fb=document.getElementById('sentFb');fb.className='sent-fb';fb.textContent='';let sd;try{sd=buildSentence();}catch(e){document.getElementById('sentDir').textContent='Error: '+e.message;document.getElementById('sentWords').textContent='';return;}sentData=sd;const srcRaw=mode==='el'?sd.english:sd.latin;const src=srcRaw.toLowerCase().replace(/[.,!?;:]/g,'').trim();document.getElementById('sentDir').textContent=mode==='el'?'Translate into Latin':'Translate into English';document.getElementById('sentTags').innerHTML='<span class="tag diff">'+difficulty+'</span>';const container=document.getElementById('sentWords');container.innerHTML='';const wmap=sd.wordMap||{};const tipLookup={};if(mode==='el'){Object.entries(wmap).forEach(([lat,eng])=>{const e=String(eng).toLowerCase().replace(/\s*\([^)]*\)/g,'');tipLookup[e]=lat;const p=e.split(' '),s=p[0],r=p.slice(1).join(' ');let c;if(e==='to be')c='is';else if(e==='to be present')c='is present';else if(e==='to be absent')c='is absent';else if(e==='to be able')c='is able';else{if(s==='be')c='is';else if(s==='have')c='has';else if(s.endsWith('y')&&!/[aeiou]y$/.test(s))c=s.slice(0,-1)+'ies';else if(/(?:s|sh|ch|x|z|o)$/.test(s))c=s+'es';else c=s+'s';c=r?c+' '+r:c;}const v3=c;if(v3!==e)tipLookup[v3]=lat;const pastW={eng:[e]};const pastF=ePast(pastW);if(pastF!==e){tipLookup[pastF]=lat;pastF.split(/\s+/).forEach(pw=>{if(pw.length>1&&!tipLookup[pw])tipLookup[pw]=lat;});}e.split(/\s+/).forEach(w=>{if(w.length>1&&!tipLookup[w])tipLookup[w]=lat;});});}else{Object.assign(tipLookup,wmap);}src.split(' ').forEach((tok,i)=>{if(i>0)container.appendChild(document.createTextNode(' '));const m=tok.match(/^([a-zA-Z]*)([^a-zA-Z]*)$/);const word=m?m[1]:'',punct=m?m[2]:'';if(word){const tip=tipLookup[word]||(mode!=='el'?WORD_MAP[word]?.[0]:null)||null;const span=document.createElement('span');span.textContent=word;if(tip){span.className='sw';const t=tip;span.onclick=function(e){e.stopPropagation();container.querySelectorAll('.sent-tip').forEach(x=>x.remove());const el=document.createElement('span');el.className='sent-tip';el.textContent=t;span.insertAdjacentElement('afterend',el);setTimeout(()=>el.remove(),2500);};}container.appendChild(span);}if(punct)container.appendChild(document.createTextNode(punct));});setTimeout(()=>inp.focus(),50);startTimer();}
 function saveSessionSnapshot(){if(sentTotal===0)return;const pct=Math.round(sentScore/sentTotal*100);const today=new Date().toDateString();const last=statsData.sessions[statsData.sessions.length-1];if(last&&new Date(last.date).toDateString()===today&&last.isSent){last.score=sentScore;last.total=sentTotal;last.pct=pct;}else{statsData.sessions.push({date:Date.now(),score:sentScore,total:sentTotal,pct,isSent:true});if(statsData.sessions.length>20)statsData.sessions=statsData.sessions.slice(-20);}saveStats();}
-function checkSentence(){if(answered)return;const ua=document.getElementById('sentInput').value.trim();if(!ua)return;answered=true;document.getElementById('sentCheckBtn').disabled=true;document.getElementById('sentInput').disabled=true;const ca=mode==='el'?sentData.latin:sentData.english;const ok=checkWithSynonyms(ua,ca);const fb=document.getElementById('sentFb');if(ok){sentScore++;score++;fb.className='sent-fb ok';fb.textContent='✓ Correct!';}else{fb.className='sent-fb no';fb.textContent='✗ '+ca;}sentTotal++;lbCount();updScorePill(sentScore);updPct();saveSessionSnapshot();document.getElementById('sentNext').style.display='block';}
-function skipSentence(){if(answered)return;answered=true;document.getElementById('sentCheckBtn').disabled=true;document.getElementById('sentInput').disabled=true;const ca=mode==='el'?sentData.latin:sentData.english;const fb=document.getElementById('sentFb');fb.className='sent-fb no';fb.textContent='→ '+ca;sentTotal++;lbCount();updPct();saveSessionSnapshot();document.getElementById('sentNext').style.display='block';}
+function checkSentence(){if(answered)return;const ua=document.getElementById('sentInput').value.trim();if(!ua)return;answered=true;document.getElementById('sentCheckBtn').disabled=true;document.getElementById('sentInput').disabled=true;const ca=mode==='el'?sentData.latin:sentData.english;const ok=checkWithSynonyms(ua,ca);const fb=document.getElementById('sentFb');if(ok){sentScore++;score++;lbCount();fb.className='sent-fb ok';fb.textContent='✓ Correct!';}else{fb.className='sent-fb no';fb.textContent='✗ '+ca;}sentTotal++;updScorePill(sentScore);updPct();saveSessionSnapshot();document.getElementById('sentNext').style.display='block';}
+function skipSentence(){if(answered)return;answered=true;document.getElementById('sentCheckBtn').disabled=true;document.getElementById('sentInput').disabled=true;const ca=mode==='el'?sentData.latin:sentData.english;const fb=document.getElementById('sentFb');fb.className='sent-fb no';fb.textContent='→ '+ca;sentTotal++;updPct();saveSessionSnapshot();document.getElementById('sentNext').style.display='block';}
 function nextSentence(){renderSentence();}
-function recAns(w,ok){const ck=w.catKey;if(!statsData.catStats[ck])statsData.catStats[ck]={seen:0,correct:0};statsData.catStats[ck].seen++;if(ok)statsData.catStats[ck].correct++;saveStats();lbCount();}
+function recAns(w,ok){const ck=w.catKey;if(!statsData.catStats[ck])statsData.catStats[ck]={seen:0,correct:0};statsData.catStats[ck].seen++;if(ok)statsData.catStats[ck].correct++;saveStats();if(ok)lbCount();}
 let sessionFinished=true;
 function finishSession(){sessionFinished=true;const total=isDrill?drillQs.length:isSent?sentTotal:quizWords.length;const pct=total>0?Math.round(score/total*100):0;if(window.resumeDate)statsData.sessions=statsData.sessions.filter(s=>s.date!==window.resumeDate);statsData.sessions.push({date:Date.now(),score,total,pct});window.resumeDate=null;if(statsData.sessions.length>20)statsData.sessions=statsData.sessions.slice(-20);saveStats();}
 const PHRASES=[[100,'Optime! Perfectly done.'],[80,'Bene! Well done.'],[60,'Satis bene. Keep going.'],[0,'Persevera. Try again.']];
@@ -2750,7 +2773,7 @@ async function checkAdminAuth(){
     const a=authFrom(await authPost('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword',{email:u,password:p,returnSecureToken:true}));
     if(a.uid!==ADMIN_UID){err.textContent='That account isn’t the admin.';return;}
     adminAuth=a;isAdmin=true;hideAdminModal();startDescEdit();
-    if(mainTab==='leaderboard')renderLb();if(mainTab==='chat')renderChat();
+    renderLb();renderChat();
   }catch(e){err.textContent=/TOO_MANY/.test(e.message)?'Too many attempts. Wait a few minutes and try again.':/INVALID|EMAIL|PASSWORD|USER_DISABLED/.test(e.message)?'Incorrect email or password.':'Couldn’t reach the server. Check your internet.';}
   finally{btn.disabled=false;}
 }
@@ -3087,47 +3110,70 @@ buildPackUI();
 loadPersisted();
 loadCustomWords().then(()=>buildUI());
 loadDescription();
-// ── LEADERBOARD & CHAT (Firebase Realtime Database, REST) ─────────────────────
+// ── LEADERBOARD & CHAT (Firebase Realtime Database, REST + live streams) ──────
 // players/{uid}: {name,total,d:{day:n},w:{week:n},m:{month:n}}; chat/{id}: {pid,text,t}.
-// A player's id is their anonymous Firebase account id, so the rules can check every write.
-// Chat stores the player id, not the name, so renaming updates the leaderboard and old messages.
+// Points = correct answers. A player's id is their anonymous Firebase account id, so the rules can
+// check every write. Chat stores the player id, not the name, so renaming updates old messages.
 const FB_ROOT=FB_DB;
 const LB_KEY='latin_lb_v1',LB_PENDING_KEY='latin_lb_pending';
-let lbMe=null,lbPending=0,lbFlushTimer=null,lbPlayers={},lbPeriod='d',lbPoll=null,chatPoll=null,chatLastSend=0,lbEditing=false,chatMsgs=[];
+let lbMe=null,lbPending=0,lbInFlight=0,lbInFlightBase=0,lbFlushTimer=null,lbPlayers={},lbPlayersLoaded=false,lbPeriod='d',chatObj={},chatMsgs=[],chatLastSend=0,lbEditing=false;
 const fbUrl=path=>FB_ROOT+'/'+path+'.json';
 async function fbReq(method,path,body,opts){opts=opts||{};const tok=opts.admin?await adminToken():await playerToken();
   if(!opts.admin&&lbMe&&lbMe.pid!==playerAuth.uid){lbMe=null;saveLbMe();renderLbProfile();}
   const q=opts.query||'';const r=await fetch(fbUrl(path)+q+(q?'&':'?')+'auth='+encodeURIComponent(tok),{method,headers:body?{'Content-Type':'application/json'}:undefined,body:body?JSON.stringify(body):undefined,keepalive:!!opts.keepalive});if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}
+
+// Live updates: Firebase pushes only what changed (put/patch events), instead of the page re-downloading.
+function applyAt(root,path,data,isPatch){if(isPatch){Object.entries(data||{}).forEach(([k,v])=>{root=applyAt(root,path.replace(/\/$/,'')+'/'+k,v,false);});return root;}
+  const segs=path.split('/').filter(Boolean);if(!segs.length)return data&&typeof data==='object'?data:{};
+  root=root||{};let o=root;segs.slice(0,-1).forEach(k=>{if(!o[k]||typeof o[k]!=='object')o[k]={};o=o[k];});
+  const last=segs[segs.length-1];if(data===null)delete o[last];else o[last]=data;return root;}
+function fbStream(path,query,onChange,onFail){let es=null,timer=null,delay=2000;
+  const retry=()=>{if(es)es.close();es=null;clearTimeout(timer);timer=setTimeout(open,delay);delay=Math.min(delay*2,60000);};
+  async function open(){let tok;try{tok=await playerToken();}catch(e){onFail();retry();return;}
+    es=new EventSource(fbUrl(path)+'?'+(query?query+'&':'')+'auth='+encodeURIComponent(tok));
+    const h=ev=>{try{const d=JSON.parse(ev.data);onChange(d.path,d.data,ev.type==='patch');delay=2000;}catch(e){}};
+    es.addEventListener('put',h);es.addEventListener('patch',h);
+    es.addEventListener('cancel',()=>{onFail();retry();});es.addEventListener('auth_revoked',retry);es.onerror=retry;
+    // Reconnect with a fresh sign-in shortly before the current one expires.
+    clearTimeout(timer);timer=setTimeout(()=>{if(es)es.close();open();},Math.max(60000,playerAuth.exp-Date.now()));}
+  open();}
+
 function saveLbMe(){try{if(lbMe)window.storage.set(LB_KEY,JSON.stringify(lbMe));else window.storage.delete(LB_KEY);}catch(e){}}
 async function loadLbMe(){try{const r=await window.storage.get(LB_KEY),a=await window.storage.get(AUTH_KEY);const auth=a&&a.value?JSON.parse(a.value):null;if(auth&&auth.uid&&!playerAuth)playerAuth=auth;
     if(r&&r.value){const v=JSON.parse(r.value);if(v&&v.pid&&v.name&&auth&&auth.uid===v.pid)lbMe=v;}
     const pend=await window.storage.get(LB_PENDING_KEY);if(pend&&+pend.value>0){window.storage.delete(LB_PENDING_KEY);if(lbMe){lbPending+=+pend.value;lbFlushTimer=setTimeout(()=>lbFlush(),3000);}}
-  }catch(e){}renderLbProfile();}
+  }catch(e){}renderLbProfile();lbUpdatePoints();}
 function lbKeys(d){d=d||new Date();const p=n=>String(n).padStart(2,'0');const day=d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate());
   const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));const dn=t.getUTCDay()||7;t.setUTCDate(t.getUTCDate()+4-dn);const y=t.getUTCFullYear();const wk=Math.ceil(((t-Date.UTC(y,0,1))/86400000+1)/7);
   return{d:day,w:y+'-W'+p(wk),m:day.slice(0,7)};}
 function lbCleanName(n){return String(n||'').replace(/\s+/g,' ').trim();}
 function lbNameError(n){if(n.length<2||n.length>20)return 'Names must be 2–20 characters.';if(!/^[\p{L}\p{N} _.'-]+$/u.test(n))return 'Use letters, numbers, spaces, - _ . or \' only.';const low=n.toLowerCase();if(Object.entries(lbPlayers).some(([id,p])=>id!==(lbMe&&lbMe.pid)&&p&&String(p.name||'').toLowerCase()===low))return 'Someone already has that name.';return '';}
 
-// Count answers locally and send them in batches.
-function lbCount(){if(!lbMe)return;lbPending++;if(!lbFlushTimer)lbFlushTimer=setTimeout(()=>lbFlush(),8000);}
-async function lbFlush(keepalive){clearTimeout(lbFlushTimer);lbFlushTimer=null;if(!lbMe||!lbPending)return;
+// Points: one per correct answer, counted locally and sent in batches.
+function lbMyPoints(){if(!lbMe)return 0;const me=lbPlayers[lbMe.pid],server=(me&&me.total)||0;
+  // While a batch is being sent, don't let the shown total dip or double-count before the server confirms it.
+  if(lbInFlight&&server<lbInFlightBase+lbInFlight)return lbInFlightBase+lbInFlight+lbPending;return server+lbPending;}
+function lbUpdatePoints(bump){const pill=document.getElementById('pointsPill');const pts=lbMyPoints().toLocaleString();
+  if(pill){pill.style.display=lbMe?'':'none';pill.textContent='⭐ '+pts;if(bump){pill.classList.remove('bump');void pill.offsetWidth;pill.classList.add('bump');}}
+  const sp=document.getElementById('lbMyPts');if(sp)sp.textContent=pts;}
+function lbCount(){if(!lbMe)return;lbPending++;lbUpdatePoints(true);renderLb();if(!lbFlushTimer)lbFlushTimer=setTimeout(()=>lbFlush(),8000);}
+async function lbFlush(keepalive){clearTimeout(lbFlushTimer);lbFlushTimer=null;if(!lbMe||!lbPending||lbInFlight)return;
   // Leaving the page with an expired sign-in: keep the count for next time instead of losing it.
   if(keepalive&&!authFresh(playerAuth)){try{window.storage.set(LB_PENDING_KEY,String(lbPending));}catch(e){}lbPending=0;return;}
-  const n=lbPending;lbPending=0;const k=lbKeys(),inc={'.sv':{increment:n}};
-  const body={name:lbMe.name,total:inc};['d','w','m'].forEach(x=>{body[x+'/'+k[x]]=inc;const mine=lbPlayers[lbMe.pid];if(mine&&mine[x])Object.keys(mine[x]).forEach(old=>{if(old!==k[x])body[x+'/'+old]=null;});});
-  try{if(!keepalive&&(await fbReq('GET','players/'+lbMe.pid+'/name'))==null){lbPlayers={};await lbLoadPlayers();return;}
-    await fbReq('PATCH','players/'+lbMe.pid,body,{keepalive});}catch(e){lbPending+=n;if(!lbFlushTimer)lbFlushTimer=setTimeout(()=>lbFlush(),30000);}}
+  const n=lbPending,k=lbKeys(),inc={'.sv':{increment:n}},mine=lbPlayers[lbMe.pid];
+  const body={name:lbMe.name,total:inc};['d','w','m'].forEach(x=>{body[x+'/'+k[x]]=inc;if(mine&&mine[x])Object.keys(mine[x]).forEach(old=>{if(old!==k[x])body[x+'/'+old]=null;});});
+  lbInFlightBase=(mine&&mine.total)||0;lbInFlight=n;lbPending=0;
+  try{if(!keepalive&&(await fbReq('GET','players/'+lbMe.pid+'/name'))==null){lbInFlight=0;lbRemoved();return;}
+    await fbReq('PATCH','players/'+lbMe.pid,body,{keepalive});lbInFlight=0;}
+  catch(e){lbInFlight=0;lbPending+=n;if(!lbFlushTimer)lbFlushTimer=setTimeout(()=>lbFlush(),30000);}
+  lbUpdatePoints();}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')lbFlush(true);});
 window.addEventListener('pagehide',()=>lbFlush(true));
-
-async function lbLoadPlayers(){try{lbPlayers=(await fbReq('GET','players'))||{};}catch(e){return false;}
-  // Removed by the admin (or left on another device): stop sending scores under this id.
-  if(lbMe&&!lbPlayers[lbMe.pid]){lbMe=null;lbPending=0;saveLbMe();renderLbProfile('You’re no longer on the leaderboard. Join again to take part.',true);}
-  return true;}
+// Removed by the admin (or left on another device): stop sending points under this id.
+function lbRemoved(){if(!lbMe)return;lbMe=null;lbPending=0;saveLbMe();renderLbProfile('You’re no longer on the leaderboard. Join again to take part.',true);lbUpdatePoints();renderLb();}
 function lbName(pid){const p=lbPlayers[pid];return p&&p.name?p.name:'(left)';}
 
-// Profile box (shared by the Leaderboard and Chat tabs).
+// Profile box at the top of the sidebar.
 function renderLbProfile(msg,isErr){document.querySelectorAll('.lb-profile').forEach(box=>{box.innerHTML='';
   if(!lbMe||lbEditing){const intro=document.createElement('div');intro.innerHTML=lbMe?'Change your name. It updates on the leaderboard and on all your chat messages.':'<b>Join the leaderboard and chat.</b> Use a first name or nickname: everyone with the link can see it.';box.appendChild(intro);
     const row=document.createElement('form');row.className='lb-row';row.onsubmit=e=>{e.preventDefault();lbSaveName(inp.value);};
@@ -3135,61 +3181,75 @@ function renderLbProfile(msg,isErr){document.querySelectorAll('.lb-profile').for
     const ok=document.createElement('button');ok.className='btn-primary';ok.textContent=lbMe?'Save':'Join';row.appendChild(ok);
     if(lbMe){const c=document.createElement('button');c.type='button';c.className='btn-secondary';c.textContent='Cancel';c.onclick=()=>{lbEditing=false;renderLbProfile();};row.appendChild(c);}
     box.appendChild(row);
-  }else{const line=document.createElement('div');line.append('You’re playing as ');const b=document.createElement('b');b.textContent=lbMe.name;line.appendChild(b);line.append(' ');
+  }else{const line=document.createElement('div');line.append('You’re ');const b=document.createElement('b');b.textContent=lbMe.name;line.appendChild(b);
+    line.append(' · ');const pts=document.createElement('span');pts.className='lb-pts';pts.append('⭐ ');const n=document.createElement('span');n.id='lbMyPts';n.textContent=lbMyPoints().toLocaleString();pts.appendChild(n);line.appendChild(pts);line.append(' ');
     const ed=document.createElement('button');ed.className='lb-link';ed.textContent='Change name';ed.onclick=()=>{lbEditing=true;renderLbProfile();};line.appendChild(ed);
     const lv=document.createElement('button');lv.className='lb-link muted';lv.textContent='Leave';lv.onclick=lbLeave;line.appendChild(lv);box.appendChild(line);}
   const m=document.createElement('div');m.className='lb-msg'+(isErr?' err':'');m.textContent=msg||'';box.appendChild(m);});
   const ci=document.getElementById('chatInput'),cs=document.getElementById('chatSend');if(ci){ci.disabled=cs.disabled=!lbMe;ci.placeholder=lbMe?'Message everyone…':'Join above to chat';}}
-async function lbSaveName(raw){const name=lbCleanName(raw);await lbLoadPlayers();const err=lbNameError(name);if(err){renderLbProfile(err,true);return;}
+async function lbSaveName(raw){const name=lbCleanName(raw);const err=lbNameError(name);if(err){renderLbProfile(err,true);return;}
   let pid;
   try{await playerToken();pid=playerAuth.uid;await fbReq('PATCH','players/'+pid,lbMe?{name}:{name,total:0});}catch(e){renderLbProfile('Couldn’t reach the server. Check your internet and try again.',true);return;}
-  lbMe={pid,name};lbEditing=false;saveLbMe();renderLbProfile();lbRefresh();if(mainTab==='chat')chatRefresh();}
-async function lbLeave(){if(!lbMe||!confirm('Leave the leaderboard and chat? Your name and score will be removed. Your chat messages will show as “(left)”.'))return;
-  try{await fbReq('DELETE','players/'+lbMe.pid);}catch(e){renderLbProfile('Couldn’t reach the server. Try again.',true);return;}
-  lbMe=null;lbPending=0;saveLbMe();renderLbProfile();lbRefresh();}
+  lbPlayers[pid]={...(lbPlayers[pid]||{total:0}),name};
+  lbMe={pid,name};lbEditing=false;saveLbMe();renderLbProfile();lbUpdatePoints();renderLb();renderChat();}
+async function lbLeave(){if(!lbMe||!confirm('Leave the leaderboard and chat? Your name and points will be removed. Your chat messages will show as “(left)”.'))return;
+  const pid=lbMe.pid;try{await fbReq('DELETE','players/'+pid);}catch(e){renderLbProfile('Couldn’t reach the server. Try again.',true);return;}
+  lbMe=null;lbPending=0;saveLbMe();renderLbProfile();lbUpdatePoints();renderLb();}
 
 // Leaderboard
+const LB_PERIOD_NAME={d:'today',w:'this week',m:'this month',all:'all time'};
+function lbScore(p,period,k){return period==='all'?(p.total||0):((p[period]||{})[k[period]]||0);}
 function setLbPeriod(p){lbPeriod=p;document.querySelectorAll('.lb-periods .mode-btn').forEach(b=>b.classList.toggle('active',b.dataset.period===p));renderLb();}
-async function lbRefresh(){await lbFlush();const ok=await lbLoadPlayers();if(!ok&&!Object.keys(lbPlayers).length){document.getElementById('lbList').innerHTML='<div class="lb-empty">Couldn’t load the leaderboard. Check your internet connection.</div>';return;}renderLb();}
-function renderLb(){const list=document.getElementById('lbList');if(!list)return;const k=lbKeys();
-  const rows=Object.entries(lbPlayers).filter(([,p])=>p&&p.name).map(([pid,p])=>({pid,name:p.name,n:lbPeriod==='all'?(p.total||0):((p[lbPeriod]||{})[k[lbPeriod]]||0)}));
-  rows.sort((a,b)=>b.n-a.n||a.name.localeCompare(b.name));
-  const shown=rows.filter(r=>r.n>0||(lbMe&&r.pid===lbMe.pid));list.innerHTML='';
-  if(!shown.length){list.innerHTML='<div class="lb-empty">No questions answered '+({d:'today',w:'this week',m:'this month',all:'yet'})[lbPeriod]+'. Be the first!</div>';return;}
-  let rank=0,prev=null;shown.forEach((r,i)=>{if(r.n!==prev){rank=i+1;prev=r.n;}
+function renderLb(){const list=document.getElementById('lbList');if(!list||!lbPlayersLoaded)return;const k=lbKeys();
+  const rows=Object.entries(lbPlayers).filter(([,p])=>p&&p.name).map(([pid,p])=>({pid,name:p.name,n:lbScore(p,lbPeriod,k)}));
+  // Add points not yet confirmed by the server to your own row, so it moves the moment you answer.
+  if(lbMe){const me=rows.find(r=>r.pid===lbMe.pid);if(me)me.n+=lbMyPoints()-((lbPlayers[lbMe.pid]||{}).total||0);}
+  rows.sort((a,b)=>b.n-a.n||a.name.localeCompare(b.name));list.innerHTML='';
+  if(!rows.length){list.innerHTML='<div class="lb-empty">Nobody has joined yet. Be the first!</div>';return;}
+  let rank=0,prev=null;rows.forEach((r,i)=>{if(r.n!==prev){rank=i+1;prev=r.n;}
     const it=document.createElement('div');it.className='lb-item'+(lbMe&&r.pid===lbMe.pid?' me':'')+(rank<=3&&r.n>0?' top':'');
-    const rk=document.createElement('span');rk.className='lb-rank';rk.textContent=r.n>0?rank:'–';
+    const rk=document.createElement('span');rk.className='lb-rank';rk.textContent=rank;
     const nm=document.createElement('span');nm.className='lb-name';nm.textContent=r.name;
     const ct=document.createElement('span');ct.className='lb-count';ct.textContent=r.n.toLocaleString();
     it.append(rk,nm,ct);
-    if(isAdmin){const d=document.createElement('button');d.className='lb-del';d.title='Remove player';d.textContent='×';d.onclick=async()=>{if(!confirm('Remove '+r.name+' from the leaderboard?'))return;try{await fbReq('DELETE','players/'+r.pid,null,{admin:true});}catch(e){}lbRefresh();};it.appendChild(d);}
+    if(isAdmin){
+      const ed=document.createElement('button');ed.className='lb-act';ed.title='Edit score';ed.textContent='✎';ed.onclick=()=>lbAdminEdit(r.pid,r.name,r.n);
+      const d=document.createElement('button');d.className='lb-act del';d.title='Remove player';d.textContent='×';d.onclick=async()=>{if(!confirm('Remove '+r.name+' from the leaderboard?'))return;try{await fbReq('DELETE','players/'+r.pid,null,{admin:true});}catch(e){alert('Couldn’t remove: '+e.message);}};
+      it.append(ed,d);}
     list.appendChild(it);});}
+async function lbAdminEdit(pid,name,cur){const per=lbPeriod,label=LB_PERIOD_NAME[per];
+  const v=prompt('Set '+name+'’s score for '+label+' to:'+(per==='all'?'':'\n(This only changes '+label+'. Pick “All time” to change their overall total.)'),cur);
+  if(v===null)return;const n=Math.floor(Number(v));if(!Number.isFinite(n)||n<0){alert('Enter a whole number, 0 or more.');return;}
+  const k=lbKeys();try{await fbReq('PATCH','players/'+pid,per==='all'?{total:n}:{[per+'/'+k[per]]:n},{admin:true});}catch(e){alert('Couldn’t save: '+e.message);}}
+function lbStreamFail(){if(!lbPlayersLoaded)document.getElementById('lbList').innerHTML='<div class="lb-empty">Couldn’t load the leaderboard. Check your internet connection.</div>';}
 
 // Chat
-async function chatRefresh(){const [ok]=await Promise.all([fbReq('GET','chat',null,{query:'?orderBy=%22$key%22&limitToLast=100'}).then(d=>{chatMsgs=Object.entries(d||{}).map(([id,m])=>({id,...m})).sort((a,b)=>a.id<b.id?-1:1);return true;}).catch(()=>false),lbLoadPlayers()]);
-  if(!ok&&!chatMsgs.length){document.getElementById('chatList').innerHTML='<div class="lb-empty">Couldn’t load the chat. Check your internet connection.</div>';return;}renderChat();}
 function chatTime(t){if(!t)return '';const d=new Date(t),now=new Date();const hm=d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});return d.toDateString()===now.toDateString()?hm:d.toLocaleDateString([],{day:'numeric',month:'short'})+' '+hm;}
-function renderChat(){const list=document.getElementById('chatList');if(!list)return;const atBottom=list.scrollHeight-list.scrollTop-list.clientHeight<40;list.innerHTML='';
+let chatLoaded=false;
+function renderChat(){const list=document.getElementById('chatList');if(!list||!chatLoaded)return;const atBottom=list.scrollHeight-list.scrollTop-list.clientHeight<40;list.innerHTML='';
   if(!chatMsgs.length){list.innerHTML='<div class="lb-empty">No messages yet. Say salve!</div>';return;}
   chatMsgs.forEach(m=>{if(!m||typeof m.text!=='string')return;const el=document.createElement('div');el.className='chat-m'+(lbMe&&m.pid===lbMe.pid?' me':'');
     const who=document.createElement('span');who.className='chat-who';who.textContent=lbName(m.pid);
     const tx=document.createElement('span');tx.textContent=m.text;
     const tm=document.createElement('span');tm.className='chat-time';tm.textContent=chatTime(m.t);
     el.append(who,tx,tm);
-    if(isAdmin){const d=document.createElement('button');d.className='lb-del';d.title='Delete message';d.textContent='×';d.onclick=async()=>{try{await fbReq('DELETE','chat/'+m.id,null,{admin:true});}catch(e){}chatRefresh();};el.appendChild(d);}
+    if(isAdmin){const d=document.createElement('button');d.className='lb-act del';d.title='Delete message';d.textContent='×';d.onclick=async()=>{try{await fbReq('DELETE','chat/'+m.id,null,{admin:true});}catch(e){alert('Couldn’t delete: '+e.message);}};el.appendChild(d);}
     list.appendChild(el);});
   if(atBottom||list.dataset.first!=='1'){list.scrollTop=list.scrollHeight;list.dataset.first='1';}}
 async function sendChat(){const inp=document.getElementById('chatInput'),err=document.getElementById('chatErr');const text=inp.value.replace(/\s+/g,' ').trim();err.textContent='';
   if(!lbMe||!text)return;if(Date.now()-chatLastSend<3000){err.textContent='Slow down a little!';return;}
-  chatLastSend=Date.now();inp.value='';
-  try{await fbReq('POST','chat',{pid:lbMe.pid,text:text.slice(0,300),t:{'.sv':'timestamp'}});}catch(e){inp.value=text;err.textContent='Message not sent. Check your internet and try again.';return;}
-  const list=document.getElementById('chatList');list.dataset.first='';chatRefresh();}
+  chatLastSend=Date.now();inp.value='';document.getElementById('chatList').dataset.first='';
+  try{await fbReq('POST','chat',{pid:lbMe.pid,text:text.slice(0,300),t:{'.sv':'timestamp'}});}catch(e){inp.value=text;err.textContent='Message not sent. Check your internet and try again.';}}
 
-// Poll only while the tab is open and the page is visible.
-function lbTabChanged(t){clearInterval(lbPoll);clearInterval(chatPoll);lbPoll=chatPoll=null;
-  if(t==='leaderboard'){lbRefresh();lbPoll=setInterval(()=>{if(document.visibilityState==='visible')lbRefresh();},30000);}
-  if(t==='chat'){document.getElementById('chatList').dataset.first='';chatRefresh();chatPoll=setInterval(()=>{if(document.visibilityState==='visible')chatRefresh();},4000);}}
-loadLbMe();
+loadLbMe().then(()=>{
+  fbStream('players','',(path,data,isPatch)=>{const wasLoaded=lbPlayersLoaded;lbPlayers=applyAt(lbPlayers,path,data,isPatch);lbPlayersLoaded=true;
+    // Only trust a removal the server tells us about directly (not a first load that may predate joining).
+    if(lbMe&&!lbPlayers[lbMe.pid]&&(path==='/'+lbMe.pid||(path==='/'&&wasLoaded)))lbRemoved();
+    renderLb();renderChat();lbUpdatePoints();},lbStreamFail);
+  fbStream('chat','orderBy=%22$key%22&limitToLast=100',(path,data,isPatch)=>{chatObj=applyAt(chatObj,path,data,isPatch);chatLoaded=true;
+    chatMsgs=Object.entries(chatObj).map(([id,m])=>({id,...m})).sort((a,b)=>a.id<b.id?-1:1);renderChat();},
+    ()=>{if(!chatLoaded)document.getElementById('chatList').innerHTML='<div class="lb-empty">Couldn’t load the chat. Check your internet connection.</div>';});
+});
 try{if(!localStorage.getItem('latin_visited')){showHelp();localStorage.setItem('latin_visited','1');}}catch(e){(async()=>{try{const r=await window.storage.get('latin_visited');if(!r){showHelp();await window.storage.set('latin_visited','1');}}catch(e2){showHelp();}})();}
 </script>
 <script>
