@@ -1640,7 +1640,7 @@ input[type=range]{flex:1;accent-color:var(--accent)}
       <div class="guide-section"><h3>Sentences</h3><p>Sentence mode builds a random sentence for you to translate. Tick the tenses you want: <strong>Present</strong> (<em>miles gladium portat</em>), <strong>Past</strong> (<em>portabat</em> — “was carrying”), <strong>Future</strong> (<em>portabit</em> — “will carry”) and <strong>Commands</strong> (<em>porta gladium!</em>; plural commands add “all of you”). The difficulty levels move from simple sentences to prepositions, adverbs and time phrases, then clauses joined by quod/sed, relative clauses, and finally three- and four-clause compounds. Hover or tap a word in the sentence for its meaning.</p></div>
       <div class="guide-section"><h3>Sentences — eius vs suus</h3><p>Sentences distinguish possessives: <strong>[own]</strong> means reflexive (<em>suus/sua/suum</em> — refers back to the subject). <strong>[someone else's]</strong> means <em>eius</em> (indeclinable — refers to a different person).</p></div>
       <div class="guide-section"><h3>Daily practice</h3><p>Date-stamped boxes at the bottom of the Practice tab contain curated word sets for specific lessons, grouped by month. Tick a month or individual date collections, expand one to choose word types, and press “Practice these” for a focused quiz. Every daily word is also in the main categories.</p></div>
-      <div class="guide-section"><h3>Word packs</h3><p>Under Daily Practice there is a <strong>Word Packs</strong> box for themed word sets (not tied to a date). Tick one or more packs and press Practice. Current packs: Colours.</p></div>
+      <div class="guide-section"><h3>Word packs</h3><p>Under Daily Practice there is a <strong>Word Packs</strong> box for themed word sets (not tied to a date). Tick one or more packs and press Practice. Current packs: Colours, Time &amp; calendar.</p></div>
       <div class="guide-section"><h3>Custom words</h3><p>Click “Custom words” above the category grid to add your own vocabulary. Choose a category, enter the Latin and English, and the word is added to the relevant subcategory. Custom words are saved and can be removed individually.</p></div>
       <div class="guide-section"><h3>Statistics</h3><p>The Stats tab shows total answers, accuracy percentage, day streak, a recent-session chart, and per-category breakdowns with due-word counts. Your stats are saved automatically in this browser, including sessions you leave early. “Reset all data” clears them.</p></div>
       <div class="guide-section"><h3>Export &amp; import progress</h3><p>Your progress lives in this browser only (clearing site data or switching device loses it). At the bottom of the Stats tab, <strong>Export progress</strong> downloads a backup file containing your statistics, spaced-repetition data, custom words, starred words and theme. <strong>Copy as text</strong> does the same to the clipboard. To restore, press <strong>Import progress</strong> and pick the file (or paste text), then choose <strong>Replace</strong> (overwrite everything) or <strong>Merge</strong> (combine, keeping whichever record has more practice).</p></div>
@@ -3019,7 +3019,51 @@ const WORD_PACKS=[{id:'colours',label:'Colours',words:[
   {lat:'flavus',eng:['yellow'],catKey:'adjectives',subKey:'1st/2nd declension'},
   {lat:'caeruleus',eng:['blue'],catKey:'adjectives',subKey:'1st/2nd declension'},
   {lat:'purpureus',eng:['purple'],catKey:'adjectives',subKey:'1st/2nd declension'},
-  {lat:'viridis',eng:['green'],catKey:'adjectives',subKey:'3rd declension'}]}];
+  {lat:'viridis',eng:['green'],catKey:'adjectives',subKey:'3rd declension'}]},
+{id:'time',label:"Time & calendar",words:[
+  {lat:"ver",gen:"veris",gender:"n",eng:["spring"],pos:"noun",catKey:"time",subKey:"seasons"},
+  {lat:"aestas",gen:"aestatis",gender:"f",eng:["summer"],pos:"noun",catKey:"time",subKey:"seasons"},
+  {lat:"autumnus",gen:null,gender:"m",eng:["autumn"],pos:"noun",catKey:"time",subKey:"seasons"},
+  {lat:"hiems",gen:"hiemis",gender:"f",eng:["winter"],pos:"noun",catKey:"time",subKey:"seasons"},
+  {lat:"Ianuarius",eng:["January"],pos:"month",catKey:"time",subKey:"months"},
+  {lat:"Februarius",eng:["February"],pos:"month",catKey:"time",subKey:"months"},
+  {lat:"Martius",eng:["March"],pos:"month",catKey:"time",subKey:"months"},
+  {lat:"Aprilis",eng:["April"],pos:"month",catKey:"time",subKey:"months"},
+  {lat:"Maius",eng:["May"],pos:"month",catKey:"time",subKey:"months"},
+  {lat:"Iunius",eng:["June"],pos:"month",catKey:"time",subKey:"months"},
+  {lat:"Iulius",eng:["July"],pos:"month",catKey:"time",subKey:"months"},
+  {lat:"Augustus",eng:["August"],pos:"month",catKey:"time",subKey:"months"},
+  {lat:"September",eng:["September"],pos:"month",catKey:"time",subKey:"months"},
+  {lat:"October",eng:["October"],pos:"month",catKey:"time",subKey:"months"},
+  {lat:"November",eng:["November"],pos:"month",catKey:"time",subKey:"months"},
+  {lat:"December",eng:["December"],pos:"month",catKey:"time",subKey:"months"},
+  {lat:"dies",gen:"diei",gender:"m",eng:["day"],pos:"noun",catKey:"time",subKey:"calendar"},
+  {lat:"mensis",gen:"mensis",gender:"m",eng:["month"],pos:"noun",catKey:"time",subKey:"calendar"},
+  {lat:"annus",gen:null,gender:"m",eng:["year"],pos:"noun",catKey:"time",subKey:"calendar"},
+  {lat:"hora",gen:null,gender:"f",eng:["hour"],pos:"noun",catKey:"time",subKey:"calendar"},
+  {lat:"Kalendae",gen:"Kalendarum",gender:"f",eng:["Kalends","the Kalends","first of the month"],pos:"noun",catKey:"time",subKey:"calendar"},
+  {lat:"Nonae",gen:"Nonarum",gender:"f",eng:["Nones","the Nones"],pos:"noun",catKey:"time",subKey:"calendar"},
+  {lat:"Idus",gen:"Iduum",gender:"f",eng:["Ides","the Ides"],pos:"noun",catKey:"time",subKey:"calendar"},
+  {lat:"saeculum",gen:null,gender:"n",eng:["century","age"],pos:"noun",catKey:"time",subKey:"calendar"},
+  {lat:"mane",eng:["in the morning","morning"],pos:"adverb",catKey:"time",subKey:"times of day"},
+  {lat:"meridies",gen:"meridiei",gender:"m",eng:["midday","noon"],pos:"noun",catKey:"time",subKey:"times of day"},
+  {lat:"vesper",gen:"vesperi",gender:"m",eng:["evening"],pos:"noun",catKey:"time",subKey:"times of day"},
+  {lat:"nox",gen:"noctis",gender:"f",eng:["night"],pos:"noun",catKey:"time",subKey:"times of day"},
+  {lat:"prima luce",eng:["at dawn","at first light"],pos:"phrase",catKey:"time",subKey:"times of day"},
+  {lat:"media nocte",eng:["at midnight","in the middle of the night"],pos:"phrase",catKey:"time",subKey:"times of day"},
+  {lat:"noctu",eng:["by night","at night"],pos:"adverb",catKey:"time",subKey:"times of day"},
+  {lat:"interdiu",eng:["by day","during the day"],pos:"adverb",catKey:"time",subKey:"times of day"},
+  {lat:"heri",eng:["yesterday"],pos:"adverb",catKey:"time",subKey:"time words"},
+  {lat:"hodie",eng:["today"],pos:"adverb",catKey:"time",subKey:"time words"},
+  {lat:"cras",eng:["tomorrow"],pos:"adverb",catKey:"time",subKey:"time words"},
+  {lat:"pridie",eng:["on the day before","the day before"],pos:"adverb",catKey:"time",subKey:"time words"},
+  {lat:"postridie",eng:["on the next day","the next day"],pos:"adverb",catKey:"time",subKey:"time words"},
+  {lat:"tum",eng:["then"],pos:"adverb",catKey:"time",subKey:"time words"},
+  {lat:"deinde",eng:["then","next"],pos:"adverb",catKey:"time",subKey:"time words"},
+  {lat:"olim",eng:["once upon a time","once"],pos:"adverb",catKey:"time",subKey:"time words"},
+  {lat:"interdum",eng:["sometimes"],pos:"adverb",catKey:"time",subKey:"time words"},
+  {lat:"nondum",eng:["not yet"],pos:"adverb",catKey:"time",subKey:"time words"},
+  {lat:"adhuc",eng:["still","until now"],pos:"adverb",catKey:"time",subKey:"time words"}]}];
 let packSel={};
 function buildPackUI(){
   const box=document.getElementById('packList');if(!box)return;box.innerHTML='';packSel={};
