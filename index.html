@@ -385,6 +385,9 @@ input[type=range]{flex:1;accent-color:var(--accent)}
 .lb-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)}
 .lb-item.me .lb-name{font-weight:600}
 .lb-count{font-variant-numeric:tabular-nums;font-family:var(--sans);font-size:14px;font-weight:600;color:var(--accent)}
+.lb-gap{text-align:center;color:var(--text3);font-size:12px;line-height:1;padding:3px 0;border-top:1px solid var(--border)}
+.lb-more{display:block;width:100%;background:none;border:none;border-top:1px solid var(--border);padding:8px;font-family:var(--sans);font-size:12px;color:var(--accent);cursor:pointer}
+.lb-more:hover{background:var(--surface2)}
 .lb-empty{padding:18px 14px;text-align:center;font-size:12px;color:var(--text3)}
 .lb-act{background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:0 3px;line-height:1}
 .lb-act:hover{color:var(--accent)}
@@ -3142,7 +3145,7 @@ loadDescription();
 // check every write. Chat stores the player id, not the name, so renaming updates old messages.
 const FB_ROOT=FB_DB;
 const LB_KEY='latin_lb_v1',LB_PENDING_KEY='latin_lb_pending';
-let lbMe=null,lbPending=0,lbInFlight=0,lbInFlightBase=0,lbFlushTimer=null,lbPlayers={},lbPlayersLoaded=false,lbPeriod='d',chatObj={},chatMsgs=[],chatLastSend=0,lbEditing=false;
+let lbLimit=10,lbMe=null,lbPending=0,lbInFlight=0,lbInFlightBase=0,lbFlushTimer=null,lbPlayers={},lbPlayersLoaded=false,lbPeriod='d',chatObj={},chatMsgs=[],chatLastSend=0,lbEditing=false;
 const fbUrl=path=>FB_ROOT+'/'+path+'.json';
 async function fbReq(method,path,body,opts){opts=opts||{};const tok=opts.admin?await adminToken():await playerToken();
   if(!opts.admin&&lbMe&&lbMe.pid!==playerAuth.uid){lbMe=null;saveLbMe();renderLbProfile();}
@@ -3240,7 +3243,13 @@ function renderLb(){const list=document.getElementById('lbList');if(!list||!lbPl
   if(lbMe){const me=rows.find(r=>r.pid===lbMe.pid);if(me)me.n+=lbMyPoints()-((lbPlayers[lbMe.pid]||{}).total||0);}
   rows.sort((a,b)=>b.n-a.n||a.name.localeCompare(b.name));list.innerHTML='';
   if(!rows.length){list.innerHTML='<div class="lb-empty">Nobody has joined yet. Be the first!</div>';return;}
-  let rank=0,prev=null;rows.forEach((r,i)=>{if(r.n!==prev){rank=i+1;prev=r.n;}
+  // Ranks over everyone (ties share a rank); show the top 10, or 25 after "Show more",
+  // and add your own row underneath if you're further down.
+  let rank=0,prev=null;rows.forEach((r,i)=>{if(r.n!==prev){rank=i+1;prev=r.n;}r.rank=rank;});
+  const shown=rows.slice(0,lbLimit),meRow=lbMe&&rows.find(r=>r.pid===lbMe.pid);
+  if(meRow&&!shown.includes(meRow)){shown.push(null,meRow);}
+  shown.forEach(r=>{if(!r){const gap=document.createElement('div');gap.className='lb-gap';gap.textContent='⋯';list.appendChild(gap);return;}
+    const rank=r.rank;
     const it=document.createElement('div');it.className='lb-item'+(lbMe&&r.pid===lbMe.pid?' me':'')+(rank<=3&&r.n>0?' top':'');
     const rk=document.createElement('span');rk.className='lb-rank';rk.textContent=rank;
     const nm=document.createElement('span');nm.className='lb-name';nm.textContent=r.name;
@@ -3250,7 +3259,9 @@ function renderLb(){const list=document.getElementById('lbList');if(!list||!lbPl
       const ed=document.createElement('button');ed.className='lb-act';ed.title='Edit score';ed.textContent='✎';ed.onclick=()=>lbAdminEdit(r.pid,r.name,r.n);
       const d=document.createElement('button');d.className='lb-act del';d.title='Remove player';d.textContent='×';d.onclick=async()=>{if(!confirm('Remove '+r.name+' from the leaderboard?'))return;try{await fbReq('DELETE','players/'+r.pid,null,{admin:true});}catch(e){alert('Couldn’t remove: '+e.message);}};
       it.append(ed,d);}
-    list.appendChild(it);});}
+    list.appendChild(it);});
+  if(rows.length>10){const more=document.createElement('button');more.className='lb-more';
+    more.textContent=lbLimit>10?'Show top 10':'Show top 25';more.onclick=()=>{lbLimit=lbLimit>10?10:25;renderLb();};list.appendChild(more);}}
 async function lbAdminEdit(pid,name,cur){const per=lbPeriod,label=LB_PERIOD_NAME[per];
   const v=prompt('Set '+name+'’s score for '+label+' to:'+(per==='all'?'':'\n(This only changes '+label+'. Pick “All time” to change their overall total.)'),cur);
   if(v===null)return;const n=Math.floor(Number(v));if(!Number.isFinite(n)||n<0){alert('Enter a whole number, 0 or more.');return;}
