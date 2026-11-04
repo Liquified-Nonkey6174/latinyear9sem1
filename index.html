@@ -351,6 +351,38 @@ input[type=range]{flex:1;accent-color:var(--accent)}
 .match-btn.m-empty{visibility:hidden;pointer-events:none}
 @keyframes mshake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
 .match-foot{text-align:center;font-size:12px;color:var(--text3);margin-top:14px}
+/* Leaderboard & chat */
+.lb-profile{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 18px;margin-bottom:1.5rem;font-size:13px;color:var(--text2)}
+.lb-profile b{color:var(--text);font-weight:600}
+.lb-profile .lb-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.lb-profile input,.chat-form input{flex:1;min-width:0;font-family:var(--sans);font-size:14px;padding:8px 14px;border-radius:999px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);outline:none}
+.lb-profile input:focus,.chat-form input:focus{border-color:var(--accent-dim);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 12%,transparent)}
+.lb-link{background:none;border:none;font-family:var(--sans);font-size:12px;color:var(--accent);cursor:pointer;padding:2px 4px;text-decoration:underline;text-underline-offset:2px}
+.lb-link.muted{color:var(--text3)}
+.lb-msg{font-size:12px;margin-top:8px;min-height:1em}
+.lb-msg.err{color:var(--red)}
+.lb-msg:empty{display:none}
+.lb-periods{display:flex;gap:2px;background:var(--surface2);border:1px solid var(--border);border-radius:999px;padding:3px;width:fit-content;margin:0 auto 1.25rem;flex-wrap:wrap;justify-content:center}
+.lb-list{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.lb-item{display:flex;align-items:center;gap:12px;padding:10px 16px;border-top:1px solid var(--border);font-size:14px}
+.lb-item:first-child{border-top:none}
+.lb-item.me{background:var(--accent-bg)}
+.lb-rank{width:2.2em;font-family:var(--serif);font-size:17px;color:var(--text3);text-align:right;flex-shrink:0}
+.lb-item.top .lb-rank{color:var(--gold)}
+.lb-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)}
+.lb-item.me .lb-name{font-weight:600}
+.lb-count{font-family:var(--serif);font-size:18px;color:var(--accent)}
+.lb-empty{padding:22px 16px;text-align:center;font-size:13px;color:var(--text3)}
+.lb-del{background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:0 4px}
+.lb-del:hover{color:var(--red)}
+.chat-list{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);height:min(55vh,460px);overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:10px}
+.chat-m{font-size:14px;line-height:1.45;color:var(--text);overflow-wrap:anywhere}
+.chat-m .chat-who{font-weight:600;color:var(--text2);margin-right:6px}
+.chat-m.me .chat-who{color:var(--accent)}
+.chat-m .chat-time{font-size:11px;color:var(--text3);margin-left:6px}
+.chat-form{display:flex;gap:8px;margin-top:10px}
+.lb-note{font-size:12px;color:var(--text3);margin-top:10px;text-align:center}
+@media(max-width:560px){.nav-tab{padding:7px 10px;font-size:12px}.nav-tabs{flex-wrap:wrap;justify-content:center}}
 </style>
 </head>
 <body>
@@ -384,6 +416,8 @@ input[type=range]{flex:1;accent-color:var(--accent)}
     <button class="nav-tab active" onclick="showMainTab('practice')">Practice</button>
     <button class="nav-tab" onclick="showMainTab('stats')">Stats</button>
     <button class="nav-tab" onclick="showMainTab('info')">Information</button>
+    <button class="nav-tab" onclick="showMainTab('leaderboard')">Leaderboard</button>
+    <button class="nav-tab" onclick="showMainTab('chat')">Chat</button>
   </div>
   <div id="practicePanel">
     <div id="resumeBanner" style="display:none"><div class="rb-head">Unfinished quizzes</div><div id="resumeBannerList"></div></div>
@@ -1547,6 +1581,30 @@ input[type=range]{flex:1;accent-color:var(--accent)}
   </div><!-- /infoPronPanel -->
 </div>
 
+<div id="lbView" style="display:none">
+  <div class="stats-header"><h2>Leaderboard</h2><p>Questions answered by everyone using Latin Trainer</p></div>
+  <div class="lb-profile"></div>
+  <div class="lb-periods">
+    <button class="mode-btn active" data-period="d" onclick="setLbPeriod('d')">Today</button>
+    <button class="mode-btn" data-period="w" onclick="setLbPeriod('w')">This week</button>
+    <button class="mode-btn" data-period="m" onclick="setLbPeriod('m')">This month</button>
+    <button class="mode-btn" data-period="all" onclick="setLbPeriod('all')">All time</button>
+  </div>
+  <div class="lb-list" id="lbList"><div class="lb-empty">Loading…</div></div>
+  <p class="lb-note">Updates every 30 seconds. Every answered question counts, right or wrong.</p>
+</div>
+
+<div id="chatView" style="display:none">
+  <div class="stats-header"><h2>Chat</h2><p>Everyone with the link can read this, so be kind.</p></div>
+  <div class="lb-profile"></div>
+  <div class="chat-list" id="chatList"><div class="lb-empty">Loading…</div></div>
+  <form class="chat-form" onsubmit="event.preventDefault();sendChat()">
+    <input id="chatInput" maxlength="300" autocomplete="off" placeholder="Join above to chat" disabled>
+    <button class="btn-primary" id="chatSend" disabled>Send</button>
+  </form>
+  <p class="lb-msg err" id="chatErr"></p>
+</div>
+
 </div><!-- .app -->
 
 <!-- HELP MENU -->
@@ -1582,7 +1640,7 @@ input[type=range]{flex:1;accent-color:var(--accent)}
       <div class="guide-section"><h3>Sentences</h3><p>Sentence mode builds a random sentence for you to translate. Tick the tenses you want: <strong>Present</strong> (<em>miles gladium portat</em>), <strong>Past</strong> (<em>portabat</em> — “was carrying”), <strong>Future</strong> (<em>portabit</em> — “will carry”) and <strong>Commands</strong> (<em>porta gladium!</em>; plural commands add “all of you”). The difficulty levels move from simple sentences to prepositions, adverbs and time phrases, then clauses joined by quod/sed, relative clauses, and finally three- and four-clause compounds. Hover or tap a word in the sentence for its meaning.</p></div>
       <div class="guide-section"><h3>Sentences — eius vs suus</h3><p>Sentences distinguish possessives: <strong>[own]</strong> means reflexive (<em>suus/sua/suum</em> — refers back to the subject). <strong>[someone else's]</strong> means <em>eius</em> (indeclinable — refers to a different person).</p></div>
       <div class="guide-section"><h3>Daily practice</h3><p>Date-stamped boxes at the bottom of the Practice tab contain curated word sets for specific lessons, grouped by month. Tick a month or individual date collections, expand one to choose word types, and press “Practice these” for a focused quiz. Every daily word is also in the main categories.</p></div>
-      <div class="guide-section"><h3>Word packs</h3><p>Under Daily Practice there is a <strong>Word Packs</strong> box for themed word sets (not tied to a date). Tick one or more packs and press Practice. Current packs: Colours.</p></div>
+      <div class="guide-section"><h3>Word packs</h3><p>Under Daily Practice there is a <strong>Word Packs</strong> box for themed word sets (not tied to a date). Tick one or more packs and press Practice, or tick categories too and press Start to practise them all together. Current packs: Colours, Time &amp; calendar.</p></div>
       <div class="guide-section"><h3>Custom words</h3><p>Click “Custom words” above the category grid to add your own vocabulary. Choose a category, enter the Latin and English, and the word is added to the relevant subcategory. Custom words are saved and can be removed individually.</p></div>
       <div class="guide-section"><h3>Statistics</h3><p>The Stats tab shows total answers, accuracy percentage, day streak, a recent-session chart, and per-category breakdowns with due-word counts. Your stats are saved automatically in this browser, including sessions you leave early. “Reset all data” clears them.</p></div>
       <div class="guide-section"><h3>Export &amp; import progress</h3><p>Your progress lives in this browser only (clearing site data or switching device loses it). At the bottom of the Stats tab, <strong>Export progress</strong> downloads a backup file containing your statistics, spaced-repetition data, custom words, starred words and theme. <strong>Copy as text</strong> does the same to the clipboard. To restore, press <strong>Import progress</strong> and pick the file (or paste text), then choose <strong>Replace</strong> (overwrite everything) or <strong>Merge</strong> (combine, keeping whichever record has more practice).</p></div>
@@ -1625,15 +1683,15 @@ input[type=range]{flex:1;accent-color:var(--accent)}
     <div class="about-title" style="text-align:center;margin-bottom:1.25rem">Admin login</div>
     <div style="display:flex;flex-direction:column;gap:10px">
       <div>
-        <div style="font-size:12px;color:var(--text3);margin-bottom:4px">Username</div>
-        <input id="adminUser" type="text" autocomplete="off" onkeydown="if(event.key==='Enter')checkAdminAuth()" style="width:100%;padding:8px 12px;border-radius:var(--rs);border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-family:var(--sans);font-size:13px;outline:none"/>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:4px">Email</div>
+        <input id="adminUser" type="email" autocomplete="username" onkeydown="if(event.key==='Enter')checkAdminAuth()" style="width:100%;padding:8px 12px;border-radius:var(--rs);border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-family:var(--sans);font-size:13px;outline:none"/>
       </div>
       <div>
         <div style="font-size:12px;color:var(--text3);margin-bottom:4px">Password</div>
-        <input id="adminPass" type="password" onkeydown="if(event.key==='Enter')checkAdminAuth()" style="width:100%;padding:8px 12px;border-radius:var(--rs);border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-family:var(--sans);font-size:13px;outline:none"/>
+        <input id="adminPass" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')checkAdminAuth()" style="width:100%;padding:8px 12px;border-radius:var(--rs);border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-family:var(--sans);font-size:13px;outline:none"/>
       </div>
       <div id="adminErr" style="font-size:12px;color:var(--red);min-height:16px"></div>
-      <button class="btn-primary" onclick="checkAdminAuth()">Login</button>
+      <button class="btn-primary" id="adminLoginBtn" onclick="checkAdminAuth()">Login</button>
     </div>
   </div>
 </div>
@@ -2335,7 +2393,7 @@ function showGuide(){document.getElementById('guideOverlay').style.display='flex
 function hideGuide(){document.getElementById('guideOverlay').style.display='none';}
 const TOUR_BASIC=[
   {el:null,title:'Welcome to Latin Trainer',body:'This quick tour shows you around. Use arrow keys or Next/Back. Press Escape to exit. You can replay it any time from the help menu (?).'},
-  {el:'.nav-tabs',title:'Navigation tabs',body:'Three tabs: <b>Practice</b> for quizzes, <b>Stats</b> for progress tracking (and backing up your progress), <b>Information</b> for grammar reference tables.',pre:()=>{showMainTab('practice');setQuizType('vocab');}},
+  {el:'.nav-tabs',title:'Navigation tabs',body:'<b>Practice</b> for quizzes, <b>Stats</b> for progress tracking (and backing up your progress), <b>Leaderboard</b> and <b>Chat</b> to see and talk to everyone else, <b>Information</b> for grammar reference tables.',pre:()=>{showMainTab('practice');setQuizType('vocab');}},
   {el:'#directionToggle',title:'Direction toggle',body:'Choose English → Latin (translate into Latin) or Latin → English (identify meanings).'},
   {el:'#quizTypeToggle',title:'Quiz types',body:'Vocabulary tests word meanings. The declension and conjugation modes drill grammatical forms. Sentences generates full translations in present, past, future and command forms.'},
   {el:'#inputModeToggle',title:'Answer mode',body:'Typed: type your answer and press Enter. Multiple choice: click an option or press 1–4. Matching (vocabulary only): click an English word and its Latin partner from two columns of five.'},
@@ -2392,7 +2450,10 @@ function showInfoTab(t){
 }
 function showMainTab(t){
   mainTab=t;
-  document.querySelectorAll('.nav-tab').forEach((b,i)=>b.classList.toggle('active',(i===0&&t==='practice')||(i===1&&t==='stats')||(i===2&&t==='info')));
+  document.querySelectorAll('.nav-tab').forEach(b=>b.classList.toggle('active',b.getAttribute('onclick')==="showMainTab('"+t+"')"));
+  document.getElementById('lbView').style.display=t==='leaderboard'?'block':'none';
+  document.getElementById('chatView').style.display=t==='chat'?'block':'none';
+  lbTabChanged(t);
   document.getElementById('practicePanel').style.display=t==='practice'?'':'none';
   document.getElementById('statsView').style.display=t==='stats'?'block':'none';
   const iv=document.getElementById('infoView');
@@ -2465,7 +2526,9 @@ function setQuizType(t){quizType=t;
   updCount();
 }
 function setInputMode(t){inputMode=t;document.getElementById('inputTyped').className='mode-btn'+(t==='typed'?' active':'');document.getElementById('inputMC').className='mode-btn'+(t==='mc'?' active':'');}
-function getWords(){const ws=[];Object.entries(selected).forEach(([ck,subs])=>Object.entries(subs).forEach(([sk,on])=>{if(on)DATA[ck].sub[sk].words.forEach(w=>ws.push({...w,catKey:ck,subKey:sk}));}));return ws;}
+function getWords(){const ws=[];Object.entries(selected).forEach(([ck,subs])=>Object.entries(subs).forEach(([sk,on])=>{if(on)DATA[ck].sub[sk].words.forEach(w=>ws.push({...w,catKey:ck,subKey:sk}));}));
+  // Ticked word packs join the selected categories (skipping words already included).
+  let pw=[];try{pw=packWords();}catch(e){}const seen=new Set(ws.map(srKey));pw.forEach(w=>{const k=srKey(w);if(!seen.has(k)){seen.add(k);ws.push(w);}});return ws;}
 function updCount(){const ws=getWords();const n=ws.length;const iS=quizType==='sentences';document.getElementById('wordPill').textContent=iS?'All categories selected':n+(n===1?' word':' words')+' selected';document.getElementById('startBtn').disabled=iS?false:n===0;const due=getDue(ws);document.getElementById('srBtn').disabled=iS||due===0;document.getElementById('srBtn').textContent=due>0&&!iS?'Due ('+due+')':'Due (0)';document.getElementById('wordDrawerCount').textContent=n+' selected';if(document.getElementById('wordDrawer').classList.contains('open'))renderWordList();}
 function displayEng(w){if(w.catKey==='pronouns'&&w.lat==='se')return 'himself, herself, itself, themselves (reflexive)';if(w.catKey==='pronouns'&&w.lat==='ipse')return 'himself, herself, itself (emphatic)';if(w.lat==='eos')return 'them (masc)';if(w.lat==='eas')return 'them (fem)';if(w.lat==='te')return 'you (sg)';if(w.lat==='vos')return 'you (pl)';if(w.lat==='vester')return 'your (plural)';if(w.lat==='conscendo')return 'board (a ship)';return w.eng.map(e=>String(e).replace(/[()]/g,'').trim()).join(', ');}
 function normalise(s){let t=String(s).toLowerCase().trim().replace(/\.\.\./g,' ').replace(/[^a-z\s]/g,'').replace(/\s+/g,' ').trim();t=t.replace(/^them\s*(?:masc|fem)?$/i,'them');t=t.replace(/^you\s*(?:sg|pl)?$/i,'you');return t;}
@@ -2578,10 +2641,10 @@ function dispatchSkip(){if(isDrill)skipDrill();else skipQ();}
 function startSentences(){clearTimeout(autoNextTimer);stopTimer();isDrill=false;isSent=true;sentScore=0;sentTotal=0;score=0;answered=false;round=1;showView('quizView');document.getElementById('promptCard').style.display='none';document.getElementById('hintBox').style.display='none';document.getElementById('typedSection').style.display='none';document.getElementById('mcSection').style.display='none';document.getElementById('sentSection').style.display='block';document.getElementById('progFill').style.width='0%';document.getElementById('progLbl').textContent='∞';document.getElementById('scorePill').textContent='0 correct';document.getElementById('roundBadge').innerHTML='<span>Sentences · '+difficulty+'</span>';updPct();renderSentence();}
 function renderSentence(){answered=false;const inp=document.getElementById('sentInput');inp.value='';inp.disabled=false;document.getElementById('sentCheckBtn').disabled=false;document.getElementById('sentNext').style.display='none';const fb=document.getElementById('sentFb');fb.className='sent-fb';fb.textContent='';let sd;try{sd=buildSentence();}catch(e){document.getElementById('sentDir').textContent='Error: '+e.message;document.getElementById('sentWords').textContent='';return;}sentData=sd;const srcRaw=mode==='el'?sd.english:sd.latin;const src=srcRaw.toLowerCase().replace(/[.,!?;:]/g,'').trim();document.getElementById('sentDir').textContent=mode==='el'?'Translate into Latin':'Translate into English';document.getElementById('sentTags').innerHTML='<span class="tag diff">'+difficulty+'</span>';const container=document.getElementById('sentWords');container.innerHTML='';const wmap=sd.wordMap||{};const tipLookup={};if(mode==='el'){Object.entries(wmap).forEach(([lat,eng])=>{const e=String(eng).toLowerCase().replace(/\s*\([^)]*\)/g,'');tipLookup[e]=lat;const p=e.split(' '),s=p[0],r=p.slice(1).join(' ');let c;if(e==='to be')c='is';else if(e==='to be present')c='is present';else if(e==='to be absent')c='is absent';else if(e==='to be able')c='is able';else{if(s==='be')c='is';else if(s==='have')c='has';else if(s.endsWith('y')&&!/[aeiou]y$/.test(s))c=s.slice(0,-1)+'ies';else if(/(?:s|sh|ch|x|z|o)$/.test(s))c=s+'es';else c=s+'s';c=r?c+' '+r:c;}const v3=c;if(v3!==e)tipLookup[v3]=lat;const pastW={eng:[e]};const pastF=ePast(pastW);if(pastF!==e){tipLookup[pastF]=lat;pastF.split(/\s+/).forEach(pw=>{if(pw.length>1&&!tipLookup[pw])tipLookup[pw]=lat;});}e.split(/\s+/).forEach(w=>{if(w.length>1&&!tipLookup[w])tipLookup[w]=lat;});});}else{Object.assign(tipLookup,wmap);}src.split(' ').forEach((tok,i)=>{if(i>0)container.appendChild(document.createTextNode(' '));const m=tok.match(/^([a-zA-Z]*)([^a-zA-Z]*)$/);const word=m?m[1]:'',punct=m?m[2]:'';if(word){const tip=tipLookup[word]||(mode!=='el'?WORD_MAP[word]?.[0]:null)||null;const span=document.createElement('span');span.textContent=word;if(tip){span.className='sw';const t=tip;span.onclick=function(e){e.stopPropagation();container.querySelectorAll('.sent-tip').forEach(x=>x.remove());const el=document.createElement('span');el.className='sent-tip';el.textContent=t;span.insertAdjacentElement('afterend',el);setTimeout(()=>el.remove(),2500);};}container.appendChild(span);}if(punct)container.appendChild(document.createTextNode(punct));});setTimeout(()=>inp.focus(),50);startTimer();}
 function saveSessionSnapshot(){if(sentTotal===0)return;const pct=Math.round(sentScore/sentTotal*100);const today=new Date().toDateString();const last=statsData.sessions[statsData.sessions.length-1];if(last&&new Date(last.date).toDateString()===today&&last.isSent){last.score=sentScore;last.total=sentTotal;last.pct=pct;}else{statsData.sessions.push({date:Date.now(),score:sentScore,total:sentTotal,pct,isSent:true});if(statsData.sessions.length>20)statsData.sessions=statsData.sessions.slice(-20);}saveStats();}
-function checkSentence(){if(answered)return;const ua=document.getElementById('sentInput').value.trim();if(!ua)return;answered=true;document.getElementById('sentCheckBtn').disabled=true;document.getElementById('sentInput').disabled=true;const ca=mode==='el'?sentData.latin:sentData.english;const ok=checkWithSynonyms(ua,ca);const fb=document.getElementById('sentFb');if(ok){sentScore++;score++;fb.className='sent-fb ok';fb.textContent='✓ Correct!';}else{fb.className='sent-fb no';fb.textContent='✗ '+ca;}sentTotal++;updScorePill(sentScore);updPct();saveSessionSnapshot();document.getElementById('sentNext').style.display='block';}
-function skipSentence(){if(answered)return;answered=true;document.getElementById('sentCheckBtn').disabled=true;document.getElementById('sentInput').disabled=true;const ca=mode==='el'?sentData.latin:sentData.english;const fb=document.getElementById('sentFb');fb.className='sent-fb no';fb.textContent='→ '+ca;sentTotal++;updPct();saveSessionSnapshot();document.getElementById('sentNext').style.display='block';}
+function checkSentence(){if(answered)return;const ua=document.getElementById('sentInput').value.trim();if(!ua)return;answered=true;document.getElementById('sentCheckBtn').disabled=true;document.getElementById('sentInput').disabled=true;const ca=mode==='el'?sentData.latin:sentData.english;const ok=checkWithSynonyms(ua,ca);const fb=document.getElementById('sentFb');if(ok){sentScore++;score++;fb.className='sent-fb ok';fb.textContent='✓ Correct!';}else{fb.className='sent-fb no';fb.textContent='✗ '+ca;}sentTotal++;lbCount();updScorePill(sentScore);updPct();saveSessionSnapshot();document.getElementById('sentNext').style.display='block';}
+function skipSentence(){if(answered)return;answered=true;document.getElementById('sentCheckBtn').disabled=true;document.getElementById('sentInput').disabled=true;const ca=mode==='el'?sentData.latin:sentData.english;const fb=document.getElementById('sentFb');fb.className='sent-fb no';fb.textContent='→ '+ca;sentTotal++;lbCount();updPct();saveSessionSnapshot();document.getElementById('sentNext').style.display='block';}
 function nextSentence(){renderSentence();}
-function recAns(w,ok){const ck=w.catKey;if(!statsData.catStats[ck])statsData.catStats[ck]={seen:0,correct:0};statsData.catStats[ck].seen++;if(ok)statsData.catStats[ck].correct++;saveStats();}
+function recAns(w,ok){const ck=w.catKey;if(!statsData.catStats[ck])statsData.catStats[ck]={seen:0,correct:0};statsData.catStats[ck].seen++;if(ok)statsData.catStats[ck].correct++;saveStats();lbCount();}
 let sessionFinished=true;
 function finishSession(){sessionFinished=true;const total=isDrill?drillQs.length:isSent?sentTotal:quizWords.length;const pct=total>0?Math.round(score/total*100):0;if(window.resumeDate)statsData.sessions=statsData.sessions.filter(s=>s.date!==window.resumeDate);statsData.sessions.push({date:Date.now(),score,total,pct});window.resumeDate=null;if(statsData.sessions.length>20)statsData.sessions=statsData.sessions.slice(-20);saveStats();}
 const PHRASES=[[100,'Optime! Perfectly done.'],[80,'Bene! Well done.'],[60,'Satis bene. Keep going.'],[0,'Persevera. Try again.']];
@@ -2630,14 +2693,31 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Tab'){e.preventDefault();if(!answered){isDrill?revealDrillHint():revealHint();}return;}
 });
 // ── DESCRIPTION (Firebase) ────────────────────────────────────────────────────
-const FB_DESC='https://latindesc-default-rtdb.asia-southeast1.firebasedatabase.app/description.json';
-const ADMIN_U='cp7122';
-// SHA-256 hash of the admin password (not stored in plaintext).
-const ADMIN_P_HASH='24645cad7f2d5d934097ec7c647e68b97cef99e2fe32cf2df249d14b7a5cfe2e';
-async function sha256Hex(str){
-  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));
-  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
-}
+// Firebase project "latinleaderboard". These values are public by design: the database
+// security rules (database.rules.json) decide who may read and write what.
+const FB_DB='https://latinleaderboard-default-rtdb.asia-southeast1.firebasedatabase.app';
+const FB_API_KEY='AIzaSyCMv90nEO8gNQ2Udsb3Ho3jOr5_DfMsDUY';
+const ADMIN_UID='F8AyOfnDz4RASWZnH6J09EmcAtv2';
+const FB_DESC=FB_DB+'/description.json';
+const AUTH_KEY='latin_auth_v1';
+// Firebase Authentication over REST. Players get an automatic anonymous account (kept in this
+// browser); the admin signs in with email + password, which Firebase checks. No passwords in the code.
+let playerAuth=null,adminAuth=null,playerAuthP=null;
+async function authPost(url,body,form){const r=await fetch(url+'?key='+FB_API_KEY,{method:'POST',headers:{'Content-Type':form?'application/x-www-form-urlencoded':'application/json'},body:form?body:JSON.stringify(body)});
+  const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error((d.error&&d.error.message)||('HTTP '+r.status));return d;}
+function authFrom(d){return{uid:d.localId||d.user_id,idToken:d.idToken||d.id_token,refreshToken:d.refreshToken||d.refresh_token,exp:Date.now()+((+(d.expiresIn||d.expires_in)||3600)-120)*1000};}
+const refreshAuth=a=>authPost('https://securetoken.googleapis.com/v1/token','grant_type=refresh_token&refresh_token='+encodeURIComponent(a.refreshToken),true).then(authFrom);
+function savePlayerAuth(){try{window.storage.set(AUTH_KEY,JSON.stringify({uid:playerAuth.uid,refreshToken:playerAuth.refreshToken}));}catch(e){}}
+const authFresh=a=>!!(a&&a.idToken&&a.exp>Date.now());
+async function playerToken(){if(authFresh(playerAuth))return playerAuth.idToken;
+  if(!playerAuthP)playerAuthP=(async()=>{
+    if(!playerAuth){try{const r=await window.storage.get(AUTH_KEY);if(r&&r.value)playerAuth=JSON.parse(r.value);}catch(e){}}
+    if(playerAuth&&playerAuth.refreshToken){try{playerAuth=await refreshAuth(playerAuth);}catch(e){if(/TOKEN|USER|INVALID/.test(e.message))playerAuth=null;else throw e;}}
+    if(!authFresh(playerAuth))playerAuth=authFrom(await authPost('https://identitytoolkit.googleapis.com/v1/accounts:signUp',{returnSecureToken:true}));
+    savePlayerAuth();
+  })().finally(()=>{playerAuthP=null;});
+  await playerAuthP;return playerAuth.idToken;}
+async function adminToken(){if(!adminAuth)throw new Error('Not logged in as admin');if(!authFresh(adminAuth))adminAuth=await refreshAuth(adminAuth);return adminAuth.idToken;}
 let isAdmin=false;
 
 async function loadDescription(){
@@ -2656,15 +2736,23 @@ function handleDescEdit(){
   document.getElementById('adminUser').value='';
   document.getElementById('adminPass').value='';
   document.getElementById('adminErr').textContent='';
+  document.getElementById('adminLoginBtn').disabled=false;
   setTimeout(()=>document.getElementById('adminUser').focus(),50);
 }
 function hideAdminModal(){document.getElementById('adminModal').style.display='none';}
 async function checkAdminAuth(){
   const u=document.getElementById('adminUser').value.trim();
   const p=document.getElementById('adminPass').value;
-  const pHash=await sha256Hex(p);
-  if(u===ADMIN_U&&pHash===ADMIN_P_HASH){isAdmin=true;hideAdminModal();startDescEdit();}
-  else{document.getElementById('adminErr').textContent='Incorrect username or password.';}
+  const err=document.getElementById('adminErr'),btn=document.getElementById('adminLoginBtn');
+  if(!u||!p){err.textContent='Enter your email and password.';return;}
+  err.textContent='';btn.disabled=true;
+  try{
+    const a=authFrom(await authPost('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword',{email:u,password:p,returnSecureToken:true}));
+    if(a.uid!==ADMIN_UID){err.textContent='That account isn’t the admin.';return;}
+    adminAuth=a;isAdmin=true;hideAdminModal();startDescEdit();
+    if(mainTab==='leaderboard')renderLb();if(mainTab==='chat')renderChat();
+  }catch(e){err.textContent=/TOO_MANY/.test(e.message)?'Too many attempts. Wait a few minutes and try again.':/INVALID|EMAIL|PASSWORD|USER_DISABLED/.test(e.message)?'Incorrect email or password.':'Couldn’t reach the server. Check your internet.';}
+  finally{btn.disabled=false;}
 }
 function startDescEdit(){
   document.getElementById('descText').style.display='none';
@@ -2676,7 +2764,7 @@ function startDescEdit(){
 async function saveDesc(){
   const text=document.getElementById('descEditArea').value.trim();
   try{
-    const r=await fetch(FB_DESC,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(text)});
+    const r=await fetch(FB_DESC+'?auth='+encodeURIComponent(await adminToken()),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(text)});
     if(!r.ok)throw new Error('HTTP '+r.status);
     document.getElementById('descText').textContent=text;
   }catch(e){alert('Could not save: '+e.message);}
@@ -2933,7 +3021,51 @@ const WORD_PACKS=[{id:'colours',label:'Colours',words:[
   {lat:'flavus',eng:['yellow'],catKey:'adjectives',subKey:'1st/2nd declension'},
   {lat:'caeruleus',eng:['blue'],catKey:'adjectives',subKey:'1st/2nd declension'},
   {lat:'purpureus',eng:['purple'],catKey:'adjectives',subKey:'1st/2nd declension'},
-  {lat:'viridis',eng:['green'],catKey:'adjectives',subKey:'3rd declension'}]}];
+  {lat:'viridis',eng:['green'],catKey:'adjectives',subKey:'3rd declension'}]},
+{id:'time',label:"Time & calendar",words:[
+  {lat:"ver",gen:"veris",gender:"n",eng:["spring"],pos:"noun",catKey:"time",subKey:"seasons"},
+  {lat:"aestas",gen:"aestatis",gender:"f",eng:["summer"],pos:"noun",catKey:"time",subKey:"seasons"},
+  {lat:"autumnus",gen:null,gender:"m",eng:["autumn"],pos:"noun",catKey:"time",subKey:"seasons"},
+  {lat:"hiems",gen:"hiemis",gender:"f",eng:["winter"],pos:"noun",catKey:"time",subKey:"seasons"},
+  {lat:"Ianuarius",eng:["January"],pos:"month",catKey:"time",subKey:"months"},
+  {lat:"Februarius",eng:["February"],pos:"month",catKey:"time",subKey:"months"},
+  {lat:"Martius",eng:["March"],pos:"month",catKey:"time",subKey:"months"},
+  {lat:"Aprilis",eng:["April"],pos:"month",catKey:"time",subKey:"months"},
+  {lat:"Maius",eng:["May"],pos:"month",catKey:"time",subKey:"months"},
+  {lat:"Iunius",eng:["June"],pos:"month",catKey:"time",subKey:"months"},
+  {lat:"Iulius",eng:["July"],pos:"month",catKey:"time",subKey:"months"},
+  {lat:"Augustus",eng:["August"],pos:"month",catKey:"time",subKey:"months"},
+  {lat:"September",eng:["September"],pos:"month",catKey:"time",subKey:"months"},
+  {lat:"October",eng:["October"],pos:"month",catKey:"time",subKey:"months"},
+  {lat:"November",eng:["November"],pos:"month",catKey:"time",subKey:"months"},
+  {lat:"December",eng:["December"],pos:"month",catKey:"time",subKey:"months"},
+  {lat:"dies",gen:"diei",gender:"m",eng:["day"],pos:"noun",catKey:"time",subKey:"calendar"},
+  {lat:"mensis",gen:"mensis",gender:"m",eng:["month"],pos:"noun",catKey:"time",subKey:"calendar"},
+  {lat:"annus",gen:null,gender:"m",eng:["year"],pos:"noun",catKey:"time",subKey:"calendar"},
+  {lat:"hora",gen:null,gender:"f",eng:["hour"],pos:"noun",catKey:"time",subKey:"calendar"},
+  {lat:"Kalendae",gen:"Kalendarum",gender:"f",eng:["Kalends","the Kalends","first of the month"],pos:"noun",catKey:"time",subKey:"calendar"},
+  {lat:"Nonae",gen:"Nonarum",gender:"f",eng:["Nones","the Nones"],pos:"noun",catKey:"time",subKey:"calendar"},
+  {lat:"Idus",gen:"Iduum",gender:"f",eng:["Ides","the Ides"],pos:"noun",catKey:"time",subKey:"calendar"},
+  {lat:"saeculum",gen:null,gender:"n",eng:["century","age"],pos:"noun",catKey:"time",subKey:"calendar"},
+  {lat:"mane",eng:["in the morning","morning"],pos:"adverb",catKey:"time",subKey:"times of day"},
+  {lat:"meridies",gen:"meridiei",gender:"m",eng:["midday","noon"],pos:"noun",catKey:"time",subKey:"times of day"},
+  {lat:"vesper",gen:"vesperi",gender:"m",eng:["evening"],pos:"noun",catKey:"time",subKey:"times of day"},
+  {lat:"nox",gen:"noctis",gender:"f",eng:["night"],pos:"noun",catKey:"time",subKey:"times of day"},
+  {lat:"prima luce",eng:["at dawn","at first light"],pos:"phrase",catKey:"time",subKey:"times of day"},
+  {lat:"media nocte",eng:["at midnight","in the middle of the night"],pos:"phrase",catKey:"time",subKey:"times of day"},
+  {lat:"noctu",eng:["by night","at night"],pos:"adverb",catKey:"time",subKey:"times of day"},
+  {lat:"interdiu",eng:["by day","during the day"],pos:"adverb",catKey:"time",subKey:"times of day"},
+  {lat:"heri",eng:["yesterday"],pos:"adverb",catKey:"time",subKey:"time words"},
+  {lat:"hodie",eng:["today"],pos:"adverb",catKey:"time",subKey:"time words"},
+  {lat:"cras",eng:["tomorrow"],pos:"adverb",catKey:"time",subKey:"time words"},
+  {lat:"pridie",eng:["on the day before","the day before"],pos:"adverb",catKey:"time",subKey:"time words"},
+  {lat:"postridie",eng:["on the next day","the next day"],pos:"adverb",catKey:"time",subKey:"time words"},
+  {lat:"tum",eng:["then"],pos:"adverb",catKey:"time",subKey:"time words"},
+  {lat:"deinde",eng:["then","next"],pos:"adverb",catKey:"time",subKey:"time words"},
+  {lat:"olim",eng:["once upon a time","once"],pos:"adverb",catKey:"time",subKey:"time words"},
+  {lat:"interdum",eng:["sometimes"],pos:"adverb",catKey:"time",subKey:"time words"},
+  {lat:"nondum",eng:["not yet"],pos:"adverb",catKey:"time",subKey:"time words"},
+  {lat:"adhuc",eng:["still","until now"],pos:"adverb",catKey:"time",subKey:"time words"}]}];
 let packSel={};
 function buildPackUI(){
   const box=document.getElementById('packList');if(!box)return;box.innerHTML='';packSel={};
@@ -2946,7 +3078,7 @@ function buildPackUI(){
     row.append(b,l,c);row.addEventListener('click',()=>{packSel[pk.id]=!packSel[pk.id];updPacks();});box.appendChild(row);});
   updPacks();}
 function packWords(){const ws=[],seen=new Set();WORD_PACKS.forEach(pk=>{if(packSel[pk.id])pk.words.forEach(w=>{if(!seen.has(w.lat)){seen.add(w.lat);ws.push(w);}});});return ws;}
-function updPacks(){const n=packWords().length;const c=document.getElementById('packCount'),b=document.getElementById('packStart');if(!c)return;
+function updPacks(){try{updCount();}catch(e){}const n=packWords().length;const c=document.getElementById('packCount'),b=document.getElementById('packStart');if(!c)return;
   c.textContent=WORD_PACKS.length?n+' words selected':'0 words';b.disabled=n===0;
   WORD_PACKS.forEach(pk=>{const e=document.getElementById('pack_'+pk.id);if(e)e.className='sbox'+(packSel[pk.id]?' checked':'');});}
 function startPacks(){const ws=packWords();if(!ws.length)return;
@@ -2955,6 +3087,109 @@ buildPackUI();
 loadPersisted();
 loadCustomWords().then(()=>buildUI());
 loadDescription();
+// ── LEADERBOARD & CHAT (Firebase Realtime Database, REST) ─────────────────────
+// players/{uid}: {name,total,d:{day:n},w:{week:n},m:{month:n}}; chat/{id}: {pid,text,t}.
+// A player's id is their anonymous Firebase account id, so the rules can check every write.
+// Chat stores the player id, not the name, so renaming updates the leaderboard and old messages.
+const FB_ROOT=FB_DB;
+const LB_KEY='latin_lb_v1',LB_PENDING_KEY='latin_lb_pending';
+let lbMe=null,lbPending=0,lbFlushTimer=null,lbPlayers={},lbPeriod='d',lbPoll=null,chatPoll=null,chatLastSend=0,lbEditing=false,chatMsgs=[];
+const fbUrl=path=>FB_ROOT+'/'+path+'.json';
+async function fbReq(method,path,body,opts){opts=opts||{};const tok=opts.admin?await adminToken():await playerToken();
+  if(!opts.admin&&lbMe&&lbMe.pid!==playerAuth.uid){lbMe=null;saveLbMe();renderLbProfile();}
+  const q=opts.query||'';const r=await fetch(fbUrl(path)+q+(q?'&':'?')+'auth='+encodeURIComponent(tok),{method,headers:body?{'Content-Type':'application/json'}:undefined,body:body?JSON.stringify(body):undefined,keepalive:!!opts.keepalive});if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}
+function saveLbMe(){try{if(lbMe)window.storage.set(LB_KEY,JSON.stringify(lbMe));else window.storage.delete(LB_KEY);}catch(e){}}
+async function loadLbMe(){try{const r=await window.storage.get(LB_KEY),a=await window.storage.get(AUTH_KEY);const auth=a&&a.value?JSON.parse(a.value):null;if(auth&&auth.uid&&!playerAuth)playerAuth=auth;
+    if(r&&r.value){const v=JSON.parse(r.value);if(v&&v.pid&&v.name&&auth&&auth.uid===v.pid)lbMe=v;}
+    const pend=await window.storage.get(LB_PENDING_KEY);if(pend&&+pend.value>0){window.storage.delete(LB_PENDING_KEY);if(lbMe){lbPending+=+pend.value;lbFlushTimer=setTimeout(()=>lbFlush(),3000);}}
+  }catch(e){}renderLbProfile();}
+function lbKeys(d){d=d||new Date();const p=n=>String(n).padStart(2,'0');const day=d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate());
+  const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));const dn=t.getUTCDay()||7;t.setUTCDate(t.getUTCDate()+4-dn);const y=t.getUTCFullYear();const wk=Math.ceil(((t-Date.UTC(y,0,1))/86400000+1)/7);
+  return{d:day,w:y+'-W'+p(wk),m:day.slice(0,7)};}
+function lbCleanName(n){return String(n||'').replace(/\s+/g,' ').trim();}
+function lbNameError(n){if(n.length<2||n.length>20)return 'Names must be 2–20 characters.';if(!/^[\p{L}\p{N} _.'-]+$/u.test(n))return 'Use letters, numbers, spaces, - _ . or \' only.';const low=n.toLowerCase();if(Object.entries(lbPlayers).some(([id,p])=>id!==(lbMe&&lbMe.pid)&&p&&String(p.name||'').toLowerCase()===low))return 'Someone already has that name.';return '';}
+
+// Count answers locally and send them in batches.
+function lbCount(){if(!lbMe)return;lbPending++;if(!lbFlushTimer)lbFlushTimer=setTimeout(()=>lbFlush(),8000);}
+async function lbFlush(keepalive){clearTimeout(lbFlushTimer);lbFlushTimer=null;if(!lbMe||!lbPending)return;
+  // Leaving the page with an expired sign-in: keep the count for next time instead of losing it.
+  if(keepalive&&!authFresh(playerAuth)){try{window.storage.set(LB_PENDING_KEY,String(lbPending));}catch(e){}lbPending=0;return;}
+  const n=lbPending;lbPending=0;const k=lbKeys(),inc={'.sv':{increment:n}};
+  const body={name:lbMe.name,total:inc};['d','w','m'].forEach(x=>{body[x+'/'+k[x]]=inc;const mine=lbPlayers[lbMe.pid];if(mine&&mine[x])Object.keys(mine[x]).forEach(old=>{if(old!==k[x])body[x+'/'+old]=null;});});
+  try{if(!keepalive&&(await fbReq('GET','players/'+lbMe.pid+'/name'))==null){lbPlayers={};await lbLoadPlayers();return;}
+    await fbReq('PATCH','players/'+lbMe.pid,body,{keepalive});}catch(e){lbPending+=n;if(!lbFlushTimer)lbFlushTimer=setTimeout(()=>lbFlush(),30000);}}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')lbFlush(true);});
+window.addEventListener('pagehide',()=>lbFlush(true));
+
+async function lbLoadPlayers(){try{lbPlayers=(await fbReq('GET','players'))||{};}catch(e){return false;}
+  // Removed by the admin (or left on another device): stop sending scores under this id.
+  if(lbMe&&!lbPlayers[lbMe.pid]){lbMe=null;lbPending=0;saveLbMe();renderLbProfile('You’re no longer on the leaderboard. Join again to take part.',true);}
+  return true;}
+function lbName(pid){const p=lbPlayers[pid];return p&&p.name?p.name:'(left)';}
+
+// Profile box (shared by the Leaderboard and Chat tabs).
+function renderLbProfile(msg,isErr){document.querySelectorAll('.lb-profile').forEach(box=>{box.innerHTML='';
+  if(!lbMe||lbEditing){const intro=document.createElement('div');intro.innerHTML=lbMe?'Change your name. It updates on the leaderboard and on all your chat messages.':'<b>Join the leaderboard and chat.</b> Use a first name or nickname: everyone with the link can see it.';box.appendChild(intro);
+    const row=document.createElement('form');row.className='lb-row';row.onsubmit=e=>{e.preventDefault();lbSaveName(inp.value);};
+    const inp=document.createElement('input');inp.maxLength=20;inp.placeholder='Your name';inp.value=lbMe?lbMe.name:'';row.appendChild(inp);
+    const ok=document.createElement('button');ok.className='btn-primary';ok.textContent=lbMe?'Save':'Join';row.appendChild(ok);
+    if(lbMe){const c=document.createElement('button');c.type='button';c.className='btn-secondary';c.textContent='Cancel';c.onclick=()=>{lbEditing=false;renderLbProfile();};row.appendChild(c);}
+    box.appendChild(row);
+  }else{const line=document.createElement('div');line.append('You’re playing as ');const b=document.createElement('b');b.textContent=lbMe.name;line.appendChild(b);line.append(' ');
+    const ed=document.createElement('button');ed.className='lb-link';ed.textContent='Change name';ed.onclick=()=>{lbEditing=true;renderLbProfile();};line.appendChild(ed);
+    const lv=document.createElement('button');lv.className='lb-link muted';lv.textContent='Leave';lv.onclick=lbLeave;line.appendChild(lv);box.appendChild(line);}
+  const m=document.createElement('div');m.className='lb-msg'+(isErr?' err':'');m.textContent=msg||'';box.appendChild(m);});
+  const ci=document.getElementById('chatInput'),cs=document.getElementById('chatSend');if(ci){ci.disabled=cs.disabled=!lbMe;ci.placeholder=lbMe?'Message everyone…':'Join above to chat';}}
+async function lbSaveName(raw){const name=lbCleanName(raw);await lbLoadPlayers();const err=lbNameError(name);if(err){renderLbProfile(err,true);return;}
+  let pid;
+  try{await playerToken();pid=playerAuth.uid;await fbReq('PATCH','players/'+pid,lbMe?{name}:{name,total:0});}catch(e){renderLbProfile('Couldn’t reach the server. Check your internet and try again.',true);return;}
+  lbMe={pid,name};lbEditing=false;saveLbMe();renderLbProfile();lbRefresh();if(mainTab==='chat')chatRefresh();}
+async function lbLeave(){if(!lbMe||!confirm('Leave the leaderboard and chat? Your name and score will be removed. Your chat messages will show as “(left)”.'))return;
+  try{await fbReq('DELETE','players/'+lbMe.pid);}catch(e){renderLbProfile('Couldn’t reach the server. Try again.',true);return;}
+  lbMe=null;lbPending=0;saveLbMe();renderLbProfile();lbRefresh();}
+
+// Leaderboard
+function setLbPeriod(p){lbPeriod=p;document.querySelectorAll('.lb-periods .mode-btn').forEach(b=>b.classList.toggle('active',b.dataset.period===p));renderLb();}
+async function lbRefresh(){await lbFlush();const ok=await lbLoadPlayers();if(!ok&&!Object.keys(lbPlayers).length){document.getElementById('lbList').innerHTML='<div class="lb-empty">Couldn’t load the leaderboard. Check your internet connection.</div>';return;}renderLb();}
+function renderLb(){const list=document.getElementById('lbList');if(!list)return;const k=lbKeys();
+  const rows=Object.entries(lbPlayers).filter(([,p])=>p&&p.name).map(([pid,p])=>({pid,name:p.name,n:lbPeriod==='all'?(p.total||0):((p[lbPeriod]||{})[k[lbPeriod]]||0)}));
+  rows.sort((a,b)=>b.n-a.n||a.name.localeCompare(b.name));
+  const shown=rows.filter(r=>r.n>0||(lbMe&&r.pid===lbMe.pid));list.innerHTML='';
+  if(!shown.length){list.innerHTML='<div class="lb-empty">No questions answered '+({d:'today',w:'this week',m:'this month',all:'yet'})[lbPeriod]+'. Be the first!</div>';return;}
+  let rank=0,prev=null;shown.forEach((r,i)=>{if(r.n!==prev){rank=i+1;prev=r.n;}
+    const it=document.createElement('div');it.className='lb-item'+(lbMe&&r.pid===lbMe.pid?' me':'')+(rank<=3&&r.n>0?' top':'');
+    const rk=document.createElement('span');rk.className='lb-rank';rk.textContent=r.n>0?rank:'–';
+    const nm=document.createElement('span');nm.className='lb-name';nm.textContent=r.name;
+    const ct=document.createElement('span');ct.className='lb-count';ct.textContent=r.n.toLocaleString();
+    it.append(rk,nm,ct);
+    if(isAdmin){const d=document.createElement('button');d.className='lb-del';d.title='Remove player';d.textContent='×';d.onclick=async()=>{if(!confirm('Remove '+r.name+' from the leaderboard?'))return;try{await fbReq('DELETE','players/'+r.pid,null,{admin:true});}catch(e){}lbRefresh();};it.appendChild(d);}
+    list.appendChild(it);});}
+
+// Chat
+async function chatRefresh(){const [ok]=await Promise.all([fbReq('GET','chat',null,{query:'?orderBy=%22$key%22&limitToLast=100'}).then(d=>{chatMsgs=Object.entries(d||{}).map(([id,m])=>({id,...m})).sort((a,b)=>a.id<b.id?-1:1);return true;}).catch(()=>false),lbLoadPlayers()]);
+  if(!ok&&!chatMsgs.length){document.getElementById('chatList').innerHTML='<div class="lb-empty">Couldn’t load the chat. Check your internet connection.</div>';return;}renderChat();}
+function chatTime(t){if(!t)return '';const d=new Date(t),now=new Date();const hm=d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});return d.toDateString()===now.toDateString()?hm:d.toLocaleDateString([],{day:'numeric',month:'short'})+' '+hm;}
+function renderChat(){const list=document.getElementById('chatList');if(!list)return;const atBottom=list.scrollHeight-list.scrollTop-list.clientHeight<40;list.innerHTML='';
+  if(!chatMsgs.length){list.innerHTML='<div class="lb-empty">No messages yet. Say salve!</div>';return;}
+  chatMsgs.forEach(m=>{if(!m||typeof m.text!=='string')return;const el=document.createElement('div');el.className='chat-m'+(lbMe&&m.pid===lbMe.pid?' me':'');
+    const who=document.createElement('span');who.className='chat-who';who.textContent=lbName(m.pid);
+    const tx=document.createElement('span');tx.textContent=m.text;
+    const tm=document.createElement('span');tm.className='chat-time';tm.textContent=chatTime(m.t);
+    el.append(who,tx,tm);
+    if(isAdmin){const d=document.createElement('button');d.className='lb-del';d.title='Delete message';d.textContent='×';d.onclick=async()=>{try{await fbReq('DELETE','chat/'+m.id,null,{admin:true});}catch(e){}chatRefresh();};el.appendChild(d);}
+    list.appendChild(el);});
+  if(atBottom||list.dataset.first!=='1'){list.scrollTop=list.scrollHeight;list.dataset.first='1';}}
+async function sendChat(){const inp=document.getElementById('chatInput'),err=document.getElementById('chatErr');const text=inp.value.replace(/\s+/g,' ').trim();err.textContent='';
+  if(!lbMe||!text)return;if(Date.now()-chatLastSend<3000){err.textContent='Slow down a little!';return;}
+  chatLastSend=Date.now();inp.value='';
+  try{await fbReq('POST','chat',{pid:lbMe.pid,text:text.slice(0,300),t:{'.sv':'timestamp'}});}catch(e){inp.value=text;err.textContent='Message not sent. Check your internet and try again.';return;}
+  const list=document.getElementById('chatList');list.dataset.first='';chatRefresh();}
+
+// Poll only while the tab is open and the page is visible.
+function lbTabChanged(t){clearInterval(lbPoll);clearInterval(chatPoll);lbPoll=chatPoll=null;
+  if(t==='leaderboard'){lbRefresh();lbPoll=setInterval(()=>{if(document.visibilityState==='visible')lbRefresh();},30000);}
+  if(t==='chat'){document.getElementById('chatList').dataset.first='';chatRefresh();chatPoll=setInterval(()=>{if(document.visibilityState==='visible')chatRefresh();},4000);}}
+loadLbMe();
 try{if(!localStorage.getItem('latin_visited')){showHelp();localStorage.setItem('latin_visited','1');}}catch(e){(async()=>{try{const r=await window.storage.get('latin_visited');if(!r){showHelp();await window.storage.set('latin_visited','1');}}catch(e2){showHelp();}})();}
 </script>
 <script>
@@ -3097,7 +3332,7 @@ function openQuizForms(){const w=currentCardWord();if(!w)return;if(!answered&&!(
 /* ---------- export / import ---------- */
 let pendingBackup=null;
 function backupMsg(t,ok){const el=document.getElementById('backupMsg');if(!el)return;el.textContent=t||'';el.style.color=ok===false?'var(--red)':ok?'var(--green)':'var(--text3)';}
-function buildBackup(){return{app:'latin-trainer',version:1,exported:new Date().toISOString(),theme:currentTheme,sr:Object.fromEntries(Object.entries(srData).filter(([k,v])=>v&&v.seen>0)),stats:statsData,custom:customWords,starred:starred};}
+function buildBackup(){return{app:'latin-trainer',version:1,exported:new Date().toISOString(),theme:currentTheme,sr:Object.fromEntries(Object.entries(srData).filter(([k,v])=>v&&v.seen>0)),stats:statsData,custom:customWords,starred:starred,lb:lbMe&&playerAuth?{pid:lbMe.pid,name:lbMe.name,rt:playerAuth.refreshToken}:null};}
 function exportProgress(){const text=JSON.stringify(buildBackup());const name='latin-trainer-progress-'+new Date().toISOString().slice(0,10)+'.json';
   try{const blob=new Blob([text],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);backupMsg('Exported “'+name+'”. Keep it somewhere safe.',true);}
   catch(e){const ta=document.getElementById('backupText');if(ta){ta.value=text;document.getElementById('backupDetails').open=true;}backupMsg('Download blocked here — copy the text below instead.',false);}}
@@ -3127,6 +3362,7 @@ async function applyImport(modeSel){const b=pendingBackup;if(!b)return;
     b.custom.forEach(w=>{if(!customWords.some(x=>x.lat===w.lat&&x.catKey===w.catKey))customWords.push(w);});
     Object.assign(starred,b.starred);
   }
+  if(b.lb&&b.lb.pid&&b.lb.name&&b.lb.rt){playerAuth={uid:b.lb.pid,refreshToken:b.lb.rt};savePlayerAuth();lbMe={pid:b.lb.pid,name:b.lb.name};saveLbMe();renderLbProfile();}
   customWords.forEach(w=>addWordToData(w));
   if(b.theme&&THEMES.some(t=>t.id===b.theme))setTheme(b.theme);
   await saveSR();await saveStats();await saveCustomWords();await saveStarred();
