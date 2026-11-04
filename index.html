@@ -2692,12 +2692,20 @@ document.addEventListener('keydown',e=>{
 });
 // ── DESCRIPTION (Firebase) ────────────────────────────────────────────────────
 const FB_DESC='https://latindesc-default-rtdb.asia-southeast1.firebasedatabase.app/description.json';
-const ADMIN_U='cp7122';
-// SHA-256 hash of the admin password (not stored in plaintext).
-const ADMIN_P_HASH='24645cad7f2d5d934097ec7c647e68b97cef99e2fe32cf2df249d14b7a5cfe2e';
+// Admin login: neither the username nor the password is stored. Only a salted PBKDF2 hash
+// (300,000 rounds) of "username:sha256(password)" is kept, so each guess is slow to check.
+const ADMIN_SALT='c049df8e8eba5e9f1af73739a9d60b46';
+const ADMIN_HASH='97e3f6f177248b9d124381dac81a75fcf44cea18ec1fea82e95de60f0167af7a';
 async function sha256Hex(str){
   const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));
   return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+async function adminHash(u,p){
+  const enc=new TextEncoder();
+  const key=await crypto.subtle.importKey('raw',enc.encode(u+':'+await sha256Hex(p)),'PBKDF2',false,['deriveBits']);
+  const salt=new Uint8Array(ADMIN_SALT.match(/../g).map(h=>parseInt(h,16)));
+  const bits=await crypto.subtle.deriveBits({name:'PBKDF2',hash:'SHA-256',salt,iterations:300000},key,256);
+  return Array.from(new Uint8Array(bits)).map(b=>b.toString(16).padStart(2,'0')).join('');
 }
 let isAdmin=false;
 
@@ -2723,8 +2731,7 @@ function hideAdminModal(){document.getElementById('adminModal').style.display='n
 async function checkAdminAuth(){
   const u=document.getElementById('adminUser').value.trim();
   const p=document.getElementById('adminPass').value;
-  const pHash=await sha256Hex(p);
-  if(u===ADMIN_U&&pHash===ADMIN_P_HASH){isAdmin=true;hideAdminModal();startDescEdit();}
+  if(await adminHash(u,p)===ADMIN_HASH){isAdmin=true;hideAdminModal();startDescEdit();}
   else{document.getElementById('adminErr').textContent='Incorrect username or password.';}
 }
 function startDescEdit(){
