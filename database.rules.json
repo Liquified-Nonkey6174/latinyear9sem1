@@ -2,13 +2,13 @@
   "rules": {
     "description": {
       ".read": true,
-      ".write": true,
+      ".write": "auth != null && auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2'",
       ".validate": "newData.isString() && newData.val().length <= 2000"
     },
     "players": {
-      ".read": true,
-      "$pid": {
-        ".write": "$pid.length <= 24",
+      ".read": "auth != null",
+      "$uid": {
+        ".write": "auth != null && (auth.uid === $uid || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2')",
         ".validate": "newData.hasChildren(['name', 'total'])",
         "name": { ".validate": "newData.isString() && newData.val().length >= 2 && newData.val().length <= 20" },
         "total": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= (data.exists() ? data.val() : 0) + 500" },
@@ -19,10 +19,10 @@
       }
     },
     "chat": {
-      ".read": true,
+      ".read": "auth != null",
       "$msg": {
-        ".write": "!data.exists() || !newData.exists()",
-        ".validate": "newData.hasChildren(['pid', 'text', 't']) && root.child('players').child(newData.child('pid').val()).exists()",
+        ".write": "auth != null && ((!data.exists() && newData.child('pid').val() === auth.uid && root.child('players').child(auth.uid).exists()) || (!newData.exists() && (data.child('pid').val() === auth.uid || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2')))",
+        ".validate": "newData.hasChildren(['pid', 'text', 't'])",
         "pid": { ".validate": "newData.isString()" },
         "text": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 300" },
         "t": { ".validate": "newData.isNumber() && newData.val() <= now" },

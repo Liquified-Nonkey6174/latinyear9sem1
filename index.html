@@ -1683,15 +1683,15 @@ input[type=range]{flex:1;accent-color:var(--accent)}
     <div class="about-title" style="text-align:center;margin-bottom:1.25rem">Admin login</div>
     <div style="display:flex;flex-direction:column;gap:10px">
       <div>
-        <div style="font-size:12px;color:var(--text3);margin-bottom:4px">Username</div>
-        <input id="adminUser" type="text" autocomplete="off" onkeydown="if(event.key==='Enter')checkAdminAuth()" style="width:100%;padding:8px 12px;border-radius:var(--rs);border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-family:var(--sans);font-size:13px;outline:none"/>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:4px">Email</div>
+        <input id="adminUser" type="email" autocomplete="username" onkeydown="if(event.key==='Enter')checkAdminAuth()" style="width:100%;padding:8px 12px;border-radius:var(--rs);border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-family:var(--sans);font-size:13px;outline:none"/>
       </div>
       <div>
         <div style="font-size:12px;color:var(--text3);margin-bottom:4px">Password</div>
-        <input id="adminPass" type="password" onkeydown="if(event.key==='Enter')checkAdminAuth()" style="width:100%;padding:8px 12px;border-radius:var(--rs);border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-family:var(--sans);font-size:13px;outline:none"/>
+        <input id="adminPass" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')checkAdminAuth()" style="width:100%;padding:8px 12px;border-radius:var(--rs);border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-family:var(--sans);font-size:13px;outline:none"/>
       </div>
       <div id="adminErr" style="font-size:12px;color:var(--red);min-height:16px"></div>
-      <button class="btn-primary" onclick="checkAdminAuth()">Login</button>
+      <button class="btn-primary" id="adminLoginBtn" onclick="checkAdminAuth()">Login</button>
     </div>
   </div>
 </div>
@@ -2691,22 +2691,31 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Tab'){e.preventDefault();if(!answered){isDrill?revealDrillHint():revealHint();}return;}
 });
 // ── DESCRIPTION (Firebase) ────────────────────────────────────────────────────
-const FB_DESC='https://latindesc-default-rtdb.asia-southeast1.firebasedatabase.app/description.json';
-// Admin login: neither the username nor the password is stored. Only a salted PBKDF2 hash
-// (300,000 rounds) of "username:sha256(password)" is kept, so each guess is slow to check.
-const ADMIN_SALT='c049df8e8eba5e9f1af73739a9d60b46';
-const ADMIN_HASH='97e3f6f177248b9d124381dac81a75fcf44cea18ec1fea82e95de60f0167af7a';
-async function sha256Hex(str){
-  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));
-  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
-}
-async function adminHash(u,p){
-  const enc=new TextEncoder();
-  const key=await crypto.subtle.importKey('raw',enc.encode(u+':'+await sha256Hex(p)),'PBKDF2',false,['deriveBits']);
-  const salt=new Uint8Array(ADMIN_SALT.match(/../g).map(h=>parseInt(h,16)));
-  const bits=await crypto.subtle.deriveBits({name:'PBKDF2',hash:'SHA-256',salt,iterations:300000},key,256);
-  return Array.from(new Uint8Array(bits)).map(b=>b.toString(16).padStart(2,'0')).join('');
-}
+// Firebase project "latinleaderboard". These values are public by design: the database
+// security rules (database.rules.json) decide who may read and write what.
+const FB_DB='https://latinleaderboard-default-rtdb.asia-southeast1.firebasedatabase.app';
+const FB_API_KEY='AIzaSyCMv90nEO8gNQ2Udsb3Ho3jOr5_DfMsDUY';
+const ADMIN_UID='F8AyOfnDz4RASWZnH6J09EmcAtv2';
+const FB_DESC=FB_DB+'/description.json';
+const AUTH_KEY='latin_auth_v1';
+// Firebase Authentication over REST. Players get an automatic anonymous account (kept in this
+// browser); the admin signs in with email + password, which Firebase checks. No passwords in the code.
+let playerAuth=null,adminAuth=null,playerAuthP=null;
+async function authPost(url,body,form){const r=await fetch(url+'?key='+FB_API_KEY,{method:'POST',headers:{'Content-Type':form?'application/x-www-form-urlencoded':'application/json'},body:form?body:JSON.stringify(body)});
+  const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error((d.error&&d.error.message)||('HTTP '+r.status));return d;}
+function authFrom(d){return{uid:d.localId||d.user_id,idToken:d.idToken||d.id_token,refreshToken:d.refreshToken||d.refresh_token,exp:Date.now()+((+(d.expiresIn||d.expires_in)||3600)-120)*1000};}
+const refreshAuth=a=>authPost('https://securetoken.googleapis.com/v1/token','grant_type=refresh_token&refresh_token='+encodeURIComponent(a.refreshToken),true).then(authFrom);
+function savePlayerAuth(){try{window.storage.set(AUTH_KEY,JSON.stringify({uid:playerAuth.uid,refreshToken:playerAuth.refreshToken}));}catch(e){}}
+const authFresh=a=>!!(a&&a.idToken&&a.exp>Date.now());
+async function playerToken(){if(authFresh(playerAuth))return playerAuth.idToken;
+  if(!playerAuthP)playerAuthP=(async()=>{
+    if(!playerAuth){try{const r=await window.storage.get(AUTH_KEY);if(r&&r.value)playerAuth=JSON.parse(r.value);}catch(e){}}
+    if(playerAuth&&playerAuth.refreshToken){try{playerAuth=await refreshAuth(playerAuth);}catch(e){if(/TOKEN|USER|INVALID/.test(e.message))playerAuth=null;else throw e;}}
+    if(!authFresh(playerAuth))playerAuth=authFrom(await authPost('https://identitytoolkit.googleapis.com/v1/accounts:signUp',{returnSecureToken:true}));
+    savePlayerAuth();
+  })().finally(()=>{playerAuthP=null;});
+  await playerAuthP;return playerAuth.idToken;}
+async function adminToken(){if(!adminAuth)throw new Error('Not logged in as admin');if(!authFresh(adminAuth))adminAuth=await refreshAuth(adminAuth);return adminAuth.idToken;}
 let isAdmin=false;
 
 async function loadDescription(){
@@ -2725,14 +2734,23 @@ function handleDescEdit(){
   document.getElementById('adminUser').value='';
   document.getElementById('adminPass').value='';
   document.getElementById('adminErr').textContent='';
+  document.getElementById('adminLoginBtn').disabled=false;
   setTimeout(()=>document.getElementById('adminUser').focus(),50);
 }
 function hideAdminModal(){document.getElementById('adminModal').style.display='none';}
 async function checkAdminAuth(){
   const u=document.getElementById('adminUser').value.trim();
   const p=document.getElementById('adminPass').value;
-  if(await adminHash(u,p)===ADMIN_HASH){isAdmin=true;hideAdminModal();startDescEdit();}
-  else{document.getElementById('adminErr').textContent='Incorrect username or password.';}
+  const err=document.getElementById('adminErr'),btn=document.getElementById('adminLoginBtn');
+  if(!u||!p){err.textContent='Enter your email and password.';return;}
+  err.textContent='';btn.disabled=true;
+  try{
+    const a=authFrom(await authPost('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword',{email:u,password:p,returnSecureToken:true}));
+    if(a.uid!==ADMIN_UID){err.textContent='That account isn’t the admin.';return;}
+    adminAuth=a;isAdmin=true;hideAdminModal();startDescEdit();
+    if(mainTab==='leaderboard')renderLb();if(mainTab==='chat')renderChat();
+  }catch(e){err.textContent=/TOO_MANY/.test(e.message)?'Too many attempts. Wait a few minutes and try again.':/INVALID|EMAIL|PASSWORD|USER_DISABLED/.test(e.message)?'Incorrect email or password.':'Couldn’t reach the server. Check your internet.';}
+  finally{btn.disabled=false;}
 }
 function startDescEdit(){
   document.getElementById('descText').style.display='none';
@@ -2744,7 +2762,7 @@ function startDescEdit(){
 async function saveDesc(){
   const text=document.getElementById('descEditArea').value.trim();
   try{
-    const r=await fetch(FB_DESC,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(text)});
+    const r=await fetch(FB_DESC+'?auth='+encodeURIComponent(await adminToken()),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(text)});
     if(!r.ok)throw new Error('HTTP '+r.status);
     document.getElementById('descText').textContent=text;
   }catch(e){alert('Could not save: '+e.message);}
@@ -3024,16 +3042,21 @@ loadPersisted();
 loadCustomWords().then(()=>buildUI());
 loadDescription();
 // ── LEADERBOARD & CHAT (Firebase Realtime Database, REST) ─────────────────────
-// players/{pid}: {name,total,d:{day:n},w:{week:n},m:{month:n}}; chat/{id}: {pid,text,t}.
+// players/{uid}: {name,total,d:{day:n},w:{week:n},m:{month:n}}; chat/{id}: {pid,text,t}.
+// A player's id is their anonymous Firebase account id, so the rules can check every write.
 // Chat stores the player id, not the name, so renaming updates the leaderboard and old messages.
-const FB_ROOT='https://latindesc-default-rtdb.asia-southeast1.firebasedatabase.app';
-const LB_KEY='latin_lb_v1';
+const FB_ROOT=FB_DB;
+const LB_KEY='latin_lb_v1',LB_PENDING_KEY='latin_lb_pending';
 let lbMe=null,lbPending=0,lbFlushTimer=null,lbPlayers={},lbPeriod='d',lbPoll=null,chatPoll=null,chatLastSend=0,lbEditing=false,chatMsgs=[];
 const fbUrl=path=>FB_ROOT+'/'+path+'.json';
-async function fbReq(method,path,body,opts){const r=await fetch(fbUrl(path)+(opts&&opts.query||''),{method,headers:body?{'Content-Type':'application/json'}:undefined,body:body?JSON.stringify(body):undefined,keepalive:!!(opts&&opts.keepalive)});if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}
-function saveLbMe(){try{window.storage.set(LB_KEY,JSON.stringify(lbMe));}catch(e){}}
-async function loadLbMe(){try{const r=await window.storage.get(LB_KEY);if(r&&r.value){const v=JSON.parse(r.value);if(v&&v.pid&&v.name)lbMe=v;}}catch(e){}renderLbProfile();}
-function lbNewId(){const a=new Uint8Array(12);crypto.getRandomValues(a);return Array.from(a,b=>'abcdefghijklmnopqrstuvwxyz0123456789'[b%36]).join('');}
+async function fbReq(method,path,body,opts){opts=opts||{};const tok=opts.admin?await adminToken():await playerToken();
+  if(!opts.admin&&lbMe&&lbMe.pid!==playerAuth.uid){lbMe=null;saveLbMe();renderLbProfile();}
+  const q=opts.query||'';const r=await fetch(fbUrl(path)+q+(q?'&':'?')+'auth='+encodeURIComponent(tok),{method,headers:body?{'Content-Type':'application/json'}:undefined,body:body?JSON.stringify(body):undefined,keepalive:!!opts.keepalive});if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}
+function saveLbMe(){try{if(lbMe)window.storage.set(LB_KEY,JSON.stringify(lbMe));else window.storage.delete(LB_KEY);}catch(e){}}
+async function loadLbMe(){try{const r=await window.storage.get(LB_KEY),a=await window.storage.get(AUTH_KEY);const auth=a&&a.value?JSON.parse(a.value):null;if(auth&&auth.uid&&!playerAuth)playerAuth=auth;
+    if(r&&r.value){const v=JSON.parse(r.value);if(v&&v.pid&&v.name&&auth&&auth.uid===v.pid)lbMe=v;}
+    const pend=await window.storage.get(LB_PENDING_KEY);if(pend&&+pend.value>0){window.storage.delete(LB_PENDING_KEY);if(lbMe){lbPending+=+pend.value;lbFlushTimer=setTimeout(()=>lbFlush(),3000);}}
+  }catch(e){}renderLbProfile();}
 function lbKeys(d){d=d||new Date();const p=n=>String(n).padStart(2,'0');const day=d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate());
   const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));const dn=t.getUTCDay()||7;t.setUTCDate(t.getUTCDate()+4-dn);const y=t.getUTCFullYear();const wk=Math.ceil(((t-Date.UTC(y,0,1))/86400000+1)/7);
   return{d:day,w:y+'-W'+p(wk),m:day.slice(0,7)};}
@@ -3042,7 +3065,10 @@ function lbNameError(n){if(n.length<2||n.length>20)return 'Names must be 2–20 
 
 // Count answers locally and send them in batches.
 function lbCount(){if(!lbMe)return;lbPending++;if(!lbFlushTimer)lbFlushTimer=setTimeout(()=>lbFlush(),8000);}
-async function lbFlush(keepalive){clearTimeout(lbFlushTimer);lbFlushTimer=null;if(!lbMe||!lbPending)return;const n=lbPending;lbPending=0;const k=lbKeys(),inc={'.sv':{increment:n}};
+async function lbFlush(keepalive){clearTimeout(lbFlushTimer);lbFlushTimer=null;if(!lbMe||!lbPending)return;
+  // Leaving the page with an expired sign-in: keep the count for next time instead of losing it.
+  if(keepalive&&!authFresh(playerAuth)){try{window.storage.set(LB_PENDING_KEY,String(lbPending));}catch(e){}lbPending=0;return;}
+  const n=lbPending;lbPending=0;const k=lbKeys(),inc={'.sv':{increment:n}};
   const body={name:lbMe.name,total:inc};['d','w','m'].forEach(x=>{body[x+'/'+k[x]]=inc;const mine=lbPlayers[lbMe.pid];if(mine&&mine[x])Object.keys(mine[x]).forEach(old=>{if(old!==k[x])body[x+'/'+old]=null;});});
   try{if(!keepalive&&(await fbReq('GET','players/'+lbMe.pid+'/name'))==null){lbPlayers={};await lbLoadPlayers();return;}
     await fbReq('PATCH','players/'+lbMe.pid,body,{keepalive});}catch(e){lbPending+=n;if(!lbFlushTimer)lbFlushTimer=setTimeout(()=>lbFlush(),30000);}}
@@ -3051,7 +3077,7 @@ window.addEventListener('pagehide',()=>lbFlush(true));
 
 async function lbLoadPlayers(){try{lbPlayers=(await fbReq('GET','players'))||{};}catch(e){return false;}
   // Removed by the admin (or left on another device): stop sending scores under this id.
-  if(lbMe&&!lbPlayers[lbMe.pid]){lbMe=null;lbPending=0;try{window.storage.delete(LB_KEY);}catch(e){}renderLbProfile('You’re no longer on the leaderboard. Join again to take part.',true);}
+  if(lbMe&&!lbPlayers[lbMe.pid]){lbMe=null;lbPending=0;saveLbMe();renderLbProfile('You’re no longer on the leaderboard. Join again to take part.',true);}
   return true;}
 function lbName(pid){const p=lbPlayers[pid];return p&&p.name?p.name:'(left)';}
 
@@ -3069,12 +3095,12 @@ function renderLbProfile(msg,isErr){document.querySelectorAll('.lb-profile').for
   const m=document.createElement('div');m.className='lb-msg'+(isErr?' err':'');m.textContent=msg||'';box.appendChild(m);});
   const ci=document.getElementById('chatInput'),cs=document.getElementById('chatSend');if(ci){ci.disabled=cs.disabled=!lbMe;ci.placeholder=lbMe?'Message everyone…':'Join above to chat';}}
 async function lbSaveName(raw){const name=lbCleanName(raw);await lbLoadPlayers();const err=lbNameError(name);if(err){renderLbProfile(err,true);return;}
-  const pid=lbMe?lbMe.pid:lbNewId();
-  try{await fbReq('PATCH','players/'+pid,lbMe?{name}:{name,total:0});}catch(e){renderLbProfile('Couldn’t reach the server. Check your internet and try again.',true);return;}
+  let pid;
+  try{await playerToken();pid=playerAuth.uid;await fbReq('PATCH','players/'+pid,lbMe?{name}:{name,total:0});}catch(e){renderLbProfile('Couldn’t reach the server. Check your internet and try again.',true);return;}
   lbMe={pid,name};lbEditing=false;saveLbMe();renderLbProfile();lbRefresh();if(mainTab==='chat')chatRefresh();}
 async function lbLeave(){if(!lbMe||!confirm('Leave the leaderboard and chat? Your name and score will be removed. Your chat messages will show as “(left)”.'))return;
   try{await fbReq('DELETE','players/'+lbMe.pid);}catch(e){renderLbProfile('Couldn’t reach the server. Try again.',true);return;}
-  lbMe=null;lbPending=0;try{window.storage.delete(LB_KEY);}catch(e){}renderLbProfile();lbRefresh();}
+  lbMe=null;lbPending=0;saveLbMe();renderLbProfile();lbRefresh();}
 
 // Leaderboard
 function setLbPeriod(p){lbPeriod=p;document.querySelectorAll('.lb-periods .mode-btn').forEach(b=>b.classList.toggle('active',b.dataset.period===p));renderLb();}
@@ -3090,7 +3116,7 @@ function renderLb(){const list=document.getElementById('lbList');if(!list)return
     const nm=document.createElement('span');nm.className='lb-name';nm.textContent=r.name;
     const ct=document.createElement('span');ct.className='lb-count';ct.textContent=r.n.toLocaleString();
     it.append(rk,nm,ct);
-    if(isAdmin){const d=document.createElement('button');d.className='lb-del';d.title='Remove player';d.textContent='×';d.onclick=async()=>{if(!confirm('Remove '+r.name+' from the leaderboard?'))return;try{await fbReq('DELETE','players/'+r.pid);}catch(e){}lbRefresh();};it.appendChild(d);}
+    if(isAdmin){const d=document.createElement('button');d.className='lb-del';d.title='Remove player';d.textContent='×';d.onclick=async()=>{if(!confirm('Remove '+r.name+' from the leaderboard?'))return;try{await fbReq('DELETE','players/'+r.pid,null,{admin:true});}catch(e){}lbRefresh();};it.appendChild(d);}
     list.appendChild(it);});}
 
 // Chat
@@ -3104,7 +3130,7 @@ function renderChat(){const list=document.getElementById('chatList');if(!list)re
     const tx=document.createElement('span');tx.textContent=m.text;
     const tm=document.createElement('span');tm.className='chat-time';tm.textContent=chatTime(m.t);
     el.append(who,tx,tm);
-    if(isAdmin){const d=document.createElement('button');d.className='lb-del';d.title='Delete message';d.textContent='×';d.onclick=async()=>{try{await fbReq('DELETE','chat/'+m.id);}catch(e){}chatRefresh();};el.appendChild(d);}
+    if(isAdmin){const d=document.createElement('button');d.className='lb-del';d.title='Delete message';d.textContent='×';d.onclick=async()=>{try{await fbReq('DELETE','chat/'+m.id,null,{admin:true});}catch(e){}chatRefresh();};el.appendChild(d);}
     list.appendChild(el);});
   if(atBottom||list.dataset.first!=='1'){list.scrollTop=list.scrollHeight;list.dataset.first='1';}}
 async function sendChat(){const inp=document.getElementById('chatInput'),err=document.getElementById('chatErr');const text=inp.value.replace(/\s+/g,' ').trim();err.textContent='';
@@ -3260,7 +3286,7 @@ function openQuizForms(){const w=currentCardWord();if(!w)return;if(!answered&&!(
 /* ---------- export / import ---------- */
 let pendingBackup=null;
 function backupMsg(t,ok){const el=document.getElementById('backupMsg');if(!el)return;el.textContent=t||'';el.style.color=ok===false?'var(--red)':ok?'var(--green)':'var(--text3)';}
-function buildBackup(){return{app:'latin-trainer',version:1,exported:new Date().toISOString(),theme:currentTheme,sr:Object.fromEntries(Object.entries(srData).filter(([k,v])=>v&&v.seen>0)),stats:statsData,custom:customWords,starred:starred,lb:lbMe};}
+function buildBackup(){return{app:'latin-trainer',version:1,exported:new Date().toISOString(),theme:currentTheme,sr:Object.fromEntries(Object.entries(srData).filter(([k,v])=>v&&v.seen>0)),stats:statsData,custom:customWords,starred:starred,lb:lbMe&&playerAuth?{pid:lbMe.pid,name:lbMe.name,rt:playerAuth.refreshToken}:null};}
 function exportProgress(){const text=JSON.stringify(buildBackup());const name='latin-trainer-progress-'+new Date().toISOString().slice(0,10)+'.json';
   try{const blob=new Blob([text],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);backupMsg('Exported “'+name+'”. Keep it somewhere safe.',true);}
   catch(e){const ta=document.getElementById('backupText');if(ta){ta.value=text;document.getElementById('backupDetails').open=true;}backupMsg('Download blocked here — copy the text below instead.',false);}}
@@ -3290,7 +3316,7 @@ async function applyImport(modeSel){const b=pendingBackup;if(!b)return;
     b.custom.forEach(w=>{if(!customWords.some(x=>x.lat===w.lat&&x.catKey===w.catKey))customWords.push(w);});
     Object.assign(starred,b.starred);
   }
-  if(b.lb&&b.lb.pid&&b.lb.name){lbMe={pid:b.lb.pid,name:b.lb.name};saveLbMe();renderLbProfile();}
+  if(b.lb&&b.lb.pid&&b.lb.name&&b.lb.rt){playerAuth={uid:b.lb.pid,refreshToken:b.lb.rt};savePlayerAuth();lbMe={pid:b.lb.pid,name:b.lb.name};saveLbMe();renderLbProfile();}
   customWords.forEach(w=>addWordToData(w));
   if(b.theme&&THEMES.some(t=>t.id===b.theme))setTheme(b.theme);
   await saveSR();await saveStats();await saveCustomWords();await saveStarred();
