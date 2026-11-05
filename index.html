@@ -489,6 +489,7 @@ body.calm *,body.calm *::before,body.calm *::after{transition:none!important;ani
 .st-la{font-family:var(--serif);font-size:20px}.st-en{font-size:13px;color:var(--text2)}.st-meta{font-size:11px;color:var(--text3);margin-top:4px}
 .st-head{display:flex;gap:14px;align-items:center;margin-bottom:6px}.st-title{font-family:var(--serif);font-size:24px}
 .st-body{display:flex;flex-direction:column;gap:10px}.st-line.cur{border-color:var(--accent-dim)}.st-input{width:100%;margin-top:8px;font-family:var(--sans);font-size:14px;padding:8px 12px;border-radius:var(--rs);border:1px solid var(--border2);background:var(--surface);color:var(--text);resize:vertical}
+.st-exact{font-size:11px;color:var(--green);font-weight:600;margin-left:4px}
 .st-btns{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}.st-model{color:var(--green)}.st-mine{font-size:12px;color:var(--text3);margin-top:2px}.st-end{text-align:center;padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r)}.st-end .st-btns{justify-content:center}
 .pz-filter{margin-bottom:1rem}.pz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px}.pz-score{font-size:12px;color:var(--text3);text-align:right}
 .pz-la{font-family:var(--serif);font-size:22px;line-height:1.5;margin:6px 0 10px}.pz-target{background:var(--accent-bg);color:var(--accent);border-bottom:2px solid var(--accent);padding:0 2px;border-radius:3px}
@@ -3612,7 +3613,7 @@ function practiseMistakes(){const list=Object.values(mistakeData()).sort((a,b)=>
   setMode(list[0].mode);beginQuiz(shuffle(ws));}
 
 // ── READING: stories + parse it ──────────────────────────────────────────────
-let readMode='stories',storyIdx=-1,storyPos=0,storyMarks=[],parseQ=null,parseFilter='all',parseScore={r:0,n:0};
+let readMode='stories',storyIdx=-1,storyPos=0,storyMarks=[],storyAuto=[],parseQ=null,parseFilter='all',parseScore={r:0,n:0};
 const STORY_DONE_KEY='latin_stories_done';
 function storyDone(){try{return JSON.parse(localStorage.getItem(STORY_DONE_KEY)||'{}')||{};}catch(e){return {};}}
 function setReadMode(m){readMode=m;document.getElementById('rdStories').classList.toggle('active',m==='stories');document.getElementById('rdParse').classList.toggle('active',m==='parse');renderReading();}
@@ -3620,17 +3621,22 @@ function storySents(i){const bank=sentBank();const st=STORIES[i];return st.lines
 function renderReading(){const a=document.getElementById('readArea');if(!a)return;if(readMode==='parse'){renderParse();return;}
   if(storyIdx<0){const done=storyDone();a.innerHTML='<div class="st-grid">'+STORIES.map((st,i)=>'<button class="st-card" onclick="openStory('+i+')"><span class="st-la">'+esc(st.la)+'</span><span class="st-en">'+esc(st.en)+'</span><span class="st-meta">'+st.lines.length+' sentences'+(done[st.id]?' · ✓ '+done[st.id]+'/'+st.lines.length:'')+'</span></button>').join('')+'</div>';return;}
   const st=STORIES[storyIdx],ss=storySents(storyIdx);EXSETS.story=ss;
-  let h='<div class="st-head"><button class="btn-secondary" onclick="storyIdx=-1;renderReading()">← All stories</button><div><div class="st-title">'+esc(st.la)+'</div><div class="st-en">'+esc(st.en)+'</div></div></div><p class="forms-note"><span>Hover over (or tap) any word for its form and meaning. Translate each sentence, then check yourself against the model.</span></p><div class="st-body" data-exset="story">';
+  let h='<div class="st-head"><button class="btn-secondary" onclick="storyIdx=-1;renderReading()">← All stories</button><div><div class="st-title">'+esc(st.la)+'</div><div class="st-en">'+esc(st.en)+'</div></div></div><p class="forms-note"><span>Hover over (or tap) any word for its form and meaning. Translate each sentence and press Check. Capitals and punctuation don’t matter. If it matches the model it’s marked right; otherwise compare and mark yourself.</span></p><div class="st-body" data-exset="story">';
   ss.forEach((s,i)=>{if(i>storyPos)return;const cur=i===storyPos&&storyMarks[i]==null;
     h+='<div class="ex-item st-line'+(cur?' cur':'')+'" data-si="'+i+'"><div class="ex-la">'+sentenceHtml(s,null)+'</div>';
     if(cur)h+='<textarea class="st-input" id="stInput" rows="2" placeholder="Your translation…"></textarea><div class="st-btns"><button class="btn-primary" onclick="storyCheck()">Check</button></div>';
     else if(storyMarks[i]==='?')h+='<div class="ex-en st-model">'+esc(s.en)+'</div><div class="st-mine">Yours: '+esc(window._stLast||'')+'</div><div class="st-btns"><button class="btn-primary" onclick="storyMark(true)">✓ I got it</button><button class="btn-secondary" onclick="storyMark(false)">✗ Not quite</button></div>';
-    else h+='<div class="ex-en">'+(storyMarks[i]?'✓ ':'✗ ')+esc(s.en)+'</div>';
+    else h+='<div class="ex-en">'+(storyMarks[i]?'✓ ':'✗ ')+esc(s.en)+(storyAuto[i]?' <span class="st-exact">exactly right!</span>':'')+'</div>';
     h+='</div>';});
   if(storyPos>=ss.length){const got=storyMarks.filter(Boolean).length;h+='<div class="st-end">You got <b>'+got+' / '+ss.length+'</b>. '+(got===ss.length?'Optime! 🎉':'Well done for finishing!')+'<div class="st-btns"><button class="btn-primary" onclick="openStory('+storyIdx+')">Read again</button><button class="btn-secondary" onclick="storyIdx=-1;renderReading()">Another story</button></div></div>';}
   a.innerHTML=h+'</div>';const inp=document.getElementById('stInput');if(inp){inp.focus();inp.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();storyCheck();}};}}
-function openStory(i){storyIdx=i;storyPos=0;storyMarks=[];renderReading();}
-function storyCheck(){const v=(document.getElementById('stInput')||{}).value||'';window._stLast=v.trim()||'(blank)';storyMarks[storyPos]='?';renderReading();}
+function openStory(i){storyIdx=i;storyPos=0;storyMarks=[];storyAuto=[];renderReading();}
+// Compare with the model ignoring capitals and punctuation; an exact match is marked right automatically,
+// anything else shows the model so you can mark yourself (there's often more than one good translation).
+function storyNorm(t){return String(t).toLowerCase().replace(/[’'`]/g,'').replace(/[^a-z0-9]+/g,' ').trim();}
+function storyCheck(){const v=(document.getElementById('stInput')||{}).value||'';if(!v.trim())return;window._stLast=v.trim();
+  const s=storySents(storyIdx)[storyPos];if(storyNorm(v)===storyNorm(s.en)){storyAuto[storyPos]=true;storyMark(true);return;}
+  storyMarks[storyPos]='?';renderReading();}
 function storyMark(ok){storyMarks[storyPos]=ok;storyPos++;if(storyPos>=STORIES[storyIdx].lines.length){const d=storyDone();const got=storyMarks.filter(Boolean).length;d[STORIES[storyIdx].id]=Math.max(d[STORIES[storyIdx].id]||0,got);try{localStorage.setItem(STORY_DONE_KEY,JSON.stringify(d));}catch(e){}}renderReading();}
 // Parse it: pick a tagged word from a sentence and ask for its form (4 options); checked from the tags, so it earns points.
 const PARSE_CASES=['nom','acc','gen','dat','abl'],PARSE_NUMS=['sg','pl'],PARSE_G=['m','f','n'];
