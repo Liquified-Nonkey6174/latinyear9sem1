@@ -3723,9 +3723,14 @@ function renderDuelPlay(){const g=duelGame,box=document.getElementById('duelPlay
     +'<div style="text-align:center;margin-top:10px"><button class="btn-primary" id="dpBtn" onclick="duelCheck()" '+(g.fb?'disabled':'')+'>Check</button></div>';
   const inp=document.getElementById('dpInput');if(!g.fb){inp.focus();inp.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();duelCheck();}};}}
 async function duelCheck(){const g=duelGame;if(!g||g.fb)return;const inp=document.getElementById('dpInput');const v=inp.value.trim();if(!v)return;if(!g.t0)g.t0=Date.now();
-  const q=g.qs[g.i];const ok=q.d==='el'?checkLat(v,q.w):checkEng(v,q.w);if(ok){g.score++;dailyTick();}playTone(ok);
+  const q=g.qs[g.i];const ok=q.d==='el'?checkLat(v,q.w):checkEng(v,q.w);
+  // Typo forgiveness is always on in challenges (same rules for both players): one free retry when a letter off.
+  if(!ok&&!g.typo){const w=q.w;let cands=[];if(q.d==='el'){cands=[w.lat,fullLat(w)];if(w.lat.includes('/'))cands.push(...w.lat.split('/'));if(typeof MULTI_FORMS!=='undefined'&&MULTI_FORMS[w.lat])cands.push(...MULTI_FORMS[w.lat]);}
+    else w.eng.forEach(e=>{cands.push(String(e));cands.push(String(e).replace(/\([^)]*\)/g,''));});
+    if(nearMiss(v,cands,q.d==='el')){g.typo=true;const fb=document.querySelector('#duelPlay .dp-fb');fb.className='dp-fb no';fb.textContent='≈ Very close: check your spelling and try again (no penalty).';inp.focus();try{inp.select();}catch(e){}return;}}
+  if(ok){g.score++;dailyTick();}playTone(ok);
   g.fb={cls:ok?'ok':'no',text:ok?'✓ Correct':'✗ '+(q.d==='el'?fullLat(q.w):displayEng(q.w))};renderDuelPlay();
-  setTimeout(async()=>{g.fb=null;g.i++;if(g.i>=g.qs.length){g.ms=Date.now()-g.t0;try{await fbReq('PUT','duels/'+g.id+'/res/'+lbMe.pid,{s:g.score,ms:g.ms});const d=duelsObj[g.id];d.res=d.res||{};d.res[lbMe.pid]={s:g.score,ms:g.ms};}catch(e){}updDuelBtn();}renderDuelPlay();},ok?600:1400);}
+  setTimeout(async()=>{g.fb=null;g.typo=false;g.i++;if(g.i>=g.qs.length){g.ms=Date.now()-g.t0;try{await fbReq('PUT','duels/'+g.id+'/res/'+lbMe.pid,{s:g.score,ms:g.ms});const d=duelsObj[g.id];d.res=d.res||{};d.res[lbMe.pid]={s:g.score,ms:g.ms};}catch(e){}updDuelBtn();}renderDuelPlay();},ok?600:1400);}
 
 loadLbMe().then(()=>{
   fbStream('players','',(path,data,isPatch)=>{const wasLoaded=lbPlayersLoaded;lbPlayers=applyAt(lbPlayers,path,data,isPatch);lbPlayersLoaded=true;
