@@ -354,10 +354,10 @@ input[type=range]{flex:1;accent-color:var(--accent)}
 /* Leaderboard & chat sidebar */
 .layout{display:flex;justify-content:center;align-items:flex-start;gap:28px;padding:0 20px}
 .layout>.app{flex:0 1 760px;min-width:0;margin:0}
-.side{flex:0 0 320px;position:sticky;top:16px;height:calc(100vh - 32px);margin-top:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.side{flex:0 0 320px;position:sticky;top:16px;height:calc(100vh - 32px);margin-top:16px;display:flex;flex-direction:column;gap:12px;min-width:0;overflow-y:auto;scrollbar-width:thin}
 .side-sec{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);display:flex;flex-direction:column;min-height:0;overflow:hidden}
-.side-lb{flex:0 1 auto;max-height:46%}
-.side-chat{flex:1 1 0}
+.side-lb{flex:0 0 auto}
+.side-chat{flex:1 0 auto;min-height:320px}
 .side-h{display:flex;align-items:baseline;justify-content:space-between;gap:8px;padding:12px 14px 8px}
 .side-h>span:first-child{font-family:var(--serif);font-size:19px;color:var(--text)}
 .side-sub{font-size:11px;color:var(--text3);text-align:right}
@@ -376,7 +376,7 @@ input[type=range]{flex:1;accent-color:var(--accent)}
 .side-chat .lb-msg{margin:0 14px 10px}
 .lb-periods{display:flex;gap:2px;background:var(--surface2);border:1px solid var(--border);border-radius:999px;padding:3px;margin:0 14px 10px;justify-content:space-between}
 .lb-periods .mode-btn{flex:1;padding:5px 6px;font-size:12px}
-.lb-list{overflow-y:auto;min-height:0;border-top:1px solid var(--border)}
+.lb-list{border-top:1px solid var(--border)}
 .lb-item{display:flex;align-items:center;gap:10px;padding:7px 14px;border-top:1px solid var(--border);font-size:13px}
 .lb-item:first-child{border-top:none}
 .lb-item.me{background:var(--accent-bg)}
@@ -421,7 +421,7 @@ input[type=range]{flex:1;accent-color:var(--accent)}
   .layout{flex-direction:column;align-items:stretch;padding:0}
   .layout>.app{margin:0 auto;width:100%;max-width:760px}
   .side{order:2;position:static;height:auto;width:100%;max-width:760px;margin:0 auto 4rem;padding:0 1.5rem}
-  .side-lb{max-height:none}.side-lb .lb-list{max-height:340px}
+
   .side-chat{flex:none}.chat-list{flex:none;height:380px}
   .nav-side{display:inline-block}
 }
@@ -466,7 +466,7 @@ body.calm *,body.calm *::before,body.calm *::after{transition:none!important;ani
 
 /* leaderboard extras */
 .lb-search{padding:0 14px 8px}.lb-search input{width:100%;font-family:var(--sans);font-size:12px;padding:6px 12px;border-radius:999px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);outline:none}
-.lb-more-row{display:flex;border-top:1px solid var(--border)}.lb-more-row .lb-more{border-top:none;flex:1}.lb-more.on{color:var(--text3);cursor:default;text-decoration:none}
+.lb-more-row{display:flex;border-top:1px solid var(--border);align-items:center}.lb-pager .lb-more:disabled{color:var(--text3);cursor:default}.lb-pageinfo{flex:1;text-align:center;font-size:11px;color:var(--text3)}.lb-more-row .lb-more{border-top:none;flex:1}.lb-more.on{color:var(--text3);cursor:default;text-decoration:none}
 .lb-item.click{cursor:pointer}.lb-item.click:hover{background:var(--surface2)}
 .pname{display:inline-flex;align-items:center;gap:4px;max-width:100%;overflow:hidden}.pname>span:last-child{overflow:hidden;text-overflow:ellipsis}.pav{font-size:1.05em;line-height:1}
 .cc-box{margin:0 14px 10px;padding:8px 10px;border:1px solid var(--gold-bdr);background:var(--gold-bg);border-radius:var(--rs)}.cc-box.done{border-color:var(--green-bdr);background:var(--green-bg)}
@@ -3391,7 +3391,7 @@ loadDescription();
 // check every write. Chat stores the player id, not the name, so renaming updates old messages.
 const FB_ROOT=FB_DB;
 const LB_KEY='latin_lb_v1',LB_PENDING_KEY='latin_lb_pending';
-let lbLimit=10,lbMe=null,lbPending=0,lbInFlight=0,lbInFlightBase=0,lbFlushTimer=null,lbPlayers={},lbPlayersLoaded=false,lbPeriod='d',chatObj={},chatMsgs=[],chatLastSend=0,lbEditing=false;
+let lbPage=0,lbLastQ='',lbLimit=10,lbMe=null,lbPending=0,lbInFlight=0,lbInFlightBase=0,lbFlushTimer=null,lbPlayers={},lbPlayersLoaded=false,lbPeriod='d',chatObj={},chatMsgs=[],chatLastSend=0,lbEditing=false;
 const fbUrl=path=>FB_ROOT+'/'+path+'.json';
 async function fbReq(method,path,body,opts){opts=opts||{};const tok=opts.admin?await adminToken():await playerToken();
   if(!opts.admin&&lbMe&&lbMe.pid!==playerAuth.uid){lbMe=null;saveLbMe();renderLbProfile();}
@@ -3513,7 +3513,9 @@ function renderLb(){const list=document.getElementById('lbList');if(!list||!lbPl
   let rank=0,prev=null;rows.forEach((r,i)=>{if(r.n!==prev){rank=i+1;prev=r.n;}r.rank=rank;});
   // Search looks through everyone and keeps their real place; otherwise show the top 10 / 25 / all.
   const q=((document.getElementById('lbSearch')||{}).value||'').trim().toLowerCase();
-  let shown=q?rows.filter(r=>r.name.toLowerCase().includes(q)):rows.slice(0,lbLimit);const meRow=lbMe&&rows.find(r=>r.pid===lbMe.pid);
+  // Pages of 10: the list grows to fit (no scrolling) and ‹ › move between pages.
+  if(q!==lbLastQ){lbPage=0;lbLastQ=q;}const pool=q?rows.filter(r=>r.name.toLowerCase().includes(q)):rows;const pages=Math.max(1,Math.ceil(pool.length/10));if(lbPage>=pages)lbPage=pages-1;
+  let shown=pool.slice(lbPage*10,lbPage*10+10);const meRow=lbMe&&rows.find(r=>r.pid===lbMe.pid);
   if(!q&&meRow&&!shown.includes(meRow)){shown.push(null,meRow);}
   if(q&&!shown.length){list.innerHTML='<div class="lb-empty">No players match “'+esc(q)+'”.</div>';return;}
   shown.forEach(r=>{if(!r){const gap=document.createElement('div');gap.className='lb-gap';gap.textContent='⋯';list.appendChild(gap);return;}
@@ -3530,9 +3532,11 @@ function renderLb(){const list=document.getElementById('lbList');if(!list||!lbPl
       const d=document.createElement('button');d.className='lb-act del';d.title='Remove player';d.textContent='×';d.onclick=async()=>{if(!confirm('Remove '+r.name+' from the leaderboard?'))return;try{await fbReq('DELETE','players/'+r.pid,null,{admin:true});}catch(e){alert('Couldn’t remove: '+e.message);}};
       it.append(ed,d);}
     list.appendChild(it);});
-  if(!q&&rows.length>10){const bar=document.createElement('div');bar.className='lb-more-row';
-    [[10,'Top 10'],[25,'Top 25'],[Infinity,'Show all']].forEach(([n,l])=>{if(n===25&&rows.length<=25)return;const b=document.createElement('button');b.className='lb-more'+(lbLimit===n?' on':'');b.textContent=l;b.onclick=()=>{lbLimit=n;renderLb();};bar.appendChild(b);});
-    list.appendChild(bar);}
+  if(pool.length>10){const bar=document.createElement('div');bar.className='lb-more-row lb-pager';
+    const prev=document.createElement('button');prev.className='lb-more';prev.textContent='‹ Previous';prev.disabled=lbPage===0;prev.onclick=()=>{lbPage--;renderLb();};
+    const info=document.createElement('span');info.className='lb-pageinfo';info.textContent=(lbPage*10+1)+'–'+Math.min(pool.length,lbPage*10+10)+' of '+pool.length;
+    const next=document.createElement('button');next.className='lb-more';next.textContent='Next ›';next.disabled=lbPage>=pages-1;next.onclick=()=>{lbPage++;renderLb();};
+    bar.append(prev,info,next);list.appendChild(bar);}
   renderClassChallenge();}
 // Admin: rename any player (same rules as choosing a name; it updates everywhere, including old chat messages).
 async function adminRename(pid){const p=lbPlayers[pid];if(!p)return;const v=prompt('New name for '+p.name+':',p.name);if(v===null)return;
