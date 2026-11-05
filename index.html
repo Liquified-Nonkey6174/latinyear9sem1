@@ -518,6 +518,7 @@ body.calm *,body.calm *::before,body.calm *::after{transition:none!important;ani
 .pw-sub{color:var(--text2);font-size:14px;margin:6px 0 14px}.pw-price{margin:0 0 16px;font-size:15px;color:var(--text3)}.pw-price b{font-size:34px;color:var(--accent);margin:0 4px}.pw-price span{display:block;font-size:12px}
 .pw-joke{font-size:18px;margin:4px 0 16px;line-height:1.5}
 .look-opt.prem{border-color:var(--accent);position:relative}.av-lock{position:absolute;right:-4px;bottom:-4px;font-size:10px;line-height:1}
+.pw-ask{display:block;font-size:14px;color:var(--text2);font-style:italic;margin-bottom:2px}.pw-price.bump b{display:inline-block;animation:pwBump .3s ease}@keyframes pwBump{0%{transform:scale(1)}40%{transform:scale(1.25)}100%{transform:scale(1)}}
 </style>
 </head>
 <body>
@@ -3627,8 +3628,10 @@ function openPaywall(){let o=document.getElementById('paywallOverlay');
     +'<p class="pw-sub">The 👑 crown avatar, plus 6 exclusive fonts: Gothic, Elegant, 3D block, Fire, Candy and Honk. Stand out on the leaderboard like a true emperor.</p>'
     +'<div class="pw-price"><s>$6,767</s> <b>$67</b><span>one-time payment</span></div>'
     +'<div id="pwBtns" style="display:flex;gap:8px;justify-content:center"><button class="btn-primary" id="pwBuy">Buy now: $67</button><button class="btn-secondary" onclick="closeOverlay(\'paywallOverlay\')">Maybe later</button></div></div>';
-  o.querySelector('#pwBuy').onclick=()=>{o.querySelector('.pw-price').outerHTML='<p class="pw-joke">Just kidding 😄<br>Premium is for the admin only.<br><small>No money needed (or accepted).</small></p>';
-    o.querySelector('#pwBtns').innerHTML='<button class="btn-primary" onclick="closeOverlay(\'paywallOverlay\')">Fair enough</button>';};
+  // "Buy now" never buys anything: every press, the price goes up by $1.
+  let price=67;const buy=o.querySelector('#pwBuy'),pr=o.querySelector('.pw-price');
+  buy.onclick=()=>{price++;pr.innerHTML='<span class="pw-ask">Actually, what about…</span><b>$'+price+'</b><span>one-time payment</span>';buy.textContent='Buy now: $'+price;
+    pr.classList.remove('bump');void pr.offsetWidth;pr.classList.add('bump');};
   o.style.display='flex';}
 function applyNameFont(el,f){const nf=NAME_FONTS[f];if(!nf)return;loadNameFonts();el.style.fontFamily=nf[1];if(nf[2]!==1)el.style.fontSize=nf[2]+'em';}
 function nameEl(pid,name){const p=lbPlayers[pid]||{};const s=document.createElement('span');s.className='pname';
