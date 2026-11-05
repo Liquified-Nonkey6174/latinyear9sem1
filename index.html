@@ -513,7 +513,10 @@ body.calm *,body.calm *::before,body.calm *::after{transition:none!important;ani
 .look-opt.fnt{width:auto;height:34px;padding:0 10px;font-size:15px;color:var(--text);white-space:nowrap}
 .fnt-h{flex-basis:100%;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin:6px 0 0}
 .look-opt.fnt.prem{border-color:var(--accent);position:relative}.fnt-tag{font-family:system-ui,sans-serif;font-size:10px;margin-left:6px;padding:1px 5px;border-radius:6px;background:var(--accent);color:var(--bg);vertical-align:middle;letter-spacing:0}
-#lookFonts{max-height:300px;overflow-y:auto;padding:2px}
+/* Look panel: preview stays at the top, Save/Cancel at the bottom, the options scroll in between */
+.look-box{max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px);display:flex;flex-direction:column}
+.look-scroll{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;margin:0 -8px;padding:0 8px 8px;border-top:1px solid var(--border2);border-bottom:1px solid var(--border2)}
+.look-actions{display:flex;gap:8px;justify-content:center;padding-top:14px;flex-shrink:0}
 .pw-box{text-align:center;max-width:380px}.pw-badge{display:inline-block;font-size:11px;letter-spacing:.12em;padding:3px 10px;border-radius:999px;background:linear-gradient(90deg,#d4a84a,#e08ab8,#6aa2e0);color:#1c1a17;font-weight:700;margin-bottom:6px}
 .pw-sub{color:var(--text2);font-size:14px;margin:6px 0 14px}.pw-price{margin:0 0 16px;font-size:15px;color:var(--text3)}.pw-price b{font-size:34px;color:var(--accent);margin:0 4px}.pw-price span{display:block;font-size:12px}
 .pw-joke{font-size:18px;margin:4px 0 16px;line-height:1.5}
@@ -1789,11 +1792,13 @@ body.calm *,body.calm *::before,body.calm *::after{transition:none!important;ani
   <div class="about-box look-box" onclick="event.stopPropagation()"><button class="about-close" onclick="closeOverlay('lookOverlay')">×</button>
     <div class="about-title">Your look</div>
     <div class="look-preview" id="lookPreview"></div>
+    <div class="look-scroll">
     <div class="set-h">Avatar</div><div class="look-grid" id="lookAvatars"></div>
     <div class="set-h">Name colour</div><div class="look-grid" id="lookColors"></div>
     <div class="set-h">Name font</div><div class="look-grid" id="lookFonts"></div>
     <div class="set-h">Name effect</div><div class="look-grid" id="lookFx"></div>
-    <div style="display:flex;gap:8px;justify-content:center;margin-top:16px"><button class="btn-primary" onclick="saveLook()">Save</button><button class="btn-secondary" onclick="closeOverlay('lookOverlay')">Cancel</button></div>
+    </div>
+    <div class="look-actions"><button class="btn-primary" onclick="saveLook()">Save</button><button class="btn-secondary" onclick="closeOverlay('lookOverlay')">Cancel</button></div>
     <p class="lb-msg err" id="lookErr"></p>
   </div>
 </div>
