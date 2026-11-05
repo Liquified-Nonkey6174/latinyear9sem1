@@ -32,13 +32,13 @@
           }
         },
         "av": {
-          ".validate": "newData.isString() && newData.val().length <= 8"
+          ".validate": "newData.isString() && newData.val().length <= 8 && (newData.val() !== '👑' || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2')"
         },
         "color": {
           ".validate": "newData.isString() && newData.val().length <= 12"
         },
         "font": {
-          ".validate": "newData.isString() && newData.val().length <= 12"
+          ".validate": "newData.isString() && newData.val().length <= 12 && (!newData.val().matches(/^(gothic|elegant|block3d|fire|candy|honk)$/) || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2')"
         },
         "$other": {
           ".validate": false
