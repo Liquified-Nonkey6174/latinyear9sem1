@@ -37,6 +37,9 @@
         "color": {
           ".validate": "newData.isString() && newData.val().length <= 12"
         },
+        "font": {
+          ".validate": "newData.isString() && newData.val().length <= 12"
+        },
         "$other": {
           ".validate": false
         }

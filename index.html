@@ -510,6 +510,7 @@ body.calm *,body.calm *::before,body.calm *::after{transition:none!important;ani
 .dp-prompt{text-align:center;font-family:var(--serif);font-size:28px;margin:6px 0 14px}.dp-fb{text-align:center;min-height:20px;margin-top:8px;font-weight:600}.dp-fb.ok{color:var(--green)}.dp-fb.no{color:var(--red)}
 @media(max-width:560px){.dl-cats,.pz-opts{grid-template-columns:1fr}.pc-grid{grid-template-columns:1fr 1fr}}
 .nh-box{margin:0 0 10px;font-size:.85em;max-height:220px;overflow:auto;text-align:left}.nh-table{width:100%;border-collapse:collapse}.nh-table td{padding:4px 6px;border-bottom:1px solid var(--border2)}.nh-box .muted{opacity:.7}
+.look-opt.fnt{width:auto;height:34px;padding:0 10px;font-size:15px;color:var(--text);white-space:nowrap}
 </style>
 </head>
 <body>
@@ -1754,6 +1755,7 @@ body.calm *,body.calm *::before,body.calm *::after{transition:none!important;ani
     <div class="look-preview" id="lookPreview"></div>
     <div class="set-h">Avatar</div><div class="look-grid" id="lookAvatars"></div>
     <div class="set-h">Name colour</div><div class="look-grid" id="lookColors"></div>
+    <div class="set-h">Name font</div><div class="look-grid" id="lookFonts"></div>
     <div style="display:flex;gap:8px;justify-content:center;margin-top:16px"><button class="btn-primary" onclick="saveLook()">Save</button><button class="btn-secondary" onclick="closeOverlay('lookOverlay')">Cancel</button></div>
     <p class="lb-msg err" id="lookErr"></p>
   </div>
@@ -3587,19 +3589,27 @@ function lbStreamFail(){if(!lbPlayersLoaded)document.getElementById('lbList').in
 // Looks: avatar + name colour, shown on the leaderboard and in chat
 const AVATARS=['🦉','🦅','🐺','🦁','🐎','🐍','🦊','🐉','🐬','🐝','🏛️','⚔️','🛡️','📜','🌿','🔥','⭐','🌙','🍇','⚓'];
 const NAME_COLORS={gold:'#d4a84a',red:'#e07a6a',green:'#6dbf8a',blue:'#6aa2e0',purple:'#b08ae0',pink:'#e08ab8',teal:'#4fbcbc',orange:'#e8964a'};
+// Name fonts (Google Fonts, loaded only once someone uses one). key -> [label, CSS font-family, size tweak]
+const NAME_FONTS={roman:['Roman','"Cinzel",serif',.95],old:['Old book','"IM Fell English",serif',1.05],hand:['Handwriting','"Caveat",cursive',1.25],script:['Fancy','"Pacifico",cursive',1],
+  marker:['Marker','"Permanent Marker",cursive',1],comic:['Comic','"Bangers",cursive',1.15],tech:['Tech','"Orbitron",sans-serif',.9],pixel:['Pixel','"Press Start 2P",monospace',.7],mono:['Typewriter','"Courier New",Courier,monospace',1]};
+let nameFontsLoaded=false;
+function loadNameFonts(){if(nameFontsLoaded)return;nameFontsLoaded=true;const l=document.createElement('link');l.rel='stylesheet';
+  l.href='https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Caveat:wght@600&family=Pacifico&family=Permanent+Marker&family=Bangers&family=Orbitron:wght@600&family=Press+Start+2P&display=swap';document.head.appendChild(l);}
+function applyNameFont(el,f){const nf=NAME_FONTS[f];if(!nf)return;loadNameFonts();el.style.fontFamily=nf[1];if(nf[2]!==1)el.style.fontSize=nf[2]+'em';}
 function nameEl(pid,name){const p=lbPlayers[pid]||{};const s=document.createElement('span');s.className='pname';
   if(p.av&&AVATARS.includes(p.av)){const a=document.createElement('span');a.className='pav';a.textContent=p.av;s.appendChild(a);}
-  const n=document.createElement('span');n.textContent=name;if(NAME_COLORS[p.color])n.style.color=NAME_COLORS[p.color];s.appendChild(n);return s;}
+  const n=document.createElement('span');n.textContent=name;if(NAME_COLORS[p.color])n.style.color=NAME_COLORS[p.color];applyNameFont(n,p.font);s.appendChild(n);return s;}
 function closeOverlay(id){document.getElementById(id).style.display='none';}
 let lookSel={};
-function openLook(){if(!lbMe)return;const p=lbPlayers[lbMe.pid]||{};lookSel={av:p.av||'',color:p.color||''};renderLook();document.getElementById('lookErr').textContent='';document.getElementById('lookOverlay').style.display='flex';}
-function renderLook(){const av=document.getElementById('lookAvatars'),co=document.getElementById('lookColors');av.innerHTML='';co.innerHTML='';
+function openLook(){if(!lbMe)return;const p=lbPlayers[lbMe.pid]||{};lookSel={av:p.av||'',color:p.color||'',font:p.font||''};loadNameFonts();renderLook();document.getElementById('lookErr').textContent='';document.getElementById('lookOverlay').style.display='flex';}
+function renderLook(){const av=document.getElementById('lookAvatars'),co=document.getElementById('lookColors'),fo=document.getElementById('lookFonts');av.innerHTML='';co.innerHTML='';fo.innerHTML='';
+  [['',['Normal','',1]]].concat(Object.entries(NAME_FONTS)).forEach(([k,f])=>{const b=document.createElement('button');b.className='look-opt fnt'+(lookSel.font===k?' on':'');b.textContent=f[0];applyNameFont(b,k);b.onclick=()=>{lookSel.font=k;renderLook();};fo.appendChild(b);});
   [''].concat(AVATARS).forEach(a=>{const b=document.createElement('button');b.className='look-opt'+(lookSel.av===a?' on':'');b.textContent=a||'—';b.title=a?'':'No avatar';b.onclick=()=>{lookSel.av=a;renderLook();};av.appendChild(b);});
   [['', 'var(--text)']].concat(Object.entries(NAME_COLORS)).forEach(([k,c])=>{const b=document.createElement('button');b.className='look-opt sw'+(lookSel.color===k?' on':'');b.style.background=c;b.title=k||'Default';b.onclick=()=>{lookSel.color=k;renderLook();};co.appendChild(b);});
   const pv=document.getElementById('lookPreview');pv.innerHTML='';const s=document.createElement('span');s.className='pname';if(lookSel.av){const a=document.createElement('span');a.className='pav';a.textContent=lookSel.av;s.appendChild(a);}
-  const n=document.createElement('b');n.textContent=lbMe.name;if(NAME_COLORS[lookSel.color])n.style.color=NAME_COLORS[lookSel.color];s.appendChild(n);pv.appendChild(s);}
-async function saveLook(){try{await fbReq('PATCH','players/'+lbMe.pid,{av:lookSel.av||null,color:lookSel.color||null});
-    lbPlayers[lbMe.pid]={...(lbPlayers[lbMe.pid]||{}),av:lookSel.av||undefined,color:lookSel.color||undefined};closeOverlay('lookOverlay');renderLb();renderChat();renderLbProfile();}
+  const n=document.createElement('b');n.textContent=lbMe.name;if(NAME_COLORS[lookSel.color])n.style.color=NAME_COLORS[lookSel.color];applyNameFont(n,lookSel.font);s.appendChild(n);pv.appendChild(s);}
+async function saveLook(){try{await fbReq('PATCH','players/'+lbMe.pid,{av:lookSel.av||null,color:lookSel.color||null,font:lookSel.font||null});
+    lbPlayers[lbMe.pid]={...(lbPlayers[lbMe.pid]||{}),av:lookSel.av||undefined,color:lookSel.color||undefined,font:lookSel.font||undefined};closeOverlay('lookOverlay');renderLb();renderChat();renderLbProfile();}
   catch(e){document.getElementById('lookErr').textContent='Couldn’t save. If this keeps happening, the database rules need updating (ask the admin).';}}
 function openPlayerCard(pid){const p=lbPlayers[pid];if(!p)return;const k=lbKeys();const box=document.getElementById('playerCard');box.innerHTML='';
   const h=document.createElement('div');h.className='pc-name';const big=nameEl(pid,p.name);h.appendChild(big);box.appendChild(h);
