@@ -400,6 +400,7 @@ input[type=range]{flex:1;accent-color:var(--accent)}
 .chat-form{display:flex;gap:6px;padding:10px 14px;border-top:1px solid var(--border)}
 .chat-m{position:relative;border-radius:6px;padding:2px 4px;margin:0 -4px;transition:background .3s}
 .chat-m.flash{background:var(--accent-bg)}
+.chat-edited{font-size:10px;color:var(--text3);font-style:italic}
 .chat-quote{font-size:11px;color:var(--text3);border-left:2px solid var(--border2);padding-left:6px;margin-bottom:2px;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .chat-quote:hover{color:var(--text2)}
 .chat-reply{background:none;border:none;font-family:var(--sans);font-size:11px;color:var(--text3);cursor:pointer;padding:0 4px;margin-left:4px;opacity:0;transition:opacity var(--t)}
@@ -3554,7 +3555,7 @@ function renderChat(){const list=document.getElementById('chatList');if(!list||!
   if(!chatMsgs.length){list.innerHTML='<div class="lb-empty">No messages yet. Say salve!</div>';return;}
   chatMsgs.forEach(m=>{if(!m||typeof m.text!=='string')return;const el=document.createElement('div');el.className='chat-m'+(lbMe&&m.pid===lbMe.pid?' me':'');
     const who=document.createElement('span');who.className='chat-who';who.appendChild(nameEl(m.pid,lbName(m.pid)));
-    const tx=document.createElement('span');tx.textContent=m.text;
+    const tx=document.createElement('span');tx.textContent=m.text;if(m.ed===true){const e=document.createElement('span');e.className='chat-edited';e.textContent=' (edited)';tx.appendChild(e);}
     const tm=document.createElement('span');tm.className='chat-time';tm.textContent=chatTime(m.t);
     el.id='cm_'+m.id;
     // A reply shows a short quote of the message it answers (click it to jump there).
@@ -3568,6 +3569,7 @@ function renderChat(){const list=document.getElementById('chatList');if(!list||!
     const rx=m.rx&&typeof m.rx==='object'?m.rx:null;if(rx){const row=document.createElement('div');row.className='chat-rx';
       REACTS.forEach(([k,e])=>{const who=rx[k]?Object.keys(rx[k]):[];if(!who.length)return;const c=document.createElement('button');c.className='rx-chip'+(lbMe&&who.includes(lbMe.pid)?' mine':'');
         c.textContent=e+' '+who.length;c.title=who.map(lbName).join(', ');c.onclick=()=>{if(lbMe)toggleReact(m.id,k);};row.appendChild(c);});if(row.childNodes.length)el.appendChild(row);}
+    if(isAdmin){const ed=document.createElement('button');ed.className='lb-act';ed.title='Edit message';ed.textContent='✎';ed.onclick=()=>adminEditMsg(m.id);el.appendChild(ed);}
     if(isAdmin){const d=document.createElement('button');d.className='lb-act del';d.title='Delete message';d.textContent='×';d.onclick=async()=>{try{await fbReq('DELETE','chat/'+m.id,null,{admin:true});}catch(e){alert('Couldn’t delete: '+e.message);}};el.appendChild(d);}
     list.appendChild(el);});
   if(atBottom||list.dataset.first!=='1'){list.scrollTop=list.scrollHeight;list.dataset.first='1';}}
@@ -3580,6 +3582,10 @@ async function sendChat(){const inp=document.getElementById('chatInput'),err=doc
   catch(e){// older database rules don't allow replies yet: send it as a normal message instead
     if(msg.re){delete msg.re;try{await fbReq('POST','chat',msg);err.textContent='Sent, but not as a reply: the database rules need updating (ask the admin).';return;}catch(e2){}}
     inp.value=text;setChatReply(was);err.textContent='Message not sent. Check your internet and try again.';}}
+// Admin: edit any chat message (marked "(edited)" for everyone).
+async function adminEditMsg(id){const m=chatObj[id];if(!m)return;const v=prompt('Edit message from '+lbName(m.pid)+':',m.text);if(v===null)return;
+  const text=v.replace(/\s+/g,' ').trim().slice(0,300);if(!text){alert('A message can’t be empty. Use × to delete it instead.');return;}if(text===m.text)return;
+  try{await fbReq('PATCH','chat/'+id,{text,ed:true},{admin:true});}catch(e){alert('Couldn’t edit: '+e.message+'. The database rules may need updating.');}}
 let chatReplyTo=null;
 function chatSnippet(t){t=String(t);return t.length>60?t.slice(0,57)+'…':t;}
 function setChatReply(id){chatReplyTo=id&&chatObj[id]?id:null;const bar=document.getElementById('chatReplyBar');if(!bar)return;
