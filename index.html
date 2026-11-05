@@ -519,6 +519,34 @@ body.calm *,body.calm *::before,body.calm *::after{transition:none!important;ani
 .pw-joke{font-size:18px;margin:4px 0 16px;line-height:1.5}
 .look-opt.prem{border-color:var(--accent);position:relative}.av-lock{position:absolute;right:-4px;bottom:-4px;font-size:10px;line-height:1}
 .pw-ask{display:block;font-size:14px;color:var(--text2);font-style:italic;margin-bottom:2px}.pw-price.bump b{display:inline-block;animation:pwBump .3s ease}@keyframes pwBump{0%{transform:scale(1)}40%{transform:scale(1.25)}100%{transform:scale(1)}}
+/* Animated name effects */
+.pname.has-fx,.pname.has-fx>span:last-child,.lb-name:has(.has-fx){overflow-x:clip;overflow-y:visible}@supports (overflow-clip-margin:1px){.pname.has-fx,.pname.has-fx>span:last-child,.lb-name:has(.has-fx){overflow:clip;overflow-clip-margin:14px}}
+.nfx-type{text-overflow:clip!important}
+.nfx{display:inline-block;position:relative}
+.nfx-rainbow{background:linear-gradient(90deg,#ff5f6d,#ffc371,#f9f871,#6dd47e,#4fc3f7,#a78bfa,#ff5f6d);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent!important;animation:nfxRainbow 4s linear infinite}
+@keyframes nfxRainbow{to{background-position:300% 0}}
+.nfx-shimmer{background:linear-gradient(100deg,#b8862f 0%,#e9c46a 35%,#fff6d5 50%,#e9c46a 65%,#b8862f 100%);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent!important;animation:nfxShimmer 3s ease-in-out infinite}
+@keyframes nfxShimmer{0%,30%{background-position:120% 0}70%,100%{background-position:-20% 0}}
+.nfx-glow{animation:nfxGlow 2.2s ease-in-out infinite}
+@keyframes nfxGlow{0%,100%{text-shadow:0 0 2px rgba(255,200,90,.3)}50%{text-shadow:0 0 6px #ffcc66,0 0 12px #ff9f1a,0 0 20px rgba(255,140,0,.55)}}
+.nfx-fire{animation:nfxFire 1.2s ease-in-out infinite alternate}
+@keyframes nfxFire{0%{text-shadow:0 -1px 3px #fff3,0 -2px 6px #ffb300,0 -4px 10px #ff6a00,0 -7px 14px #c81e00}50%{text-shadow:0 -2px 4px #fff5,0 -3px 8px #ffc400,0 -6px 12px #ff7a00,0 -9px 16px #d02800}100%{text-shadow:0 -1px 3px #fff3,0 -2px 6px #ffa000,0 -4px 9px #ff5a00,0 -6px 13px #b01800}}
+.nfx-sparkle::before,.nfx-sparkle::after{content:"✦";position:absolute;font-size:10px;line-height:1;color:#ffd866;opacity:0;animation:nfxTwinkle 2.4s ease-in-out infinite;font-family:system-ui,sans-serif;font-style:normal;pointer-events:none}
+.nfx-sparkle::before{top:-7px;left:1px}.nfx-sparkle::after{bottom:-5px;right:1px;animation-delay:1.2s}
+@keyframes nfxTwinkle{0%,100%{opacity:0;transform:scale(.4) rotate(0)}50%{opacity:1;transform:scale(1.2) rotate(90deg)}}
+.nfx-ghost{animation:nfxGhost 3.5s ease-in-out infinite}
+@keyframes nfxGhost{0%,100%{opacity:1;filter:blur(0);transform:translateY(0)}50%{opacity:.4;filter:blur(1.2px);transform:translateY(-3px)}}
+.nfx .ch{display:inline-block;white-space:pre}
+.nfx-wave .ch{animation:nfxWave 1.6s ease-in-out infinite;animation-delay:calc(var(--i)*.08s)}
+@keyframes nfxWave{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.nfx-flip .ch{animation:nfxFlip 4s ease-in-out infinite;animation-delay:calc(var(--i)*.1s)}
+@keyframes nfxFlip{0%,70%{transform:rotateY(0)}85%,100%{transform:rotateY(360deg)}}
+.nfx-rwave .ch{animation:nfxWave 1.6s ease-in-out infinite,nfxHue 3s linear infinite;animation-delay:calc(var(--i)*.08s),calc(var(--i)*-.2s);color:hsl(0 85% 62%)}
+@keyframes nfxHue{0%{color:hsl(0 85% 62%)}25%{color:hsl(90 70% 50%)}50%{color:hsl(185 75% 50%)}75%{color:hsl(270 75% 66%)}100%{color:hsl(360 85% 62%)}}
+.nfx-type{overflow:hidden!important;white-space:nowrap;vertical-align:bottom;border-right:2px solid var(--accent);animation:nfxType 4.5s steps(var(--n)) infinite,nfxCaret .7s step-end infinite}
+@keyframes nfxType{0%{width:0}55%,85%{width:calc(var(--n)*1ch)}100%{width:0}}
+@keyframes nfxCaret{50%{border-color:transparent}}
+.look-opt.fxo{overflow:visible}
 </style>
 </head>
 <body>
@@ -1764,6 +1792,7 @@ body.calm *,body.calm *::before,body.calm *::after{transition:none!important;ani
     <div class="set-h">Avatar</div><div class="look-grid" id="lookAvatars"></div>
     <div class="set-h">Name colour</div><div class="look-grid" id="lookColors"></div>
     <div class="set-h">Name font</div><div class="look-grid" id="lookFonts"></div>
+    <div class="set-h">Name effect</div><div class="look-grid" id="lookFx"></div>
     <div style="display:flex;gap:8px;justify-content:center;margin-top:16px"><button class="btn-primary" onclick="saveLook()">Save</button><button class="btn-secondary" onclick="closeOverlay('lookOverlay')">Cancel</button></div>
     <p class="lb-msg err" id="lookErr"></p>
   </div>
@@ -3616,6 +3645,13 @@ const NAME_FONTS={roman:['Roman','"Cinzel",serif',.95,'Classic'],old:['Old book'
   spy:['Spy','"Special Elite",monospace',1,'Other'],zoo:['Zoo','"Zen Tokyo Zoo",sans-serif',1.05,'Other'],outline:['Outline','"Londrina Outline",sans-serif',1.2,'Other'],moon:['Moon','"Rubik Moonrocks",sans-serif',1.05,'Other'],cowboy:['Cowboy','"Rye",serif',1,'Other']};
 // "Premium" fonts: a joke $67 paywall; really they're admin-only (the database rules enforce it).
 const PREMIUM_FONTS=['gothic','elegant','block3d','fire','candy','honk'];
+// Animated name effects (CSS only; the Reduce animations setting stops them). key -> [label, premium?, animates each letter?]
+const NAME_FX={sparkle:['Sparkle ✨',0,0],ghost:['Ghost 👻',0,0],wave:['Wave',0,1],flip:['Letter flip',0,1],
+  rainbow:['Rainbow',1,0],shimmer:['Gold shimmer',1,0],glow:['Glow',1,0],fire:['Fire',1,0],rwave:['Rainbow wave',1,1],type:['Typewriter',1,0]};
+const PREMIUM_FX=Object.keys(NAME_FX).filter(k=>NAME_FX[k][1]);
+function applyNameFx(el,fx,text){const f=NAME_FX[fx];if(!f)return;el.classList.add('nfx','nfx-'+fx);
+  if(f[2]){el.textContent='';[...text].forEach((c,i)=>{const t=document.createElement('span');t.className='ch';t.style.setProperty('--i',i);t.textContent=c;el.appendChild(t);});}
+  if(fx==='type'){el.style.setProperty('--n',[...text].length);el.style.fontFamily='"Courier New",Courier,monospace';el.style.fontSize='';}}
 let nameFontsLoaded=false;
 function loadNameFonts(){if(nameFontsLoaded)return;nameFontsLoaded=true;const l=document.createElement('link');l.rel='stylesheet';
   const fams=['Cinzel:wght@600','Caveat:wght@600','Pacifico','Permanent Marker','Bangers','Orbitron:wght@600','Press Start 2P','UnifrakturMaguntia','Cinzel Decorative','Pirata One','Almendra Display','New Rocker','Great Vibes','Monoton','Faster One','Silkscreen','Sixtyfour','Rubik Vinyl','Megrim',
@@ -3625,7 +3661,7 @@ function openPaywall(){let o=document.getElementById('paywallOverlay');
   if(!o){o=document.createElement('div');o.id='paywallOverlay';o.className='overlay';o.onclick=()=>closeOverlay('paywallOverlay');document.body.appendChild(o);}
   o.innerHTML='<div class="about-box pw-box" onclick="event.stopPropagation()"><button class="about-close" onclick="closeOverlay(\'paywallOverlay\')">×</button>'
     +'<div class="pw-badge">✨ PREMIUM ✨</div><div class="about-title">Unlock Latin Trainer Premium</div>'
-    +'<p class="pw-sub">The 👑 crown avatar, plus 6 exclusive fonts: Gothic, Elegant, 3D block, Fire, Candy and Honk. Stand out on the leaderboard like a true emperor.</p>'
+    +'<p class="pw-sub">The 👑 crown avatar, 6 exclusive fonts (Gothic, Elegant, 3D block, Fire, Candy, Honk) and 6 animated effects (Rainbow, Gold shimmer, Glow, Fire, Rainbow wave, Typewriter). Stand out on the leaderboard like a true emperor.</p>'
     +'<div class="pw-price"><s>$6,767</s> <b>$67</b><span>one-time payment</span></div>'
     +'<div id="pwBtns" style="display:flex;gap:8px;justify-content:center"><button class="btn-primary" id="pwBuy">Buy now: $67</button><button class="btn-secondary" onclick="closeOverlay(\'paywallOverlay\')">Maybe later</button></div></div>';
   // "Buy now" never buys anything: every press, the price goes up by $1.
@@ -3636,11 +3672,15 @@ function openPaywall(){let o=document.getElementById('paywallOverlay');
 function applyNameFont(el,f){const nf=NAME_FONTS[f];if(!nf)return;loadNameFonts();el.style.fontFamily=nf[1];if(nf[2]!==1)el.style.fontSize=nf[2]+'em';}
 function nameEl(pid,name){const p=lbPlayers[pid]||{};const s=document.createElement('span');s.className='pname';
   if(p.av&&AVATARS.includes(p.av)){const a=document.createElement('span');a.className='pav';a.textContent=p.av;s.appendChild(a);}
-  const n=document.createElement('span');n.textContent=name;if(NAME_COLORS[p.color])n.style.color=NAME_COLORS[p.color];applyNameFont(n,p.font);s.appendChild(n);return s;}
+  const n=document.createElement('span');n.textContent=name;if(NAME_COLORS[p.color])n.style.color=NAME_COLORS[p.color];applyNameFont(n,p.font);applyNameFx(n,p.fx,name);if(NAME_FX[p.fx])s.classList.add('has-fx');s.appendChild(n);return s;}
 function closeOverlay(id){document.getElementById(id).style.display='none';}
 let lookSel={};
-function openLook(){if(!lbMe)return;const p=lbPlayers[lbMe.pid]||{};lookSel={av:p.av||'',color:p.color||'',font:p.font||''};loadNameFonts();renderLook();document.getElementById('lookErr').textContent='';document.getElementById('lookOverlay').style.display='flex';}
-function renderLook(){const av=document.getElementById('lookAvatars'),co=document.getElementById('lookColors'),fo=document.getElementById('lookFonts');av.innerHTML='';co.innerHTML='';fo.innerHTML='';
+function openLook(){if(!lbMe)return;const p=lbPlayers[lbMe.pid]||{};lookSel={av:p.av||'',color:p.color||'',font:p.font||'',fx:p.fx||''};loadNameFonts();renderLook();document.getElementById('lookErr').textContent='';document.getElementById('lookOverlay').style.display='flex';}
+function renderLook(){const av=document.getElementById('lookAvatars'),co=document.getElementById('lookColors'),fo=document.getElementById('lookFonts'),fe=document.getElementById('lookFx');av.innerHTML='';co.innerHTML='';fo.innerHTML='';fe.innerHTML='';
+  [['',['None',0,0]]].concat(Object.entries(NAME_FX)).forEach(([k,f])=>{const locked=f[1]&&!isAdmin;const b=document.createElement('button');b.className='look-opt fnt fxo'+(lookSel.fx===k?' on':'')+(f[1]?' prem':'');
+    const lab=document.createElement('span');lab.textContent=f[0];if(k)applyNameFx(lab,k,f[0]);b.appendChild(lab);
+    if(f[1]){const t=document.createElement('span');t.className='fnt-tag';t.textContent=locked?'🔒 $67':'👑';b.appendChild(t);}
+    b.onclick=()=>{if(locked){openPaywall();return;}lookSel.fx=k;renderLook();};fe.appendChild(b);});
   let grp=null;[['',['Normal','',1,'Classic']]].concat(Object.entries(NAME_FONTS)).forEach(([k,f])=>{
     if(f[3]!==grp){grp=f[3];if(grp!=='Classic'){const h=document.createElement('div');h.className='fnt-h';h.textContent=grp==='Colour'?'Colour (built-in colours)':grp;fo.appendChild(h);}}
     const prem=PREMIUM_FONTS.includes(k),locked=prem&&!isAdmin;const b=document.createElement('button');b.className='look-opt fnt'+(lookSel.font===k?' on':'')+(prem?' prem':'');b.textContent=f[0];applyNameFont(b,k);
@@ -3651,13 +3691,13 @@ function renderLook(){const av=document.getElementById('lookAvatars'),co=documen
     b.onclick=()=>{if(locked){openPaywall();return;}lookSel.av=a;renderLook();};av.appendChild(b);});
   [['', 'var(--text)']].concat(Object.entries(NAME_COLORS)).forEach(([k,c])=>{const b=document.createElement('button');b.className='look-opt sw'+(lookSel.color===k?' on':'');b.style.background=c;b.title=k||'Default';b.onclick=()=>{lookSel.color=k;renderLook();};co.appendChild(b);});
   const pv=document.getElementById('lookPreview');pv.innerHTML='';const s=document.createElement('span');s.className='pname';if(lookSel.av){const a=document.createElement('span');a.className='pav';a.textContent=lookSel.av;s.appendChild(a);}
-  const n=document.createElement('b');n.textContent=lbMe.name;if(NAME_COLORS[lookSel.color])n.style.color=NAME_COLORS[lookSel.color];applyNameFont(n,lookSel.font);s.appendChild(n);pv.appendChild(s);}
-async function saveLook(){const me=lbPlayers[lbMe.pid]||{},fontChanged=lookSel.font!==(me.font||''),avChanged=lookSel.av!==(me.av||'');
-  const needAdmin=(fontChanged&&PREMIUM_FONTS.includes(lookSel.font))||(avChanged&&lookSel.av===PREMIUM_AV);
+  const n=document.createElement('b');n.textContent=lbMe.name;if(NAME_COLORS[lookSel.color])n.style.color=NAME_COLORS[lookSel.color];applyNameFont(n,lookSel.font);applyNameFx(n,lookSel.fx,lbMe.name);if(NAME_FX[lookSel.fx])s.classList.add('has-fx');s.appendChild(n);pv.appendChild(s);}
+async function saveLook(){const me=lbPlayers[lbMe.pid]||{},fontChanged=lookSel.font!==(me.font||''),avChanged=lookSel.av!==(me.av||''),fxChanged=lookSel.fx!==(me.fx||'');
+  const needAdmin=(fontChanged&&PREMIUM_FONTS.includes(lookSel.font))||(avChanged&&lookSel.av===PREMIUM_AV)||(fxChanged&&PREMIUM_FX.includes(lookSel.fx));
   if(needAdmin&&!isAdmin){openPaywall();return;}
-  const body={color:lookSel.color||null};if(fontChanged)body.font=lookSel.font||null;if(avChanged)body.av=lookSel.av||null;   // unchanged premium items aren't re-sent
+  const body={color:lookSel.color||null};if(fontChanged)body.font=lookSel.font||null;if(avChanged)body.av=lookSel.av||null;if(fxChanged)body.fx=lookSel.fx||null;   // unchanged premium items aren't re-sent
   try{await fbReq('PATCH','players/'+lbMe.pid,body,{admin:needAdmin});
-    lbPlayers[lbMe.pid]={...(lbPlayers[lbMe.pid]||{}),av:lookSel.av||undefined,color:lookSel.color||undefined,font:lookSel.font||undefined};closeOverlay('lookOverlay');renderLb();renderChat();renderLbProfile();}
+    lbPlayers[lbMe.pid]={...(lbPlayers[lbMe.pid]||{}),av:lookSel.av||undefined,color:lookSel.color||undefined,font:lookSel.font||undefined,fx:lookSel.fx||undefined};closeOverlay('lookOverlay');renderLb();renderChat();renderLbProfile();}
   catch(e){document.getElementById('lookErr').textContent='Couldn’t save. If this keeps happening, the database rules need updating (ask the admin).';}}
 function openPlayerCard(pid){const p=lbPlayers[pid];if(!p)return;const k=lbKeys();const box=document.getElementById('playerCard');box.innerHTML='';
   const h=document.createElement('div');h.className='pc-name';const big=nameEl(pid,p.name);h.appendChild(big);box.appendChild(h);
