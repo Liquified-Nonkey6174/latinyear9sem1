@@ -470,6 +470,9 @@ body.calm *,body.calm *::before,body.calm *::after{transition:none!important;ani
 .cc-bar div{height:100%;background:var(--gold);border-radius:999px}.cc-box.done .cc-bar div{background:var(--green)}.cc-sub{font-size:11px;color:var(--text3)}
 #classChallenge>.lb-link{margin:0 14px 8px}
 .duel-btn{margin-top:8px;font-family:var(--sans);font-size:12px;font-weight:600;padding:5px 12px;border-radius:999px;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);cursor:pointer}.duel-btn:hover{color:var(--text)}
+.duel-pending{display:flex;flex-direction:column;gap:6px;margin-top:8px}.duel-pending:empty{display:none}
+.dpn-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 10px;border:1px solid var(--gold-bdr);background:var(--gold-bg);border-radius:var(--rs);font-size:12px;color:var(--text)}
+.dpn-row>span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.dpn-row>span:last-child{display:flex;gap:4px;align-items:center;flex-shrink:0}.dpn-row .btn-primary{padding:4px 12px;font-size:11px}
 .duel-badge{display:inline-block;min-width:18px;padding:0 5px;margin-left:4px;border-radius:999px;background:var(--red);color:var(--bg);font-size:11px}
 .pc-box{text-align:center;max-width:340px}.pc-name{font-size:22px;font-family:var(--serif);margin:4px 0 12px;display:flex;justify-content:center}.pc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:16px}
 .pc-grid div{background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:6px}.pc-grid b{display:block;font-size:16px;color:var(--accent)}.pc-grid span{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em}
@@ -3440,7 +3443,8 @@ function renderLbProfile(msg,isErr){document.querySelectorAll('.lb-profile').for
     const look=document.createElement('button');look.className='lb-link';look.textContent='Look';look.onclick=openLook;line.appendChild(look);
     const ed=document.createElement('button');ed.className='lb-link';ed.textContent='Change name';ed.onclick=()=>{lbEditing=true;renderLbProfile();};line.appendChild(ed);
     const lv=document.createElement('button');lv.className='lb-link muted';lv.textContent='Leave';lv.onclick=lbLeave;line.appendChild(lv);box.appendChild(line);
-    const du=document.createElement('button');du.className='duel-btn';du.id='duelBtn';du.onclick=()=>openDuelInbox();box.appendChild(du);updDuelBtn();}
+    const du=document.createElement('button');du.className='duel-btn';du.id='duelBtn';du.onclick=()=>openDuelInbox();box.appendChild(du);
+    const pend=document.createElement('div');pend.id='duelPending';pend.className='duel-pending';box.appendChild(pend);updDuelBtn();}
   const m=document.createElement('div');m.className='lb-msg'+(isErr?' err':'');m.textContent=msg||'';box.appendChild(m);});
   const ci=document.getElementById('chatInput'),cs=document.getElementById('chatSend');if(ci){ci.disabled=cs.disabled=!lbMe;ci.placeholder=lbMe?'Message everyone…':'Join above to chat';}}
 async function lbSaveName(raw){const name=lbCleanName(raw);const err=lbNameError(name);if(err){renderLbProfile(err,true);return;}
@@ -3670,7 +3674,11 @@ function myDuels(){if(!lbMe)return [];return Object.entries(duelsObj).filter(([,
 function duelState(d){const me=lbMe.pid,op=d.from===me?d.to:d.from,r=d.res||{};if(!r[me])return 'play';if(!r[op])return 'wait';return 'done';}
 function duelWinner(d){const a=d.res[d.from],b=d.res[d.to];if(a.s!==b.s)return a.s>b.s?d.from:d.to;if(a.ms!==b.ms)return a.ms<b.ms?d.from:d.to;return null;}
 function updDuelBtn(){const b=document.getElementById('duelBtn');if(!b)return;const ds=myDuels();const toPlay=ds.filter(d=>duelState(d)==='play').length;
-  b.innerHTML='⚔ Challenges'+(toPlay?' <span class="duel-badge">'+toPlay+'</span>':'');}
+  b.innerHTML='⚔ Challenges'+(toPlay?' <span class="duel-badge">'+toPlay+'</span>':'');
+  // Challenges sent to you that you haven't played yet, listed right under the button.
+  const pend=document.getElementById('duelPending');if(!pend)return;const inc=ds.filter(d=>d.to===lbMe.pid&&duelState(d)==='play');
+  pend.innerHTML=inc.slice(0,3).map(d=>'<div class="dpn-row"><span>⚔ <b>'+esc(lbPlayers[d.from]?lbPlayers[d.from].name:'Someone')+'</b> challenged you</span><span><button class="btn-primary" onclick="startDuel(\''+d.id+'\')">Play</button><button class="lb-link muted" onclick="deleteDuel(\''+d.id+'\')">Decline</button></span></div>').join('')
+    +(inc.length>3?'<button class="lb-link" onclick="openDuelInbox()">+ '+(inc.length-3)+' more</button>':'');}
 function wordByKey(k){return allWordsFlat().find(w=>wKey(w)===k);}
 function openDuelSetup(pid){const p=lbPlayers[pid];if(!p||!lbMe)return;duelSel={to:pid,subs:{},packs:{},dir:'mixed'};renderDuelSetup();document.getElementById('duelSetupOverlay').style.display='flex';}
 function duelPool(){const ws=[],seen=new Set();Object.entries(duelSel.subs).forEach(([k,on])=>{if(!on)return;const [ck,sk]=k.split('||');DATA[ck].sub[sk].words.forEach(w=>{const x={...w,catKey:ck,subKey:sk};if(!seen.has(wKey(x))){seen.add(wKey(x));ws.push(x);}});});
