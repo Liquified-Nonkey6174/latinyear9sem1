@@ -3624,7 +3624,7 @@ function loadNameFonts(){if(nameFontsLoaded)return;nameFontsLoaded=true;const l=
 function openPaywall(){let o=document.getElementById('paywallOverlay');
   if(!o){o=document.createElement('div');o.id='paywallOverlay';o.className='overlay';o.onclick=()=>closeOverlay('paywallOverlay');document.body.appendChild(o);}
   o.innerHTML='<div class="about-box pw-box" onclick="event.stopPropagation()"><button class="about-close" onclick="closeOverlay(\'paywallOverlay\')">×</button>'
-    +'<div class="pw-badge">✨ PREMIUM ✨</div><div class="about-title">Unlock Premium</div>'
+    +'<div class="pw-badge">✨ PREMIUM ✨</div><div class="about-title">Unlock Latin Trainer Premium</div>'
     +'<p class="pw-sub">The 👑 crown avatar, plus 6 exclusive fonts: Gothic, Elegant, 3D block, Fire, Candy and Honk. Stand out on the leaderboard like a true emperor.</p>'
     +'<div class="pw-price"><s>$6,767</s> <b>$67</b><span>one-time payment</span></div>'
     +'<div id="pwBtns" style="display:flex;gap:8px;justify-content:center"><button class="btn-primary" id="pwBuy">Buy now: $67</button><button class="btn-secondary" onclick="closeOverlay(\'paywallOverlay\')">Maybe later</button></div></div>';
