@@ -50,6 +50,9 @@
         "t": {
           ".validate": "newData.isNumber() && newData.val() <= now"
         },
+        "re": {
+          ".validate": "newData.isString() && newData.val().length <= 40"
+        },
         "$other": {
           ".validate": false
         }

@@ -398,6 +398,16 @@ input[type=range]{flex:1;accent-color:var(--accent)}
 .chat-m.me .chat-who{color:var(--accent)}
 .chat-m .chat-time{font-size:10px;color:var(--text3);margin-left:6px}
 .chat-form{display:flex;gap:6px;padding:10px 14px;border-top:1px solid var(--border)}
+.chat-m{position:relative;border-radius:6px;padding:2px 4px;margin:0 -4px;transition:background .3s}
+.chat-m.flash{background:var(--accent-bg)}
+.chat-quote{font-size:11px;color:var(--text3);border-left:2px solid var(--border2);padding-left:6px;margin-bottom:2px;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chat-quote:hover{color:var(--text2)}
+.chat-reply{background:none;border:none;font-family:var(--sans);font-size:11px;color:var(--text3);cursor:pointer;padding:0 4px;margin-left:4px;opacity:0;transition:opacity var(--t)}
+.chat-m:hover .chat-reply,.chat-reply:focus{opacity:1}
+.chat-reply:hover{color:var(--accent);text-decoration:underline}
+@media(hover:none){.chat-reply{opacity:.7}}
+.chat-replybar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 14px 0;font-size:11px;color:var(--text2);border-top:1px solid var(--border)}
+.chat-replybar span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .points-pill{font-size:12px;color:var(--gold);background:var(--gold-bg);padding:3px 10px;border-radius:999px;border:1px solid var(--gold-bdr);white-space:nowrap}
 .points-pill.bump{animation:ptsBump .35s ease}
 @keyframes ptsBump{50%{transform:scale(1.18)}}
@@ -467,6 +477,7 @@ body.calm *,body.calm *::before,body.calm *::after{transition:none!important;ani
   <section class="side-sec side-chat">
     <div class="side-h"><span>Chat</span><span class="side-sub">everyone can read this, so be kind</span></div>
     <div class="chat-list" id="chatList"><div class="lb-empty">Loading…</div></div>
+    <div class="chat-replybar" id="chatReplyBar" style="display:none"><span id="chatReplyText"></span><button type="button" class="lb-act del" title="Cancel reply" onclick="setChatReply(null)">×</button></div>
     <form class="chat-form" onsubmit="event.preventDefault();sendChat()">
       <input id="chatInput" maxlength="300" autocomplete="off" placeholder="Join above to chat" disabled>
       <button class="btn-primary" id="chatSend" disabled>Send</button>
@@ -3372,14 +3383,31 @@ function renderChat(){const list=document.getElementById('chatList');if(!list||!
     const who=document.createElement('span');who.className='chat-who';who.textContent=lbName(m.pid);
     const tx=document.createElement('span');tx.textContent=m.text;
     const tm=document.createElement('span');tm.className='chat-time';tm.textContent=chatTime(m.t);
+    el.id='cm_'+m.id;
+    // A reply shows a short quote of the message it answers (click it to jump there).
+    if(typeof m.re==='string'){const o=chatObj[m.re];const q=document.createElement('div');q.className='chat-quote';
+      q.textContent='↪ '+(o&&typeof o.text==='string'?lbName(o.pid)+': '+chatSnippet(o.text):'an earlier message');
+      if(o)q.onclick=()=>{const t=document.getElementById('cm_'+m.re);if(t){t.scrollIntoView({block:'center',behavior:'smooth'});t.classList.add('flash');setTimeout(()=>t.classList.remove('flash'),1200);}};
+      el.appendChild(q);}
     el.append(who,tx,tm);
+    if(lbMe){const r=document.createElement('button');r.className='chat-reply';r.title='Reply';r.textContent='Reply';r.onclick=()=>setChatReply(m.id);el.appendChild(r);}
     if(isAdmin){const d=document.createElement('button');d.className='lb-act del';d.title='Delete message';d.textContent='×';d.onclick=async()=>{try{await fbReq('DELETE','chat/'+m.id,null,{admin:true});}catch(e){alert('Couldn’t delete: '+e.message);}};el.appendChild(d);}
     list.appendChild(el);});
   if(atBottom||list.dataset.first!=='1'){list.scrollTop=list.scrollHeight;list.dataset.first='1';}}
 async function sendChat(){const inp=document.getElementById('chatInput'),err=document.getElementById('chatErr');const text=inp.value.replace(/\s+/g,' ').trim();err.textContent='';
   if(!lbMe||!text)return;if(Date.now()-chatLastSend<3000){err.textContent='Slow down a little!';return;}
   chatLastSend=Date.now();inp.value='';document.getElementById('chatList').dataset.first='';
-  try{await fbReq('POST','chat',{pid:lbMe.pid,text:text.slice(0,300),t:{'.sv':'timestamp'}});}catch(e){inp.value=text;err.textContent='Message not sent. Check your internet and try again.';}}
+  const msg={pid:lbMe.pid,text:text.slice(0,300),t:{'.sv':'timestamp'}};if(chatReplyTo&&chatObj[chatReplyTo])msg.re=chatReplyTo;
+  const was=chatReplyTo;setChatReply(null);
+  try{await fbReq('POST','chat',msg);}
+  catch(e){// older database rules don't allow replies yet: send it as a normal message instead
+    if(msg.re){delete msg.re;try{await fbReq('POST','chat',msg);return;}catch(e2){}}
+    inp.value=text;setChatReply(was);err.textContent='Message not sent. Check your internet and try again.';}}
+let chatReplyTo=null;
+function chatSnippet(t){t=String(t);return t.length>60?t.slice(0,57)+'…':t;}
+function setChatReply(id){chatReplyTo=id&&chatObj[id]?id:null;const bar=document.getElementById('chatReplyBar');if(!bar)return;
+  if(!chatReplyTo){bar.style.display='none';return;}const o=chatObj[chatReplyTo];
+  document.getElementById('chatReplyText').textContent='Replying to '+lbName(o.pid)+': '+chatSnippet(o.text);bar.style.display='flex';document.getElementById('chatInput').focus();}
 
 loadLbMe().then(()=>{
   fbStream('players','',(path,data,isPatch)=>{const wasLoaded=lbPlayersLoaded;lbPlayers=applyAt(lbPlayers,path,data,isPatch);lbPlayersLoaded=true;
