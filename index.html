@@ -3368,7 +3368,7 @@ function applyAt(root,path,data,isPatch){if(isPatch){Object.entries(data||{}).fo
   const segs=path.split('/').filter(Boolean);if(!segs.length)return data&&typeof data==='object'?data:{};
   root=root||{};let o=root;segs.slice(0,-1).forEach(k=>{if(!o[k]||typeof o[k]!=='object')o[k]={};o=o[k];});
   const last=segs[segs.length-1];if(data===null)delete o[last];else o[last]=data;return root;}
-function fbStream(path,query,onChange,onFail){let ctrl=null,timer=null,delay=2000;
+function fbStream(path,query,onChange,onFail){let ctrl=null,timer=null,delay=2000,last=Date.now();
   const retry=()=>{if(ctrl)ctrl.abort();ctrl=null;clearTimeout(timer);timer=setTimeout(open,delay);delay=Math.min(delay*2,60000);};
   const handle=(type,data)=>{if(type==='put'||type==='patch'){try{const d=JSON.parse(data);onChange(d.path,d.data,type==='patch');delay=2000;}catch(e){}}
     else if(type==='cancel'){onFail();retry();}else if(type==='auth_revoked')retry();};
@@ -3379,12 +3379,19 @@ function fbStream(path,query,onChange,onFail){let ctrl=null,timer=null,delay=200
     try{const r=await acFetch(fbUrl(path)+'?'+(query?query+'&':'')+'auth='+encodeURIComponent(tok),{headers:{Accept:'text/event-stream'},signal:c.signal});
       if(!r.ok||!r.body)throw new Error('HTTP '+r.status);
       const rd=r.body.getReader(),dec=new TextDecoder();let buf='';
-      for(;;){const{value,done}=await rd.read();if(done)break;buf+=dec.decode(value,{stream:true}).replace(/\r\n?/g,'\n');let i;
+      last=Date.now();
+      for(;;){const{value,done}=await rd.read();if(done)break;last=Date.now();buf+=dec.decode(value,{stream:true}).replace(/\r\n?/g,'\n');let i;
         while((i=buf.indexOf('\n\n'))>=0){const block=buf.slice(0,i);buf=buf.slice(i+2);let type='message',data=[];
           block.split('\n').forEach(l=>{if(l.startsWith('event:'))type=l.slice(6).trim();else if(l.startsWith('data:'))data.push(l.slice(5).replace(/^ /,''));});
           handle(type,data.join('\n'));}}
       if(c===ctrl)retry();}
     catch(e){if(c===ctrl&&!c.signal.aborted){onFail();retry();}}}
+  // Watchdog: Firebase sends a keep-alive about every 30s. If nothing has arrived for a while (laptop slept,
+  // Wi-Fi changed, phone locked), the connection has silently died, so reconnect and reload the data.
+  const revive=()=>{if(ctrl){ctrl.abort();ctrl=null;}clearTimeout(timer);delay=2000;last=Date.now();open();};
+  setInterval(()=>{if(Date.now()-last>75000)revive();},15000);
+  const wake=()=>{if(Date.now()-last>40000)revive();};
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')wake();});window.addEventListener('online',revive);
   open();}
 
 function saveLbMe(){try{if(lbMe)window.storage.set(LB_KEY,JSON.stringify(lbMe));else window.storage.delete(LB_KEY);}catch(e){}}
@@ -3555,7 +3562,7 @@ function renderChat(){const list=document.getElementById('chatList');if(!list||!
   if(!chatMsgs.length){list.innerHTML='<div class="lb-empty">No messages yet. Say salve!</div>';return;}
   chatMsgs.forEach(m=>{if(!m||typeof m.text!=='string')return;const el=document.createElement('div');el.className='chat-m'+(lbMe&&m.pid===lbMe.pid?' me':'');
     const who=document.createElement('span');who.className='chat-who';who.appendChild(nameEl(m.pid,lbName(m.pid)));
-    const tx=document.createElement('span');tx.textContent=m.text;if(m.ed===true){const e=document.createElement('span');e.className='chat-edited';e.textContent=' (edited)';tx.appendChild(e);}
+    const tx=document.createElement('span');tx.textContent=m.text;
     const tm=document.createElement('span');tm.className='chat-time';tm.textContent=chatTime(m.t);
     el.id='cm_'+m.id;
     // A reply shows a short quote of the message it answers (click it to jump there).
@@ -3585,7 +3592,7 @@ async function sendChat(){const inp=document.getElementById('chatInput'),err=doc
 // Admin: edit any chat message (marked "(edited)" for everyone).
 async function adminEditMsg(id){const m=chatObj[id];if(!m)return;const v=prompt('Edit message from '+lbName(m.pid)+':',m.text);if(v===null)return;
   const text=v.replace(/\s+/g,' ').trim().slice(0,300);if(!text){alert('A message can’t be empty. Use × to delete it instead.');return;}if(text===m.text)return;
-  try{await fbReq('PATCH','chat/'+id,{text,ed:true},{admin:true});}catch(e){alert('Couldn’t edit: '+e.message+'. The database rules may need updating.');}}
+  try{await fbReq('PATCH','chat/'+id,{text},{admin:true});}catch(e){alert('Couldn’t edit: '+e.message+'. The database rules may need updating.');}}
 let chatReplyTo=null;
 function chatSnippet(t){t=String(t);return t.length>60?t.slice(0,57)+'…':t;}
 function setChatReply(id){chatReplyTo=id&&chatObj[id]?id:null;const bar=document.getElementById('chatReplyBar');if(!bar)return;
