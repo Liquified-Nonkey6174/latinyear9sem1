@@ -45,7 +45,7 @@
     "chat": {
       ".read": "auth != null",
       "$msg": {
-        ".write": "auth != null && ((!data.exists() && newData.child('pid').val() === auth.uid && root.child('players').child(auth.uid).exists()) || (!newData.exists() && (data.child('pid').val() === auth.uid || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2')))",
+        ".write": "auth != null && ((!data.exists() && newData.child('pid').val() === auth.uid && root.child('players').child(auth.uid).exists()) || (!newData.exists() && (data.child('pid').val() === auth.uid || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2'))) || (auth != null && auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2' && data.exists() && newData.exists())",
         ".validate": "newData.hasChildren(['pid', 'text', 't'])",
         "pid": {
           ".validate": "newData.isString()"
@@ -66,6 +66,9 @@
               ".validate": "newData.val() === true && ($e === 'like' || $e === 'laugh' || $e === 'love' || $e === 'wow')"
             }
           }
+        },
+        "ed": {
+          ".validate": "newData.val() === true"
         },
         "$other": {
           ".validate": false
