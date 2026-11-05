@@ -509,6 +509,7 @@ body.calm *,body.calm *::before,body.calm *::after{transition:none!important;ani
 .dp-top{display:flex;justify-content:space-between;font-size:12px;color:var(--text3)}.dp-dir{text-align:center;font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-top:10px}
 .dp-prompt{text-align:center;font-family:var(--serif);font-size:28px;margin:6px 0 14px}.dp-fb{text-align:center;min-height:20px;margin-top:8px;font-weight:600}.dp-fb.ok{color:var(--green)}.dp-fb.no{color:var(--red)}
 @media(max-width:560px){.dl-cats,.pz-opts{grid-template-columns:1fr}.pc-grid{grid-template-columns:1fr 1fr}}
+.nh-box{margin:0 0 10px;font-size:.85em;max-height:220px;overflow:auto;text-align:left}.nh-table{width:100%;border-collapse:collapse}.nh-table td{padding:4px 6px;border-bottom:1px solid var(--border2)}.nh-box .muted{opacity:.7}
 </style>
 </head>
 <body>
@@ -2692,7 +2693,7 @@ const TOUR_ADV=[
   {el:null,title:'Keyboard shortcuts',body:'During a quiz: <strong>Enter</strong> = check/next, <strong>Escape</strong> = skip, <strong>Tab</strong> = hint (\xbd point if correct), <strong>1–4</strong> = MC options. In the forms popup, <strong>Escape</strong> closes it.'},
   {el:'.side-lb',title:'⚔ Head-to-head challenges',body:'Click a player on the leaderboard and press <b>⚔ Challenge</b>. Pick which word groups or packs can come up (use <b>Select all</b>, or a section’s <b>all</b> box, to tick lots at once) and the direction, then play your 10 questions. They get the same 10. The higher score wins, and if it’s a tie, whoever was faster wins. Challenges waiting for you show a red badge on <b>⚔ Challenges</b> next to your name.',pre:()=>{showMainTab('practice');}},
   {el:'.side-lb',title:'Class challenge',body:'When the admin sets one, a shared weekly target appears above the leaderboard (e.g. <i>1,240 / 2,000</i>). Every correct answer from anyone counts towards it.'},
-  {el:null,title:'How points work',body:'One leaderboard point per correct answer in quizzes and <b>Parse it</b>. A correct <b>sentence</b> is worth more, depending on its length: 2–10 points (3–14 English → Latin). Each sentence shows what it’s worth, and up to 2 small typos are allowed. To stop point farming, a short quiz (5 questions or fewer) earns nothing from the 3rd time you repeat it in a day. Story self-marking and challenges don’t give points.'},
+  {el:null,title:'How points work',body:'One leaderboard point per correct answer in quizzes, <b>⚔ challenges</b> and <b>Parse it</b>. A correct <b>sentence</b> is worth more, depending on its length: 2–10 points (3–14 English → Latin). Each sentence shows what it’s worth, and up to 2 small typos are allowed. To stop point farming, a short quiz (5 questions or fewer) earns nothing from the 3rd time you repeat it in a day. Story self-marking and challenges don’t give points.'},
   {el:'.settings-btn',title:'Themes, text size &amp; more',body:'In <b>⚙ Settings</b>: 11 themes (hover a swatch to preview, click to apply), larger text, reduced animations, sound effects, auto-advance timing, and hiding the leaderboard &amp; chat. Everything is remembered.'},
   {el:'#backupBox',title:'Export &amp; import progress',body:'Progress is stored in this browser only. <b>Export</b> saves everything — stats, spaced-repetition data, custom words, starred words and theme — to a backup file (or <b>Copy as text</b>). <b>Import</b> reads one back — choose <b>Replace</b> to overwrite or <b>Merge</b> to combine, keeping whichever record has more practice.',pre:()=>{showMainTab('stats');}},
   {el:null,title:'Tour complete!',body:'Open <b>⚙ Settings → Help</b> any time for tours, the user guide, or shortcuts.',pre:()=>{showMainTab('practice');setQuizType('vocab');}}
@@ -3494,15 +3495,19 @@ function renderLbProfile(msg,isErr){document.querySelectorAll('.lb-profile').for
   }else{const line=document.createElement('div');line.append('You’re ');line.appendChild(nameEl(lbMe.pid,lbMe.name));
     line.append(' · ');const pts=document.createElement('span');pts.className='lb-pts';pts.append('⭐ ');const n=document.createElement('span');n.id='lbMyPts';n.textContent=lbMyPoints().toLocaleString();pts.appendChild(n);line.appendChild(pts);line.append(' ');
     const look=document.createElement('button');look.className='lb-link';look.textContent='Look';look.onclick=openLook;line.appendChild(look);
-    const ed=document.createElement('button');ed.className='lb-link';ed.textContent='Change name';ed.onclick=()=>{lbEditing=true;renderLbProfile();};line.appendChild(ed);
+    const ed=document.createElement('button');ed.className='lb-link';ed.textContent='Change name';ed.onclick=async()=>{let locked=false;try{locked=(await fbReq('GET','nlock/'+lbMe.pid))===true;}catch(e){}
+      if(locked){renderLbProfile('The admin has turned off name changes for you.',true);return;}lbEditing=true;renderLbProfile();};line.appendChild(ed);
     const lv=document.createElement('button');lv.className='lb-link muted';lv.textContent='Leave';lv.onclick=lbLeave;line.appendChild(lv);box.appendChild(line);
     const du=document.createElement('button');du.className='duel-btn';du.id='duelBtn';du.onclick=()=>openDuelInbox();box.appendChild(du);
     const pend=document.createElement('div');pend.id='duelPending';pend.className='duel-pending';box.appendChild(pend);updDuelBtn();}
   const m=document.createElement('div');m.className='lb-msg'+(isErr?' err':'');m.textContent=msg||'';box.appendChild(m);});
   const ci=document.getElementById('chatInput'),cs=document.getElementById('chatSend');if(ci){ci.disabled=cs.disabled=!lbMe;ci.placeholder=lbMe?'Message everyone…':'Join above to chat';}}
 async function lbSaveName(raw){const name=lbCleanName(raw);const err=lbNameError(name);if(err){renderLbProfile(err,true);return;}
-  let pid;
-  try{await playerToken();pid=playerAuth.uid;await fbReq('PATCH','players/'+pid,lbMe?{name}:{name,total:0});}catch(e){renderLbProfile('Couldn’t reach the server. Check your internet and try again.',true);return;}
+  let pid;const prev=lbMe?lbMe.name:null;   // remember it now: the live stream may update lbMe.name while we wait
+  try{await playerToken();pid=playerAuth.uid;await fbReq('PATCH','players/'+pid,lbMe?{name}:{name,total:0});}catch(e){
+    if(lbMe&&/HTTP 40[13]/.test(e.message)){lbEditing=false;renderLbProfile('The admin has turned off name changes for you.',true);return;}
+    renderLbProfile('Couldn’t reach the server. Check your internet and try again.',true);return;}
+  if(prev!==name)logName(pid,name,prev===null?'join':'self');
   lbPlayers[pid]={...(lbPlayers[pid]||{total:0}),name};
   lbMe={pid,name};lbEditing=false;saveLbMe();renderLbProfile();lbUpdatePoints();renderLb();renderChat();}
 async function lbLeave(){if(!lbMe||!confirm('Leave the leaderboard and chat? Your name and points will be removed. Your chat messages will show as “(left)”.'))return;
@@ -3553,7 +3558,20 @@ function renderLb(){const list=document.getElementById('lbList');if(!list||!lbPl
 async function adminRename(pid){const p=lbPlayers[pid];if(!p)return;const v=prompt('New name for '+p.name+':',p.name);if(v===null)return;
   const name=lbCleanName(v);if(name===p.name)return;let err='';if(name.length<2||name.length>30)err='Names must be 2–30 characters.';else if(!/^[\p{L}\p{N} _.'-]+$/u.test(name))err='Use letters, numbers, spaces, - _ . or \' only.';
   else if(Object.entries(lbPlayers).some(([id,x])=>id!==pid&&x&&String(x.name||'').toLowerCase()===name.toLowerCase()))err='Someone already has that name.';
-  if(err){alert(err);return;}try{await fbReq('PATCH','players/'+pid,{name},{admin:true});}catch(e){alert('Couldn’t rename: '+e.message);}}
+  if(err){alert(err);return;}try{await fbReq('PATCH','players/'+pid,{name},{admin:true});}catch(e){alert('Couldn’t rename: '+e.message);return;}
+  logName(pid,name,'admin',true);}
+// Name history (only the admin can read it). Each join/rename adds an entry; entries can't be changed or deleted.
+function logName(pid,name,by,admin){const key=Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+  fbReq('PUT','names/'+pid+'/'+key,{n:name,t:{'.sv':'timestamp'},by},{admin:!!admin}).catch(()=>{});}
+async function showNameHistory(pid,box){box.textContent='Loading…';let h;
+  try{h=await fbReq('GET','names/'+pid,null,{admin:true});}catch(e){box.textContent='Couldn’t load name history: '+e.message;return;}
+  const list=Object.values(h||{}).filter(x=>x&&x.n).sort((a,b)=>(b.t||0)-(a.t||0));box.innerHTML='';
+  if(!list.length){box.textContent='No name changes recorded yet. (History starts from when this feature was added.)';return;}
+  const tb=document.createElement('table');tb.className='nh-table';
+  list.forEach(x=>{const tr=document.createElement('tr');const d=new Date(x.t||0);
+    [d.toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'})+' '+d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'}),x.n,x.by==='admin'?'renamed by admin':x.by==='join'?'joined':'changed it']
+      .forEach((v,i)=>{const td=document.createElement('td');td.textContent=v;if(i===1)td.style.fontWeight='600';else td.className='muted';tr.appendChild(td);});tb.appendChild(tr);});
+  box.appendChild(tb);}
 // Admin score edit. Periods nest (today ⊂ week ⊂ month ⊂ all time), so a change moves the bigger periods by the
 // same amount, and the smaller ones are capped so none is ever more than the period that contains it.
 async function lbAdminEdit(pid,name,cur){const per=lbPeriod,label=LB_PERIOD_NAME[per],p=lbPlayers[pid]||{},k=lbKeys();
@@ -3586,7 +3604,13 @@ async function saveLook(){try{await fbReq('PATCH','players/'+lbMe.pid,{av:lookSe
 function openPlayerCard(pid){const p=lbPlayers[pid];if(!p)return;const k=lbKeys();const box=document.getElementById('playerCard');box.innerHTML='';
   const h=document.createElement('div');h.className='pc-name';const big=nameEl(pid,p.name);h.appendChild(big);box.appendChild(h);
   const g=document.createElement('div');g.className='pc-grid';[['Today','d'],['Week','w'],['Month','m'],['All time','all']].forEach(([l,per])=>{const c=document.createElement('div');c.innerHTML='<b>'+lbScore(p,per,k).toLocaleString()+'</b><span>'+l+'</span>';g.appendChild(c);});box.appendChild(g);
-  if(isAdmin){const rb=document.createElement('button');rb.className='btn-secondary';rb.style.marginBottom='8px';rb.textContent='Rename (admin)';rb.onclick=()=>{closeOverlay('playerOverlay');adminRename(pid);};box.appendChild(rb);box.appendChild(document.createElement('br'));}
+  if(isAdmin){const rb=document.createElement('button');rb.className='btn-secondary';rb.style.marginBottom='8px';rb.textContent='Rename (admin)';rb.onclick=()=>{closeOverlay('playerOverlay');adminRename(pid);};box.appendChild(rb);
+    const hb=document.createElement('button');hb.className='btn-secondary';hb.style.margin='0 0 8px 6px';hb.textContent='Name history';const hist=document.createElement('div');hist.className='nh-box';
+    hb.onclick=()=>{hb.disabled=true;showNameHistory(pid,hist);};box.appendChild(hb);
+    const lk=document.createElement('button');lk.className='btn-secondary';lk.style.margin='0 0 8px 6px';lk.textContent='…';lk.disabled=true;box.appendChild(lk);box.appendChild(hist);
+    let locked=false;const setLk=()=>{lk.textContent=locked?'🔒 Name locked (unlock)':'Lock name';lk.title=locked?'They can’t change their own name. Click to allow it again.':'Stop them changing their own name (you can still rename them).';lk.disabled=false;};
+    fbReq('GET','nlock/'+pid,null,{admin:true}).then(v=>{locked=v===true;setLk();}).catch(()=>{lk.textContent='Lock name (unavailable)';});
+    lk.onclick=async()=>{lk.disabled=true;try{await fbReq(locked?'DELETE':'PUT','nlock/'+pid,locked?null:true,{admin:true});locked=!locked;}catch(e){alert('Couldn’t save: '+e.message);}setLk();};}
   if(lbMe&&pid!==lbMe.pid){const b=document.createElement('button');b.className='btn-primary';b.textContent='⚔ Challenge '+p.name;b.onclick=()=>{closeOverlay('playerOverlay');openDuelSetup(pid);};box.appendChild(b);}
   else if(!lbMe){const n=document.createElement('p');n.className='forms-note';n.textContent='Join the leaderboard to challenge other players.';box.appendChild(n);}
   document.getElementById('playerOverlay').style.display='flex';}
@@ -3802,8 +3826,10 @@ async function duelCheck(){const g=duelGame;if(!g||g.fb)return;const inp=documen
   if(!ok&&!g.typo){const w=q.w;let cands=[];if(q.d==='el'){cands=[w.lat,fullLat(w)];if(w.lat.includes('/'))cands.push(...w.lat.split('/'));if(typeof MULTI_FORMS!=='undefined'&&MULTI_FORMS[w.lat])cands.push(...MULTI_FORMS[w.lat]);}
     else w.eng.forEach(e=>{cands.push(String(e));cands.push(String(e).replace(/\([^)]*\)/g,''));});
     if(nearMiss(v,cands,q.d==='el')){g.typo=true;const fb=document.querySelector('#duelPlay .dp-fb');fb.className='dp-fb no';fb.textContent='≈ Very close: check your spelling and try again (no penalty).';inp.focus();try{inp.select();}catch(e){}return;}}
-  if(ok){g.score++;dailyTick();}playTone(ok);
-  g.fb={cls:ok?'ok':'no',text:ok?'✓ Correct':'✗ '+(q.d==='el'?fullLat(q.w):displayEng(q.w))};renderDuelPlay();
+  // Each correct answer earns 1 ⭐ like normal practice (only the first time a challenge is played).
+  const dd=duelsObj[g.id],earn=ok&&lbMe&&!(dd&&dd.res&&dd.res[lbMe.pid]);
+  if(ok){g.score++;dailyTick();if(earn)lbCount();}playTone(ok);
+  g.fb={cls:ok?'ok':'no',text:ok?'✓ Correct'+(earn?'  +1 ⭐':''):'✗ '+(q.d==='el'?fullLat(q.w):displayEng(q.w))};renderDuelPlay();
   setTimeout(async()=>{g.fb=null;g.typo=false;g.i++;if(g.i>=g.qs.length){g.ms=Date.now()-g.t0;try{await fbReq('PUT','duels/'+g.id+'/res/'+lbMe.pid,{s:g.score,ms:g.ms});const d=duelsObj[g.id];d.res=d.res||{};d.res[lbMe.pid]={s:g.score,ms:g.ms};pollShared();}catch(e){}updDuelBtn();}renderDuelPlay();},ok?600:1400);}
 
 loadLbMe().then(()=>{
