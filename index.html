@@ -400,6 +400,7 @@ input[type=range]{flex:1;accent-color:var(--accent)}
 .chat-form{display:flex;gap:6px;padding:10px 14px;border-top:1px solid var(--border)}
 .chat-m{position:relative;border-radius:6px;padding:2px 4px;margin:0 -4px;transition:background .3s}
 .chat-m.flash{background:var(--accent-bg)}
+.dt-term{display:block;font-size:9px;color:var(--text3);letter-spacing:.04em;text-transform:none}
 .chat-edited{font-size:10px;color:var(--text3);font-style:italic}
 .chat-quote{font-size:11px;color:var(--text3);border-left:2px solid var(--border2);padding-left:6px;margin-bottom:2px;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .chat-quote:hover{color:var(--text2)}
@@ -1198,16 +1199,16 @@ body.calm *,body.calm *::before,body.calm *::after{transition:none!important;ani
           <tbody>
             <tr><td class="dt-case">inf.</td><td>amare</td><td>monere</td><td>regere</td><td>capere</td><td>audire</td></tr>
             <tr class="dt-section-row"><td colspan="6">Singular</td></tr>
-            <tr><td class="dt-case">1st sg.</td><td>amo</td><td>moneo</td><td>rego</td><td>capio</td><td>audio</td></tr>
-            <tr><td class="dt-case">2nd sg.</td><td>amas</td><td>mones</td><td>regis</td><td>capis</td><td>audis</td></tr>
-            <tr><td class="dt-case">3rd sg.</td><td>amat</td><td>monet</td><td>regit</td><td>capit</td><td>audit</td></tr>
+            <tr><td class="dt-case">I<small class="dt-term">1st sg</small></td><td>amo</td><td>moneo</td><td>rego</td><td>capio</td><td>audio</td></tr>
+            <tr><td class="dt-case">you (sg)<small class="dt-term">2nd sg</small></td><td>amas</td><td>mones</td><td>regis</td><td>capis</td><td>audis</td></tr>
+            <tr><td class="dt-case">he / she / it<small class="dt-term">3rd sg</small></td><td>amat</td><td>monet</td><td>regit</td><td>capit</td><td>audit</td></tr>
             <tr class="dt-section-row"><td colspan="6">Plural</td></tr>
-            <tr><td class="dt-case">1st pl.</td><td>amamus</td><td>monemus</td><td>regimus</td><td>capimus</td><td>audimus</td></tr>
-            <tr><td class="dt-case">2nd pl.</td><td>amatis</td><td>monetis</td><td>regitis</td><td>capitis</td><td>auditis</td></tr>
-            <tr><td class="dt-case">3rd pl.</td><td>amant</td><td>monent</td><td>regunt</td><td>capiunt</td><td>audiunt</td></tr>
+            <tr><td class="dt-case">we<small class="dt-term">1st pl</small></td><td>amamus</td><td>monemus</td><td>regimus</td><td>capimus</td><td>audimus</td></tr>
+            <tr><td class="dt-case">you (pl)<small class="dt-term">2nd pl</small></td><td>amatis</td><td>monetis</td><td>regitis</td><td>capitis</td><td>auditis</td></tr>
+            <tr><td class="dt-case">they<small class="dt-term">3rd pl</small></td><td>amant</td><td>monent</td><td>regunt</td><td>capiunt</td><td>audiunt</td></tr>
             <tr class="dt-section-row"><td colspan="6">Imperative</td></tr>
-            <tr><td class="dt-case">imp. sg.</td><td>ama</td><td>mone</td><td>rege</td><td>cape</td><td>audi</td></tr>
-            <tr><td class="dt-case">imp. pl.</td><td>amate</td><td>monete</td><td>regite</td><td>capite</td><td>audite</td></tr>
+            <tr><td class="dt-case">command (one)<small class="dt-term">imp sg</small></td><td>ama</td><td>mone</td><td>rege</td><td>cape</td><td>audi</td></tr>
+            <tr><td class="dt-case">command (more than one)<small class="dt-term">imp pl</small></td><td>amate</td><td>monete</td><td>regite</td><td>capite</td><td>audite</td></tr>
           </tbody>
         </table>
         </div>
@@ -1231,13 +1232,13 @@ body.calm *,body.calm *::before,body.calm *::after{transition:none!important;ani
           </thead>
           <tbody>
             <tr class="dt-section-row"><td colspan="6">Singular</td></tr>
-            <tr><td class="dt-case">1st sg.</td><td>amabam</td><td>monebam</td><td>regebam</td><td>capiebam</td><td>audiebam</td></tr>
-            <tr><td class="dt-case">2nd sg.</td><td>amabas</td><td>monebas</td><td>regebas</td><td>capiebas</td><td>audiebas</td></tr>
-            <tr><td class="dt-case">3rd sg.</td><td>amabat</td><td>monebat</td><td>regebat</td><td>capiebat</td><td>audiebat</td></tr>
+            <tr><td class="dt-case">I<small class="dt-term">1st sg</small></td><td>amabam</td><td>monebam</td><td>regebam</td><td>capiebam</td><td>audiebam</td></tr>
+            <tr><td class="dt-case">you (sg)<small class="dt-term">2nd sg</small></td><td>amabas</td><td>monebas</td><td>regebas</td><td>capiebas</td><td>audiebas</td></tr>
+            <tr><td class="dt-case">he / she / it<small class="dt-term">3rd sg</small></td><td>amabat</td><td>monebat</td><td>regebat</td><td>capiebat</td><td>audiebat</td></tr>
             <tr class="dt-section-row"><td colspan="6">Plural</td></tr>
-            <tr><td class="dt-case">1st pl.</td><td>amabamus</td><td>monebamus</td><td>regebamus</td><td>capiebamus</td><td>audiebamus</td></tr>
-            <tr><td class="dt-case">2nd pl.</td><td>amabatis</td><td>monebatis</td><td>regebatis</td><td>capiebatis</td><td>audiebatis</td></tr>
-            <tr><td class="dt-case">3rd pl.</td><td>amabant</td><td>monebant</td><td>regebant</td><td>capiebant</td><td>audiebant</td></tr>
+            <tr><td class="dt-case">we<small class="dt-term">1st pl</small></td><td>amabamus</td><td>monebamus</td><td>regebamus</td><td>capiebamus</td><td>audiebamus</td></tr>
+            <tr><td class="dt-case">you (pl)<small class="dt-term">2nd pl</small></td><td>amabatis</td><td>monebatis</td><td>regebatis</td><td>capiebatis</td><td>audiebatis</td></tr>
+            <tr><td class="dt-case">they<small class="dt-term">3rd pl</small></td><td>amabant</td><td>monebant</td><td>regebant</td><td>capiebant</td><td>audiebant</td></tr>
           </tbody>
         </table>
         </div>
@@ -1252,13 +1253,13 @@ body.calm *,body.calm *::before,body.calm *::after{transition:none!important;ani
           <thead><tr><th class="dt-left" style="width:65px"></th><th>1st</th><th>2nd</th><th>3rd</th><th>3rd-io</th><th>4th</th></tr></thead>
           <tbody>
             <tr class="dt-section-row"><td colspan="6">Singular</td></tr>
-            <tr><td class="dt-case">1st sg.</td><td>amabo</td><td>monebo</td><td>regam</td><td>capiam</td><td>audiam</td></tr>
-            <tr><td class="dt-case">2nd sg.</td><td>amabis</td><td>monebis</td><td>reges</td><td>capies</td><td>audies</td></tr>
-            <tr><td class="dt-case">3rd sg.</td><td>amabit</td><td>monebit</td><td>reget</td><td>capiet</td><td>audiet</td></tr>
+            <tr><td class="dt-case">I<small class="dt-term">1st sg</small></td><td>amabo</td><td>monebo</td><td>regam</td><td>capiam</td><td>audiam</td></tr>
+            <tr><td class="dt-case">you (sg)<small class="dt-term">2nd sg</small></td><td>amabis</td><td>monebis</td><td>reges</td><td>capies</td><td>audies</td></tr>
+            <tr><td class="dt-case">he / she / it<small class="dt-term">3rd sg</small></td><td>amabit</td><td>monebit</td><td>reget</td><td>capiet</td><td>audiet</td></tr>
             <tr class="dt-section-row"><td colspan="6">Plural</td></tr>
-            <tr><td class="dt-case">1st pl.</td><td>amabimus</td><td>monebimus</td><td>regemus</td><td>capiemus</td><td>audiemus</td></tr>
-            <tr><td class="dt-case">2nd pl.</td><td>amabitis</td><td>monebitis</td><td>regetis</td><td>capietis</td><td>audietis</td></tr>
-            <tr><td class="dt-case">3rd pl.</td><td>amabunt</td><td>monebunt</td><td>regent</td><td>capient</td><td>audient</td></tr>
+            <tr><td class="dt-case">we<small class="dt-term">1st pl</small></td><td>amabimus</td><td>monebimus</td><td>regemus</td><td>capiemus</td><td>audiemus</td></tr>
+            <tr><td class="dt-case">you (pl)<small class="dt-term">2nd pl</small></td><td>amabitis</td><td>monebitis</td><td>regetis</td><td>capietis</td><td>audietis</td></tr>
+            <tr><td class="dt-case">they<small class="dt-term">3rd pl</small></td><td>amabunt</td><td>monebunt</td><td>regent</td><td>capient</td><td>audient</td></tr>
           </tbody>
         </table>
         </div>
@@ -1272,13 +1273,13 @@ body.calm *,body.calm *::before,body.calm *::after{transition:none!important;ani
           <thead><tr><th class="dt-left" style="width:60px"></th><th>Present</th><th>Imperfect</th><th>Future</th></tr></thead>
           <tbody>
             <tr class="dt-section-row"><td colspan="4">Singular</td></tr>
-            <tr><td class="dt-case">1st sg.</td><td>sum</td><td>eram</td><td>ero</td></tr>
-            <tr><td class="dt-case">2nd sg.</td><td>es</td><td>eras</td><td>eris</td></tr>
-            <tr><td class="dt-case">3rd sg.</td><td>est</td><td>erat</td><td>erit</td></tr>
+            <tr><td class="dt-case">I<small class="dt-term">1st sg</small></td><td>sum</td><td>eram</td><td>ero</td></tr>
+            <tr><td class="dt-case">you (sg)<small class="dt-term">2nd sg</small></td><td>es</td><td>eras</td><td>eris</td></tr>
+            <tr><td class="dt-case">he / she / it<small class="dt-term">3rd sg</small></td><td>est</td><td>erat</td><td>erit</td></tr>
             <tr class="dt-section-row"><td colspan="4">Plural</td></tr>
-            <tr><td class="dt-case">1st pl.</td><td>sumus</td><td>eramus</td><td>erimus</td></tr>
-            <tr><td class="dt-case">2nd pl.</td><td>estis</td><td>eratis</td><td>eritis</td></tr>
-            <tr><td class="dt-case">3rd pl.</td><td>sunt</td><td>erant</td><td>erunt</td></tr>
+            <tr><td class="dt-case">we<small class="dt-term">1st pl</small></td><td>sumus</td><td>eramus</td><td>erimus</td></tr>
+            <tr><td class="dt-case">you (pl)<small class="dt-term">2nd pl</small></td><td>estis</td><td>eratis</td><td>eritis</td></tr>
+            <tr><td class="dt-case">they<small class="dt-term">3rd pl</small></td><td>sunt</td><td>erant</td><td>erunt</td></tr>
           </tbody>
         </table></div>
         <p class="info-body" style="margin-top:10px;margin-bottom:0"><em>adesse</em> → adsum, aderam, adero; <em>abesse</em> → absum, aberam, abero; <em>posse</em> → possum, poteram, potero (stem <em>pot-</em>).</p>
@@ -1291,13 +1292,13 @@ body.calm *,body.calm *::before,body.calm *::after{transition:none!important;ani
           <thead><tr><th class="dt-left" style="width:60px"></th><th>Present</th><th>Imperfect</th><th>Future</th></tr></thead>
           <tbody>
             <tr class="dt-section-row"><td colspan="4">Singular</td></tr>
-            <tr><td class="dt-case">1st sg.</td><td>eo</td><td>ibam</td><td>ibo</td></tr>
-            <tr><td class="dt-case">2nd sg.</td><td>is</td><td>ibas</td><td>ibis</td></tr>
-            <tr><td class="dt-case">3rd sg.</td><td>it</td><td>ibat</td><td>ibit</td></tr>
+            <tr><td class="dt-case">I<small class="dt-term">1st sg</small></td><td>eo</td><td>ibam</td><td>ibo</td></tr>
+            <tr><td class="dt-case">you (sg)<small class="dt-term">2nd sg</small></td><td>is</td><td>ibas</td><td>ibis</td></tr>
+            <tr><td class="dt-case">he / she / it<small class="dt-term">3rd sg</small></td><td>it</td><td>ibat</td><td>ibit</td></tr>
             <tr class="dt-section-row"><td colspan="4">Plural</td></tr>
-            <tr><td class="dt-case">1st pl.</td><td>imus</td><td>ibamus</td><td>ibimus</td></tr>
-            <tr><td class="dt-case">2nd pl.</td><td>itis</td><td>ibatis</td><td>ibitis</td></tr>
-            <tr><td class="dt-case">3rd pl.</td><td>eunt</td><td>ibant</td><td>ibunt</td></tr>
+            <tr><td class="dt-case">we<small class="dt-term">1st pl</small></td><td>imus</td><td>ibamus</td><td>ibimus</td></tr>
+            <tr><td class="dt-case">you (pl)<small class="dt-term">2nd pl</small></td><td>itis</td><td>ibatis</td><td>ibitis</td></tr>
+            <tr><td class="dt-case">they<small class="dt-term">3rd pl</small></td><td>eunt</td><td>ibant</td><td>ibunt</td></tr>
           </tbody>
         </table></div>
         <p class="info-body" style="margin-top:10px;margin-bottom:0">Compounds follow the same pattern: <em>transeo</em>, <em>abeo</em>, <em>exeo</em>, <em>redeo</em>, <em>ineo</em> (e.g. abeo, abis, abit… / abibam / abibo).</p>
@@ -1310,26 +1311,26 @@ body.calm *,body.calm *::before,body.calm *::after{transition:none!important;ani
           <thead><tr><th class="dt-left" style="width:60px"></th><th>volo</th><th>nolo</th></tr></thead>
           <tbody>
             <tr class="dt-section-row"><td colspan="3">Present</td></tr>
-            <tr><td class="dt-case">1st sg.</td><td>volo</td><td>nolo</td></tr>
-            <tr><td class="dt-case">2nd sg.</td><td>vis</td><td>non vis</td></tr>
-            <tr><td class="dt-case">3rd sg.</td><td>vult</td><td>non vult</td></tr>
-            <tr><td class="dt-case">1st pl.</td><td>volumus</td><td>nolumus</td></tr>
-            <tr><td class="dt-case">2nd pl.</td><td>vultis</td><td>non vultis</td></tr>
-            <tr><td class="dt-case">3rd pl.</td><td>volunt</td><td>nolunt</td></tr>
+            <tr><td class="dt-case">I<small class="dt-term">1st sg</small></td><td>volo</td><td>nolo</td></tr>
+            <tr><td class="dt-case">you (sg)<small class="dt-term">2nd sg</small></td><td>vis</td><td>non vis</td></tr>
+            <tr><td class="dt-case">he / she / it<small class="dt-term">3rd sg</small></td><td>vult</td><td>non vult</td></tr>
+            <tr><td class="dt-case">we<small class="dt-term">1st pl</small></td><td>volumus</td><td>nolumus</td></tr>
+            <tr><td class="dt-case">you (pl)<small class="dt-term">2nd pl</small></td><td>vultis</td><td>non vultis</td></tr>
+            <tr><td class="dt-case">they<small class="dt-term">3rd pl</small></td><td>volunt</td><td>nolunt</td></tr>
             <tr class="dt-section-row"><td colspan="3">Imperfect</td></tr>
-            <tr><td class="dt-case">1st sg.</td><td>volebam</td><td>nolebam</td></tr>
-            <tr><td class="dt-case">2nd sg.</td><td>volebas</td><td>nolebas</td></tr>
-            <tr><td class="dt-case">3rd sg.</td><td>volebat</td><td>nolebat</td></tr>
-            <tr><td class="dt-case">1st pl.</td><td>volebamus</td><td>nolebamus</td></tr>
-            <tr><td class="dt-case">2nd pl.</td><td>volebatis</td><td>nolebatis</td></tr>
-            <tr><td class="dt-case">3rd pl.</td><td>volebant</td><td>nolebant</td></tr>
+            <tr><td class="dt-case">I<small class="dt-term">1st sg</small></td><td>volebam</td><td>nolebam</td></tr>
+            <tr><td class="dt-case">you (sg)<small class="dt-term">2nd sg</small></td><td>volebas</td><td>nolebas</td></tr>
+            <tr><td class="dt-case">he / she / it<small class="dt-term">3rd sg</small></td><td>volebat</td><td>nolebat</td></tr>
+            <tr><td class="dt-case">we<small class="dt-term">1st pl</small></td><td>volebamus</td><td>nolebamus</td></tr>
+            <tr><td class="dt-case">you (pl)<small class="dt-term">2nd pl</small></td><td>volebatis</td><td>nolebatis</td></tr>
+            <tr><td class="dt-case">they<small class="dt-term">3rd pl</small></td><td>volebant</td><td>nolebant</td></tr>
             <tr class="dt-section-row"><td colspan="3">Future</td></tr>
-            <tr><td class="dt-case">1st sg.</td><td>volam</td><td>nolam</td></tr>
-            <tr><td class="dt-case">2nd sg.</td><td>voles</td><td>noles</td></tr>
-            <tr><td class="dt-case">3rd sg.</td><td>volet</td><td>nolet</td></tr>
-            <tr><td class="dt-case">1st pl.</td><td>volemus</td><td>nolemus</td></tr>
-            <tr><td class="dt-case">2nd pl.</td><td>voletis</td><td>noletis</td></tr>
-            <tr><td class="dt-case">3rd pl.</td><td>volent</td><td>nolent</td></tr>
+            <tr><td class="dt-case">I<small class="dt-term">1st sg</small></td><td>volam</td><td>nolam</td></tr>
+            <tr><td class="dt-case">you (sg)<small class="dt-term">2nd sg</small></td><td>voles</td><td>noles</td></tr>
+            <tr><td class="dt-case">he / she / it<small class="dt-term">3rd sg</small></td><td>volet</td><td>nolet</td></tr>
+            <tr><td class="dt-case">we<small class="dt-term">1st pl</small></td><td>volemus</td><td>nolemus</td></tr>
+            <tr><td class="dt-case">you (pl)<small class="dt-term">2nd pl</small></td><td>voletis</td><td>noletis</td></tr>
+            <tr><td class="dt-case">they<small class="dt-term">3rd pl</small></td><td>volent</td><td>nolent</td></tr>
           </tbody>
         </table></div>
         <p class="info-body" style="margin-top:10px;margin-bottom:0">Imperfect (-ebam) and future (-am, -es, -et…) are regular. <em>nolo</em> uses <span class="info-hi">non</span> + the <em>volo</em> form for 2nd sg., 3rd sg., and 2nd pl.</p>
@@ -2305,8 +2306,14 @@ function getAllMatchingKeys(q){
 }
 const ID_NORM={nominative:'nom',vocative:'voc',accusative:'acc',genitive:'gen',dative:'dat',ablative:'abl',singular:'sg',plural:'pl',masculine:'m',masc:'m',feminine:'f',fem:'f',femin:'f',neuter:'n',neut:'n',first:'1st',second:'2nd',third:'3rd',present:'pres',imperfect:'impf',imperative:'imp',future:'fut'};
 const TENSE_LBL={'pres':'present','impf':'imperfect','fut':'future','imp':'imperative'};
-function dispKey(k){const m=String(k).match(/^(pres|impf|fut|imp)\.\s*(.*)$/);if(!m)return normId(k);return '<b style="color:var(--accent)">'+TENSE_LBL[m[1]]+'</b> '+m[2].replace('singular','sg').replace('plural','pl');}
-function normId(s){let t=s.toLowerCase().replace(/[.,!?]/g,'');Object.entries(ID_NORM).forEach(([f,a])=>{t=t.replace(new RegExp('\\b'+f+'\\b','g'),a);});return t.replace(/\s+/g,' ').trim();}
+// Verb persons as plain pronouns: "3rd singular" → "he / she / it".
+const PERSON_WORD={'1st singular':'I','2nd singular':'you (one person)','3rd singular':'he / she / it','1st plural':'we','2nd plural':'you (more than one)','3rd plural':'they'};
+function dispKey(k){const m=String(k).match(/^(pres|impf|fut|imp)\.\s*(.*)$/);if(!m)return normId(k);
+  if(m[1]==='imp')return '<b style="color:var(--accent)">command</b> to '+(m[2]==='plural'?'more than one person':'one person');
+  return '<b style="color:var(--accent)">'+TENSE_LBL[m[1]]+'</b> '+(PERSON_WORD[m[2]]||m[2].replace('singular','sg').replace('plural','pl'));}
+function normId(s){let t=s.toLowerCase().replace(/[.,!?]/g,'')
+    .replace(/\bhe\s*\/?\s*she\s*\/?\s*it\b|\b(he|she|it)\b/g,' 3rd sg ').replace(/\bthey\b/g,' 3rd pl ').replace(/\bwe\b/g,' 1st pl ')
+    .replace(/\byou\s*\(?\s*(sg|singular|one person|one)\s*\)?/g,' 2nd sg ').replace(/\byou\s*\(?\s*(pl|plural|all|more than one|more than one person)\s*\)?/g,' 2nd pl ').replace(/(^|\s)i(?=\s|$)/g,' 1st sg ');Object.entries(ID_NORM).forEach(([f,a])=>{t=t.replace(new RegExp('\\b'+f+'\\b','g'),a);});return t.replace(/\s+/g,' ').trim();}
 function checkLEDrill(ans,q){const n=normId(ans);if(!n.includes(q.word.lat.toLowerCase()))return false;const keys=getAllMatchingKeys(q);const nt=new Set(n.split(' '));return keys.some(k=>normId(k).split(' ').every(t=>nt.has(t)));}
 function formatValidIds(q){return getAllMatchingKeys(q).map(k=>q.word.lat+' '+dispKey(k).replace(/<[^>]*>/g,'')).join(' / ');}
 
@@ -2830,7 +2837,7 @@ function showDrill(){clearTimeout(autoNextTimer);stopTimer();answered=false;hint
   const catLabel={'nouns':'noun','verbs':'verb','adjectives':'adjective','adverbs':'adverb','prepositions':'preposition','conjunctions':'conjunction','pronouns':'pronoun','interrogatives':'interrogative'}[q.word.catKey]||q.word.catKey;
   const ct=document.createElement('span');ct.className='tag decl';ct.textContent=catLabel;tags.appendChild(ct);
   const st=document.createElement('span');st.className='tag';st.textContent=safeSub(q.word.subKey);tags.appendChild(st);
-  if(mode==='le'){document.getElementById('pDir').textContent='What is this form?';document.getElementById('pWord').textContent=q.form;}else{document.getElementById('pDir').textContent=q.type==='conj'?'Conjugation drill':'Declension drill';document.getElementById('pWord').innerHTML='<span style="font-size:16px;color:var(--text3)">'+(q.type==='conj'?dispKey(q.key):q.key.replace(' singular',' sg').replace(' plural',' pl'))+' of</span><br>'+esc(safeSub(q.target));}updPct();const pc=document.getElementById('promptCard');pc.style.animation='none';requestAnimationFrame(()=>{pc.style.animation='fadeIn .22s ease';});if(inputMode==='typed'){showTypedDrill();if(mode==='le'){const ph=q.word.catKey==='verbs'?'e.g. porto 3rd sg':q.word.catKey==='adjectives'?'e.g. bonus m nom sg':'e.g. servus nom sg';document.getElementById('answerInput').placeholder=ph;}}else showMCDrill(q);startTimer();}
+  if(mode==='le'){document.getElementById('pDir').textContent='What is this form?';document.getElementById('pWord').textContent=q.form;}else{document.getElementById('pDir').textContent=q.type==='conj'?'Conjugation drill':'Declension drill';document.getElementById('pWord').innerHTML='<span style="font-size:16px;color:var(--text3)">'+(q.type==='conj'?dispKey(q.key):q.key.replace(' singular',' sg').replace(' plural',' pl'))+' of</span><br>'+esc(safeSub(q.target));}updPct();const pc=document.getElementById('promptCard');pc.style.animation='none';requestAnimationFrame(()=>{pc.style.animation='fadeIn .22s ease';});if(inputMode==='typed'){showTypedDrill();if(mode==='le'){const ph=q.word.catKey==='verbs'?'e.g. porto he/she/it':q.word.catKey==='adjectives'?'e.g. bonus m nom sg':'e.g. servus nom sg';document.getElementById('answerInput').placeholder=ph;}}else showMCDrill(q);startTimer();}
 function showTypedDrill(){document.getElementById('typedSection').style.display='';document.getElementById('mcSection').style.display='none';const ai=document.getElementById('answerInput');ai.value='';ai.className='answer-input';ai.disabled=false;document.getElementById('feedbackBox').className='feedback-box';document.getElementById('feedbackBox').textContent='';document.getElementById('nextBtn').style.display='none';document.getElementById('checkBtn').style.display='';setTimeout(()=>ai.focus(),50);}
 function showMCDrill(q){
   document.getElementById('typedSection').style.display='none';document.getElementById('mcSection').style.display='';document.getElementById('mcFeedback').className='feedback-box';document.getElementById('mcFeedback').textContent='';document.getElementById('mcNextBtn').style.display='none';
@@ -3658,10 +3665,10 @@ function storyMark(ok){storyMarks[storyPos]=ok;storyPos++;if(storyPos>=STORIES[s
 // Parse it: pick a tagged word from a sentence and ask for its form (4 options); checked from the tags, so it earns points.
 const PARSE_CASES=['nom','acc','gen','dat','abl'],PARSE_NUMS=['sg','pl'],PARSE_G=['m','f','n'];
 function parseAnswer(t){const k=tagKind(t),p=t.code.split('.');
-  if(k==='verb'){if(p[0]==='inf')return 'infinitive';if(p[0]==='imp')return 'command, '+(p[1]==='s'?'singular':'plural');return T_NAME[p[0]]+', '+P_NAME[p[1]].replace(/ \(.*\)/,'');}
+  if(k==='verb'){if(p[0]==='inf')return 'infinitive';if(p[0]==='imp')return 'command, '+(p[1]==='s'?'singular':'plural');return T_NAME[p[0]]+', '+P_SHORT[p[1]];}
   const cn=tagCaseNum(t);return [k==='adj'||(k==='pers'&&cn.g)?G_NAME[cn.g]:'',C_NAME[cn.c],N_NAME[cn.n]].filter(Boolean).join(' ');}
 function parseOptions(t){const k=tagKind(t),right=parseAnswer(t),pool=new Set();
-  if(k==='verb'){['pres','impf','fut'].forEach(tn=>Object.keys(P_NAME).forEach(pn=>pool.add(T_NAME[tn]+', '+P_NAME[pn].replace(/ \(.*\)/,''))));pool.add('infinitive');pool.add('command, singular');pool.add('command, plural');}
+  if(k==='verb'){['pres','impf','fut'].forEach(tn=>Object.keys(P_SHORT).forEach(pn=>pool.add(T_NAME[tn]+', '+P_SHORT[pn])));pool.add('infinitive');pool.add('command, singular');pool.add('command, plural');}
   else{const cn=tagCaseNum(t);const gs=(k==='adj'||(k==='pers'&&cn.g))?PARSE_G:[''];gs.forEach(g=>PARSE_CASES.forEach(c=>PARSE_NUMS.forEach(n=>pool.add([g?G_NAME[g]:'',C_NAME[c],N_NAME[n]].filter(Boolean).join(' ')))));}
   pool.delete(right);const wrong=shuffle([...pool]).sort((a,b)=>sim(b,right)-sim(a,right)).slice(0,6);return shuffle([right,...shuffle(wrong).slice(0,3)]);}
 function sim(a,b){const A=a.split(/[ ,]+/),B=b.split(/[ ,]+/);return A.filter(x=>B.includes(x)).length;}
@@ -4661,7 +4668,8 @@ function sentBank(){if(SENT_BANK)return SENT_BANK;const all=allWordsFlat();
 function sentencesFor(w){const k=wKey(w);return sentBank().filter(s=>s.tags.some(t=>t.keys.has(k)));}
 
 const G_NAME={m:'masculine',f:'feminine',n:'neuter'},C_NAME={nom:'nominative',acc:'accusative',gen:'genitive',dat:'dative',abl:'ablative',voc:'vocative'},N_NAME={sg:'singular',pl:'plural'};
-const T_NAME={pres:'present',impf:'imperfect',fut:'future'},P_NAME={'1s':'1st person singular (I)','2s':'2nd person singular (you, one person)','3s':'3rd person singular (he/she/it)','1p':'1st person plural (we)','2p':'2nd person plural (you, more than one)','3p':'3rd person plural (they)'};
+const T_NAME={pres:'present',impf:'imperfect',fut:'future'},P_NAME={'1s':'I (1st person singular)','2s':'you, one person (2nd person singular)','3s':'he / she / it (3rd person singular)','1p':'we (1st person plural)','2p':'you, more than one (2nd person plural)','3p':'they (3rd person plural)'};
+const P_SHORT={'1s':'I','2s':'you (one person)','3s':'he/she/it','1p':'we','2p':'you (more than one)','3p':'they'};
 const CASE_WHY={nom:'Nominative: the subject, the person or thing doing the action.',acc:'Accusative: the object, the person or thing the action is done to.',gen:'Genitive: means “of …” (whose / belonging to).',dat:'Dative: means “to …” or “for …” (the indirect object).',abl:'Ablative: means “by / with / from / in …”.',voc:'Vocative: used when speaking directly to someone.'};
 const INF_GOV=['posse','volo','nolo','debeo','iubeo','cupio','constituo','tempto'];
 function tagKind(t){const c=t.code.split('.')[0];if(!c)return 'plain';if(['pres','impf','fut','imp','inf'].includes(c))return 'verb';if(/^[123]$/.test(c))return 'pers';if(/^[mfn]$/.test(c))return 'adj';return 'noun';}
