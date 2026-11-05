@@ -3392,7 +3392,7 @@ function lbKeys(d){d=d||new Date();const p=n=>String(n).padStart(2,'0');const da
   const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));const dn=t.getUTCDay()||7;t.setUTCDate(t.getUTCDate()+4-dn);const y=t.getUTCFullYear();const wk=Math.ceil(((t-Date.UTC(y,0,1))/86400000+1)/7);
   return{d:day,w:y+'-W'+p(wk),m:day.slice(0,7)};}
 function lbCleanName(n){return String(n||'').replace(/\s+/g,' ').trim();}
-function lbNameError(n){if(n.length<2||n.length>20)return 'Names must be 2–20 characters.';if(!/^[\p{L}\p{N} _.'-]+$/u.test(n))return 'Use letters, numbers, spaces, - _ . or \' only.';const low=n.toLowerCase();if(Object.entries(lbPlayers).some(([id,p])=>id!==(lbMe&&lbMe.pid)&&p&&String(p.name||'').toLowerCase()===low))return 'Someone already has that name.';return '';}
+function lbNameError(n){if(n.length<2||n.length>30)return 'Names must be 2–30 characters.';if(!/^[\p{L}\p{N} _.'-]+$/u.test(n))return 'Use letters, numbers, spaces, - _ . or \' only.';const low=n.toLowerCase();if(Object.entries(lbPlayers).some(([id,p])=>id!==(lbMe&&lbMe.pid)&&p&&String(p.name||'').toLowerCase()===low))return 'Someone already has that name.';return '';}
 
 // Points: one per correct answer, counted locally and sent in batches.
 function lbMyPoints(){if(!lbMe)return 0;const me=lbPlayers[lbMe.pid],server=(me&&me.total)||0;
@@ -3431,7 +3431,7 @@ function lbName(pid){const p=lbPlayers[pid];return p&&p.name?p.name:'(left)';}
 function renderLbProfile(msg,isErr){document.querySelectorAll('.lb-profile').forEach(box=>{box.innerHTML='';
   if(!lbMe||lbEditing){const intro=document.createElement('div');intro.innerHTML=lbMe?'Change your name. It updates on the leaderboard and on all your chat messages.':'<b>Join the leaderboard and chat.</b> Use a first name or nickname: everyone with the link can see it.';box.appendChild(intro);
     const row=document.createElement('form');row.className='lb-row';row.onsubmit=e=>{e.preventDefault();lbSaveName(inp.value);};
-    const inp=document.createElement('input');inp.maxLength=20;inp.placeholder='Your name';inp.value=lbMe?lbMe.name:'';row.appendChild(inp);
+    const inp=document.createElement('input');inp.maxLength=30;inp.placeholder='Your name';inp.value=lbMe?lbMe.name:'';row.appendChild(inp);
     const ok=document.createElement('button');ok.className='btn-primary';ok.textContent=lbMe?'Save':'Join';row.appendChild(ok);
     if(lbMe){const c=document.createElement('button');c.type='button';c.className='btn-secondary';c.textContent='Cancel';c.onclick=()=>{lbEditing=false;renderLbProfile();};row.appendChild(c);}
     box.appendChild(row);
@@ -3490,7 +3490,7 @@ function renderLb(){const list=document.getElementById('lbList');if(!list||!lbPl
   renderClassChallenge();}
 // Admin: rename any player (same rules as choosing a name; it updates everywhere, including old chat messages).
 async function adminRename(pid){const p=lbPlayers[pid];if(!p)return;const v=prompt('New name for '+p.name+':',p.name);if(v===null)return;
-  const name=lbCleanName(v);if(name===p.name)return;let err='';if(name.length<2||name.length>20)err='Names must be 2–20 characters.';else if(!/^[\p{L}\p{N} _.'-]+$/u.test(name))err='Use letters, numbers, spaces, - _ . or \' only.';
+  const name=lbCleanName(v);if(name===p.name)return;let err='';if(name.length<2||name.length>30)err='Names must be 2–30 characters.';else if(!/^[\p{L}\p{N} _.'-]+$/u.test(name))err='Use letters, numbers, spaces, - _ . or \' only.';
   else if(Object.entries(lbPlayers).some(([id,x])=>id!==pid&&x&&String(x.name||'').toLowerCase()===name.toLowerCase()))err='Someone already has that name.';
   if(err){alert(err);return;}try{await fbReq('PATCH','players/'+pid,{name},{admin:true});}catch(e){alert('Couldn’t rename: '+e.message);}}
 async function lbAdminEdit(pid,name,cur){const per=lbPeriod,label=LB_PERIOD_NAME[per];
