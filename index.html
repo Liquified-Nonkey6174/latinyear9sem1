@@ -3505,7 +3505,12 @@ function renderLbProfile(msg,isErr){document.querySelectorAll('.lb-profile').for
     const du=document.createElement('button');du.className='duel-btn';du.id='duelBtn';du.onclick=()=>openDuelInbox();box.appendChild(du);
     const pend=document.createElement('div');pend.id='duelPending';pend.className='duel-pending';box.appendChild(pend);updDuelBtn();}
   const m=document.createElement('div');m.className='lb-msg'+(isErr?' err':'');m.textContent=msg||'';box.appendChild(m);});
-  const ci=document.getElementById('chatInput'),cs=document.getElementById('chatSend');if(ci){ci.disabled=cs.disabled=!lbMe;ci.placeholder=lbMe?'Message everyone…':'Join above to chat';}}
+  updChatInput();}
+// Chat input state: not joined, blocked by the admin (mute/{uid}), or normal.
+let chatMuted=false;
+function updChatInput(){const ci=document.getElementById('chatInput'),cs=document.getElementById('chatSend');if(!ci)return;
+  ci.disabled=cs.disabled=!lbMe||chatMuted;ci.placeholder=!lbMe?'Join above to chat':chatMuted?'The admin has blocked you from sending messages':'Message everyone…';}
+function setChatMuted(m){m=!!m;if(m===chatMuted)return;chatMuted=m;updChatInput();}
 async function lbSaveName(raw){const name=lbCleanName(raw);const err=lbNameError(name);if(err){renderLbProfile(err,true);return;}
   let pid;const prev=lbMe?lbMe.name:null;   // remember it now: the live stream may update lbMe.name while we wait
   try{await playerToken();pid=playerAuth.uid;await fbReq('PATCH','players/'+pid,lbMe?{name}:{name,total:0});}catch(e){
@@ -3622,7 +3627,11 @@ function openPlayerCard(pid){const p=lbPlayers[pid];if(!p)return;const k=lbKeys(
     const lk=document.createElement('button');lk.className='btn-secondary';lk.style.margin='0 0 8px 6px';lk.textContent='…';lk.disabled=true;box.appendChild(lk);box.appendChild(hist);
     let locked=false;const setLk=()=>{lk.textContent=locked?'🔒 Name locked (unlock)':'Lock name';lk.title=locked?'They can’t change their own name. Click to allow it again.':'Stop them changing their own name (you can still rename them).';lk.disabled=false;};
     fbReq('GET','nlock/'+pid,null,{admin:true}).then(v=>{locked=v===true;setLk();}).catch(()=>{lk.textContent='Lock name (unavailable)';});
-    lk.onclick=async()=>{lk.disabled=true;try{await fbReq(locked?'DELETE':'PUT','nlock/'+pid,locked?null:true,{admin:true});locked=!locked;}catch(e){alert('Couldn’t save: '+e.message);}setLk();};}
+    lk.onclick=async()=>{lk.disabled=true;try{await fbReq(locked?'DELETE':'PUT','nlock/'+pid,locked?null:true,{admin:true});locked=!locked;}catch(e){alert('Couldn’t save: '+e.message);}setLk();};
+    const mb=document.createElement('button');mb.className='btn-secondary';mb.style.margin='0 0 8px 6px';mb.textContent='…';mb.disabled=true;box.insertBefore(mb,hist);
+    let muted=false;const setMb=()=>{mb.textContent=muted?'🚫 Blocked from chat (unblock)':'Block from chat';mb.title=muted?'They can’t send chat messages. Click to allow it again.':'Stop them sending chat messages (they can still read chat and play).';mb.disabled=false;};
+    fbReq('GET','mute/'+pid,null,{admin:true}).then(v=>{muted=v===true;setMb();}).catch(()=>{mb.textContent='Block from chat (unavailable)';});
+    mb.onclick=async()=>{mb.disabled=true;try{await fbReq(muted?'DELETE':'PUT','mute/'+pid,muted?null:true,{admin:true});muted=!muted;}catch(e){alert('Couldn’t save: '+e.message);}setMb();};}
   if(lbMe&&pid!==lbMe.pid){const b=document.createElement('button');b.className='btn-primary';b.textContent='⚔ Challenge '+p.name;b.onclick=()=>{closeOverlay('playerOverlay');openDuelSetup(pid);};box.appendChild(b);}
   else if(!lbMe){const n=document.createElement('p');n.className='forms-note';n.textContent='Join the leaderboard to challenge other players.';box.appendChild(n);}
   document.getElementById('playerOverlay').style.display='flex';}
@@ -3679,7 +3688,10 @@ async function sendChat(){const inp=document.getElementById('chatInput'),err=doc
   try{await fbReq('POST','chat',msg);}
   catch(e){// older database rules don't allow replies yet: send it as a normal message instead
     if(msg.re){delete msg.re;try{await fbReq('POST','chat',msg);err.textContent='Sent, but not as a reply: the database rules need updating (ask the admin).';return;}catch(e2){}}
-    inp.value=text;setChatReply(was);err.textContent='Message not sent. Check your internet and try again.';}}
+    inp.value=text;setChatReply(was);
+    let mu=false;try{mu=(await fbReq('GET','mute/'+lbMe.pid))===true;}catch(e3){}
+    if(mu){setChatMuted(true);inp.value='';err.textContent='The admin has blocked you from sending messages.';return;}
+    err.textContent='Message not sent. Check your internet and try again.';}}
 // Admin: edit any chat message (marked "(edited)" for everyone).
 async function adminEditMsg(id){const m=chatObj[id];if(!m)return;const v=prompt('Edit message from '+lbName(m.pid)+':',m.text);if(v===null)return;
   const text=v.replace(/\s+/g,' ').trim().slice(0,300);if(!text){alert('A message can’t be empty. Use × to delete it instead.');return;}if(text===m.text)return;
@@ -3772,7 +3784,8 @@ function pickParse(i){if(!parseQ||parseQ.picked!=null)return;parseQ.picked=i;con
 
 let pollBusy=false;
 async function pollShared(){if(pollBusy)return;pollBusy=true;
-  try{const [d,c]=await Promise.all([fbReq('GET','duels').catch(()=>undefined),fbReq('GET','challenge').catch(()=>undefined)]);
+  try{const [d,c,mu]=await Promise.all([fbReq('GET','duels').catch(()=>undefined),fbReq('GET','challenge').catch(()=>undefined),lbMe?fbReq('GET','mute/'+lbMe.pid).catch(()=>undefined):undefined]);
+    if(mu!==undefined)setChatMuted(mu===true);
     if(d!==undefined){duelsObj=d||{};updDuelBtn();if(document.getElementById('duelInboxOverlay').style.display==='flex')renderDuelInbox();}
     if(c!==undefined){classChal=c&&c.target?c:null;renderClassChallenge();}}
   finally{pollBusy=false;}}
