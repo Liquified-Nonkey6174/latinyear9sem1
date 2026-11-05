@@ -3401,7 +3401,7 @@ async function sendChat(){const inp=document.getElementById('chatInput'),err=doc
   const was=chatReplyTo;setChatReply(null);
   try{await fbReq('POST','chat',msg);}
   catch(e){// older database rules don't allow replies yet: send it as a normal message instead
-    if(msg.re){delete msg.re;try{await fbReq('POST','chat',msg);return;}catch(e2){}}
+    if(msg.re){delete msg.re;try{await fbReq('POST','chat',msg);err.textContent='Sent, but not as a reply: the database rules need updating (ask the admin).';return;}catch(e2){}}
     inp.value=text;setChatReply(was);err.textContent='Message not sent. Check your internet and try again.';}}
 let chatReplyTo=null;
 function chatSnippet(t){t=String(t);return t.length>60?t.slice(0,57)+'…':t;}
