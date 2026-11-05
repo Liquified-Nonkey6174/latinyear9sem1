@@ -411,8 +411,8 @@ input[type=range]{flex:1;accent-color:var(--accent)}
   .nav-side{display:inline-block}
 }
 @media(max-width:560px){.nav-tab{padding:7px 10px;font-size:12px}.nav-tabs{flex-wrap:wrap;justify-content:center}}
-.settings-row{display:flex;justify-content:center;margin:-.75rem 0 .75rem}
-.settings-btn{font-family:var(--sans);font-size:12px;color:var(--text2);background:none;border:1px solid var(--border);border-radius:999px;padding:5px 14px;cursor:pointer;transition:all var(--t)}
+.settings-row{display:flex;justify-content:center;margin:-.5rem 0 1rem}
+.settings-btn{font-family:var(--sans);font-size:14px;font-weight:500;color:var(--text2);background:var(--surface2);border:1px solid var(--border2);border-radius:999px;padding:8px 22px;cursor:pointer;transition:all var(--t)}
 .settings-btn:hover{color:var(--text);border-color:var(--border2);background:var(--surface2)}
 .set-box{max-width:440px;text-align:left;padding:1.5rem 1.5rem 1.25rem}
 .set-box .about-title{text-align:center}
@@ -433,6 +433,21 @@ input[type=range]{flex:1;accent-color:var(--accent)}
 .set-reset{display:block;margin:14px auto 0}
 body.no-side .side,body.no-side .nav-side{display:none!important}
 body.calm *,body.calm *::before,body.calm *::after{transition:none!important;animation:none!important}
+.ex-sec{margin-top:1.5rem;border-top:1px solid var(--border);padding-top:1rem}
+.ex-h{font-family:var(--serif);font-size:19px;color:var(--text);margin-bottom:4px}
+.ex-h span{font-family:var(--sans);font-size:11px;color:var(--text3);border:1px solid var(--border2);border-radius:999px;padding:1px 7px;margin-left:6px;vertical-align:middle}
+.ex-list{display:flex;flex-direction:column;gap:10px}
+.ex-item{background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:10px 12px}
+.ex-sec:not(.all) .ex-more{display:none}
+.ex-la{font-family:var(--serif);font-size:18px;color:var(--text);line-height:1.5}
+.ex-en{font-size:13px;color:var(--text2);margin-top:2px}
+.ex-w{border-bottom:1px dotted var(--text3);cursor:help;outline:none;border-radius:2px}
+.ex-w:hover,.ex-w:focus{background:var(--accent-bg);border-bottom-color:var(--accent)}
+.ex-w.hit{color:var(--accent);border-bottom:2px solid var(--accent)}
+.ex-toggle{border:1px solid var(--border);border-radius:var(--rs);margin-top:10px}
+.ex-tip{position:fixed;z-index:400;max-width:300px;background:var(--surface);color:var(--text2);border:1px solid var(--border2);border-radius:8px;padding:10px 12px;font-size:12.5px;line-height:1.45;box-shadow:0 8px 24px rgba(0,0,0,.35);pointer-events:none;display:none}
+.ex-tip div+div{margin-top:3px}
+.ex-tip-w{font-family:var(--serif);font-size:16px;color:var(--accent)}
 </style>
 </head>
 <body>
@@ -479,10 +494,6 @@ body.calm *,body.calm *::before,body.calm *::after{transition:none!important;ani
         <button class="btn-primary" style="font-size:12px;padding:6px 16px" onclick="saveDesc()">Save</button>
         <button class="btn-secondary" style="font-size:12px;padding:6px 14px" onclick="cancelDescEdit()">Cancel</button>
       </div>
-    </div>
-    <div class="masthead-btns">
-      <button class="icon-btn" id="themeBtn" onclick="toggleTheme()">☀</button>
-      <button class="help-btn pulse" id="helpBtn" onclick="showHelp()">?</button>
     </div>
   </div>
   <div class="settings-row"><button class="settings-btn" onclick="showSettings()">⚙ Settings</button></div>
@@ -1710,7 +1721,7 @@ body.calm *,body.calm *::before,body.calm *::after{transition:none!important;ani
   <div class="guide-box" onclick="event.stopPropagation()">
     <div class="guide-head"><h2>User Guide</h2><button class="about-close" onclick="hideGuide()">×</button></div>
     <div class="guide-scroll">
-      <div class="guide-section"><h3>Getting started</h3><p>Choose a direction (English → Latin or Latin → English), select a quiz type, tick the categories you want to practise, and press Begin. The trainer pulls words from every ticked subcategory and shuffles them into a quiz. First time here? The help menu (?) has a basic tour and an advanced tour.</p></div>
+      <div class="guide-section"><h3>Getting started</h3><p>Choose a direction (English → Latin or Latin → English), select a quiz type, tick the categories you want to practise, and press Begin. The trainer pulls words from every ticked subcategory and shuffles them into a quiz. First time here? The <strong>⚙ Settings → Help</strong> has a basic tour and an advanced tour.</p></div>
       <div class="guide-section"><h3>Quiz types</h3><p><strong>Vocabulary</strong> tests word meanings. <strong>Noun / Adjective / Pronoun declension</strong> drills case forms. <strong>Verb conjugation</strong> drills person/number forms in the tenses you choose. <strong>Sentences</strong> generates full Latin or English sentences to translate, with five difficulty levels.</p></div>
       <div class="guide-section"><h3>Answer modes &amp; scoring</h3><p><strong>Typed</strong> — type your answer and press Enter or click Check. <strong>Multiple choice</strong> — click one of four options (or press 1–4). Correct = 1 point. Press Tab for a hint: if you then answer correctly you get ½ point. Skip (Escape) = 0 points. <strong>Matching</strong> (vocabulary only) — click an English word and its Latin partner from two columns of five. Matched words vanish and are replaced in the same slots by halves of different pairs, so partners turn up later; nothing reshuffles. Matching on the first try scores a point; a wrong click marks the word for review.</p></div>
       <div class="guide-section"><h3>Typing tips &amp; tags</h3><p>When typing a Latin <strong>verb</strong> you can add <strong>dat</strong> or <strong>acc</strong> to the end to show the case it takes (<em>credo dat</em>, <em>porto acc</em>); after a <strong>preposition</strong> add <strong>abl</strong> or <strong>acc</strong>. Anything in (brackets) in an English meaning is optional. When two words share a meaning, an extra tag on the prompt (like “1st declension” or “starts with a”) tells you which word is wanted. For 3rd-declension nouns give nominative, genitive and gender. For words listed with several forms (<em>hic haec hoc</em>, <em>ille illa illud</em>, <em>qui quae quod</em>, <em>idem/eadem</em>) you can type just one of the forms — any one counts. If you make a small slip in spelling (for example <em>ancills</em> instead of <em>ancilla</em>), you get one free retry with no penalty — but a genuine wrong ending or wrong word still counts as wrong.</p></div>
@@ -1729,7 +1740,10 @@ body.calm *,body.calm *::before,body.calm *::after{transition:none!important;ani
       <div class="guide-section"><h3>Statistics</h3><p>The Stats tab shows total answers, accuracy percentage, day streak, a recent-session chart, and per-category breakdowns with due-word counts. Your stats are saved automatically in this browser, including sessions you leave early. “Reset all data” clears them.</p></div>
       <div class="guide-section"><h3>Export &amp; import progress</h3><p>Your progress lives in this browser only (clearing site data or switching device loses it). At the bottom of the Stats tab, <strong>Export progress</strong> downloads a backup file containing your statistics, spaced-repetition data, custom words, starred words and theme. <strong>Copy as text</strong> does the same to the clipboard. To restore, press <strong>Import progress</strong> and pick the file (or paste text), then choose <strong>Replace</strong> (overwrite everything) or <strong>Merge</strong> (combine, keeping whichever record has more practice).</p></div>
       <div class="guide-section"><h3>Information tab</h3><p>Reference tables for all grammar: noun declensions (1st–5th), adjective declensions, verb conjugations (present, imperfect, future, imperative), pronoun paradigms, number declensions, and special cases (dative verbs, time expressions, relative pronoun rules, cum+pronoun forms). Wide tables scroll sideways on narrow screens.</p></div>
-      <div class="guide-section"><h3>Themes</h3><p>Click the ☀/☾ button to open the theme picker. Choose from 11 themes: Dark, Light, Parchment, Mist (light themes), Midnight, Forest, Rose, Ocean, Violet, Slate, and Sepia (dark themes). Your choice is remembered.</p></div>
+      <div class="guide-section"><h3>Settings</h3><p>The <strong>⚙ Settings</strong> button above the Practice / Stats / Information tabs holds everything you can adjust: how long to wait after a right or wrong answer, typo forgiveness, sound effects, theme, text size, reduced animations, showing the leaderboard &amp; chat, rank style, and the Help menu (tours, this guide and keyboard shortcuts).</p></div>
+      <div class="guide-section"><h3>Example sentences</h3><p>Click any word in the word list, or press <strong>Forms</strong> during a quiz, to see its forms and a set of example sentences that use it, each with an English translation. Hover over (or tap) any underlined Latin word to see which form it is and why, e.g. <i>puellis</i>: feminine ablative plural because <i>in</i> takes the ablative.</p></div>
+      <div class="guide-section"><h3>Leaderboard &amp; chat</h3><p>Join with a first name or nickname to appear on the leaderboard (one point per correct answer: today, this week, this month and all time) and to use the class chat. Your points show as ⭐ during a quiz. Changing your name updates it everywhere, including old messages.</p></div>
+      <div class="guide-section"><h3>Themes</h3><p>Open <strong>⚙ Settings</strong> and choose <strong>Change theme…</strong> to open the theme picker. Choose from 11 themes: Dark, Light, Parchment, Mist (light themes), Midnight, Forest, Rose, Ocean, Violet, Slate, and Sepia (dark themes). Your choice is remembered.</p></div>
       <div class="guide-section"><h3>Keyboard shortcuts</h3><p><strong>Enter</strong> check / next · <strong>Escape</strong> skip (or close the forms popup) · <strong>Tab</strong> hint · <strong>1–4</strong> pick a multiple-choice option · <strong>?</strong> show shortcuts.</p></div>
     </div>
   </div>
@@ -2406,7 +2420,7 @@ function buildSentenceRaw(){
 
 const SR_KEY='latin_sr_v2',STATS_KEY='latin_stats_v2',THEME_KEY='latin_theme';
 let srData={},statsData={sessions:[],catStats:{}};
-async function loadPersisted(){try{const r=await window.storage.get(SR_KEY);if(r)srData=JSON.parse(r.value);}catch(e){}try{const r=await window.storage.get(STATS_KEY);if(r)statsData=JSON.parse(r.value);}catch(e){}try{const r=await window.storage.get(THEME_KEY);if(r&&r.value){currentTheme=r.value;if(r.value!=='dark')document.body.className=r.value;document.getElementById('themeBtn').textContent=['light','parchment','mist'].includes(r.value)?'☾':'☀';}}catch(e){}updCount();}
+async function loadPersisted(){try{const r=await window.storage.get(SR_KEY);if(r)srData=JSON.parse(r.value);}catch(e){}try{const r=await window.storage.get(STATS_KEY);if(r)statsData=JSON.parse(r.value);}catch(e){}try{const r=await window.storage.get(THEME_KEY);if(r&&r.value){currentTheme=r.value;if(r.value!=='dark')setBodyTheme(r.value);}}catch(e){}updCount();}
 async function saveSR(){try{await window.storage.set(SR_KEY,JSON.stringify(srData));}catch(e){}}
 async function saveStats(){try{await window.storage.set(STATS_KEY,JSON.stringify(statsData));}catch(e){}}
 function srKey(w){return w.catKey+'|'+w.subKey+'|'+w.lat;}
@@ -2441,6 +2455,8 @@ const THEMES=[
   {id:'sepia',label:'Sepia',bg:'#1a1612',surface:'#221d18',accent:'#cfa46a'},
 ];
 let currentTheme='dark';
+// Swap only the theme class, keeping other body classes (e.g. settings like no-side, calm).
+function setBodyTheme(t){THEMES.forEach(x=>document.body.classList.remove(x.id));if(t&&t!=='dark')document.body.classList.add(t);}
 function buildThemePicker(){
   const grid=document.getElementById('themePicker');grid.innerHTML='';
   THEMES.forEach(t=>{
@@ -2448,15 +2464,14 @@ function buildThemePicker(){
     sw.style.background='linear-gradient(135deg,'+t.bg+' 0%,'+t.bg+' 40%,'+t.surface+' 40%,'+t.surface+' 70%,'+t.accent+' 70%)';
     sw.innerHTML='<span class="theme-swatch-label">'+t.label+'</span>';
     sw.onclick=()=>setTheme(t.id);
-    sw.onmouseenter=()=>{document.body.className=t.id==='dark'?'':t.id;};
-    sw.onmouseleave=()=>{document.body.className=currentTheme==='dark'?'':currentTheme;};
+    sw.onmouseenter=()=>{setBodyTheme(t.id==='dark'?'':t.id);};
+    sw.onmouseleave=()=>{setBodyTheme(currentTheme==='dark'?'':currentTheme);};
     grid.appendChild(sw);
   });
 }
 function setTheme(id){
   currentTheme=id;
-  document.body.className=id==='dark'?'':id;
-  document.getElementById('themeBtn').textContent=['light','parchment','mist'].includes(id)?'☾':'☀';
+  setBodyTheme(id==='dark'?'':id);
   THEMES.forEach(t=>{const sw=document.getElementById('ts_'+t.id);if(sw)sw.className='theme-swatch'+(t.id===id?' active':'');});
   try{window.storage.set(THEME_KEY,id);}catch(e){}
 }
@@ -2499,8 +2514,10 @@ function hideHelp(){document.getElementById('helpOverlay').style.display='none';
 function showGuide(){document.getElementById('guideOverlay').style.display='flex';}
 function hideGuide(){document.getElementById('guideOverlay').style.display='none';}
 const TOUR_BASIC=[
-  {el:null,title:'Welcome to Latin Trainer',body:'This quick tour shows you around. Use arrow keys or Next/Back. Press Escape to exit. You can replay it any time from the help menu (?).'},
+  {el:null,title:'Welcome to Latin Trainer',body:'This quick tour shows you around. Use arrow keys or Next/Back. Press Escape to exit. You can replay it any time from <b>⚙ Settings → Help</b>.'},
   {el:'.nav-tabs',title:'Navigation tabs',body:'<b>Practice</b> for quizzes, <b>Stats</b> for progress tracking (and backing up your progress), <b>Information</b> for grammar reference tables.',pre:()=>{showMainTab('practice');setQuizType('vocab');}},
+  {el:'.settings-btn',title:'⚙ Settings',body:'Adjust how long to wait after right and wrong answers, typo forgiveness, sounds, theme, text size and more. <b>Help</b> (tours, user guide, shortcuts) lives here too.'},
+  {el:'#sidePanel',title:'Leaderboard &amp; chat',body:'Join with a first name or nickname to get on the leaderboard: one point for every correct answer, ranked for today, this week, this month and all time. The chat below is shared with everyone, so be kind.'},
   {el:'#directionToggle',title:'Direction toggle',body:'Choose English → Latin (translate into Latin) or Latin → English (identify meanings).'},
   {el:'#quizTypeToggle',title:'Quiz types',body:'Vocabulary tests word meanings. The declension and conjugation modes drill grammatical forms. Sentences generates full translations in present, past, future and command forms.'},
   {el:'#inputModeToggle',title:'Answer mode',body:'Typed: type your answer and press Enter. Multiple choice: click an option or press 1–4. Matching (vocabulary only): click an English word and its Latin partner from two columns of five.'},
@@ -2510,11 +2527,11 @@ const TOUR_BASIC=[
   {el:'.prompt-card',title:'The prompt',body:'This card shows the word or form you need to answer. Tags below show the part of speech, declension, or gender. If two words share a meaning, an extra tag (like <i>1st declension</i> or <i>starts with a</i>) tells them apart.'},
   {el:'.answer-input',title:'Your answer',body:'Type your answer here and press Enter or click Check. Press Tab for a hint (costs \xbd point). Press Escape to skip. Special typing tags (like <b>dat</b>/<b>acc</b> after a verb) are explained in the advanced tour. A small typo (e.g. <i>ancills</i> for <i>ancilla</i>) gets one free retry with no penalty.'},
   {el:'#starBtn',title:'Mark as hard ★',body:'Tap the star on any question to flag that word as hard. Starred words are saved (you can also star them in the word list and forms popup) and collected under the <b>★ Starred</b> button on the setup screen, so you can drill just your trouble words in whichever quiz type is selected.'},
-  {el:'#formsBtn',title:'See every form',body:'After you answer (or any time in Latin → English), <b>Forms</b> opens the full declension or conjugation table for the word, with its category and any daily boxes it appears in.'},
+  {el:'#formsBtn',title:'Forms &amp; example sentences',body:'After you answer (or any time in Latin → English), <b>Forms</b> opens the full declension or conjugation table for the word, plus <b>example sentences</b> that use it. Hover over a word in a sentence to see its form and why it has that ending.'},
   {el:'.prog-row',title:'Progress bar',body:'Shows how far through the quiz you are, your score, your accuracy percentage, and a Menu button to exit early. Even a quiz you leave early is recorded in your stats, and you can finish it later \u2014 your unfinished quizzes (up to 5) are listed the next time you open the trainer.'},
   {el:null,title:'Back to setup',body:'That’s the quiz interface! Let’s look at a few more features.',pre:()=>{backToMenu();showMainTab('practice');setQuizType('vocab');}},
   {el:'#speedOn',title:'Speed mode',body:'Enable for a timed challenge. When time runs out, your typed text is auto-submitted — correct text still counts!'},
-  {el:'.word-drawer-tab',title:'Word list, search &amp; forms',body:'Opens a side panel listing your selected words with their spaced-repetition stats. Type in its search box to find <b>any</b> word by Latin or English; click a word to see all its forms.'},
+  {el:'.word-drawer-tab',title:'Word list, search &amp; forms',body:'Opens a side panel listing your selected words with their spaced-repetition stats. Type in its search box to find <b>any</b> word by Latin or English; click a word to see all its forms and example sentences.'},
   {el:'#dailySection',title:'Daily practice',body:'Date-stamped word sets for lessons. Each month is a category; tick a month or individual date collections (combine as many as you like), expand a collection to pick word types, then press Practice.'},
   {el:'#statsView',title:'Stats &amp; backup',body:'See total answers, accuracy, streak and per-category progress. Backing up and restoring your progress is covered in the advanced tour.',pre:()=>{showMainTab('stats');}},
   {el:'.nav-tab:nth-child(3)',title:'Information reference',body:'Grammar tables for declensions, conjugations (present, imperfect, future, imperative), adjectives, pronouns, and special cases — all in one place. Wide tables scroll sideways on small screens.',pre:()=>{showMainTab('info');}},
@@ -2531,9 +2548,9 @@ const TOUR_ADV=[
   {el:'#customWordsBtn',title:'Custom words',body:'Add your own vocabulary. Choose a category, enter Latin and English, and it joins the word pool. Custom words are saved, and included in exports.',pre:()=>{setQuizType('vocab');}},
   {el:null,title:'Typing tips &amp; tags',body:'Verbs: add <b>dat</b> or <b>acc</b> after the Latin (<i>credo dat</i>); prepositions: <b>abl</b> or <b>acc</b>. Anything in (brackets) in an English answer is optional. When several words share a meaning, an extra tag (declension, conjugation, “starts with…”) tells you which one is wanted. For <em>se</em> and <em>ipse</em> (both “himself”), the prompt shows “(reflexive)” or “(emphatic)” to tell them apart; your English answer can just be “himself”. For <i>se</i> and <i>ipse</i> (both “himself”) the prompt is labelled <b>reflexive</b> or <b>emphatic</b>; a plain “himself” answer is fine. A plural command is shown with “all of you”.'},
   {el:null,title:'Keyboard shortcuts',body:'During a quiz: <strong>Enter</strong> = check/next, <strong>Escape</strong> = skip, <strong>Tab</strong> = hint (\xbd point if correct), <strong>1–4</strong> = MC options. In the forms popup, <strong>Escape</strong> closes it.'},
-  {el:'#themeBtn',title:'11 Themes',body:'3 light and 8 dark themes. Hover a swatch to preview it live, click to apply. Your choice is remembered.'},
+  {el:'.settings-btn',title:'Themes, text size &amp; more',body:'In <b>⚙ Settings</b>: 11 themes (hover a swatch to preview, click to apply), larger text, reduced animations, sound effects, auto-advance timing, and hiding the leaderboard &amp; chat. Everything is remembered.'},
   {el:'#backupBox',title:'Export &amp; import progress',body:'Progress is stored in this browser only. <b>Export</b> saves everything — stats, spaced-repetition data, custom words, starred words and theme — to a backup file (or <b>Copy as text</b>). <b>Import</b> reads one back — choose <b>Replace</b> to overwrite or <b>Merge</b> to combine, keeping whichever record has more practice.',pre:()=>{showMainTab('stats');}},
-  {el:null,title:'Tour complete!',body:'Open the help menu (?) any time for tours, the user guide, or shortcuts.',pre:()=>{showMainTab('practice');setQuizType('vocab');}}
+  {el:null,title:'Tour complete!',body:'Open <b>⚙ Settings → Help</b> any time for tours, the user guide, or shortcuts.',pre:()=>{showMainTab('practice');setQuizType('vocab');}}
 ];
 
 let tourSteps=null,tourIdx=0;
@@ -3493,6 +3510,366 @@ function verbTable(w){const P=['1st singular','2nd singular','3rd singular','1st
   let h='<div class="tbl-scroll"><table class="decl-table" style="min-width:0"><thead><tr><th class="dt-left"></th>'+T.map(t=>'<th>'+t[0]+'</th>').join('')+'</tr></thead><tbody>'+P.map(p=>'<tr><td class="dt-case">'+({'1st singular':'I','2nd singular':'you (sg)','3rd singular':'he / she / it','1st plural':'we','2nd plural':'you (pl)','3rd plural':'they'})[p]+'</td>'+T.map(t=>'<td>'+esc(t[1][p]||'—')+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>';
   const im=get(getVerbImp);if(im)h+='<p class="forms-note"><strong>Imperative:</strong> '+esc(im.singular)+' <span>(to one person)</span> · '+esc(im.plural)+' <span>(to several)</span></p>';
   return h;}
+// ── EXAMPLE SENTENCES ─────────────────────────────────────────────────────────
+// Each line: Latin|English|tags. A tag is  surface[=listword][@hint][:form]  (_ = space).
+// form: nouns case.num[.role] (role c=after est, t=time when, d=how long, dv=dative with verb),
+// adjectives/pronouns gender.case.num, personal pronouns person.case.num, verbs pres|impf|fut.1s…3p, imp.s|imp.p, inf.
+// Every tagged form was checked against this app's own declension/conjugation tables.
+const SENT_LINES=[
+"Puella in villa cum matre habitat.|The girl lives in the villa with her mother.|puella:nom.sg in@abl villa:abl.sg cum matre=mater:abl.sg habitat=habito:pres.3s",
+"Pater et filius in horto laborant.|The father and son are working in the garden.|pater:nom.sg et filius:nom.sg in@abl horto=hortus:abl.sg laborant=laboro:pres.3p",
+"Mater filiam caram vocat.|The mother calls her dear daughter.|mater:nom.sg filiam=filia:acc.sg caram=carus:f.acc.sg vocat=voco:pres.3s",
+"Frater meus sororem tuam amat.|My brother loves your sister.|frater:nom.sg meus:m.nom.sg sororem=soror:acc.sg tuam=tuus:f.acc.sg amat=amo:pres.3s",
+"Uxor marito cenam parat.|The wife is preparing dinner for her husband.|uxor:nom.sg marito=maritus:dat.sg cenam=cena:acc.sg parat=paro:pres.3s",
+"Ancilla mensam ad ianuam portat.|The slave girl carries the table to the door.|ancilla:nom.sg mensam=mensa:acc.sg ad ianuam=ianua:acc.sg portat=porto:pres.3s",
+"Domina ancillas diligenter laborare iubet.|The mistress orders the slave girls to work carefully.|domina:nom.sg ancillas=ancilla:acc.pl diligenter laborare=laboro:inf iubet=iubeo:pres.3s",
+"Dominus servos in agros mittit.|The master sends the slaves into the fields.|dominus:nom.sg servos=servus:acc.pl in@acc agros=ager:acc.pl mittit=mitto:pres.3s",
+"Parentes filiis fabulas narrant.|Parents tell stories to their sons.|parentes=parens:nom.pl filiis=filius:dat.pl fabulas=fabula:acc.pl narrant=narro:pres.3p",
+"Familia nostra in casa parva habitabat.|Our family used to live in a small cottage.|familia:nom.sg nostra=noster:f.nom.sg in@abl casa:abl.sg parva=parvus:f.abl.sg habitabat=habito:impf.3s",
+"Senex sub arbore sedet et dormit.|The old man sits under the tree and sleeps.|senex:nom.sg sub arbore=arbor:abl.sg sedet=sedeo:pres.3s et dormit=dormio:pres.3s",
+"Iuvenis virginem pulchram in via videt.|The young man sees a beautiful maiden in the road.|iuvenis:nom.sg virginem=virgo:acc.sg pulchram=pulcher:f.acc.sg in@abl via:abl.sg videt=video:pres.3s",
+"Puer canem et felem habet.|The boy has a dog and a cat.|puer:nom.sg canem=canis:acc.sg et felem=feles:acc.sg habet=habeo:pres.3s",
+"Canis post felem currit.|The dog runs after the cat.|canis:nom.sg post felem=feles:acc.sg currit=curro:pres.3s",
+"Puellae in schola sedent et tacent.|The girls sit in the classroom and are quiet.|puellae=puella:nom.pl in@abl schola:abl.sg sedent=sedeo:pres.3p et tacent=taceo:pres.3p",
+"Magister discipulos Latinam docet.|The teacher teaches the students Latin.|magister:nom.sg discipulos=discipulus:acc.pl latinam=Latina:acc.sg docet=doceo:pres.3s",
+"Magistra discipulis libros dat.|The teacher gives books to the students.|magistra:nom.sg discipulis=discipulus:dat.pl libros=liber@nouns:acc.pl dat=do:pres.3s",
+"Discipuli libellos legunt et verba scribunt.|The students read booklets and write words.|discipuli=discipulus:nom.pl libellos=libellus:acc.pl legunt=lego:pres.3p et verba=verbum:acc.pl scribunt=scribo:pres.3p",
+"Discipulus stultus numquam studet.|The stupid student never studies.|discipulus:nom.sg stultus:m.nom.sg numquam studet=studeo:pres.3s",
+"Caudex! Cur non respondes?|Blockhead! Why don't you answer?|caudex:voc.sg cur respondes=respondeo:pres.2s",
+"Ludus noster prope templum est.|Our school is near the temple.|ludus:nom.sg noster:m.nom.sg prope templum:acc.sg est=esse:pres.3s",
+"Lanista iuvenes in ludo exercet.|The trainer trains the young men in the school.|lanista:nom.sg iuvenes=iuvenis:acc.pl in@abl ludo=ludus:abl.sg exercet=exerceo:pres.3s",
+"Agricola agrum suum amat.|The farmer loves his own field.|agricola:nom.sg agrum=ager:acc.sg suum=suus:m.acc.sg amat=amo:pres.3s",
+"Ubi est magister vester, pueri?|Where is your teacher, boys?|ubi est=esse:pres.3s magister:nom.sg vester:m.nom.sg pueri=puer:voc.pl",
+"Vir quem vides meus pater est.|The man whom you see is my father.|vir:nom.sg quem=qui_quae_quod:m.acc.sg vides=video:pres.2s meus:m.nom.sg pater:nom.sg.c est=esse:pres.3s",
+"Puella quae in villa habitat fabulas amat.|The girl who lives in the villa loves stories.|puella:nom.sg quae=qui_quae_quod:f.nom.sg in@abl villa:abl.sg habitat=habito:pres.3s fabulas=fabula:acc.pl amat=amo:pres.3s",
+"Ea est soror mea; id donum ei do.|She is my sister; I give that gift to her.|ea:3.f.nom.sg est=esse:pres.3s soror:nom.sg.c mea=meus:f.nom.sg id:3.n.acc.sg donum:acc.sg ei=ea:3.f.dat.sg do:pres.1s",
+"Esto fortis, mi fili!|Be brave, my son!|esto fortis:m.nom.sg mi=meus:m.voc.sg fili=filius:voc.sg",
+"Este boni, discipuli!|Be good, students!|este boni=bonus:m.nom.pl discipuli=discipulus:voc.pl",
+"Pater filium monet: \"Noli in silvam noctu ire!\"|The father warns his son: \"Don't go into the forest at night!\"|pater:nom.sg filium=filius:acc.sg monet=moneo:pres.3s noli=nolo:imp.s in@acc silvam=silva:acc.sg noctu ire=eo:inf",
+"Fratres saepe sororibus invident.|Brothers often envy their sisters.|fratres=frater:nom.pl saepe sororibus=soror:dat.pl.dv invident=invideo:pres.3p",
+"Mater filiae flores ostendit.|The mother shows her daughter the flowers.|mater:nom.sg filiae=filia:dat.sg flores=flos:acc.pl ostendit=ostendo:pres.3s",
+"Gaudeo quod amicus meus adest.|I am glad because my friend is here.|gaudeo:pres.1s quod amicus:nom.sg meus:m.nom.sg adest=adesse:pres.3s",
+"Hodie Marcus a ludo abest.|Today Marcus is absent from school.|hodie a=ab ludo=ludus:abl.sg abest=abesse:pres.3s",
+"Mater pueros mane excitat.|Mother wakes the boys up in the morning.|mater:nom.sg pueros=puer:acc.pl mane excitat=excito:pres.3s",
+"Prima luce puer evigilat et surgit.|At dawn the boy wakes up and gets up.|prima_luce puer:nom.sg evigilat=evigilo:pres.3s et surgit=surgo:pres.3s",
+"Vesperi familia cenat et laete cantat.|In the evening the family dines and sings happily.|vesperi=vesper familia:nom.sg cenat=ceno:pres.3s et laete cantat=canto:pres.3s",
+"Media nocte omnes dormiunt.|At midnight everyone is asleep.|media_nocte omnes=omnis:m.nom.pl dormiunt=dormio:pres.3p",
+"Interdiu laboramus, noctu dormimus.|By day we work, by night we sleep.|interdiu laboramus=laboro:pres.1p noctu dormimus=dormio:pres.1p",
+"Cenamus primo, deinde dormimus.|First we dine, then we sleep.|cenamus=ceno:pres.1p deinde dormimus=dormio:pres.1p",
+"Iam nox est; pueri, statim dormite!|It is already night; boys, sleep at once!|iam nox:nom.sg est=esse:pres.3s pueri=puer:voc.pl statim dormite=dormio:imp.p",
+"Festinate, pueri! Hora sexta est.|Hurry, boys! It is the sixth hour.|festinate=festino:imp.p pueri=puer:voc.pl hora:nom.sg sexta=sextus:f.nom.sg est=esse:pres.3s",
+"Abite, pueri! Exite e villa!|Go away, boys! Get out of the villa!|abite=abeo:imp.p pueri=puer:voc.pl exite=exeo:imp.p e=ex villa:abl.sg",
+"Nolumus in villa manere; ad mare ire volumus.|We don't want to stay in the villa; we want to go to the sea.|nolumus=nolo:pres.1p in@abl villa:abl.sg manere=maneo:inf ad mare:acc.sg ire=eo:inf volumus=volo:pres.1p",
+"Huc veni, amice! Sic laboramus.|Come here, friend! This is how we work.|huc veni=venio:imp.s amice=amicus:voc.sg sic laboramus=laboro:pres.1p",
+"Quid dicis, amice? Te non audio.|What are you saying, friend? I can't hear you.|quid dicis=dico:pres.2s amice=amicus:voc.sg te=tu:2.acc.sg audio:pres.1s",
+"Tibi credo, amice.|I trust you, friend.|tibi=tu:2.dat.sg.dv credo:pres.1s amice=amicus:voc.sg",
+"In via amico occurro.|I meet a friend in the street.|in@abl via:abl.sg amico=amicus:dat.sg.dv occurro:pres.1s",
+"Amici nostri nos adiuvabunt.|Our friends will help us.|amici=amicus:nom.pl nostri=noster:m.nom.pl nos:1.acc.pl adiuvabunt=adiuvo:fut.3p",
+"Vos, discipuli, laudo; nam bene laboratis.|I praise you, students; for you work well.|vos:2.acc.pl discipuli=discipulus:voc.pl laudo:pres.1s nam bene laboratis=laboro:pres.2p",
+"Ego Romam amo; frater quoque Romam amat.|I love Rome; my brother also loves Rome.|ego:1.nom.sg romam=Roma:acc.sg amo:pres.1s frater:nom.sg quoque amat=amo:pres.3s",
+"Quid est nomen tuum?|What is your name?|quid est=esse:pres.3s nomen:nom.sg tuum=tuus:n.nom.sg",
+"Homo sine amicis miser est.|A person without friends is miserable.|homo:nom.sg sine amicis=amicus:abl.pl miser:m.nom.sg est=esse:pres.3s",
+"Senex unum oculum et paucos dentes habet.|The old man has one eye and few teeth.|senex:nom.sg unum=unus:m.acc.sg oculum=oculus:acc.sg et paucos=pauci:m.acc.pl dentes=dens:acc.pl habet=habeo:pres.3s",
+"Puer pedem in aqua ponit.|The boy puts his foot in the water.|puer:nom.sg pedem=pes:acc.sg in@abl aqua:abl.sg ponit=pono:pres.3s",
+"Quem colorem amas? Rubrum an nigrum?|Which colour do you love? Red or black?|quem=quis:m.acc.sg colorem=color:acc.sg amas=amo:pres.2s rubrum=ruber:m.acc.sg nigrum=niger:m.acc.sg",
+"Mensa lignea et magna est.|The table is wooden and big.|mensa:nom.sg lignea=ligneus:f.nom.sg et magna=magnus:f.nom.sg est=esse:pres.3s",
+"Magister discipulos rogat: \"Ubi est liber meus?\"|The teacher asks the students: \"Where is my book?\"|magister:nom.sg discipulos=discipulus:acc.pl rogat=rogo:pres.3s ubi est=esse:pres.3s liber@nouns:nom.sg meus:m.nom.sg",
+"Discipuli magistrum salutant.|The students greet the teacher.|discipuli=discipulus:nom.pl magistrum=magister:acc.sg salutant=saluto:pres.3p",
+"Discipuli taciti magistrum audiunt.|The silent students listen to the teacher.|discipuli=discipulus:nom.pl taciti=tacitus:m.nom.pl magistrum=magister:acc.sg audiunt=audio:pres.3p",
+"Vocem magistri non audio.|I don't hear the teacher's voice.|vocem=vox:acc.sg magistri=magister:gen.sg audio:pres.1s",
+"Hic discipulus male scribit; vix legere potest.|This student writes badly; he can scarcely read.|hic=hic_haec_hoc:m.nom.sg discipulus:nom.sg male scribit=scribo:pres.3s vix legere=lego:inf potest=posse:pres.3s",
+"Sero ad ludum venis, puer!|You are coming to school late, boy!|sero ad ludum=ludus:acc.sg venis=venio:pres.2s puer:voc.sg",
+"Discipuli multa de Romanis cognoscunt.|The students learn many things about the Romans.|discipuli=discipulus:nom.pl multa=multi:n.acc.pl de romanis=Romanus@nouns:abl.pl cognoscunt=cognosco:pres.3p",
+"Optimus discipulus pessimum iuvat.|The best student helps the worst.|optimus:m.nom.sg discipulus:nom.sg pessimum=pessimus:m.acc.sg iuvat=iuvo:pres.3s",
+"Epistulam nondum scribo; adhuc librum lego.|I am not writing the letter yet; I am still reading a book.|epistulam=epistula:acc.sg nondum scribo:pres.1s adhuc librum=liber@nouns:acc.sg lego:pres.1s",
+"Non solum pueri sed etiam puellae in ludo studebant.|Not only the boys but also the girls were studying in the school.|non_solum=non_solum...sed_etiam pueri=puer:nom.pl sed_etiam=non_solum...sed_etiam puellae=puella:nom.pl in@abl ludo=ludus:abl.sg studebant=studeo:impf.3p",
+"Idem puer semper eandem fabulam narrat.|The same boy always tells the same story.|idem=idem/eadem/idem:m.nom.sg puer:nom.sg semper eandem=idem/eadem/idem:f.acc.sg fabulam=fabula:acc.sg narrat=narro:pres.3s",
+"Mense Septembri ad ludum redimus.|In the month of September we go back to school.|mense=mensis:abl.sg.t septembri=September:m.abl.sg ad ludum=ludus:acc.sg redimus=redeo:pres.1p",
+"Hora tertia ad ludum imus.|At the third hour we go to school.|hora:abl.sg.t tertia=tertius:f.abl.sg ad ludum=ludus:acc.sg imus=eo:pres.1p",
+"Quarta hora pueri, quinta puellae cantant.|At the fourth hour the boys sing, at the fifth the girls.|quarta=quartus:f.abl.sg hora:abl.sg.t pueri=puer:nom.pl quinta=quintus:f.abl.sg puellae=puella:nom.pl cantant=canto:pres.3p",
+"Romani multas urbes oppugnabant.|The Romans used to attack many cities.|romani=Romanus@nouns:nom.pl multas=multi:f.acc.pl urbes=urbs:acc.pl oppugnabant=oppugno:impf.3p",
+"Milites Romani fortiter pugnant.|The Roman soldiers fight bravely.|milites=miles:nom.pl romani=Romanus@adjectives:m.nom.pl fortiter pugnant=pugno:pres.3p",
+"Imperator legiones contra hostes ducit.|The general leads the legions against the enemy.|imperator:nom.sg legiones=legio:acc.pl contra hostes=hostis:acc.pl ducit=duco:pres.3s",
+"Centurio militibus imperat.|The centurion gives orders to the soldiers.|centurio:nom.sg militibus=miles:dat.pl.dv imperat=impero:pres.3s",
+"Dux equitem cum nuntio mittet.|The leader will send a horseman with the messenger.|dux:nom.sg equitem=eques:acc.sg cum nuntio=nuntius:abl.sg mittet=mitto:fut.3s",
+"Hostes castra Romana circumveniunt.|The enemy surround the Roman camp.|hostes=hostis:nom.pl castra:acc.pl romana=Romanus@adjectives:n.acc.pl circumveniunt=circumvenio:pres.3p",
+"Milites castra fortiter defendebant.|The soldiers were defending the camp bravely.|milites=miles:nom.pl castra:acc.pl fortiter defendebant=defendo:impf.3p",
+"Barbari tela et hastas in muros conicient.|The barbarians will hurl javelins and spears onto the walls.|barbari=barbarus:nom.pl tela=telum:acc.pl et hastas=hasta:acc.pl in@acc muros=murus:acc.pl conicient=conicio:fut.3p",
+"Miles scutum et gladium tenet.|The soldier holds a shield and a sword.|miles:nom.sg scutum:acc.sg et gladium=gladius:acc.sg tenet=teneo:pres.3s",
+"In proelio multi milites vulnera accipiunt.|In the battle many soldiers receive wounds.|in@abl proelio=proelium:abl.sg multi:m.nom.pl milites=miles:nom.pl vulnera=vulnus:acc.pl accipiunt=accipio:pres.3p",
+"Bellum longum et crudele erat.|The war was long and cruel.|bellum:nom.sg longum=longus:n.nom.sg et crudele=crudelis:n.nom.sg erat=esse:impf.3s",
+"Post pugnam milites fessi in castra redeunt.|After the fight the tired soldiers return to the camp.|post pugnam=pugna:acc.sg milites=miles:nom.pl fessi=fessus:m.nom.pl in@acc castra:acc.pl redeunt=redeo:pres.3p",
+"Consul senatores in templum convocat.|The consul calls the senators together into the temple.|consul:nom.sg senatores=senator:acc.pl in@acc templum:acc.sg convocat=convoco:pres.3s",
+"Dictator Romanis leges novas dabit.|The dictator will give new laws to the Romans.|dictator:nom.sg romanis=Romanus@nouns:dat.pl leges=lex:acc.pl novas=novus:f.acc.pl dabit=do:fut.3s",
+"Cives libertatem semper amabunt.|Citizens will always love freedom.|cives=civis:nom.pl libertatem=libertas:acc.sg semper amabunt=amo:fut.3p",
+"Senator orationem gravem habet.|The senator makes a serious speech.|senator:nom.sg orationem=oratio:acc.sg gravem=gravis:f.acc.sg habet=habeo:pres.3s",
+"Orator insignis populo placet.|The outstanding orator pleases the people.|orator:nom.sg insignis:m.nom.sg populo=populus:dat.sg.dv placet=placeo:pres.3s",
+"Hostes pacem petunt et obsides tradunt.|The enemy seek peace and hand over hostages.|hostes=hostis:nom.pl pacem=pax:acc.sg petunt=peto:pres.3p et obsides=obses:acc.pl tradunt=trado:pres.3p",
+"Romani cum Gallis foedus faciunt.|The Romans make a treaty with the Gauls.|romani=Romanus@nouns:nom.pl cum gallis=Gallus:abl.pl foedus:acc.sg faciunt=facio:pres.3p",
+"Galli Romanis fortiter resistebant.|The Gauls were bravely resisting the Romans.|galli=Gallus:nom.pl romanis=Romanus@nouns:dat.pl.dv fortiter resistebant=resisto:impf.3p",
+"Praesidium oppidum diu custodiebat.|The garrison guarded the town for a long time.|praesidium:nom.sg oppidum:acc.sg diu custodiebat=custodio:impf.3s",
+"Captivi e castris evadere temptant.|The prisoners try to escape from the camp.|captivi=captivus:nom.pl e=ex castris=castra:abl.pl evadere=evado:inf temptant=tempto:pres.3p",
+"Barbari se Romanis dedunt.|The barbarians surrender to the Romans.|barbari=barbarus:nom.pl se:acc.pl romanis=Romanus@nouns:dat.pl dedunt=dedo:pres.3p",
+"Milites hostes trans flumen repellunt.|The soldiers drive the enemy back across the river.|milites=miles:nom.pl hostes=hostis:acc.pl trans flumen:acc.sg repellunt=repello:pres.3p",
+"Hostes circum urbem castra ponunt.|The enemy pitch camp around the city.|hostes=hostis:nom.pl circum urbem=urbs:acc.sg castra:acc.pl ponunt=pono:pres.3p",
+"Hostes ad muros accedunt.|The enemy approach the walls.|hostes=hostis:nom.pl ad muros=murus:acc.pl accedunt=accedo:pres.3p",
+"Arma capite, milites! Hostes adveniunt!|Take up your weapons, soldiers! The enemy are arriving!|arma:acc.pl capite=capio:imp.p milites=miles:voc.pl hostes=hostis:nom.pl adveniunt=advenio:pres.3p",
+"Si hostes venient, fortiter pugnabimus.|If the enemy come, we will fight bravely.|si hostes=hostis:nom.pl venient=venio:fut.3p fortiter pugnabimus=pugno:fut.1p",
+"Hostes multi sunt; tamen milites non timent.|The enemy are many; however, the soldiers are not afraid.|hostes=hostis:nom.pl multi:m.nom.pl sunt=esse:pres.3p tamen milites=miles:nom.pl timent=timeo:pres.3p",
+"Milites pro patria fortiter pugnabunt.|The soldiers will fight bravely for their homeland.|milites=miles:nom.pl pro patria:abl.sg fortiter pugnabunt=pugno:fut.3p",
+"Imperator milites procedere iubet.|The general orders the soldiers to go forward.|imperator:nom.sg milites=miles:acc.pl procedere=procedo:inf iubet=iubeo:pres.3s",
+"Dux captivos dimittit.|The leader sends the prisoners away.|dux:nom.sg captivos=captivus:acc.pl dimittit=dimitto:pres.3s",
+"Milites arma in campo relinquunt.|The soldiers leave their weapons behind on the plain.|milites=miles:nom.pl arma:acc.pl in@abl campo=campus:abl.sg relinquunt=relinquo:pres.3p",
+"Milites fessi arma deponunt.|The tired soldiers put down their weapons.|milites=miles:nom.pl fessi=fessus:m.nom.pl arma:acc.pl deponunt=depono:pres.3p",
+"Miles crudelis captivum interficit.|The cruel soldier kills the prisoner.|miles:nom.sg crudelis:m.nom.sg captivum=captivus:acc.sg interficit=interficio:pres.3s",
+"Milites a duce pecuniam poscunt.|The soldiers demand money from the leader.|milites=miles:nom.pl a=ab duce=dux:abl.sg pecuniam=pecunia:acc.sg poscunt=posco:pres.3p",
+"Barbari milites Romanos in silva occidunt.|The barbarians slaughter Roman soldiers in the forest.|barbari=barbarus:nom.pl milites=miles:acc.pl romanos=Romanus@adjectives:m.acc.pl in@abl silva:abl.sg occidunt=occido:pres.3p",
+"Romani hostes superant et multos necant.|The Romans overcome the enemy and kill many.|romani=Romanus@nouns:nom.pl hostes=hostis:acc.pl superant=supero:pres.3p et multos=multi:m.acc.pl necant=neco:pres.3p",
+"Romani imperium magnum habebant.|The Romans had a great empire.|romani=Romanus@nouns:nom.pl imperium:acc.sg magnum=magnus:n.acc.sg habebant=habeo:impf.3p",
+"Populus Romanus imperatorem laudat.|The Roman people praise the general.|populus:nom.sg romanus=Romanus@adjectives:m.nom.sg imperatorem=imperator:acc.sg laudat=laudo:pres.3s",
+"Imperator exemplum virtutis militibus dat.|The general gives the soldiers an example of courage.|imperator:nom.sg exemplum:acc.sg virtutis=virtus:gen.sg militibus=miles:dat.pl dat=do:pres.3s",
+"Imperator ipse ad castra venit.|The general himself comes to the camp.|imperator:nom.sg ipse:m.nom.sg ad castra:acc.pl venit=venio:pres.3s",
+"Dux consilium capit et auxilium petit.|The leader forms a plan and seeks help.|dux:nom.sg consilium:acc.sg capit=capio:pres.3s et auxilium:acc.sg petit=peto:pres.3s",
+"Post bellum Romani pontem novum aedificabunt.|After the war the Romans will build a new bridge.|post bellum:acc.sg romani=Romanus@nouns:nom.pl pontem=pons:acc.sg novum=novus:m.acc.sg aedificabunt=aedifico:fut.3p",
+"Eques in equo albo sedet.|The horseman sits on a white horse.|eques:nom.sg in@abl equo=equus:abl.sg albo=albus:m.abl.sg sedet=sedeo:pres.3s",
+"Dux et milites Alpes altas ascendunt.|The leader and the soldiers climb the high Alps.|dux:nom.sg et milites=miles:nom.pl alpes=Alpes:acc.pl altas=altus:f.acc.pl ascendunt=ascendo:pres.3p",
+"Mille milites in castris erant.|There were a thousand soldiers in the camp.|mille milites=miles:nom.pl in@abl castris=castra:abl.pl erant=esse:impf.3p",
+"Pauci milites manent; ceteri fugiunt.|A few soldiers stay; the rest flee.|pauci:m.nom.pl milites=miles:nom.pl manent=maneo:pres.3p ceteri:m.nom.pl fugiunt=fugio:pres.3p",
+"Reliqui captivi in castris erant.|The remaining prisoners were in the camp.|reliqui=reliquus:m.nom.pl captivi=captivus:nom.pl in@abl castris=castra:abl.pl erant=esse:impf.3p",
+"Milites ad proelium parati sunt.|The soldiers are prepared for battle.|milites=miles:nom.pl ad proelium:acc.sg parati=paratus:m.nom.pl sunt=esse:pres.3p",
+"Hic miles dignus est gloria.|This soldier is worthy of glory.|hic=hic_haec_hoc:m.nom.sg miles:nom.sg dignus:m.nom.sg est=esse:pres.3s gloria:abl.sg",
+"Gloria et virtus militibus carae sunt.|Glory and courage are dear to soldiers.|gloria:nom.sg et virtus:nom.sg militibus=miles:dat.pl carae=carus:f.nom.pl sunt=esse:pres.3p",
+"Miles infelix in proelio cadit.|The unlucky soldier falls in battle.|miles:nom.sg infelix:m.nom.sg in@abl proelio=proelium:abl.sg cadit=cado:pres.3s",
+"Miles vulnera in capite et in corpore habet.|The soldier has wounds on his head and body.|miles:nom.sg vulnera=vulnus:acc.pl in@abl capite=caput:abl.sg et corpore=corpus:abl.sg habet=habeo:pres.3s",
+"Medicus militem a morte servat.|The doctor saves the soldier from death.|medicus:nom.sg militem=miles:acc.sg a=ab morte=mors:abl.sg servat=servo:pres.3s",
+"Medicus dolorem militis curat.|The doctor treats the soldier's pain.|medicus:nom.sg dolorem=dolor:acc.sg militis=miles:gen.sg curat=curo:pres.3s",
+"Medicus militem mortuum invenit.|The doctor finds the dead soldier.|medicus:nom.sg militem=miles:acc.sg mortuum=mortuus:m.acc.sg invenit=invenio:pres.3s",
+"Timor et clamor in castris erant.|There was fear and shouting in the camp.|timor:nom.sg et clamor:nom.sg in@abl castris=castra:abl.pl erant=esse:impf.3p",
+"Postridie hostes iterum oppugnabant.|On the next day the enemy were attacking again.|postridie hostes=hostis:nom.pl iterum oppugnabant=oppugno:impf.3p",
+"Mox nuntius veniet; postea consilium capiemus.|Soon a messenger will come; afterwards we will make a plan.|mox nuntius:nom.sg veniet=venio:fut.3s postea consilium:acc.sg capiemus=capio:fut.1p",
+"Nuntius mortem regis nuntiat.|The messenger announces the death of the king.|nuntius:nom.sg mortem=mors:acc.sg regis=rex:gen.sg nuntiat=nuntio:pres.3s",
+"Cives in via clamant quod hostes adsunt.|The citizens shout in the street because the enemy are here.|cives=civis:nom.pl in@abl via:abl.sg clamant=clamo:pres.3p quod hostes=hostis:nom.pl adsunt=adesse:pres.3p",
+"Cives pacem et libertatem postulant.|The citizens demand peace and freedom.|cives=civis:nom.pl pacem=pax:acc.sg et libertatem=libertas:acc.sg postulant=postulo:pres.3p",
+"Custodes portas urbis noctu custodiunt.|The guards guard the city gates by night.|custodes=custos:nom.pl portas=porta:acc.pl urbis=urbs:gen.sg noctu custodiunt=custodio:pres.3p",
+"Moenia urbis alta et lata sunt.|The city walls are high and wide.|moenia:nom.pl urbis=urbs:gen.sg alta=altus:n.nom.pl et lata=latus:n.nom.pl sunt=esse:pres.3p",
+"In summo monte custodes stant.|On top of the mountain stand guards.|in@abl summo=summus:m.abl.sg monte=mons:abl.sg custodes=custos:nom.pl stant=sto:pres.3p",
+"Nullus Romanus solus in silvam ire vult.|No Roman wants to go into the forest alone.|nullus:m.nom.sg romanus=Romanus@nouns:nom.sg solus:m.nom.sg in@acc silvam=silva:acc.sg ire=eo:inf vult=volo:pres.3s",
+"Potestne orator populo persuadere?|Can the orator persuade the people?|potestne=posse:pres.3s potestne=-ne orator:nom.sg populo=populus:dat.sg.dv persuadere=persuadeo:inf",
+"Nonne Roma pulchra est? Num barbari Romam vincent?|Surely Rome is beautiful? Surely the barbarians will not conquer Rome?|nonne roma=Roma:nom.sg pulchra=pulcher:f.nom.sg est=esse:pres.3s num barbari=barbarus:nom.pl romam=Roma:acc.sg vincent=vinco:fut.3p",
+"Quis est ille vir? Is est consul.|Who is that man? He is the consul.|quis:m.nom.sg est=esse:pres.3s ille=ille_illa_illud:m.nom.sg vir:nom.sg is:3.m.nom.sg consul:nom.sg.c",
+"Rex bonus populum bene regit.|A good king rules the people well.|rex:nom.sg bonus:m.nom.sg populum=populus:acc.sg bene regit=rego:pres.3s",
+"Regina ipsa nuntium audit.|The queen herself hears the messenger.|regina:nom.sg ipsa:f.nom.sg nuntium=nuntius:acc.sg audit=audio:pres.3s",
+"Regina gracilis et pulchra erat.|The queen was slender and beautiful.|regina:nom.sg gracilis:f.nom.sg et pulchra=pulcher:f.nom.sg erat=esse:impf.3s",
+"Rex togam purpuream gerit.|The king wears a purple toga.|rex:nom.sg togam=toga:acc.sg purpuream=purpureus:f.acc.sg gerit=gero:pres.3s",
+"Toga senatoris alba est.|The senator's toga is white.|toga:nom.sg senatoris=senator:gen.sg alba=albus:f.nom.sg est=esse:pres.3s",
+"Senatores templum ineunt.|The senators go into the temple.|senatores=senator:nom.pl templum:acc.sg ineunt=ineo:pres.3p",
+"Idibus Martiis senatores conveniebant.|On the Ides of March the senators used to meet.|idibus=Idus:abl.pl.t martiis=Martius:f.abl.pl senatores=senator:nom.pl conveniebant=convenio:impf.3p",
+"Multos annos Romani regem non habebant.|For many years the Romans did not have a king.|multos=multi:m.acc.pl annos=annus:acc.pl.d romani=Romanus@nouns:nom.pl regem=rex:acc.sg habebant=habeo:impf.3p",
+"Graeci Troiam diu oppugnabant.|The Greeks were attacking Troy for a long time.|graeci=Graecus:nom.pl troiam=Troia:acc.sg diu oppugnabant=oppugno:impf.3p",
+"Nono anno Graeci adhuc pugnabant; decimo anno Troiam capient.|In the ninth year the Greeks were still fighting; in the tenth year they will capture Troy.|nono=nonus:m.abl.sg anno=annus:abl.sg.t graeci=Graecus:nom.pl adhuc pugnabant=pugno:impf.3p decimo=decimus:m.abl.sg troiam=Troia:acc.sg capient=capio:fut.3p",
+"Romani Galliam et Britanniam vincere cupiebant.|The Romans wanted to conquer Gaul and Britain.|romani=Romanus@nouns:nom.pl galliam=Gallia:acc.sg et britanniam=Britannia:acc.sg vincere=vinco:inf cupiebant=cupio:impf.3p",
+"Multi barbari in Germania habitabant.|Many barbarians used to live in Germany.|multi:m.nom.pl barbari=barbarus:nom.pl in@abl germania=Germania:abl.sg habitabant=habito:impf.3p",
+"Classis Romana ad insulam navigat.|The Roman fleet sails to the island.|classis:nom.sg romana=Romanus@adjectives:f.nom.sg ad insulam=insula:acc.sg navigat=navigo:pres.3s",
+"Nautae navem conscendunt et a litore navigant.|The sailors board the ship and sail away from the shore.|nautae=nauta:nom.pl navem=navis:acc.sg conscendunt=conscendo:pres.3p et a=ab litore=litus:abl.sg navigant=navigo:pres.3p",
+"Subito tempestas ingens navem rumpit.|Suddenly a huge storm breaks the ship.|subito tempestas:nom.sg ingens:f.nom.sg navem=navis:acc.sg rumpit=rumpo:pres.3s",
+"Undae magnae nautas terrent.|The big waves terrify the sailors.|undae=unda:nom.pl magnae=magnus:f.nom.pl nautas=nauta:acc.pl terrent=terreo:pres.3p",
+"Ventus trans mare navem portat.|The wind carries the ship across the sea.|ventus:nom.sg trans mare:acc.sg navem=navis:acc.sg portat=porto:pres.3s",
+"Nautae in tempestate desperant.|The sailors despair in the storm.|nautae=nauta:nom.pl in@abl tempestate=tempestas:abl.sg desperant=despero:pres.3p",
+"Propter tempestatem nautae non navigant.|Because of the storm the sailors are not sailing.|propter tempestatem=tempestas:acc.sg nautae=nauta:nom.pl navigant=navigo:pres.3p",
+"Nautae periculum maris non timent.|Sailors do not fear the danger of the sea.|nautae=nauta:nom.pl periculum:acc.sg maris=mare:gen.sg timent=timeo:pres.3p",
+"Nauta felix incolumis ad patriam redit.|The lucky sailor returns safe to his homeland.|nauta:nom.sg felix:m.nom.sg incolumis:m.nom.sg ad patriam=patria:acc.sg redit=redeo:pres.3s",
+"Quattuor nautae navem parvam habent.|Four sailors have a small ship.|quattuor nautae=nauta:nom.pl navem=navis:acc.sg parvam=parvus:f.acc.sg habent=habeo:pres.3p",
+"Prope litus multae naves stant.|Near the shore many ships stand.|prope litus:acc.sg multae=multi:f.nom.pl naves=navis:nom.pl stant=sto:pres.3p",
+"Sexto mense, septimo, octavo navis in mari erat.|In the sixth, seventh and eighth months the ship was at sea.|sexto=sextus:m.abl.sg mense=mensis:abl.sg.t septimo=septimus:m.abl.sg octavo=octavus:m.abl.sg navis:nom.sg in@abl mari=mare:abl.sg erat=esse:impf.3s",
+"Mare hodie caeruleum est.|The sea is blue today.|mare:nom.sg hodie caeruleum=caeruleus:n.nom.sg est=esse:pres.3s",
+"Nautae vinum ex Hispania in Italiam portant.|Sailors carry wine from Spain to Italy.|nautae=nauta:nom.pl vinum:acc.sg ex hispania=Hispania:abl.sg in@acc italiam=Italia:acc.sg portant=porto:pres.3p",
+"Roma in Italia est; Athenae in Graecia sunt.|Rome is in Italy; Athens is in Greece.|roma=Roma:nom.sg in@abl italia=Italia:abl.sg est=esse:pres.3s athenae=Athenae:nom.pl graecia=Graecia:abl.sg sunt=esse:pres.3p",
+"Olim in Graecia rex crudelis habitabat.|Once upon a time a cruel king lived in Greece.|olim in@abl graecia=Graecia:abl.sg rex:nom.sg crudelis:m.nom.sg habitabat=habito:impf.3s",
+"Viator per viam longam ambulat.|The traveller walks along the long road.|viator:nom.sg per viam=via:acc.sg longam=longus:f.acc.sg ambulat=ambulo:pres.3s",
+"Viatores ab urbe ad oppidum contendunt.|The travellers hurry from the city to the town.|viatores=viator:nom.pl ab urbe=urbs:abl.sg ad oppidum:acc.sg contendunt=contendo:pres.3p",
+"Viator cum comite per silvam ambulabat.|The traveller was walking through the forest with a companion.|viator:nom.sg cum comite=comes:abl.sg per silvam=silva:acc.sg ambulabat=ambulo:impf.3s",
+"Viator leonem ferocem timet.|The traveller fears the fierce lion.|viator:nom.sg leonem=leo:acc.sg ferocem=ferox:m.acc.sg timet=timeo:pres.3s",
+"Viatores de monte lente descendunt.|The travellers come down slowly from the mountain.|viatores=viator:nom.pl de monte=mons:abl.sg lente descendunt=descendo:pres.3p",
+"Hieme viatores trans Alpes ire non possunt.|In winter travellers cannot go across the Alps.|hieme=hiems:abl.sg.t viatores=viator:nom.pl trans alpes=Alpes:acc.pl ire=eo:inf possunt=posse:pres.3p",
+"Nox erat; viatores in taberna cenabant.|It was night; the travellers were dining in the tavern.|nox:nom.sg erat=esse:impf.3s viatores=viator:nom.pl in@abl taberna:abl.sg cenabant=ceno:impf.3p",
+"Primo die viatores fessi erant, secundo laeti.|On the first day the travellers were tired, on the second happy.|primo=primus:m.abl.sg die=dies:abl.sg.t viatores=viator:nom.pl fessi=fessus:m.nom.pl erant=esse:impf.3p secundo=secundus:m.abl.sg laeti=laetus:m.nom.pl",
+"Quinque horas ambulabamus; tandem ad urbem advenimus.|We were walking for five hours; at last we arrive at the city.|quinque horas=hora:acc.pl.d ambulabamus=ambulo:impf.1p tandem ad urbem=urbs:acc.sg advenimus=advenio:pres.1p",
+"Flumen latum est; itaque per pontem transimus.|The river is wide; and so we cross by the bridge.|flumen:nom.sg latum=latus:n.nom.sg est=esse:pres.3s itaque per pontem=pons:acc.sg transimus=transeo:pres.1p",
+"Inter flumen et silvam villa stat.|Between the river and the forest stands a villa.|inter flumen:acc.sg et silvam=silva:acc.sg villa:nom.sg stat=sto:pres.3s",
+"Constituimus ad urbem redire.|We decide to return to the city.|constituimus=constituo:pres.1p ad urbem=urbs:acc.sg redire=redeo:inf",
+"Quando ad villam venies, et quo modo?|When will you come to the villa, and how?|quando ad villam=villa:acc.sg venies=venio:fut.2s quo_modo",
+"Pridie Nonas Februarias ad villam veniemus.|We will come to the villa on the day before the Nones of February.|pridie nonas=Nonae:acc.pl februarias=Februarius:f.acc.pl ad villam=villa:acc.sg veniemus=venio:fut.1p",
+"Decem dies in villa manebimus.|We will stay at the villa for ten days.|decem dies:acc.pl.d in@abl villa:abl.sg manebimus=maneo:fut.1p",
+"Heri in silva errabam; cras in oppido ero.|Yesterday I was wandering in the forest; tomorrow I will be in the town.|heri in@abl silva:abl.sg errabam=erro:impf.1s cras oppido=oppidum:abl.sg ero=esse:fut.1s",
+"In campo agricolae frumentum colunt.|In the plain the farmers grow wheat.|in@abl campo=campus:abl.sg agricolae=agricola:nom.pl frumentum:acc.sg colunt=colo:pres.3p",
+"Colonus in agro laborat dum filius dormit.|The farmer works in the field while his son sleeps.|colonus:nom.sg in@abl agro=ager:abl.sg laborat=laboro:pres.3s dum filius:nom.sg dormit=dormio:pres.3s",
+"Equi in campo viridi stant.|The horses stand in the green plain.|equi=equus:nom.pl in@abl campo=campus:abl.sg viridi=viridis:m.abl.sg stant=sto:pres.3p",
+"Octo equi et novem canes in agro currunt.|Eight horses and nine dogs are running in the field.|octo equi=equus:nom.pl et novem canes=canis:nom.pl in@abl agro=ager:abl.sg currunt=curro:pres.3p",
+"Flores flavi et purpurei in horto sunt.|There are yellow and purple flowers in the garden.|flores=flos:nom.pl flavi=flavus:m.nom.pl et purpurei=purpureus:m.nom.pl in@abl horto=hortus:abl.sg sunt=esse:pres.3p",
+"Arbores in colle altae sunt.|The trees on the hill are tall.|arbores=arbor:nom.pl in@abl colle=collis:abl.sg altae=altus:f.nom.pl sunt=esse:pres.3p",
+"Leo ingens e silva subito venit.|Suddenly a huge lion comes out of the forest.|leo:nom.sg ingens:m.nom.sg e=ex silva:abl.sg subito venit=venio:pres.3s",
+"Quantus est hic leo? Tantum leonem numquam videbo.|How big is this lion? I will never see so big a lion.|quantus:m.nom.sg est=esse:pres.3s hic=hic_haec_hoc:m.nom.sg leo:nom.sg tantum=tantus:m.acc.sg leonem=leo:acc.sg numquam videbo=video:fut.1s",
+"Ver pulchrum est; flores in hortis sunt.|Spring is beautiful; there are flowers in the gardens.|ver:nom.sg pulchrum=pulcher:n.nom.sg est=esse:pres.3s flores=flos:nom.pl in@abl hortis=hortus:abl.pl sunt=esse:pres.3p",
+"Aestate pueri in mari ludunt.|In summer the boys play in the sea.|aestate=aestas:abl.sg.t pueri=puer:nom.pl in@abl mari=mare:abl.sg ludunt=ludo:pres.3p",
+"Autumno agricolae diu laborant.|In autumn the farmers work for a long time.|autumno=autumnus:abl.sg.t agricolae=agricola:nom.pl diu laborant=laboro:pres.3p",
+"Mense Aprili et mense Maio ver est.|In April and May it is spring.|mense=mensis:abl.sg.t aprili=Aprilis:m.abl.sg maio=Maius:m.abl.sg ver:nom.sg est=esse:pres.3s",
+"Mensibus Iunio, Iulio, Augusto aestas est.|In June, July and August it is summer.|mensibus=mensis:abl.pl.t iunio=Iunius:m.abl.sg iulio=Iulius:m.abl.sg augusto=Augustus:m.abl.sg aestas:nom.sg est=esse:pres.3s",
+"Mense Octobri et mense Novembri autumnus est; mense Decembri hiems venit.|In October and November it is autumn; in December winter comes.|mense=mensis:abl.sg.t octobri=October:m.abl.sg novembri=November:m.abl.sg autumnus:nom.sg est=esse:pres.3s decembri=December:m.abl.sg hiems:nom.sg venit=venio:pres.3s",
+"Hodie Kalendae Ianuariae sunt.|Today is the Kalends (1st) of January.|hodie kalendae=Kalendae:nom.pl ianuariae=Ianuarius:f.nom.pl sunt=esse:pres.3p",
+"Saeculum centum annos habet.|A century has a hundred years.|saeculum:nom.sg centum annos=annus:acc.pl habet=habeo:pres.3s",
+"Meridie servi sub arboribus iacent.|At midday the slaves lie under the trees.|meridie=meridies:abl.sg.t servi=servus:nom.pl sub arboribus=arbor:abl.pl iacent=iaceo:pres.3p",
+"Senex sub arbore dormit et somnus dulcis est.|The old man sleeps under the tree, and sleep is sweet.|senex:nom.sg sub arbore=arbor:abl.sg dormit=dormio:pres.3s et somnus:nom.sg dulcis:m.nom.sg est=esse:pres.3s",
+"Nocte nulla lux in via erat.|At night there was no light in the road.|nocte=nox:abl.sg.t nulla=nullus:f.nom.sg lux:nom.sg in@abl via:abl.sg erat=esse:impf.3s",
+"Subito sonum ingentem audimus.|Suddenly we hear a huge sound.|subito sonum=sonus:acc.sg ingentem=ingens:m.acc.sg audimus=audio:pres.1p",
+"Nemo in via erat; nihil audiebam.|No one was in the road; I heard nothing.|nemo:nom.sg in@abl via:abl.sg erat=esse:impf.3s nihil audiebam=audio:impf.1s",
+"Hunc locum amo; nam pulcher et tacitus est.|I love this place; for it is beautiful and quiet.|hunc=hic_haec_hoc:m.acc.sg locum=locus:acc.sg amo:pres.1s nam pulcher:m.nom.sg et tacitus:m.nom.sg est=esse:pres.3s",
+"Terra patriae nostrae pulchra est.|The land of our homeland is beautiful.|terra:nom.sg patriae=patria:gen.sg nostrae=noster:f.gen.sg pulchra=pulcher:f.nom.sg est=esse:pres.3s",
+"Amor patriae magnus est in animis civium.|Love of the homeland is great in the minds of the citizens.|amor:nom.sg patriae=patria:gen.sg magnus:m.nom.sg est=esse:pres.3s in@abl animis=animus:abl.pl civium=civis:gen.pl",
+"Olim homines in silvis vivebant.|Once upon a time people lived in the forests.|olim homines=homo:nom.pl in@abl silvis=silva:abl.pl vivebant=vivo:impf.3p",
+"Multum vinum in taberna est.|There is a lot of wine in the tavern.|multum=multus:n.nom.sg vinum:nom.sg in@abl taberna:abl.sg est=esse:pres.3s",
+"Ludi in urbe hodie sunt; omnes cives spectare volunt.|There are games in the city today; all the citizens want to watch.|ludi:nom.pl in@abl urbe=urbs:abl.sg hodie sunt=esse:pres.3p omnes=omnis:m.nom.pl cives=civis:nom.pl spectare=specto:inf volunt=volo:pres.3p",
+"Et senes et iuvenes ad ludos veniunt.|Both old men and young men come to the games.|et=et...et senes=senex:nom.pl iuvenes=iuvenis:nom.pl ad ludos=ludi:acc.pl veniunt=venio:pres.3p",
+"Etiam senex ad ludos venit.|Even the old man comes to the games.|etiam senex:nom.sg ad ludos=ludi:acc.pl venit=venio:pres.3s",
+"Aedificium novum in media urbe stat.|A new building stands in the middle of the city.|aedificium:nom.sg novum=novus:n.nom.sg in@abl media=medius:f.abl.sg urbe=urbs:abl.sg stat=sto:pres.3s",
+"Domina tabernae vinum bonum vendit.|The mistress of the tavern sells good wine.|domina:nom.sg tabernae=taberna:gen.sg vinum:acc.sg bonum=bonus:n.acc.sg vendit=vendo:pres.3s",
+"Servus cibum in taberna emit.|The slave buys food in the tavern.|servus:nom.sg cibum=cibus:acc.sg in@abl taberna:abl.sg emit=emo:pres.3s",
+"Pecuniam reddere debes!|You ought to give back the money!|pecuniam=pecunia:acc.sg reddere=reddo:inf debes=debeo:pres.2s",
+"Iuvenis aquam bibit, senex vinum.|The young man drinks water, the old man wine.|iuvenis:nom.sg aquam=aqua:acc.sg bibit=bibo:pres.3s senex:nom.sg vinum:acc.sg",
+"Vinum dulce est.|The wine is sweet.|vinum:nom.sg dulce=dulcis:n.nom.sg est=esse:pres.3s",
+"Ianuam claude, serve! Hiems est.|Close the door, slave! It is winter.|ianuam=ianua:acc.sg claude=claudo:imp.s serve=servus:voc.sg hiems:nom.sg est=esse:pres.3s",
+"Servi villam intrant et cenam in mensa ponunt.|The slaves enter the villa and put the dinner on the table.|servi=servus:nom.pl villam=villa:acc.sg intrant=intro:pres.3p et cenam=cena:acc.sg in@abl mensa:abl.sg ponunt=pono:pres.3p",
+"Ante cenam pueri in horto ludunt.|Before dinner the boys play in the garden.|ante cenam=cena:acc.sg pueri=puer:nom.pl in@abl horto=hortus:abl.sg ludunt=ludo:pres.3p",
+"Interea servi cenam parabant.|Meanwhile the slaves were preparing dinner.|interea=interea/interim servi=servus:nom.pl cenam=cena:acc.sg parabant=paro:impf.3p",
+"Sex servi et septem ancillae in villa laborant.|Six slaves and seven slave girls work in the villa.|sex servi=servus:nom.pl et septem ancillae=ancilla:nom.pl in@abl villa:abl.sg laborant=laboro:pres.3p",
+"Dominus irate clamat; servi tacite laborant.|The master shouts angrily; the slaves work silently.|dominus:nom.sg irate clamat=clamo:pres.3s servi=servus:nom.pl tacite laborant=laboro:pres.3p",
+"Interdum servi fabulas narrant; tum omnes tacent.|Sometimes the slaves tell stories; then everyone is quiet.|interdum servi=servus:nom.pl fabulas=fabula:acc.pl narrant=narro:pres.3p tum omnes=omnis:m.nom.pl tacent=taceo:pres.3p",
+"Servi saxa ingentia ad villam trahunt.|The slaves drag huge rocks to the villa.|servi=servus:nom.pl saxa=saxum:acc.pl ingentia=ingens:n.acc.pl ad villam=villa:acc.sg trahunt=traho:pres.3p",
+"Ancilla in flumine togas lavat.|The slave girl washes the togas in the river.|ancilla:nom.sg in@abl flumine=flumen:abl.sg togas=toga:acc.pl lavat=lavo:pres.3s",
+"Dominus iratus servum malum punit.|The angry master punishes the bad slave.|dominus:nom.sg iratus:m.nom.sg servum=servus:acc.sg malum=malus:m.acc.sg punit=punio:pres.3s",
+"Dominus benignus servum bonum liberat.|The kind master frees the good slave.|dominus:nom.sg benignus:m.nom.sg servum=servus:acc.sg bonum=bonus:m.acc.sg liberat=libero:pres.3s",
+"Libertus nunc liber est.|The freedman is now free.|libertus:nom.sg nunc liber@adjectives:m.nom.sg est=esse:pres.3s",
+"Servus miser semper laborat et numquam ludit.|The miserable slave always works and never plays.|servus:nom.sg miser:m.nom.sg semper laborat=laboro:pres.3s et numquam ludit=ludo:pres.3s",
+"Unus vir duas feminas et tres pueros videt.|One man sees two women and three boys.|unus:m.nom.sg vir:nom.sg duas=duo:f.acc.pl feminas=femina:acc.pl et tres:m.acc.pl pueros=puer:acc.pl videt=video:pres.3s",
+"Puer saxum in flumen iacit.|The boy throws a rock into the river.|puer:nom.sg saxum:acc.sg in@acc flumen:acc.sg iacit=iacio:pres.3s",
+"Puer iterum ad ianuam currit.|The boy runs to the door again.|puer:nom.sg iterum ad ianuam=ianua:acc.sg currit=curro:pres.3s",
+"Puer territus ad patrem currit.|The terrified boy runs to his father.|puer:nom.sg territus:m.nom.sg ad patrem=pater:acc.sg currit=curro:pres.3s",
+"Iuvenis puellae in aqua succurrit.|The young man helps the girl in the water.|iuvenis:nom.sg puellae=puella:dat.sg.dv in@abl aqua:abl.sg succurrit=succurro:pres.3s",
+"Hercules saxum ingens tollit.|Hercules lifts a huge rock.|saxum:acc.sg ingens:n.acc.sg tollit=tollo:pres.3s",
+"Saxum grave est sed scutum leve.|The rock is heavy but the shield is light.|saxum:nom.sg grave=gravis:n.nom.sg est=esse:pres.3s sed scutum:nom.sg leve=levis:n.nom.sg",
+"Haec via brevis et facilis est; illa longa et difficilis.|This road is short and easy; that one is long and difficult.|haec=hic_haec_hoc:f.nom.sg via:nom.sg brevis:f.nom.sg et facilis:f.nom.sg est=esse:pres.3s illa=ille_illa_illud:f.nom.sg longa=longus:f.nom.sg difficilis:f.nom.sg",
+"Fama de proelio per urbem currit.|A rumour about the battle runs through the city.|fama:nom.sg de proelio=proelium:abl.sg per urbem=urbs:acc.sg currit=curro:pres.3s",
+"Ego quoque cum amicis ad ludos ibo.|I too will go to the games with my friends.|ego:1.nom.sg quoque cum amicis=amicus:abl.pl ad ludos=ludi:acc.pl ibo=eo:fut.1s",
+"Graeci multos deos colebant.|The Greeks used to worship many gods.|graeci=Graecus:nom.pl multos=multi:m.acc.pl deos=deus:acc.pl colebant=colo:impf.3p",
+"Romani in templis statuas deorum ponunt.|The Romans place statues of the gods in the temples.|romani=Romanus@nouns:nom.pl in@abl templis=templum:abl.pl statuas=statua:acc.pl deorum=deus:gen.pl ponunt=pono:pres.3p",
+"Femina deam orat et dona fert.|The woman begs the goddess and brings gifts.|femina:nom.sg deam=dea:acc.sg orat=oro:pres.3s et dona=donum:acc.pl fert=fero:pres.3s",
+"Hoc templum sacrum est.|This temple is sacred.|hoc=hic_haec_hoc:n.nom.sg templum:nom.sg sacrum=sacer:n.nom.sg est=esse:pres.3s",
+"Templum ipsum magnum non est.|The temple itself is not big.|templum:nom.sg ipsum:n.nom.sg magnum=magnus:n.nom.sg est=esse:pres.3s",
+"In silva est templum; ibi deam colimus.|In the forest there is a temple; there we worship the goddess.|in@abl silva:abl.sg est=esse:pres.3s templum:nom.sg ibi deam=dea:acc.sg colimus=colo:pres.1p",
+"Poeta carmen de deis divinis canit.|The poet sings a song about the divine gods.|poeta:nom.sg carmen:acc.sg de deis=deus:abl.pl divinis=divinus:m.abl.pl canit=cano:pres.3s",
+"Hic poeta notus est, ille ignotus.|This poet is famous, that one unknown.|hic=hic_haec_hoc:m.nom.sg poeta:nom.sg notus:m.nom.sg est=esse:pres.3s ille=ille_illa_illud:m.nom.sg ignotus:m.nom.sg",
+"Forma statuae pulchra est.|The shape of the statue is beautiful.|forma:nom.sg statuae=statua:gen.sg pulchra=pulcher:f.nom.sg est=esse:pres.3s",
+"Puella laeta est quod donum accipit.|The girl is happy because she is receiving a gift.|puella:nom.sg laeta=laetus:f.nom.sg est=esse:pres.3s quod donum:acc.sg accipit=accipio:pres.3s",
+"Cur tristis es, amice? Quid times?|Why are you sad, friend? What are you afraid of?|cur tristis:m.nom.sg es=esse:pres.2s amice=amicus:voc.sg quid times=timeo:pres.2s",
+"Mater anxia et sollicita filium exspectat.|The anxious and worried mother waits for her son.|mater:nom.sg anxia=anxius:f.nom.sg et sollicita=sollicitus:f.nom.sg filium=filius:acc.sg exspectat=exspecto:pres.3s",
+"Senex commotus verba filiae audit.|The old man, deeply moved, hears his daughter's words.|senex:nom.sg commotus:m.nom.sg verba=verbum:acc.pl filiae=filia:gen.sg audit=audio:pres.3s",
+"Iuvenes fortes et feroces sunt, senes graves.|Young men are brave and fierce, old men serious.|iuvenes=iuvenis:nom.pl fortes=fortis:m.nom.pl et feroces=ferox:m.nom.pl sunt=esse:pres.3p senes=senex:nom.pl graves=gravis:m.nom.pl",
+"Post laborem longum agricola dormire vult.|After long work the farmer wants to sleep.|post laborem=labor:acc.sg longum=longus:m.acc.sg agricola:nom.sg dormire=dormio:inf vult=volo:pres.3s",
+"Tempus celeriter fugit.|Time flies quickly.|tempus:nom.sg celeriter fugit=fugio:pres.3s"];
+let SENT_BANK=null;
+const wKey=w=>w.catKey+'|'+w.subKey+'|'+w.lat;
+function sentBank(){if(SENT_BANK)return SENT_BANK;const all=allWordsFlat();
+  SENT_BANK=SENT_LINES.map(line=>{const [la,en,tg]=line.split('|');
+    const tags=tg.trim().split(/\s+/).map(t=>{let [lhs,code]=t.split(':');let hint=null;const at=lhs.lastIndexOf('@');if(at>0){hint=lhs.slice(at+1);lhs=lhs.slice(0,at);}
+      let [surf,lem]=lhs.split('=');lem=(lem||surf).replace(/_/g,' ');surf=surf.replace(/_/g,' ');
+      let c=all.filter(w=>w.lat.toLowerCase()===lem.toLowerCase());
+      if(hint)c=c.filter(w=>w.catKey===hint||(w.subKey||'').includes(hint==='abl'?'ablative':hint==='acc'?'accusative':'@@'));
+      const main=c.filter(w=>w.catKey!=='time');return{surf,lem,code:code||'',w:(main[0]||c[0]||null),keys:new Set(c.map(wKey))};});
+    // where each tag sits in the sentence (word-token index), for context like "after in"
+    const toks=la.toLowerCase().match(/[a-z]+/g)||[];const usedPos=new Set();
+    tags.forEach(t=>{const sw=t.surf.toLowerCase().match(/[a-z]+/g)||[];t.pos=-1;t.len=sw.length;
+      for(let i=0;i+sw.length<=toks.length;i++){if(sw.every((x,j)=>toks[i+j]===x)&&(t.lem==='-ne'||!usedPos.has(i))){t.pos=i;break;}}
+      if(t.pos>=0&&t.lem!=='-ne')for(let j=0;j<t.len;j++)usedPos.add(t.pos+j);
+      if(t.pos<0&&t.lem==='-ne'){const k=toks.findIndex(x=>x.endsWith('ne'));t.pos=k;t.len=1;}});
+    return{la,en,tags};});
+  return SENT_BANK;}
+function sentencesFor(w){const k=wKey(w);return sentBank().filter(s=>s.tags.some(t=>t.keys.has(k)));}
+
+const G_NAME={m:'masculine',f:'feminine',n:'neuter'},C_NAME={nom:'nominative',acc:'accusative',gen:'genitive',dat:'dative',abl:'ablative',voc:'vocative'},N_NAME={sg:'singular',pl:'plural'};
+const T_NAME={pres:'present',impf:'imperfect',fut:'future'},P_NAME={'1s':'1st person singular (I)','2s':'2nd person singular (you, one person)','3s':'3rd person singular (he/she/it)','1p':'1st person plural (we)','2p':'2nd person plural (you, more than one)','3p':'3rd person plural (they)'};
+const CASE_WHY={nom:'Nominative: the subject, the person or thing doing the action.',acc:'Accusative: the object, the person or thing the action is done to.',gen:'Genitive: means “of …” (whose / belonging to).',dat:'Dative: means “to …” or “for …” (the indirect object).',abl:'Ablative: means “by / with / from / in …”.',voc:'Vocative: used when speaking directly to someone.'};
+const INF_GOV=['posse','volo','nolo','debeo','iubeo','cupio','constituo','tempto'];
+function tagKind(t){const c=t.code.split('.')[0];if(!c)return 'plain';if(['pres','impf','fut','imp','inf'].includes(c))return 'verb';if(/^[123]$/.test(c))return 'pers';if(/^[mfn]$/.test(c))return 'adj';return 'noun';}
+function tagCaseNum(t){const p=t.code.split('.');const k=tagKind(t);if(k==='noun')return{c:p[0],n:p[1],role:p[2]};if(k==='adj')return{g:p[0],c:p[1],n:p[2]};if(k==='pers')return p.length===5||(p.length===4&&/^[mfn]$/.test(p[1]))?{g:p[1],c:p[2],n:p[3],role:p[4]}:{c:p[1],n:p[2],role:p[3]};return{};}
+function nounGender(t){const w=t.w;if(!w)return null;if(w.gender)return w.gender;return null;}
+function prepFor(s,t){// nearest preposition before this word, skipping adjectives/numbers in between
+  const before=s.tags.filter(x=>x.pos>=0&&x.pos<t.pos).sort((a,b)=>b.pos-a.pos);
+  for(const x of before){if(x.w&&x.w.catKey==='prepositions')return x;const k=tagKind(x);if(k==='adj'||(x.w&&x.w.subKey==='cardinal numbers'))continue;return null;}return null;}
+function agreeTarget(s,t,cn){const cands=s.tags.filter(x=>x!==t&&(tagKind(x)==='noun'||tagKind(x)==='pers')&&x.pos>=0).filter(x=>{const o=tagCaseNum(x);const g=tagKind(x)==='noun'?nounGender(x):o.g;return o.c===cn.c&&o.n===cn.n&&(!g||!cn.g||g===cn.g);});
+  cands.sort((a,b)=>Math.abs(a.pos-t.pos)-Math.abs(b.pos-t.pos));return cands[0]||null;}
+function nearestVerb(s,t,filter){const v=s.tags.filter(x=>tagKind(x)==='verb'&&x.pos>=0&&(!filter||filter(x)));v.sort((a,b)=>Math.abs(a.pos-t.pos)-Math.abs(b.pos-t.pos));return v[0]||null;}
+function caseReason(s,t,cn){const pr=prepFor(s,t);
+  if(pr){const pc=pr.w.subKey.includes('ablative')?'abl':'acc';if(pc===cn.c)return '“'+pr.surf+'” takes the '+C_NAME[cn.c]+(pr.w.lat==='in'?' (in + ablative = in/on; in + accusative = into/onto).':', so the word after it goes into the '+C_NAME[cn.c]+'.');}
+  if(cn.role==='c')return 'Nominative because it comes with “est/sunt” and describes the subject.';
+  if(cn.role==='t')return 'Ablative of time: says when something happens.';
+  if(cn.role==='d')return 'Accusative of time: says how long something goes on.';
+  if(cn.role==='dv'){const v=nearestVerb(s,t);return 'Dative because '+(v?'“'+v.w.lat+'”':'this verb')+' takes the dative.';}
+  return CASE_WHY[cn.c]||'';}
+function explainTag(s,t){const w=t.w;const lines=[];const kind=tagKind(t);
+  const head=w?(w.lat==='-ne'?'-ne':fullLat(w))+' = '+displayEng(w):t.lem;lines.push(head);
+  if(t.lem==='-ne'){lines.push('-ne on the end of the first word turns the sentence into a yes/no question.');return lines;}
+  if(kind==='verb'){const [tn,pn]=t.code.split('.');
+    if(tn==='inf'){const g=nearestVerb(s,t,x=>x!==t&&INF_GOV.includes(x.w&&x.w.lat));lines.push('Infinitive: “to '+String(w.eng[0]).replace(/^to /,'')+'”.');if(g)lines.push('Used with “'+g.surf+'” ('+g.w.lat+').');}
+    else if(tn==='imp')lines.push('Command (imperative) to '+(pn==='s'?'one person.':'more than one person.'));
+    else{lines.push(T_NAME[tn][0].toUpperCase()+T_NAME[tn].slice(1)+' tense, '+P_NAME[pn]+'.');
+      if(pn[0]==='3'){// subject = nearest matching nominative before the verb (same clause), otherwise the nearest after it
+        const subj=s.tags.filter(x=>x!==t&&(tagKind(x)==='noun'||tagKind(x)==='pers')&&tagCaseNum(x).c==='nom'&&tagCaseNum(x).role!=='c'&&tagCaseNum(x).n===(pn[1]==='s'?'sg':'pl'))
+          .sort((a,b)=>(a.pos<t.pos?t.pos-a.pos:100+a.pos-t.pos)-(b.pos<t.pos?t.pos-b.pos:100+b.pos-t.pos))[0];if(subj)lines.push((pn[1]==='s'?'Singular':'Plural')+' because the subject “'+subj.surf+'” is '+(pn[1]==='s'?'singular.':'plural.'));}}
+    return lines;}
+  if(kind==='noun'){const cn=tagCaseNum(t);const g=nounGender(t);
+    lines.push([g?G_NAME[g]:'',C_NAME[cn.c],N_NAME[cn.n]].filter(Boolean).join(' ')+(w&&w.catKey==='nouns'?' ('+w.subKey+')':'')+'.');lines.push(caseReason(s,t,cn));return lines;}
+  if(kind==='adj'||kind==='pers'){const cn=tagCaseNum(t);
+    const desc=(kind==='pers'?({1:'1st person',2:'2nd person',3:'3rd person'})[t.code[0]]+' ':'')+[cn.g?G_NAME[cn.g]:'',C_NAME[cn.c],N_NAME[cn.n]].filter(Boolean).join(' ')+'.';lines.push(desc[0].toUpperCase()+desc.slice(1));
+    const isRel=w&&w.subKey&&w.subKey.startsWith('relative');
+    if(isRel){const ante=s.tags.filter(x=>tagKind(x)==='noun'&&x.pos<t.pos&&nounGender(x)===cn.g&&tagCaseNum(x).n===cn.n).sort((a,b)=>b.pos-a.pos)[0];
+      lines.push((ante?'Gender and number match “'+ante.surf+'”, the word it refers back to. ':'')+'Its case comes from its own job in the “who/which” clause: '+CASE_WHY[cn.c].split(':')[0].toLowerCase()+'.');return lines;}
+    if(kind==='adj'||(w&&w.catKey==='pronouns'&&!w.subKey.startsWith('personal')&&!w.subKey.startsWith('reflexive'))){
+      const a=agreeTarget(s,t,cn);if(a){const o=tagCaseNum(a);const ag=tagKind(a)==='noun'?nounGender(a):o.g;lines.push('Agrees with “'+a.surf+'”'+(a.w?' ('+a.w.lat+')':'')+', which is '+[ag?G_NAME[ag]:'',C_NAME[o.c],N_NAME[o.n]].filter(Boolean).join(' ')+'.');return lines;}
+      if(kind==='adj'&&w&&w.catKey!=='pronouns'){lines.push('Used on its own as a noun (e.g. “the many”, “everyone”), so it takes the case of its job in the sentence. '+caseReason(s,t,cn));return lines;}}
+    lines.push(caseReason(s,t,cn));return lines;}
+  // words that never change
+  const cat=w&&w.catKey;
+  if(cat==='prepositions')lines.push('Preposition: takes the '+(w.subKey.includes('ablative')?'ablative':'accusative')+'. Prepositions never change their ending.');
+  else if(cat==='adverbs')lines.push('Adverb: describes how, when or where. Adverbs never change their ending.');
+  else if(cat==='conjunctions')lines.push('Conjunction: joins words or clauses. It never changes its ending.');
+  else if(cat==='interrogatives')lines.push('Question word.');
+  else if(w&&w.subKey==='cardinal numbers')lines.push('This number never changes its ending.');
+  else if(cat==='time')lines.push('Time word: it never changes its ending.');
+  return lines;}
+function sentenceHtml(s,hitKey){const parts=s.la.split(/([A-Za-z]+)/);let wi=-1;const wordAt=[];parts.forEach((p,i)=>{if(i%2===1){wi++;wordAt[i]=wi;}});
+  // tags covering each word index (several tags may share one word, e.g. potestne = posse + -ne)
+  const cover={};s.tags.forEach((t,ti)=>{if(t.pos<0)return;for(let j=0;j<t.len;j++)(cover[t.pos+j]=cover[t.pos+j]||[]).push(ti);});
+  let html='';parts.forEach((p,i)=>{if(i%2===0){html+=esc(p);return;}const tis=cover[wordAt[i]];if(!tis){html+=esc(p);return;}
+    const hit=hitKey&&tis.some(ti=>s.tags[ti].keys.has(hitKey));html+='<span class="ex-w'+(hit?' hit':'')+'" tabindex="0" data-tags="'+tis.join(',')+'">'+esc(p)+'</span>';});
+  return html;}
+let exCurrent=[];
+function examplesHtml(w){const list=sentencesFor(w);exCurrent=list;if(!list.length)return '';const k=wKey(w);
+  return '<div class="ex-sec"><div class="ex-h">Example sentences <span>'+list.length+'</span></div><p class="forms-note" style="margin-top:0"><span>Hover over (or tap) a word to see what form it is and why.</span></p><div class="ex-list">'
+    +list.map((s,i)=>'<div class="ex-item'+(i>=4?' ex-more':'')+'" data-si="'+i+'"><div class="ex-la">'+sentenceHtml(s,k)+'</div><div class="ex-en">'+esc(s.en)+'</div></div>').join('')
+    +'</div>'+(list.length>4?'<button class="lb-more ex-toggle" onclick="this.closest(\'.ex-sec\').classList.toggle(\'all\');this.textContent=this.closest(\'.ex-sec\').classList.contains(\'all\')?\'Show fewer\':\'Show all '+list.length+'\'">Show all '+list.length+'</button>':'')+'</div>';}
+// Tooltip for words in example sentences (hover, keyboard focus, or tap)
+(function(){let tip=null;function show(el){const item=el.closest('.ex-item');if(!item)return;const s=exCurrent[+item.dataset.si];if(!s)return;
+    const lines=el.dataset.tags.split(',').flatMap(ti=>{const t=s.tags[+ti];return [{b:t.surf},...explainTag(s,t).map(x=>({t:x}))];});
+    tip=tip||Object.assign(document.createElement('div'),{className:'ex-tip'});document.body.appendChild(tip);tip.innerHTML='';
+    lines.forEach((l,i)=>{const d=document.createElement('div');if(l.b){d.className='ex-tip-w';d.textContent=l.b;if(i)d.style.marginTop='8px';}else d.textContent=l.t;tip.appendChild(d);});
+    const r=el.getBoundingClientRect();tip.style.display='block';const tw=tip.offsetWidth,th=tip.offsetHeight;
+    let x=Math.min(Math.max(8,r.left+r.width/2-tw/2),innerWidth-tw-8),y=r.top-th-8;if(y<8)y=r.bottom+8;tip.style.left=x+'px';tip.style.top=y+'px';}
+  function hide(){if(tip)tip.style.display='none';}
+  document.addEventListener('mouseover',e=>{const el=e.target.closest&&e.target.closest('.ex-w');if(el)show(el);});
+  document.addEventListener('mouseout',e=>{if(e.target.closest&&e.target.closest('.ex-w'))hide();});
+  document.addEventListener('focusin',e=>{if(e.target.classList&&e.target.classList.contains('ex-w'))show(e.target);});
+  document.addEventListener('focusout',e=>{if(e.target.classList&&e.target.classList.contains('ex-w'))hide();});
+  document.addEventListener('click',e=>{const el=e.target.closest&&e.target.closest('.ex-w');if(el)show(el);else hide();},true);
+  document.addEventListener('scroll',hide,true);})();
 function showWordForms(w){
   const body=document.getElementById('formsBody');if(!body)return;
   w=(w.catKey&&DATA[w.catKey]&&DATA[w.catKey].sub[w.subKey])?w:(allWordsFlat().find(x=>x.lat===w.lat)||w);
@@ -3507,7 +3884,7 @@ function showWordForms(w){
   if(!tbl)tbl='<p class="forms-note">This word doesn’t change its ending, so there are no forms to learn'+(w.catKey==='prepositions'?' — just remember the case it takes ('+esc(w.subKey)+').':'.')+'</p>';
   const st=isStarred(w);
   body.innerHTML='<div class="forms-head"><div><div class="forms-lat">'+esc(fullLat(w)).replace(/\//g,' / ')+'</div><div class="forms-eng">'+esc(displayEng(w))+'</div></div><button class="row-star big'+(st?' on':'')+'" id="formsStar" title="Mark as hard" onclick="toggleStar(window._formsW);this.classList.toggle(\'on\',isStarred(window._formsW));this.textContent=isStarred(window._formsW)?\'★\':\'☆\'">'+(st?'★':'☆')+'</button></div>'
-    +'<div class="forms-tags"><span class="tag decl">'+esc(DATA[w.catKey]?DATA[w.catKey].label:w.catKey)+'</span><span class="tag">'+esc(w.subKey||'')+'</span>'+(w.gender?'<span class="tag gend">'+(w.gender==='f'?'feminine':w.gender==='m'?'masculine':'neuter')+'</span>':'')+boxes.map(b=>'<span class="tag" style="color:var(--gold)">📅 '+esc(b)+'</span>').join('')+'</div>'+tbl;
+    +'<div class="forms-tags"><span class="tag decl">'+esc(DATA[w.catKey]?DATA[w.catKey].label:w.catKey)+'</span><span class="tag">'+esc(w.subKey||'')+'</span>'+(w.gender?'<span class="tag gend">'+(w.gender==='f'?'feminine':w.gender==='m'?'masculine':'neuter')+'</span>':'')+boxes.map(b=>'<span class="tag" style="color:var(--gold)">📅 '+esc(b)+'</span>').join('')+'</div>'+tbl+examplesHtml(w);
   window._formsW=w;document.getElementById('formsOverlay').style.display='flex';}
 function hideForms(){document.getElementById('formsOverlay').style.display='none';}
 function openQuizForms(){const w=currentCardWord();if(!w)return;if(!answered&&!(mode==='le'&&!isDrill)){toast('Answer first, then check the forms.');return;}showWordForms(w);}
