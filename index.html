@@ -1846,7 +1846,7 @@ body.calm *,body.calm *::before,body.calm *::after{transition:none!important;ani
       <div class="guide-section"><h3>Reading: stories &amp; parsing</h3><p>The <strong>Reading</strong> tab has short <strong>stories</strong>: translate one sentence at a time, then compare with the model translation and mark yourself (hover any word for help). <strong>Parse it</strong> highlights a word in a sentence and asks for its form (e.g. <i>dative plural</i> or <i>present, 3rd person plural</i>), then explains why. Correct parses earn leaderboard points.</p></div>
       <div class="guide-section"><h3>Daily goal, streak &amp; mistake review</h3><p>Set a <strong>daily goal</strong> in Settings; the Practice page shows today’s progress and your 🔥 streak of days in a row you reached it. The Stats tab has a <strong>mistake review</strong> of the questions you miss most, with a button to practise them.</p></div>
       <div class="guide-section"><h3>Challenges, reactions &amp; your look</h3><p>Click someone on the leaderboard and press <strong>⚔ Challenge</strong>: pick which words can come up, and you both answer the same 10 questions; the higher score wins (a tie goes to whoever was faster). Your challenges are under <strong>⚔ Challenges</strong> beside your name. React to chat messages with 👍 😂 ❤️ 😮, and press <strong>Look</strong> to choose an avatar and name colour. Use the search box to find anyone on the leaderboard, with their real place.</p></div>
-      <div class="guide-section"><h3>Leaderboard &amp; chat</h3><p>Join with a first name or nickname to appear on the leaderboard (one point per correct answer, and 2–9 for a sentence depending on its length and direction: today, this week, this month and all time; a short quiz of 5 questions or fewer stops earning points from the 3rd time you repeat it in a day) and to use the class chat. Your points show as ⭐ during a quiz. Changing your name updates it everywhere, including old messages.</p></div>
+      <div class="guide-section"><h3>Leaderboard &amp; chat</h3><p>Join with a first name or nickname to appear on the leaderboard (one point per correct answer, and 2–14 for a sentence depending on its length and direction: today, this week, this month and all time; a short quiz of 5 questions or fewer stops earning points from the 3rd time you repeat it in a day) and to use the class chat. Your points show as ⭐ during a quiz. Changing your name updates it everywhere, including old messages.</p></div>
       <div class="guide-section"><h3>Themes</h3><p>Open <strong>⚙ Settings</strong> and choose <strong>Change theme…</strong> to open the theme picker. Choose from 11 themes: Dark, Light, Parchment, Mist (light themes), Midnight, Forest, Rose, Ocean, Violet, Slate, and Sepia (dark themes). Your choice is remembered.</p></div>
       <div class="guide-section"><h3>Keyboard shortcuts</h3><p><strong>Enter</strong> check / next · <strong>Escape</strong> skip (or close the forms popup) · <strong>Tab</strong> hint · <strong>1–4</strong> pick a multiple-choice option · <strong>?</strong> show shortcuts.</p></div>
     </div>
@@ -2247,6 +2247,9 @@ const FORM_SYNS={};
     // "farmer": agricola (1st decl) ↔ colonus (2nd decl masc)
     [{lat:'agricola',gen:null,gender:'m',subKey:'1st declension',catKey:'nouns'},
      {lat:'colonus', gen:null,gender:'m',subKey:'2nd declension (masc)',catKey:'nouns'}],
+    // "man": vir ↔ homo
+    [{lat:'vir',gen:null,gender:'m',subKey:'2nd declension (masc)',catKey:'nouns'},
+     {lat:'homo',gen:'hominis',gender:'m',subKey:'3rd declension',catKey:'nouns'}],
   ];
   const verbGroups=[
     [{lat:'neco',      subKey:'1st conjugation',catKey:'verbs'},
@@ -2256,7 +2259,18 @@ const FORM_SYNS={};
      {lat:'postulo',   subKey:'1st conjugation',catKey:'verbs'}],
     [{lat:'cano',      subKey:'3rd conjugation',catKey:'verbs'},
      {lat:'canto',     subKey:'1st conjugation',catKey:'verbs'}],
+    // same meaning and same construction, so either is right in a sentence
+    [{lat:'iuvo',      subKey:'1st conjugation',catKey:'verbs'},
+     {lat:'adiuvo',    subKey:'1st conjugation',catKey:'verbs'}],
+    [{lat:'festino',   subKey:'1st conjugation',catKey:'verbs'},
+     {lat:'contendo',  subKey:'3rd conjugation',catKey:'verbs'}],
+    [{lat:'porto',     subKey:'1st conjugation',catKey:'verbs'},
+     {lat:'fero',      subKey:'irregular',catKey:'verbs'}],
+    [{lat:'habito',    subKey:'1st conjugation',catKey:'verbs'},
+     {lat:'vivo',      subKey:'3rd conjugation',catKey:'verbs'}],
   ];
+  // "your" is the same in English for one person or several, so tuus and vester are both right
+  const adjGroups=[[{lat:'tuus',subKey:'1st/2nd declension',catKey:'adjectives'},{lat:'vester',subKey:'1st/2nd declension',catKey:'adjectives'}]];
   function linkGroup(formSets){
     const keys=new Set();
     formSets.forEach(fs=>{if(fs)Object.keys(fs).forEach(k=>keys.add(k));});
@@ -2269,7 +2283,8 @@ const FORM_SYNS={};
     });
   }
   nounGroups.forEach(g=>linkGroup(g.map(w=>getNounForms(w))));
-  verbGroups.forEach(g=>{linkGroup(g.map(w=>getVerbConj(w)));linkGroup(g.map(w=>getVerbImpf(w)));linkGroup(g.map(w=>getVerbFut(w)));});
+  verbGroups.forEach(g=>{linkGroup(g.map(w=>getVerbConj(w)));linkGroup(g.map(w=>getVerbImpf(w)));linkGroup(g.map(w=>getVerbFut(w)));linkGroup(g.map(w=>{try{return getVerbImp(w);}catch(e){return null;}}));});
+  adjGroups.forEach(g=>linkGroup(g.map(w=>getAdjForms(w))));
   // Preposition alternate forms
   if(!FORM_SYNS['ex'])FORM_SYNS['ex']=new Set();FORM_SYNS['ex'].add('e');
   if(!FORM_SYNS['e'])FORM_SYNS['e']=new Set();FORM_SYNS['e'].add('ex');
@@ -2672,7 +2687,7 @@ const TOUR_ADV=[
   {el:null,title:'Keyboard shortcuts',body:'During a quiz: <strong>Enter</strong> = check/next, <strong>Escape</strong> = skip, <strong>Tab</strong> = hint (\xbd point if correct), <strong>1–4</strong> = MC options. In the forms popup, <strong>Escape</strong> closes it.'},
   {el:'.side-lb',title:'⚔ Head-to-head challenges',body:'Click a player on the leaderboard and press <b>⚔ Challenge</b>. Pick which word groups or packs can come up (use <b>Select all</b>, or a section’s <b>all</b> box, to tick lots at once) and the direction, then play your 10 questions. They get the same 10. The higher score wins, and if it’s a tie, whoever was faster wins. Challenges waiting for you show a red badge on <b>⚔ Challenges</b> next to your name.',pre:()=>{showMainTab('practice');}},
   {el:'.side-lb',title:'Class challenge',body:'When the admin sets one, a shared weekly target appears above the leaderboard (e.g. <i>1,240 / 2,000</i>). Every correct answer from anyone counts towards it.'},
-  {el:null,title:'How points work',body:'One leaderboard point per correct answer in quizzes and <b>Parse it</b>. A correct <b>sentence</b> is worth more, depending on its length: 2–7 points (3–9 English → Latin). Each sentence shows what it’s worth, and up to 2 small typos are allowed. To stop point farming, a short quiz (5 questions or fewer) earns nothing from the 3rd time you repeat it in a day. Story self-marking and challenges don’t give points.'},
+  {el:null,title:'How points work',body:'One leaderboard point per correct answer in quizzes and <b>Parse it</b>. A correct <b>sentence</b> is worth more, depending on its length: 2–10 points (3–14 English → Latin). Each sentence shows what it’s worth, and up to 2 small typos are allowed. To stop point farming, a short quiz (5 questions or fewer) earns nothing from the 3rd time you repeat it in a day. Story self-marking and challenges don’t give points.'},
   {el:'.settings-btn',title:'Themes, text size &amp; more',body:'In <b>⚙ Settings</b>: 11 themes (hover a swatch to preview, click to apply), larger text, reduced animations, sound effects, auto-advance timing, and hiding the leaderboard &amp; chat. Everything is remembered.'},
   {el:'#backupBox',title:'Export &amp; import progress',body:'Progress is stored in this browser only. <b>Export</b> saves everything — stats, spaced-repetition data, custom words, starred words and theme — to a backup file (or <b>Copy as text</b>). <b>Import</b> reads one back — choose <b>Replace</b> to overwrite or <b>Merge</b> to combine, keeping whichever record has more practice.',pre:()=>{showMainTab('stats');}},
   {el:null,title:'Tour complete!',body:'Open <b>⚙ Settings → Help</b> any time for tours, the user guide, or shortcuts.',pre:()=>{showMainTab('practice');setQuizType('vocab');}}
@@ -2896,9 +2911,9 @@ function renderSentence(){answered=false;const inp=document.getElementById('sent
 function saveSessionSnapshot(){if(sentTotal===0)return;const pct=Math.round(sentScore/sentTotal*100);const today=new Date().toDateString();const last=statsData.sessions[statsData.sessions.length-1];if(last&&new Date(last.date).toDateString()===today&&last.isSent){last.score=sentScore;last.total=sentTotal;last.pct=pct;}else{statsData.sessions.push({date:Date.now(),score:sentScore,total:sentTotal,pct,isSent:true});if(statsData.sessions.length>20)statsData.sessions=statsData.sessions.slice(-20);}saveStats();}
 // Leaderboard points for a correct sentence come from the sentence itself (the difficulty label isn't a
 // reliable guide: some Expert sentences are short). About 1 point per 2 Latin words; English → Latin +1.
-// Latin → English 2–7, English → Latin 3–9.
-function sentPoints(sd){sd=sd||sentData;const n=(String(sd&&sd.latin||'').match(/[A-Za-z]+/g)||[]).length;const base=Math.max(2,Math.ceil(n/2));
-  return mode==='el'?Math.min(9,base+1):Math.min(7,base);}
+// Latin → English 2–10, English → Latin 3–14.
+const SENT_PTS=[[4,2,3],[6,3,4],[8,4,6],[10,6,8],[12,7,10],[14,9,12],[Infinity,10,14]];// [up to N Latin words, L→E, E→L]
+function sentPoints(sd){sd=sd||sentData;const n=(String(sd&&sd.latin||'').match(/[A-Za-z]+/g)||[]).length;const row=SENT_PTS.find(r=>n<=r[0]);return mode==='el'?row[2]:row[1];}
 function checkSentence(){if(answered)return;const ua=document.getElementById('sentInput').value.trim();if(!ua)return;answered=true;document.getElementById('sentCheckBtn').disabled=true;document.getElementById('sentInput').disabled=true;const ca=mode==='el'?sentData.latin:sentData.english;const exact=checkWithSynonyms(ua,ca);const ok=exact||nearMiss(ua,[ca],mode==='el');const fb=document.getElementById('sentFb');if(ok){const pts=sentPoints();sentScore++;score++;quizNoPoints=false;lbCount(pts);dailyTick();fb.className='sent-fb ok';fb.textContent='✓ Correct!'+(exact?'':' (check the spelling: '+ca+')')+(lbMe?'  +'+pts+' ⭐':'');}else{fb.className='sent-fb no';fb.textContent='✗ '+ca;}sentTotal++;updScorePill(sentScore);updPct();saveSessionSnapshot();document.getElementById('sentNext').style.display='block';afterAnswer(ok);}
 function skipSentence(){if(answered)return;answered=true;document.getElementById('sentCheckBtn').disabled=true;document.getElementById('sentInput').disabled=true;const ca=mode==='el'?sentData.latin:sentData.english;const fb=document.getElementById('sentFb');fb.className='sent-fb no';fb.textContent='→ '+ca;sentTotal++;updPct();saveSessionSnapshot();document.getElementById('sentNext').style.display='block';}
 function nextSentence(){clearTimeout(autoNextTimer);renderSentence();}
