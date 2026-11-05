@@ -459,6 +459,48 @@ body.calm *,body.calm *::before,body.calm *::after{transition:none!important;ani
 .ex-tip{position:fixed;z-index:400;max-width:300px;background:var(--surface);color:var(--text2);border:1px solid var(--border2);border-radius:8px;padding:10px 12px;font-size:12.5px;line-height:1.45;box-shadow:0 8px 24px rgba(0,0,0,.35);pointer-events:none;display:none}
 .ex-tip div+div{margin-top:3px}
 .ex-tip-w{font-family:var(--serif);font-size:16px;color:var(--accent)}
+
+/* leaderboard extras */
+.lb-search{padding:0 14px 8px}.lb-search input{width:100%;font-family:var(--sans);font-size:12px;padding:6px 12px;border-radius:999px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);outline:none}
+.lb-more-row{display:flex;border-top:1px solid var(--border)}.lb-more-row .lb-more{border-top:none;flex:1}.lb-more.on{color:var(--text3);cursor:default;text-decoration:none}
+.lb-item.click{cursor:pointer}.lb-item.click:hover{background:var(--surface2)}
+.pname{display:inline-flex;align-items:center;gap:4px;max-width:100%;overflow:hidden}.pname>span:last-child{overflow:hidden;text-overflow:ellipsis}.pav{font-size:1.05em;line-height:1}
+.cc-box{margin:0 14px 10px;padding:8px 10px;border:1px solid var(--gold-bdr);background:var(--gold-bg);border-radius:var(--rs)}.cc-box.done{border-color:var(--green-bdr);background:var(--green-bg)}
+.cc-top{display:flex;justify-content:space-between;align-items:center;gap:6px;font-size:12px;color:var(--text);font-weight:600}.cc-bar,.dg-bar{height:6px;border-radius:999px;background:var(--surface3);overflow:hidden;margin:6px 0 4px}
+.cc-bar div{height:100%;background:var(--gold);border-radius:999px}.cc-box.done .cc-bar div{background:var(--green)}.cc-sub{font-size:11px;color:var(--text3)}
+#classChallenge>.lb-link{margin:0 14px 8px}
+.duel-btn{margin-top:8px;font-family:var(--sans);font-size:12px;font-weight:600;padding:5px 12px;border-radius:999px;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);cursor:pointer}.duel-btn:hover{color:var(--text)}
+.duel-badge{display:inline-block;min-width:18px;padding:0 5px;margin-left:4px;border-radius:999px;background:var(--red);color:var(--bg);font-size:11px}
+.pc-box{text-align:center;max-width:340px}.pc-name{font-size:22px;font-family:var(--serif);margin:4px 0 12px;display:flex;justify-content:center}.pc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:16px}
+.pc-grid div{background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:6px}.pc-grid b{display:block;font-size:16px;color:var(--accent)}.pc-grid span{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em}
+.look-box{max-width:380px;text-align:left}.look-box .about-title{text-align:center}.look-preview{text-align:center;font-size:20px;margin-bottom:6px;display:flex;justify-content:center}
+.look-grid{display:flex;flex-wrap:wrap;gap:6px}.look-opt{width:34px;height:34px;border-radius:8px;border:1px solid var(--border2);background:var(--surface2);cursor:pointer;font-size:18px;color:var(--text3)}.look-opt.on{outline:2px solid var(--accent);outline-offset:1px}.look-opt.sw{border-radius:50%}
+/* chat reactions */
+.chat-pick{display:inline-flex;gap:2px;margin-left:2px;opacity:0;transition:opacity var(--t)}.chat-m:hover .chat-pick,.chat-pick:focus-within{opacity:1}@media(hover:none){.chat-pick{opacity:.8}}
+.chat-pick button{background:none;border:none;cursor:pointer;font-size:13px;padding:0 2px;line-height:1}.chat-pick button:hover{transform:scale(1.2)}
+.chat-rx{display:flex;flex-wrap:wrap;gap:4px;margin-top:3px}.rx-chip{font-family:var(--sans);font-size:11px;padding:1px 7px;border-radius:999px;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);cursor:pointer}.rx-chip.mine{border-color:var(--accent);background:var(--accent-bg);color:var(--accent)}
+/* daily goal */
+.dg{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;margin-bottom:1.25rem}.dg.done{border-color:var(--green-bdr)}
+.dg-top{display:flex;justify-content:space-between;font-size:13px;font-weight:600;color:var(--text)}.dg-bar div{height:100%;background:var(--accent);border-radius:999px;transition:width .3s}.dg.done .dg-bar div{background:var(--green)}.dg-sub{font-size:12px;color:var(--text2)}
+/* mistakes */
+.mk-list{display:flex;flex-direction:column;gap:4px}.mk-row{display:flex;gap:10px;align-items:baseline;font-size:13px;border-top:1px solid var(--border);padding-top:4px}.mk-w{font-family:var(--serif);font-size:16px;color:var(--text)}.mk-d{flex:1;color:var(--text3);font-size:12px}.mk-n{color:var(--red);font-size:12px}
+/* reading */
+.st-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}.st-card{display:flex;flex-direction:column;gap:3px;text-align:left;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;cursor:pointer;font-family:var(--sans);color:var(--text)}.st-card:hover{border-color:var(--accent-dim)}
+.st-la{font-family:var(--serif);font-size:20px}.st-en{font-size:13px;color:var(--text2)}.st-meta{font-size:11px;color:var(--text3);margin-top:4px}
+.st-head{display:flex;gap:14px;align-items:center;margin-bottom:6px}.st-title{font-family:var(--serif);font-size:24px}
+.st-body{display:flex;flex-direction:column;gap:10px}.st-line.cur{border-color:var(--accent-dim)}.st-input{width:100%;margin-top:8px;font-family:var(--sans);font-size:14px;padding:8px 12px;border-radius:var(--rs);border:1px solid var(--border2);background:var(--surface);color:var(--text);resize:vertical}
+.st-btns{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}.st-model{color:var(--green)}.st-mine{font-size:12px;color:var(--text3);margin-top:2px}.st-end{text-align:center;padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r)}.st-end .st-btns{justify-content:center}
+.pz-filter{margin-bottom:1rem}.pz-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px}.pz-score{font-size:12px;color:var(--text3);text-align:right}
+.pz-la{font-family:var(--serif);font-size:22px;line-height:1.5;margin:6px 0 10px}.pz-target{background:var(--accent-bg);color:var(--accent);border-bottom:2px solid var(--accent);padding:0 2px;border-radius:3px}
+.pz-q{font-size:14px;color:var(--text2);margin-bottom:10px}.pz-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}.pz-opt{text-align:center}
+.pz-fb{margin-top:12px;font-weight:600}.pz-fb.ok{color:var(--green)}.pz-fb.no{color:var(--red)}.pz-why{font-size:13px;color:var(--text2);margin:6px 0 10px;line-height:1.5}.pz-en .ex-item{margin-top:6px}
+/* duels */
+.duel-box{max-width:520px;width:94%;text-align:left;max-height:88vh;overflow:auto}.duel-box .about-title{text-align:center}
+.dl-cats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}.dl-cat{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--text2);background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:8px}.dl-cat b{color:var(--text);font-size:13px}.dl-cat small{color:var(--text3)}.dl-cat label{cursor:pointer}
+.dl-count{font-size:13px;color:var(--text2)}.dl-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--border);font-size:13px}
+.dp-top{display:flex;justify-content:space-between;font-size:12px;color:var(--text3)}.dp-dir{text-align:center;font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-top:10px}
+.dp-prompt{text-align:center;font-family:var(--serif);font-size:28px;margin:6px 0 14px}.dp-fb{text-align:center;min-height:20px;margin-top:8px;font-weight:600}.dp-fb.ok{color:var(--green)}.dp-fb.no{color:var(--red)}
+@media(max-width:560px){.dl-cats,.pz-opts{grid-template-columns:1fr}.pc-grid{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
@@ -473,6 +515,8 @@ body.calm *,body.calm *::before,body.calm *::after{transition:none!important;ani
       <button class="mode-btn" data-period="m" onclick="setLbPeriod('m')">Month</button>
       <button class="mode-btn" data-period="all" onclick="setLbPeriod('all')">All time</button>
     </div>
+    <div id="classChallenge"></div>
+    <div class="lb-search"><input id="lbSearch" type="search" placeholder="Search players…" autocomplete="off" oninput="renderLb()"></div>
     <div class="lb-list" id="lbList"><div class="lb-empty">Loading…</div></div>
   </section>
   <section class="side-sec side-chat">
@@ -511,11 +555,13 @@ body.calm *,body.calm *::before,body.calm *::after{transition:none!important;ani
   <div class="settings-row"><button class="settings-btn" onclick="showSettings()">⚙ Settings</button></div>
   <div class="nav-tabs">
     <button class="nav-tab active" onclick="showMainTab('practice')">Practice</button>
+    <button class="nav-tab" onclick="showMainTab('read')">Reading</button>
     <button class="nav-tab" onclick="showMainTab('stats')">Stats</button>
     <button class="nav-tab" onclick="showMainTab('info')">Information</button>
     <button class="nav-tab nav-side" onclick="document.getElementById('sidePanel').scrollIntoView({behavior:'smooth'})">Leaderboard &amp; chat</button>
   </div>
   <div id="practicePanel">
+    <div id="dailyGoal" class="dg" style="display:none"></div>
     <div id="resumeBanner" style="display:none"><div class="rb-head">Unfinished quizzes</div><div id="resumeBannerList"></div></div>
     <div class="mode-toggle" id="directionToggle">
       <button class="mode-btn active" id="modeEL" onclick="setMode('el')">English → Latin</button>
@@ -695,6 +741,8 @@ body.calm *,body.calm *::before,body.calm *::after{transition:none!important;ani
   <div class="session-chart" id="sessionChart"></div>
   <p class="section-title">By category</p>
   <div class="cat-stats-grid" id="catStatsGrid"></div>
+  <p class="section-title">Mistake review</p>
+  <div id="mistakeBox" class="backup-box" style="margin-bottom:2rem"></div>
   <p class="section-title">Backup &amp; transfer</p>
   <div class="backup-box" id="backupBox">
     <p>Your progress is stored in this browser only. Export it to keep a safe copy or move to another device, then import it there.</p>
@@ -725,6 +773,11 @@ body.calm *,body.calm *::before,body.calm *::after{transition:none!important;ani
 </div>
 
 <!-- INFO -->
+<div id="readView" style="display:none">
+  <div class="stats-header"><h2>Reading</h2><p>Translate short stories and practise parsing words in context</p></div>
+  <div class="mode-toggle" style="margin-bottom:1.25rem"><button class="mode-btn active" id="rdStories" onclick="setReadMode('stories')">Stories</button><button class="mode-btn" id="rdParse" onclick="setReadMode('parse')">Parse it</button></div>
+  <div id="readArea"></div>
+</div>
 <div id="infoView" style="display:none">
   <div class="stats-header"><h2>Information</h2><p>Grammar notes and declension tables</p></div>
   <div class="mode-toggle" style="margin-bottom:1.5rem">
@@ -1683,6 +1736,30 @@ body.calm *,body.calm *::before,body.calm *::after{transition:none!important;ani
 </div><!-- .layout -->
 
 <!-- HELP MENU -->
+<div id="playerOverlay" class="overlay" style="display:none" onclick="closeOverlay('playerOverlay')">
+  <div class="about-box pc-box" onclick="event.stopPropagation()"><button class="about-close" onclick="closeOverlay('playerOverlay')">×</button><div id="playerCard"></div></div>
+</div>
+<div id="lookOverlay" class="overlay" style="display:none" onclick="closeOverlay('lookOverlay')">
+  <div class="about-box look-box" onclick="event.stopPropagation()"><button class="about-close" onclick="closeOverlay('lookOverlay')">×</button>
+    <div class="about-title">Your look</div>
+    <div class="look-preview" id="lookPreview"></div>
+    <div class="set-h">Avatar</div><div class="look-grid" id="lookAvatars"></div>
+    <div class="set-h">Name colour</div><div class="look-grid" id="lookColors"></div>
+    <div style="display:flex;gap:8px;justify-content:center;margin-top:16px"><button class="btn-primary" onclick="saveLook()">Save</button><button class="btn-secondary" onclick="closeOverlay('lookOverlay')">Cancel</button></div>
+    <p class="lb-msg err" id="lookErr"></p>
+  </div>
+</div>
+
+<div id="duelSetupOverlay" class="overlay" style="display:none" onclick="closeOverlay('duelSetupOverlay')">
+  <div class="about-box duel-box" onclick="event.stopPropagation()"><button class="about-close" onclick="closeOverlay('duelSetupOverlay')">×</button><div id="duelSetup"></div></div>
+</div>
+<div id="duelInboxOverlay" class="overlay" style="display:none" onclick="closeOverlay('duelInboxOverlay')">
+  <div class="about-box duel-box" onclick="event.stopPropagation()"><button class="about-close" onclick="closeOverlay('duelInboxOverlay')">×</button><div id="duelInbox"></div></div>
+</div>
+<div id="duelPlayOverlay" class="overlay" style="display:none">
+  <div class="about-box duel-box" onclick="event.stopPropagation()"><div id="duelPlay"></div></div>
+</div>
+
 <div id="settingsOverlay" class="overlay" style="display:none" onclick="hideSettings()">
   <div class="about-box set-box" onclick="event.stopPropagation()">
     <button class="about-close" onclick="hideSettings()">×</button>
@@ -1695,6 +1772,8 @@ body.calm *,body.calm *::before,body.calm *::after{transition:none!important;ani
         <select data-set="nextWrong"><option value="-1">Wait for me</option><option value="2000">2 seconds</option><option value="3000">3 seconds</option><option value="5000">5 seconds</option></select></label>
       <label class="set-row"><span>Typo forgiveness<small>One free retry when you’re a letter off</small></span><input type="checkbox" class="set-tog" data-set="typo"></label>
       <label class="set-row"><span>Sound effects<small>A soft tone for right and wrong answers</small></span><input type="checkbox" class="set-tog" data-set="sound"></label>
+      <label class="set-row"><span>Daily goal<small>Correct answers to aim for each day (keeps your 🔥 streak going)</small></span>
+        <select data-set="goal"><option value="0">Off</option><option value="10">10</option><option value="20">20</option><option value="30">30</option><option value="50">50</option><option value="100">100</option></select></label>
       <div class="set-h">Display</div>
       <div class="set-row"><span>Theme</span><button class="btn-secondary" onclick="hideSettings();showThemePicker()">Change theme…</button></div>
       <label class="set-row"><span>Text size</span>
@@ -1754,6 +1833,9 @@ body.calm *,body.calm *::before,body.calm *::after{transition:none!important;ani
       <div class="guide-section"><h3>Information tab</h3><p>Reference tables for all grammar: noun declensions (1st–5th), adjective declensions, verb conjugations (present, imperfect, future, imperative), pronoun paradigms, number declensions, and special cases (dative verbs, time expressions, relative pronoun rules, cum+pronoun forms). Wide tables scroll sideways on narrow screens.</p></div>
       <div class="guide-section"><h3>Settings</h3><p>The <strong>⚙ Settings</strong> button above the Practice / Stats / Information tabs holds everything you can adjust: how long to wait after a right or wrong answer, typo forgiveness, sound effects, theme, text size, reduced animations, showing the leaderboard &amp; chat, rank style, and the Help menu (tours, this guide and keyboard shortcuts).</p></div>
       <div class="guide-section"><h3>Example sentences</h3><p>Click any word in the word list, or press <strong>Forms</strong> during a quiz, to see its forms and a set of example sentences that use it, each with an English translation. Hover over (or tap) any underlined Latin word to see which form it is and why, e.g. <i>puellis</i>: feminine ablative plural because <i>in</i> takes the ablative.</p></div>
+      <div class="guide-section"><h3>Reading: stories &amp; parsing</h3><p>The <strong>Reading</strong> tab has short <strong>stories</strong>: translate one sentence at a time, then compare with the model translation and mark yourself (hover any word for help). <strong>Parse it</strong> highlights a word in a sentence and asks for its form (e.g. <i>dative plural</i> or <i>present, 3rd person plural</i>), then explains why. Correct parses earn leaderboard points.</p></div>
+      <div class="guide-section"><h3>Daily goal, streak &amp; mistake review</h3><p>Set a <strong>daily goal</strong> in Settings; the Practice page shows today’s progress and your 🔥 streak of days in a row you reached it. The Stats tab has a <strong>mistake review</strong> of the questions you miss most, with a button to practise them.</p></div>
+      <div class="guide-section"><h3>Challenges, reactions &amp; your look</h3><p>Click someone on the leaderboard and press <strong>⚔ Challenge</strong>: pick which words can come up, and you both answer the same 10 questions; the higher score wins (a tie goes to whoever was faster). Your challenges are under <strong>⚔ Challenges</strong> beside your name. React to chat messages with 👍 😂 ❤️ 😮, and press <strong>Look</strong> to choose an avatar and name colour. Use the search box to find anyone on the leaderboard, with their real place.</p></div>
       <div class="guide-section"><h3>Leaderboard &amp; chat</h3><p>Join with a first name or nickname to appear on the leaderboard (one point per correct answer: today, this week, this month and all time; a short quiz of 5 questions or fewer stops earning points from the 3rd time you repeat it in a day) and to use the class chat. Your points show as ⭐ during a quiz. Changing your name updates it everywhere, including old messages.</p></div>
       <div class="guide-section"><h3>Themes</h3><p>Open <strong>⚙ Settings</strong> and choose <strong>Change theme…</strong> to open the theme picker. Choose from 11 themes: Dark, Light, Parchment, Mist (light themes), Midnight, Forest, Rose, Ocean, Violet, Slate, and Sepia (dark themes). Your choice is remembered.</p></div>
       <div class="guide-section"><h3>Keyboard shortcuts</h3><p><strong>Enter</strong> check / next · <strong>Escape</strong> skip (or close the forms popup) · <strong>Tab</strong> hint · <strong>1–4</strong> pick a multiple-choice option · <strong>?</strong> show shortcuts.</p></div>
@@ -2499,12 +2581,12 @@ function stopTimer(){clearInterval(timerInterval);document.getElementById('timer
 function timeUp(){if(answered)return;if(isSent){const val=document.getElementById('sentInput').value.trim();if(val){checkSentence();}else{skipSentence();}}else if(isDrill){if(inputMode==='typed'){const val=document.getElementById('answerInput').value.trim();if(val){checkDrill();}else{skipDrill();}}else{skipDrill();}}else{if(inputMode==='typed'){const val=document.getElementById('answerInput').value.trim();if(val){dispatchCheck();}else{skipQ();}}else{skipQ();}}}
 function setDiff(d){difficulty=d;[{i:'dEasy',v:'easy'},{i:'dMed',v:'medium'},{i:'dHard',v:'hard'},{i:'dInsane',v:'insane'},{i:'dExpert',v:'expert'}].forEach(({i,v})=>{const b=document.getElementById(i);if(b)b.className='diff-btn'+(v==='insane'?' ins':'')+(d===v?' active':'');});}
 // ── SETTINGS (saved in this browser) ──────────────────────────────────────────
-const SETTINGS_KEY='latin_settings',SET_DEFAULT={nextRight:500,nextWrong:-1,typo:true,sound:false,zoom:1,calm:false,side:true,ordinal:false};
+const SETTINGS_KEY='latin_settings',SET_DEFAULT={goal:20,nextRight:500,nextWrong:-1,typo:true,sound:false,zoom:1,calm:false,side:true,ordinal:false};
 let SET={...SET_DEFAULT};
 function applySettings(){document.body.classList.toggle('no-side',!SET.side);document.body.classList.toggle('calm',!!SET.calm);
   document.querySelector('.layout').style.zoom=SET.zoom==1?'':SET.zoom;
   document.querySelectorAll('[data-set]').forEach(el=>{const k=el.dataset.set;if(el.type==='checkbox')el.checked=!!SET[k];else el.value=String(SET[k]);});
-  try{renderLb();}catch(e){}}
+  try{renderLb();}catch(e){}try{renderDaily();}catch(e){}}
 function saveSettings(){try{window.storage.set(SETTINGS_KEY,JSON.stringify(SET));}catch(e){}}
 async function loadSettings(){try{const r=await window.storage.get(SETTINGS_KEY);if(r&&r.value)SET={...SET_DEFAULT,...JSON.parse(r.value)};}catch(e){}applySettings();}
 function resetSettings(){SET={...SET_DEFAULT};saveSettings();applySettings();}
@@ -2523,6 +2605,7 @@ function playTone(ok){if(!SET.sound)return;try{audioCtx=audioCtx||new (window.Au
     o.connect(g).connect(audioCtx.destination);o.start(s0);o.stop(s0+len+.02);});}catch(e){}}
 function ordinal(n){const v=n%100;return n+((v>=11&&v<=13)?'th':({1:'st',2:'nd',3:'rd'})[n%10]||'th');}
 loadSettings();
+setTimeout(()=>{try{renderDaily();}catch(e){}},0);
 function showHelp(){document.getElementById('helpOverlay').style.display='flex';}
 function hideHelp(){document.getElementById('helpOverlay').style.display='none';}
 function showGuide(){document.getElementById('guideOverlay').style.display='flex';}
@@ -2531,7 +2614,9 @@ const TOUR_BASIC=[
   {el:null,title:'Welcome to Latin Trainer',body:'This quick tour shows you around. Use arrow keys or Next/Back. Press Escape to exit. You can replay it any time from <b>⚙ Settings → Help</b>.'},
   {el:'.nav-tabs',title:'Navigation tabs',body:'<b>Practice</b> for quizzes, <b>Stats</b> for progress tracking (and backing up your progress), <b>Information</b> for grammar reference tables.',pre:()=>{showMainTab('practice');setQuizType('vocab');}},
   {el:'.settings-btn',title:'⚙ Settings',body:'Adjust how long to wait after right and wrong answers, typo forgiveness, sounds, theme, text size and more. <b>Help</b> (tours, user guide, shortcuts) lives here too.'},
-  {el:'#sidePanel',title:'Leaderboard &amp; chat',body:'Join with a first name or nickname to get on the leaderboard: one point for every correct answer, ranked for today, this week, this month and all time. The chat below is shared with everyone, so be kind.'},
+  {el:'#sidePanel',title:'Leaderboard &amp; chat',body:'Join with a first name or nickname to get on the leaderboard: one point for every correct answer, ranked for today, this week, this month and all time. Click a player to <b>⚔ challenge</b> them, use <b>Look</b> to pick an avatar and colour, and react to chat messages. Be kind: everyone can read the chat.'},
+  {el:'#dailyGoal',title:'Daily goal &amp; streak',body:'Your progress towards today’s goal of correct answers, and your 🔥 streak of days in a row. Change the goal in Settings.',pre:()=>{if(!SET.goal){SET.goal=20;}renderDaily();}},
+  {el:'.nav-tab:nth-child(2)',title:'Reading',body:'Translate short <b>stories</b> sentence by sentence, or practise <b>Parse it</b>: name the form of a highlighted word, then see why it has that ending.'},
   {el:'#directionToggle',title:'Direction toggle',body:'Choose English → Latin (translate into Latin) or Latin → English (identify meanings).'},
   {el:'#quizTypeToggle',title:'Quiz types',body:'Vocabulary tests word meanings. The declension and conjugation modes drill grammatical forms. Sentences generates full translations in present, past, future and command forms.'},
   {el:'#inputModeToggle',title:'Answer mode',body:'Typed: type your answer and press Enter. Multiple choice: click an option or press 1–4. Matching (vocabulary only): click an English word and its Latin partner from two columns of five.'},
@@ -2593,7 +2678,9 @@ function showMainTab(t){
   document.getElementById('statsView').style.display=t==='stats'?'block':'none';
   const iv=document.getElementById('infoView');
   if(iv)iv.style.display=t==='info'?'block':'none';
-  if(t==='stats')renderStats();
+  const rv=document.getElementById('readView');if(rv)rv.style.display=t==='read'?'block':'none';
+  if(t==='stats'){renderStats();renderMistakes();}
+  if(t==='read')renderReading();
 }
 function selectAll(){Object.entries(DATA).forEach(([ck,cat])=>{if(cat.packOnly)return;Object.keys(DATA[ck].sub).forEach(sk=>{selected[ck][sk]=true;const sc=document.getElementById('sbox_'+ck+'_'+sk);if(sc)sc.className='sbox checked';});updCatBox(ck);});updCount();}
 function deselectAll(){Object.entries(DATA).forEach(([ck,cat])=>{if(cat.packOnly)return;Object.keys(DATA[ck].sub).forEach(sk=>{selected[ck][sk]=false;const sc=document.getElementById('sbox_'+ck+'_'+sk);if(sc)sc.className='sbox';});updCatBox(ck);});updCount();}
@@ -2781,10 +2868,10 @@ function dispatchSkip(){if(isDrill)skipDrill();else skipQ();}
 function startSentences(){quizNoPoints=false;clearTimeout(autoNextTimer);stopTimer();isDrill=false;isSent=true;sentScore=0;sentTotal=0;score=0;answered=false;round=1;showView('quizView');document.getElementById('promptCard').style.display='none';document.getElementById('hintBox').style.display='none';document.getElementById('typedSection').style.display='none';document.getElementById('mcSection').style.display='none';document.getElementById('sentSection').style.display='block';document.getElementById('progFill').style.width='0%';document.getElementById('progLbl').textContent='∞';document.getElementById('scorePill').textContent='0 correct';document.getElementById('roundBadge').innerHTML='<span>Sentences · '+difficulty+'</span>';updPct();renderSentence();}
 function renderSentence(){answered=false;const inp=document.getElementById('sentInput');inp.value='';inp.disabled=false;document.getElementById('sentCheckBtn').disabled=false;document.getElementById('sentNext').style.display='none';const fb=document.getElementById('sentFb');fb.className='sent-fb';fb.textContent='';let sd;try{sd=buildSentence();}catch(e){document.getElementById('sentDir').textContent='Error: '+e.message;document.getElementById('sentWords').textContent='';return;}sentData=sd;const srcRaw=mode==='el'?sd.english:sd.latin;const src=srcRaw.toLowerCase().replace(/[.,!?;:]/g,'').trim();document.getElementById('sentDir').textContent=mode==='el'?'Translate into Latin':'Translate into English';document.getElementById('sentTags').innerHTML='<span class="tag diff">'+difficulty+'</span>';const container=document.getElementById('sentWords');container.innerHTML='';const wmap=sd.wordMap||{};const tipLookup={};if(mode==='el'){Object.entries(wmap).forEach(([lat,eng])=>{const e=String(eng).toLowerCase().replace(/\s*\([^)]*\)/g,'');tipLookup[e]=lat;const p=e.split(' '),s=p[0],r=p.slice(1).join(' ');let c;if(e==='to be')c='is';else if(e==='to be present')c='is present';else if(e==='to be absent')c='is absent';else if(e==='to be able')c='is able';else{if(s==='be')c='is';else if(s==='have')c='has';else if(s.endsWith('y')&&!/[aeiou]y$/.test(s))c=s.slice(0,-1)+'ies';else if(/(?:s|sh|ch|x|z|o)$/.test(s))c=s+'es';else c=s+'s';c=r?c+' '+r:c;}const v3=c;if(v3!==e)tipLookup[v3]=lat;const pastW={eng:[e]};const pastF=ePast(pastW);if(pastF!==e){tipLookup[pastF]=lat;pastF.split(/\s+/).forEach(pw=>{if(pw.length>1&&!tipLookup[pw])tipLookup[pw]=lat;});}e.split(/\s+/).forEach(w=>{if(w.length>1&&!tipLookup[w])tipLookup[w]=lat;});});}else{Object.assign(tipLookup,wmap);}src.split(' ').forEach((tok,i)=>{if(i>0)container.appendChild(document.createTextNode(' '));const m=tok.match(/^([a-zA-Z]*)([^a-zA-Z]*)$/);const word=m?m[1]:'',punct=m?m[2]:'';if(word){const tip=tipLookup[word]||(mode!=='el'?WORD_MAP[word]?.[0]:null)||null;const span=document.createElement('span');span.textContent=word;if(tip){span.className='sw';const t=tip;span.onclick=function(e){e.stopPropagation();container.querySelectorAll('.sent-tip').forEach(x=>x.remove());const el=document.createElement('span');el.className='sent-tip';el.textContent=t;span.insertAdjacentElement('afterend',el);setTimeout(()=>el.remove(),2500);};}container.appendChild(span);}if(punct)container.appendChild(document.createTextNode(punct));});setTimeout(()=>inp.focus(),50);startTimer();}
 function saveSessionSnapshot(){if(sentTotal===0)return;const pct=Math.round(sentScore/sentTotal*100);const today=new Date().toDateString();const last=statsData.sessions[statsData.sessions.length-1];if(last&&new Date(last.date).toDateString()===today&&last.isSent){last.score=sentScore;last.total=sentTotal;last.pct=pct;}else{statsData.sessions.push({date:Date.now(),score:sentScore,total:sentTotal,pct,isSent:true});if(statsData.sessions.length>20)statsData.sessions=statsData.sessions.slice(-20);}saveStats();}
-function checkSentence(){if(answered)return;const ua=document.getElementById('sentInput').value.trim();if(!ua)return;answered=true;document.getElementById('sentCheckBtn').disabled=true;document.getElementById('sentInput').disabled=true;const ca=mode==='el'?sentData.latin:sentData.english;const ok=checkWithSynonyms(ua,ca);const fb=document.getElementById('sentFb');if(ok){sentScore++;score++;lbCount();fb.className='sent-fb ok';fb.textContent='✓ Correct!';}else{fb.className='sent-fb no';fb.textContent='✗ '+ca;}sentTotal++;updScorePill(sentScore);updPct();saveSessionSnapshot();document.getElementById('sentNext').style.display='block';afterAnswer(ok);}
+function checkSentence(){if(answered)return;const ua=document.getElementById('sentInput').value.trim();if(!ua)return;answered=true;document.getElementById('sentCheckBtn').disabled=true;document.getElementById('sentInput').disabled=true;const ca=mode==='el'?sentData.latin:sentData.english;const ok=checkWithSynonyms(ua,ca);const fb=document.getElementById('sentFb');if(ok){sentScore++;score++;lbCount();dailyTick();fb.className='sent-fb ok';fb.textContent='✓ Correct!';}else{fb.className='sent-fb no';fb.textContent='✗ '+ca;}sentTotal++;updScorePill(sentScore);updPct();saveSessionSnapshot();document.getElementById('sentNext').style.display='block';afterAnswer(ok);}
 function skipSentence(){if(answered)return;answered=true;document.getElementById('sentCheckBtn').disabled=true;document.getElementById('sentInput').disabled=true;const ca=mode==='el'?sentData.latin:sentData.english;const fb=document.getElementById('sentFb');fb.className='sent-fb no';fb.textContent='→ '+ca;sentTotal++;updPct();saveSessionSnapshot();document.getElementById('sentNext').style.display='block';}
 function nextSentence(){clearTimeout(autoNextTimer);renderSentence();}
-function recAns(w,ok){const ck=w.catKey;if(!statsData.catStats[ck])statsData.catStats[ck]={seen:0,correct:0};statsData.catStats[ck].seen++;if(ok)statsData.catStats[ck].correct++;saveStats();if(ok)lbCount();}
+function recAns(w,ok){const ck=w.catKey;if(!statsData.catStats[ck])statsData.catStats[ck]={seen:0,correct:0};statsData.catStats[ck].seen++;if(ok)statsData.catStats[ck].correct++;saveStats();if(ok){lbCount();dailyTick();}trackMistake(w,ok);}
 let sessionFinished=true;
 function finishSession(){sessionFinished=true;const total=isDrill?drillQs.length:isSent?sentTotal:quizWords.length;const pct=total>0?Math.round(score/total*100):0;if(window.resumeDate)statsData.sessions=statsData.sessions.filter(s=>s.date!==window.resumeDate);statsData.sessions.push({date:Date.now(),score,total,pct});window.resumeDate=null;if(statsData.sessions.length>20)statsData.sessions=statsData.sessions.slice(-20);saveStats();}
 const PHRASES=[[100,'Optime! Perfectly done.'],[80,'Bene! Well done.'],[60,'Satis bene. Keep going.'],[0,'Persevera. Try again.']];
@@ -3340,10 +3427,12 @@ function renderLbProfile(msg,isErr){document.querySelectorAll('.lb-profile').for
     const ok=document.createElement('button');ok.className='btn-primary';ok.textContent=lbMe?'Save':'Join';row.appendChild(ok);
     if(lbMe){const c=document.createElement('button');c.type='button';c.className='btn-secondary';c.textContent='Cancel';c.onclick=()=>{lbEditing=false;renderLbProfile();};row.appendChild(c);}
     box.appendChild(row);
-  }else{const line=document.createElement('div');line.append('You’re ');const b=document.createElement('b');b.textContent=lbMe.name;line.appendChild(b);
+  }else{const line=document.createElement('div');line.append('You’re ');line.appendChild(nameEl(lbMe.pid,lbMe.name));
     line.append(' · ');const pts=document.createElement('span');pts.className='lb-pts';pts.append('⭐ ');const n=document.createElement('span');n.id='lbMyPts';n.textContent=lbMyPoints().toLocaleString();pts.appendChild(n);line.appendChild(pts);line.append(' ');
+    const look=document.createElement('button');look.className='lb-link';look.textContent='Look';look.onclick=openLook;line.appendChild(look);
     const ed=document.createElement('button');ed.className='lb-link';ed.textContent='Change name';ed.onclick=()=>{lbEditing=true;renderLbProfile();};line.appendChild(ed);
-    const lv=document.createElement('button');lv.className='lb-link muted';lv.textContent='Leave';lv.onclick=lbLeave;line.appendChild(lv);box.appendChild(line);}
+    const lv=document.createElement('button');lv.className='lb-link muted';lv.textContent='Leave';lv.onclick=lbLeave;line.appendChild(lv);box.appendChild(line);
+    const du=document.createElement('button');du.className='duel-btn';du.id='duelBtn';du.onclick=()=>openDuelInbox();box.appendChild(du);updDuelBtn();}
   const m=document.createElement('div');m.className='lb-msg'+(isErr?' err':'');m.textContent=msg||'';box.appendChild(m);});
   const ci=document.getElementById('chatInput'),cs=document.getElementById('chatSend');if(ci){ci.disabled=cs.disabled=!lbMe;ci.placeholder=lbMe?'Message everyone…':'Join above to chat';}}
 async function lbSaveName(raw){const name=lbCleanName(raw);const err=lbNameError(name);if(err){renderLbProfile(err,true);return;}
@@ -3368,27 +3457,76 @@ function renderLb(){const list=document.getElementById('lbList');if(!list||!lbPl
   // Ranks over everyone (ties share a rank); show the top 10, or 25 after "Show more",
   // and add your own row underneath if you're further down.
   let rank=0,prev=null;rows.forEach((r,i)=>{if(r.n!==prev){rank=i+1;prev=r.n;}r.rank=rank;});
-  const shown=rows.slice(0,lbLimit),meRow=lbMe&&rows.find(r=>r.pid===lbMe.pid);
-  if(meRow&&!shown.includes(meRow)){shown.push(null,meRow);}
+  // Search looks through everyone and keeps their real place; otherwise show the top 10 / 25 / all.
+  const q=((document.getElementById('lbSearch')||{}).value||'').trim().toLowerCase();
+  let shown=q?rows.filter(r=>r.name.toLowerCase().includes(q)):rows.slice(0,lbLimit);const meRow=lbMe&&rows.find(r=>r.pid===lbMe.pid);
+  if(!q&&meRow&&!shown.includes(meRow)){shown.push(null,meRow);}
+  if(q&&!shown.length){list.innerHTML='<div class="lb-empty">No players match “'+esc(q)+'”.</div>';return;}
   shown.forEach(r=>{if(!r){const gap=document.createElement('div');gap.className='lb-gap';gap.textContent='⋯';list.appendChild(gap);return;}
     const rank=r.rank;
     const it=document.createElement('div');it.className='lb-item'+(lbMe&&r.pid===lbMe.pid?' me':'')+(rank<=3&&r.n>0?' top':'');
     const rk=document.createElement('span');rk.className='lb-rank';rk.textContent=SET.ordinal?ordinal(rank):rank;
-    const nm=document.createElement('span');nm.className='lb-name';nm.textContent=r.name;
+    const nm=document.createElement('span');nm.className='lb-name';nm.appendChild(nameEl(r.pid,r.name));
     const ct=document.createElement('span');ct.className='lb-count';ct.textContent=r.n.toLocaleString();
-    it.append(rk,nm,ct);
+    it.append(rk,nm,ct);it.classList.add('click');it.title=lbMe&&r.pid===lbMe.pid?'Change your look':'View '+r.name;
+    it.onclick=e=>{if(e.target.closest('.lb-act'))return;if(lbMe&&r.pid===lbMe.pid)openLook();else openPlayerCard(r.pid);};
     if(isAdmin){
       const ed=document.createElement('button');ed.className='lb-act';ed.title='Edit score';ed.textContent='✎';ed.onclick=()=>lbAdminEdit(r.pid,r.name,r.n);
       const d=document.createElement('button');d.className='lb-act del';d.title='Remove player';d.textContent='×';d.onclick=async()=>{if(!confirm('Remove '+r.name+' from the leaderboard?'))return;try{await fbReq('DELETE','players/'+r.pid,null,{admin:true});}catch(e){alert('Couldn’t remove: '+e.message);}};
       it.append(ed,d);}
     list.appendChild(it);});
-  if(rows.length>10){const more=document.createElement('button');more.className='lb-more';
-    more.textContent=lbLimit>10?'Show top 10':'Show top 25';more.onclick=()=>{lbLimit=lbLimit>10?10:25;renderLb();};list.appendChild(more);}}
+  if(!q&&rows.length>10){const bar=document.createElement('div');bar.className='lb-more-row';
+    [[10,'Top 10'],[25,'Top 25'],[Infinity,'Show all']].forEach(([n,l])=>{if(n===25&&rows.length<=25)return;const b=document.createElement('button');b.className='lb-more'+(lbLimit===n?' on':'');b.textContent=l;b.onclick=()=>{lbLimit=n;renderLb();};bar.appendChild(b);});
+    list.appendChild(bar);}
+  renderClassChallenge();}
 async function lbAdminEdit(pid,name,cur){const per=lbPeriod,label=LB_PERIOD_NAME[per];
   const v=prompt('Set '+name+'’s score for '+label+' to:'+(per==='all'?'':'\n(This only changes '+label+'. Pick “All time” to change their overall total.)'),cur);
   if(v===null)return;const n=Math.floor(Number(v));if(!Number.isFinite(n)||n<0){alert('Enter a whole number, 0 or more.');return;}
   const k=lbKeys();try{await fbReq('PATCH','players/'+pid,per==='all'?{total:n}:{[per+'/'+k[per]]:n},{admin:true});}catch(e){alert('Couldn’t save: '+e.message);}}
 function lbStreamFail(){if(!lbPlayersLoaded)document.getElementById('lbList').innerHTML='<div class="lb-empty">Couldn’t load the leaderboard. Check your internet connection.</div>';}
+
+// Looks: avatar + name colour, shown on the leaderboard and in chat
+const AVATARS=['🦉','🦅','🐺','🦁','🐎','🐍','🦊','🐉','🐬','🐝','🏛️','⚔️','🛡️','📜','🌿','🔥','⭐','🌙','🍇','⚓'];
+const NAME_COLORS={gold:'#d4a84a',red:'#e07a6a',green:'#6dbf8a',blue:'#6aa2e0',purple:'#b08ae0',pink:'#e08ab8',teal:'#4fbcbc',orange:'#e8964a'};
+function nameEl(pid,name){const p=lbPlayers[pid]||{};const s=document.createElement('span');s.className='pname';
+  if(p.av&&AVATARS.includes(p.av)){const a=document.createElement('span');a.className='pav';a.textContent=p.av;s.appendChild(a);}
+  const n=document.createElement('span');n.textContent=name;if(NAME_COLORS[p.color])n.style.color=NAME_COLORS[p.color];s.appendChild(n);return s;}
+function closeOverlay(id){document.getElementById(id).style.display='none';}
+let lookSel={};
+function openLook(){if(!lbMe)return;const p=lbPlayers[lbMe.pid]||{};lookSel={av:p.av||'',color:p.color||''};renderLook();document.getElementById('lookErr').textContent='';document.getElementById('lookOverlay').style.display='flex';}
+function renderLook(){const av=document.getElementById('lookAvatars'),co=document.getElementById('lookColors');av.innerHTML='';co.innerHTML='';
+  [''].concat(AVATARS).forEach(a=>{const b=document.createElement('button');b.className='look-opt'+(lookSel.av===a?' on':'');b.textContent=a||'—';b.title=a?'':'No avatar';b.onclick=()=>{lookSel.av=a;renderLook();};av.appendChild(b);});
+  [['', 'var(--text)']].concat(Object.entries(NAME_COLORS)).forEach(([k,c])=>{const b=document.createElement('button');b.className='look-opt sw'+(lookSel.color===k?' on':'');b.style.background=c;b.title=k||'Default';b.onclick=()=>{lookSel.color=k;renderLook();};co.appendChild(b);});
+  const pv=document.getElementById('lookPreview');pv.innerHTML='';const s=document.createElement('span');s.className='pname';if(lookSel.av){const a=document.createElement('span');a.className='pav';a.textContent=lookSel.av;s.appendChild(a);}
+  const n=document.createElement('b');n.textContent=lbMe.name;if(NAME_COLORS[lookSel.color])n.style.color=NAME_COLORS[lookSel.color];s.appendChild(n);pv.appendChild(s);}
+async function saveLook(){try{await fbReq('PATCH','players/'+lbMe.pid,{av:lookSel.av||null,color:lookSel.color||null});
+    lbPlayers[lbMe.pid]={...(lbPlayers[lbMe.pid]||{}),av:lookSel.av||undefined,color:lookSel.color||undefined};closeOverlay('lookOverlay');renderLb();renderChat();renderLbProfile();}
+  catch(e){document.getElementById('lookErr').textContent='Couldn’t save. If this keeps happening, the database rules need updating (ask the admin).';}}
+function openPlayerCard(pid){const p=lbPlayers[pid];if(!p)return;const k=lbKeys();const box=document.getElementById('playerCard');box.innerHTML='';
+  const h=document.createElement('div');h.className='pc-name';const big=nameEl(pid,p.name);h.appendChild(big);box.appendChild(h);
+  const g=document.createElement('div');g.className='pc-grid';[['Today','d'],['Week','w'],['Month','m'],['All time','all']].forEach(([l,per])=>{const c=document.createElement('div');c.innerHTML='<b>'+lbScore(p,per,k).toLocaleString()+'</b><span>'+l+'</span>';g.appendChild(c);});box.appendChild(g);
+  if(lbMe&&pid!==lbMe.pid){const b=document.createElement('button');b.className='btn-primary';b.textContent='⚔ Challenge '+p.name;b.onclick=()=>{closeOverlay('playerOverlay');openDuelSetup(pid);};box.appendChild(b);}
+  else if(!lbMe){const n=document.createElement('p');n.className='forms-note';n.textContent='Join the leaderboard to challenge other players.';box.appendChild(n);}
+  document.getElementById('playerOverlay').style.display='flex';}
+
+// Class challenge: a shared weekly target for everyone's correct answers (set by the admin)
+let classChal=null;
+function renderClassChallenge(){const box=document.getElementById('classChallenge');if(!box)return;box.innerHTML='';
+  const target=classChal&&+classChal.target;if(!target){if(isAdmin){const b=document.createElement('button');b.className='lb-link';b.textContent='+ Set a class challenge';b.onclick=editClassChallenge;box.appendChild(b);}return;}
+  const wk=lbKeys().w;const total=Object.values(lbPlayers).reduce((a,p)=>a+((p&&p.w&&p.w[wk])||0),0);const pct=Math.min(100,Math.round(total/target*100));
+  box.className='cc-box'+(total>=target?' done':'');
+  box.innerHTML='<div class="cc-top"><span>🏆 '+esc(classChal.title||'Class challenge')+'</span><span>'+total.toLocaleString()+' / '+target.toLocaleString()+'</span></div><div class="cc-bar"><div style="width:'+pct+'%"></div></div><div class="cc-sub">'+(total>=target?'Goal reached this week! 🎉':'Correct answers by everyone this week')+'</div>';
+  if(isAdmin){const b=document.createElement('button');b.className='lb-act';b.textContent='✎';b.title='Edit challenge';b.onclick=editClassChallenge;box.querySelector('.cc-top').appendChild(b);}}
+async function editClassChallenge(){const t=prompt('Weekly target for the whole class (correct answers). Enter 0 to remove the challenge:',classChal&&classChal.target||1000);if(t===null)return;
+  const n=Math.floor(Number(t));if(!Number.isFinite(n)||n<0){alert('Enter a whole number.');return;}
+  try{if(n===0)await fbReq('DELETE','challenge',null,{admin:true});else{const title=prompt('Challenge name (optional):',classChal&&classChal.title||'Class challenge')||'Class challenge';await fbReq('PUT','challenge',{target:n,title:title.slice(0,60)},{admin:true});}}
+  catch(e){alert('Couldn’t save: '+e.message+'. The database rules may need updating.');}}
+
+// Chat reactions
+const REACTS=[['like','👍'],['laugh','😂'],['love','❤️'],['wow','😮']];
+async function toggleReact(id,k){if(!lbMe)return;const m=chatObj[id];const mine=m&&m.rx&&m.rx[k]&&m.rx[k][lbMe.pid];
+  try{if(mine)await fbReq('DELETE','chat/'+id+'/rx/'+k+'/'+lbMe.pid);else await fbReq('PUT','chat/'+id+'/rx/'+k+'/'+lbMe.pid,true);}
+  catch(e){document.getElementById('chatErr').textContent='Couldn’t react. The database rules may need updating (ask the admin).';}}
 
 // Chat
 function chatTime(t){if(!t)return '';const d=new Date(t),now=new Date();const hm=d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});return d.toDateString()===now.toDateString()?hm:d.toLocaleDateString([],{day:'numeric',month:'short'})+' '+hm;}
@@ -3396,7 +3534,7 @@ let chatLoaded=false;
 function renderChat(){const list=document.getElementById('chatList');if(!list||!chatLoaded)return;const atBottom=list.scrollHeight-list.scrollTop-list.clientHeight<40;list.innerHTML='';
   if(!chatMsgs.length){list.innerHTML='<div class="lb-empty">No messages yet. Say salve!</div>';return;}
   chatMsgs.forEach(m=>{if(!m||typeof m.text!=='string')return;const el=document.createElement('div');el.className='chat-m'+(lbMe&&m.pid===lbMe.pid?' me':'');
-    const who=document.createElement('span');who.className='chat-who';who.textContent=lbName(m.pid);
+    const who=document.createElement('span');who.className='chat-who';who.appendChild(nameEl(m.pid,lbName(m.pid)));
     const tx=document.createElement('span');tx.textContent=m.text;
     const tm=document.createElement('span');tm.className='chat-time';tm.textContent=chatTime(m.t);
     el.id='cm_'+m.id;
@@ -3406,7 +3544,11 @@ function renderChat(){const list=document.getElementById('chatList');if(!list||!
       if(o)q.onclick=()=>{const t=document.getElementById('cm_'+m.re);if(t){t.scrollIntoView({block:'center',behavior:'smooth'});t.classList.add('flash');setTimeout(()=>t.classList.remove('flash'),1200);}};
       el.appendChild(q);}
     el.append(who,tx,tm);
-    if(lbMe){const r=document.createElement('button');r.className='chat-reply';r.title='Reply';r.textContent='Reply';r.onclick=()=>setChatReply(m.id);el.appendChild(r);}
+    if(lbMe){const r=document.createElement('button');r.className='chat-reply';r.title='Reply';r.textContent='Reply';r.onclick=()=>setChatReply(m.id);el.appendChild(r);
+      const pick=document.createElement('span');pick.className='chat-pick';REACTS.forEach(([k,e])=>{const b=document.createElement('button');b.textContent=e;b.title='React '+e;b.onclick=()=>toggleReact(m.id,k);pick.appendChild(b);});el.appendChild(pick);}
+    const rx=m.rx&&typeof m.rx==='object'?m.rx:null;if(rx){const row=document.createElement('div');row.className='chat-rx';
+      REACTS.forEach(([k,e])=>{const who=rx[k]?Object.keys(rx[k]):[];if(!who.length)return;const c=document.createElement('button');c.className='rx-chip'+(lbMe&&who.includes(lbMe.pid)?' mine':'');
+        c.textContent=e+' '+who.length;c.title=who.map(lbName).join(', ');c.onclick=()=>{if(lbMe)toggleReact(m.id,k);};row.appendChild(c);});if(row.childNodes.length)el.appendChild(row);}
     if(isAdmin){const d=document.createElement('button');d.className='lb-act del';d.title='Delete message';d.textContent='×';d.onclick=async()=>{try{await fbReq('DELETE','chat/'+m.id,null,{admin:true});}catch(e){alert('Couldn’t delete: '+e.message);}};el.appendChild(d);}
     list.appendChild(el);});
   if(atBottom||list.dataset.first!=='1'){list.scrollTop=list.scrollHeight;list.dataset.first='1';}}
@@ -3425,11 +3567,140 @@ function setChatReply(id){chatReplyTo=id&&chatObj[id]?id:null;const bar=document
   if(!chatReplyTo){bar.style.display='none';return;}const o=chatObj[chatReplyTo];
   document.getElementById('chatReplyText').textContent='Replying to '+lbName(o.pid)+': '+chatSnippet(o.text);bar.style.display='flex';document.getElementById('chatInput').focus();}
 
+// ── DAILY GOAL & STREAK (this browser) ───────────────────────────────────────
+const DAILY_KEY='latin_daily';
+function dailyData(){try{return JSON.parse(localStorage.getItem(DAILY_KEY)||'{}')||{};}catch(e){return {};}}
+function dailyTick(){const d=dailyData(),k=lbKeys().d;d[k]=(d[k]||0)+1;
+  // keep ~60 days
+  Object.keys(d).sort().slice(0,-60).forEach(x=>delete d[x]);try{localStorage.setItem(DAILY_KEY,JSON.stringify(d));}catch(e){}
+  if(SET.goal&&d[k]===SET.goal)toast('🎉 Daily goal reached: '+SET.goal+' correct answers today!');renderDaily();}
+function dayKeyOffset(n){const t=new Date();t.setDate(t.getDate()-n);return lbKeys(t).d;}
+function dailyStreak(){const d=dailyData(),g=SET.goal||1;let n=0,i=(d[dayKeyOffset(0)]||0)>=g?0:1;for(;;i++){if((d[dayKeyOffset(i)]||0)>=g)n++;else break;}return n;}
+function renderDaily(){const box=document.getElementById('dailyGoal');if(!box)return;if(!SET.goal){box.style.display='none';return;}
+  const today=dailyData()[lbKeys().d]||0,g=SET.goal,st=dailyStreak(),pct=Math.min(100,Math.round(today/g*100));box.style.display='';
+  box.className='dg'+(today>=g?' done':'');box.innerHTML='<div class="dg-top"><span>'+(today>=g?'✓ Daily goal reached':'Daily goal')+'</span><span>'+today+' / '+g+'</span></div><div class="dg-bar"><div style="width:'+pct+'%"></div></div><div class="dg-sub">'+(st?'🔥 '+st+'-day streak':'Reach your goal to start a streak 🔥')+'</div>';}
+
+// ── MISTAKE REVIEW (this browser) ────────────────────────────────────────────
+const MISTAKE_KEY='latin_mistakes';
+function mistakeData(){try{return JSON.parse(localStorage.getItem(MISTAKE_KEY)||'{}')||{};}catch(e){return {};}}
+function trackMistake(w,ok){if(!w||!w.catKey||isSent)return;const d=mistakeData();const q=isDrill&&drillQs[drillIdx]&&drillQs[drillIdx].word&&drillQs[drillIdx].word.lat===w.lat?drillQs[drillIdx]:null;
+  const key=wKey(w)+'|'+mode+(q?'|'+q.key:'');
+  if(!ok){d[key]=d[key]||{w:{lat:w.lat,catKey:w.catKey,subKey:w.subKey},mode,form:q?q.key:'',n:0};d[key].n++;d[key].t=Date.now();}
+  else if(d[key]){d[key].n--;if(d[key].n<=0)delete d[key];}else return;
+  try{localStorage.setItem(MISTAKE_KEY,JSON.stringify(d));}catch(e){}}
+function mistakeWord(m){return allWordsFlat().find(x=>x.lat===m.w.lat&&x.catKey===m.w.catKey&&x.subKey===m.w.subKey);}
+function renderMistakes(){const box=document.getElementById('mistakeBox');if(!box)return;const list=Object.values(mistakeData()).filter(m=>mistakeWord(m)).sort((a,b)=>b.n-a.n||b.t-a.t);
+  if(!list.length){box.innerHTML='<p style="margin:0">No mistakes recorded yet. Questions you get wrong will appear here, and drop off once you get them right.</p>';return;}
+  box.innerHTML='<p>Your most-missed questions. Each one drops off once you’ve got it right as many times as you missed it.</p><div class="mk-list">'+list.slice(0,20).map(m=>'<div class="mk-row"><span class="mk-w">'+esc(m.w.lat)+'</span><span class="mk-d">'+esc(m.form?m.form:(m.mode==='el'?'English → Latin':'Latin → English'))+'</span><span class="mk-n">missed ×'+m.n+'</span></div>').join('')+'</div>'
+    +'<div class="backup-btns" style="margin-top:12px"><button class="btn-primary" onclick="practiseMistakes()">Practise these words</button><button class="btn-secondary" onclick="if(confirm(\'Clear your mistake list?\')){localStorage.removeItem(MISTAKE_KEY);renderMistakes();}">Clear list</button></div>';}
+function practiseMistakes(){const list=Object.values(mistakeData()).sort((a,b)=>b.n-a.n).slice(0,20);const seen=new Set(),ws=[];list.forEach(m=>{const w=mistakeWord(m);if(w&&!seen.has(wKey(w))){seen.add(wKey(w));ws.push(w);}});if(!ws.length)return;
+  showMainTab('practice');setQuizType('vocab');const drill=list.find(m=>m.form);if(drill){const ck=drill.w.catKey;const qt={nouns:'nounDecl',adjectives:'adjDecl',verbs:'verbConj',pronouns:'pronDecl'}[ck];if(qt&&ws.every(w=>w.catKey===ck))setQuizType(qt);}
+  setMode(list[0].mode);beginQuiz(shuffle(ws));}
+
+// ── READING: stories + parse it ──────────────────────────────────────────────
+let readMode='stories',storyIdx=-1,storyPos=0,storyMarks=[],parseQ=null,parseFilter='all',parseScore={r:0,n:0};
+const STORY_DONE_KEY='latin_stories_done';
+function storyDone(){try{return JSON.parse(localStorage.getItem(STORY_DONE_KEY)||'{}')||{};}catch(e){return {};}}
+function setReadMode(m){readMode=m;document.getElementById('rdStories').classList.toggle('active',m==='stories');document.getElementById('rdParse').classList.toggle('active',m==='parse');renderReading();}
+function storySents(i){const bank=sentBank();const st=STORIES[i];return st.lines.map(l=>bank.find(b=>b.la===l.split('|')[0]));}
+function renderReading(){const a=document.getElementById('readArea');if(!a)return;if(readMode==='parse'){renderParse();return;}
+  if(storyIdx<0){const done=storyDone();a.innerHTML='<div class="st-grid">'+STORIES.map((st,i)=>'<button class="st-card" onclick="openStory('+i+')"><span class="st-la">'+esc(st.la)+'</span><span class="st-en">'+esc(st.en)+'</span><span class="st-meta">'+st.lines.length+' sentences'+(done[st.id]?' · ✓ '+done[st.id]+'/'+st.lines.length:'')+'</span></button>').join('')+'</div>';return;}
+  const st=STORIES[storyIdx],ss=storySents(storyIdx);EXSETS.story=ss;
+  let h='<div class="st-head"><button class="btn-secondary" onclick="storyIdx=-1;renderReading()">← All stories</button><div><div class="st-title">'+esc(st.la)+'</div><div class="st-en">'+esc(st.en)+'</div></div></div><p class="forms-note"><span>Hover over (or tap) any word for its form and meaning. Translate each sentence, then check yourself against the model.</span></p><div class="st-body" data-exset="story">';
+  ss.forEach((s,i)=>{if(i>storyPos)return;const cur=i===storyPos&&storyMarks[i]==null;
+    h+='<div class="ex-item st-line'+(cur?' cur':'')+'" data-si="'+i+'"><div class="ex-la">'+sentenceHtml(s,null)+'</div>';
+    if(cur)h+='<textarea class="st-input" id="stInput" rows="2" placeholder="Your translation…"></textarea><div class="st-btns"><button class="btn-primary" onclick="storyCheck()">Check</button></div>';
+    else if(storyMarks[i]==='?')h+='<div class="ex-en st-model">'+esc(s.en)+'</div><div class="st-mine">Yours: '+esc(window._stLast||'')+'</div><div class="st-btns"><button class="btn-primary" onclick="storyMark(true)">✓ I got it</button><button class="btn-secondary" onclick="storyMark(false)">✗ Not quite</button></div>';
+    else h+='<div class="ex-en">'+(storyMarks[i]?'✓ ':'✗ ')+esc(s.en)+'</div>';
+    h+='</div>';});
+  if(storyPos>=ss.length){const got=storyMarks.filter(Boolean).length;h+='<div class="st-end">You got <b>'+got+' / '+ss.length+'</b>. '+(got===ss.length?'Optime! 🎉':'Well done for finishing!')+'<div class="st-btns"><button class="btn-primary" onclick="openStory('+storyIdx+')">Read again</button><button class="btn-secondary" onclick="storyIdx=-1;renderReading()">Another story</button></div></div>';}
+  a.innerHTML=h+'</div>';const inp=document.getElementById('stInput');if(inp){inp.focus();inp.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();storyCheck();}};}}
+function openStory(i){storyIdx=i;storyPos=0;storyMarks=[];renderReading();}
+function storyCheck(){const v=(document.getElementById('stInput')||{}).value||'';window._stLast=v.trim()||'(blank)';storyMarks[storyPos]='?';renderReading();}
+function storyMark(ok){storyMarks[storyPos]=ok;storyPos++;if(storyPos>=STORIES[storyIdx].lines.length){const d=storyDone();const got=storyMarks.filter(Boolean).length;d[STORIES[storyIdx].id]=Math.max(d[STORIES[storyIdx].id]||0,got);try{localStorage.setItem(STORY_DONE_KEY,JSON.stringify(d));}catch(e){}}renderReading();}
+// Parse it: pick a tagged word from a sentence and ask for its form (4 options); checked from the tags, so it earns points.
+const PARSE_CASES=['nom','acc','gen','dat','abl'],PARSE_NUMS=['sg','pl'],PARSE_G=['m','f','n'];
+function parseAnswer(t){const k=tagKind(t),p=t.code.split('.');
+  if(k==='verb'){if(p[0]==='inf')return 'infinitive';if(p[0]==='imp')return 'command, '+(p[1]==='s'?'singular':'plural');return T_NAME[p[0]]+', '+P_NAME[p[1]].replace(/ \(.*\)/,'');}
+  const cn=tagCaseNum(t);return [k==='adj'||(k==='pers'&&cn.g)?G_NAME[cn.g]:'',C_NAME[cn.c],N_NAME[cn.n]].filter(Boolean).join(' ');}
+function parseOptions(t){const k=tagKind(t),right=parseAnswer(t),pool=new Set();
+  if(k==='verb'){['pres','impf','fut'].forEach(tn=>Object.keys(P_NAME).forEach(pn=>pool.add(T_NAME[tn]+', '+P_NAME[pn].replace(/ \(.*\)/,''))));pool.add('infinitive');pool.add('command, singular');pool.add('command, plural');}
+  else{const cn=tagCaseNum(t);const gs=(k==='adj'||(k==='pers'&&cn.g))?PARSE_G:[''];gs.forEach(g=>PARSE_CASES.forEach(c=>PARSE_NUMS.forEach(n=>pool.add([g?G_NAME[g]:'',C_NAME[c],N_NAME[n]].filter(Boolean).join(' ')))));}
+  pool.delete(right);const wrong=shuffle([...pool]).sort((a,b)=>sim(b,right)-sim(a,right)).slice(0,6);return shuffle([right,...shuffle(wrong).slice(0,3)]);}
+function sim(a,b){const A=a.split(/[ ,]+/),B=b.split(/[ ,]+/);return A.filter(x=>B.includes(x)).length;}
+function nextParse(){const bank=sentBank();for(let tries=0;tries<200;tries++){const s=bank[Math.floor(Math.random()*bank.length)];
+    const ts=s.tags.filter(t=>t.pos>=0&&t.code&&t.w&&!(t.w.catKey==='pronouns'&&!t.code.match(/^(\d|[mfn])/)&&tagKind(t)!=='verb')&&(parseFilter==='all'||(parseFilter==='verb'?tagKind(t)==='verb':parseFilter==='adj'?tagKind(t)==='adj'&&t.w.catKey!=='pronouns':parseFilter==='pron'?t.w.catKey==='pronouns':tagKind(t)==='noun'&&t.w.catKey!=='pronouns')));
+    if(!ts.length)continue;const t=ts[Math.floor(Math.random()*ts.length)];parseQ={s,t,opts:parseOptions(t),picked:null};return;}parseQ=null;}
+function renderParse(){const a=document.getElementById('readArea');if(!parseQ)nextParse();quizNoPoints=false;
+  const f=[['all','All'],['noun','Nouns'],['adj','Adjectives'],['verb','Verbs'],['pron','Pronouns']].map(([k,l])=>'<button class="mode-btn'+(parseFilter===k?' active':'')+'" onclick="parseFilter=\''+k+'\';parseQ=null;renderParse()">'+l+'</button>').join('');
+  if(!parseQ){a.innerHTML='<div class="mode-toggle pz-filter">'+f+'</div><div class="lb-empty">No questions for this filter.</div>';return;}
+  const {s,t,opts,picked}=parseQ;EXSETS.parse=[s];const right=parseAnswer(t);
+  const la=s.la.split(/([A-Za-z]+)/).map((p,i)=>{if(i%2===0)return esc(p);const wi=(s.la.split(/([A-Za-z]+)/).slice(0,i).filter((x,j)=>j%2===1).length);return wi>=t.pos&&wi<t.pos+t.len?'<mark class="pz-target">'+esc(p)+'</mark>':esc(p);}).join('');
+  let h='<div class="mode-toggle pz-filter">'+f+'</div><div class="pz-card"><div class="pz-score">'+parseScore.r+' / '+parseScore.n+' correct</div><div class="pz-la">'+la+'</div><div class="pz-q">What form is <b>'+esc(t.surf)+'</b>?</div><div class="pz-opts">'
+    +opts.map((o,i)=>'<button class="mc-btn pz-opt'+(picked!=null?(o===right?' correct':o===opts[picked]?' wrong':''):'')+'" '+(picked!=null?'disabled':'')+' onclick="pickParse('+i+')">'+esc(o)+'</button>').join('')+'</div>';
+  if(picked!=null){const ok=opts[picked]===right;h+='<div class="pz-fb '+(ok?'ok':'no')+'">'+(ok?'✓ Correct!':'✗ It’s '+esc(right)+'.')+'</div><div class="pz-why">'+explainTag(s,t).map(esc).join('<br>')+'</div><div class="pz-en" data-exset="parse"><div class="ex-item" data-si="0"><div class="ex-la">'+sentenceHtml(s,null)+'</div><div class="ex-en">'+esc(s.en)+'</div></div></div><div class="st-btns"><button class="btn-primary" id="pzNext" onclick="parseQ=null;renderParse()">Next →</button></div>';}
+  a.innerHTML=h+'</div>';const nb=document.getElementById('pzNext');if(nb)nb.focus();}
+function pickParse(i){if(!parseQ||parseQ.picked!=null)return;parseQ.picked=i;const ok=parseQ.opts[i]===parseAnswer(parseQ.t);parseScore.n++;if(ok){parseScore.r++;quizNoPoints=false;lbCount();dailyTick();}playTone(ok);renderParse();}
+
+// ── HEAD-TO-HEAD CHALLENGES ──────────────────────────────────────────────────
+// duels/{id}: {from,to,qs:[{k:wordKey,d:'el'|'le'}],t,dir,res:{uid:{s:score,ms:time}}}
+let duelsObj={},duelSel=null,duelGame=null;
+const DUEL_N=10;
+function myDuels(){if(!lbMe)return [];return Object.entries(duelsObj).filter(([,d])=>d&&(d.from===lbMe.pid||d.to===lbMe.pid)).map(([id,d])=>({id,...d})).sort((a,b)=>(b.t||0)-(a.t||0));}
+function duelState(d){const me=lbMe.pid,op=d.from===me?d.to:d.from,r=d.res||{};if(!r[me])return 'play';if(!r[op])return 'wait';return 'done';}
+function duelWinner(d){const a=d.res[d.from],b=d.res[d.to];if(a.s!==b.s)return a.s>b.s?d.from:d.to;if(a.ms!==b.ms)return a.ms<b.ms?d.from:d.to;return null;}
+function updDuelBtn(){const b=document.getElementById('duelBtn');if(!b)return;const ds=myDuels();const toPlay=ds.filter(d=>duelState(d)==='play').length;
+  b.innerHTML='⚔ Challenges'+(toPlay?' <span class="duel-badge">'+toPlay+'</span>':'');}
+function wordByKey(k){return allWordsFlat().find(w=>wKey(w)===k);}
+function openDuelSetup(pid){const p=lbPlayers[pid];if(!p||!lbMe)return;duelSel={to:pid,subs:{},packs:{},dir:'mixed'};renderDuelSetup();document.getElementById('duelSetupOverlay').style.display='flex';}
+function duelPool(){const ws=[],seen=new Set();Object.entries(duelSel.subs).forEach(([k,on])=>{if(!on)return;const [ck,sk]=k.split('||');DATA[ck].sub[sk].words.forEach(w=>{const x={...w,catKey:ck,subKey:sk};if(!seen.has(wKey(x))){seen.add(wKey(x));ws.push(x);}});});
+  WORD_PACKS.forEach(pk=>{if(duelSel.packs[pk.id])pk.words.forEach(w=>{if(!seen.has(wKey(w))){seen.add(wKey(w));ws.push(w);}});});return ws;}
+function renderDuelSetup(){const p=lbPlayers[duelSel.to];const box=document.getElementById('duelSetup');const n=duelPool().length;
+  let h='<div class="about-title">⚔ Challenge '+esc(p.name)+'</div><p class="forms-note" style="text-align:center"><span>Pick the words that can come up. You both get the same '+DUEL_N+' questions; the higher score wins, and if it’s a tie, the faster player wins.</span></p><div class="dl-cats">';
+  Object.entries(DATA).forEach(([ck,cat])=>{if(cat.packOnly)return;h+='<div class="dl-cat"><b>'+esc(cat.label)+'</b>'+Object.keys(cat.sub).map(sk=>{const k=ck+'||'+sk;return '<label><input type="checkbox" '+(duelSel.subs[k]?'checked':'')+' onchange="duelSel.subs[\''+k.replace(/'/g,"\\'")+'\']=this.checked;renderDuelSetup()"> '+esc(sameLabel(cat.label,sk)?cat.label:sk)+' <small>'+cat.sub[sk].words.length+'</small></label>';}).join('')+'</div>';});
+  h+='<div class="dl-cat"><b>Word packs</b>'+WORD_PACKS.map(pk=>'<label><input type="checkbox" '+(duelSel.packs[pk.id]?'checked':'')+' onchange="duelSel.packs[\''+pk.id+'\']=this.checked;renderDuelSetup()"> '+esc(pk.label)+' <small>'+pk.words.length+'</small></label>').join('')+'</div></div>';
+  h+='<label class="set-row" style="cursor:default"><span>Direction</span><select onchange="duelSel.dir=this.value">'+[['mixed','Mixed'],['el','English → Latin'],['le','Latin → English']].map(([v,l])=>'<option value="'+v+'"'+(duelSel.dir===v?' selected':'')+'>'+l+'</option>').join('')+'</select></label>';
+  h+='<div style="display:flex;gap:8px;justify-content:center;align-items:center;margin-top:14px"><span class="dl-count">'+n+' words</span><button class="btn-primary" '+(n<5?'disabled':'')+' onclick="sendDuel()">Send challenge</button></div>'+(n<5?'<p class="forms-note" style="text-align:center"><span>Pick at least 5 words.</span></p>':'')+'<p class="lb-msg err" id="duelErr"></p>';
+  box.innerHTML=h;}
+async function sendDuel(){const pool=shuffle(duelPool());if(pool.length<5)return;const qs=[];for(let i=0;i<DUEL_N;i++){const w=pool[i%pool.length];qs.push({k:wKey(w),d:duelSel.dir==='mixed'?(Math.random()<.5?'el':'le'):duelSel.dir});}
+  try{const r=await fbReq('POST','duels',{from:lbMe.pid,to:duelSel.to,qs,t:{'.sv':'timestamp'}});closeOverlay('duelSetupOverlay');
+    duelsObj[r.name]={from:lbMe.pid,to:duelSel.to,qs,t:Date.now()};updDuelBtn();startDuel(r.name);}
+  catch(e){document.getElementById('duelErr').textContent='Couldn’t send the challenge. The database rules may need updating (ask the admin).';}}
+function openDuelInbox(){renderDuelInbox();document.getElementById('duelInboxOverlay').style.display='flex';}
+function renderDuelInbox(){const box=document.getElementById('duelInbox');if(!box)return;const ds=myDuels();const me=lbMe&&lbMe.pid;
+  const opName=d=>{const op=d.from===me?d.to:d.from;return lbPlayers[op]?lbPlayers[op].name:'(left)';};
+  const sec=(title,list,fn)=>list.length?'<div class="set-h">'+title+'</div>'+list.map(fn).join(''):'';
+  const play=ds.filter(d=>duelState(d)==='play'),wait=ds.filter(d=>duelState(d)==='wait'),done=ds.filter(d=>duelState(d)==='done');
+  let h='<div class="about-title">⚔ Challenges</div>';
+  if(!ds.length)h+='<p class="forms-note" style="text-align:center"><span>No challenges yet. Click someone on the leaderboard to challenge them.</span></p>';
+  h+=sec('Your turn',play,d=>'<div class="dl-row"><span>'+(d.from===me?'You vs ':'From ')+'<b>'+esc(opName(d))+'</b></span><span><button class="btn-primary" onclick="closeOverlay(\'duelInboxOverlay\');startDuel(\''+d.id+'\')">Play</button> <button class="lb-link muted" onclick="deleteDuel(\''+d.id+'\')">'+(d.from===me?'Cancel':'Decline')+'</button></span></div>');
+  h+=sec('Waiting for them',wait,d=>'<div class="dl-row"><span>vs <b>'+esc(opName(d))+'</b> · you scored '+d.res[me].s+'/'+d.qs.length+'</span>'+(d.from===me?'<button class="lb-link muted" onclick="deleteDuel(\''+d.id+'\')">Cancel</button>':'')+'</div>');
+  h+=sec('Finished',done,d=>{const w=duelWinner(d),a=d.res[me],b=d.res[d.from===me?d.to:d.from];return '<div class="dl-row"><span>'+(w===me?'🏆 You beat ':w?'You lost to ':'Draw with ')+'<b>'+esc(opName(d))+'</b> · '+a.s+'–'+b.s+' ('+(a.ms/1000).toFixed(1)+'s vs '+(b.ms/1000).toFixed(1)+'s)</span><button class="lb-link muted" onclick="deleteDuel(\''+d.id+'\')">Clear</button></div>';});
+  box.innerHTML=h;}
+async function deleteDuel(id){try{await fbReq('DELETE','duels/'+id);delete duelsObj[id];}catch(e){}renderDuelInbox();updDuelBtn();}
+function startDuel(id){const d=duelsObj[id];if(!d)return;const qs=d.qs.map(q=>({w:wordByKey(q.k),d:q.d})).filter(q=>q.w);duelGame={id,qs,i:0,score:0,t0:0,fb:null};renderDuelPlay();document.getElementById('duelPlayOverlay').style.display='flex';}
+function renderDuelPlay(){const g=duelGame,box=document.getElementById('duelPlay');if(!g)return;const d=duelsObj[g.id];const op=d.from===lbMe.pid?d.to:d.from,opn=lbPlayers[op]?lbPlayers[op].name:'opponent';
+  if(g.i>=g.qs.length){const mine=d.res&&d.res[lbMe.pid],theirs=d.res&&d.res[op];let r='<div class="about-title">Finished!</div><p style="text-align:center;font-size:18px">You scored <b>'+g.score+' / '+g.qs.length+'</b> in '+(g.ms/1000).toFixed(1)+'s</p>';
+    if(theirs&&mine){const w=duelWinner(d);r+='<p style="text-align:center;font-size:16px">'+(w===lbMe.pid?'🏆 You beat '+esc(opn)+'!':w?esc(opn)+' wins this one.':'It’s a draw!')+'<br><small>'+esc(opn)+': '+theirs.s+'/'+g.qs.length+' in '+(theirs.ms/1000).toFixed(1)+'s</small></p>';}
+    else r+='<p class="forms-note" style="text-align:center"><span>Waiting for '+esc(opn)+' to play. You’ll see the result under ⚔ Challenges.</span></p>';
+    box.innerHTML=r+'<div style="text-align:center"><button class="btn-primary" onclick="closeOverlay(\'duelPlayOverlay\');duelGame=null">Close</button></div>';return;}
+  const q=g.qs[g.i];const prompt=q.d==='el'?displayEng(q.w):q.w.lat;
+  box.innerHTML='<div class="dp-top"><span>⚔ vs '+esc(opn)+'</span><span>'+(g.i+1)+' / '+g.qs.length+' · ✓ '+g.score+'</span></div><div class="dp-dir">'+(q.d==='el'?'English → Latin':'Latin → English')+'</div><div class="dp-prompt">'+esc(prompt)+'</div>'
+    +'<input class="answer-input" id="dpInput" autocomplete="off" placeholder="Your answer…" '+(g.fb?'disabled':'')+'><div class="dp-fb '+(g.fb?g.fb.cls:'')+'">'+(g.fb?esc(g.fb.text):'')+'</div>'
+    +'<div style="text-align:center;margin-top:10px"><button class="btn-primary" id="dpBtn" onclick="duelCheck()" '+(g.fb?'disabled':'')+'>Check</button></div>';
+  const inp=document.getElementById('dpInput');if(!g.fb){inp.focus();inp.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();duelCheck();}};}}
+async function duelCheck(){const g=duelGame;if(!g||g.fb)return;const inp=document.getElementById('dpInput');const v=inp.value.trim();if(!v)return;if(!g.t0)g.t0=Date.now();
+  const q=g.qs[g.i];const ok=q.d==='el'?checkLat(v,q.w):checkEng(v,q.w);if(ok){g.score++;dailyTick();}playTone(ok);
+  g.fb={cls:ok?'ok':'no',text:ok?'✓ Correct':'✗ '+(q.d==='el'?fullLat(q.w):displayEng(q.w))};renderDuelPlay();
+  setTimeout(async()=>{g.fb=null;g.i++;if(g.i>=g.qs.length){g.ms=Date.now()-g.t0;try{await fbReq('PUT','duels/'+g.id+'/res/'+lbMe.pid,{s:g.score,ms:g.ms});const d=duelsObj[g.id];d.res=d.res||{};d.res[lbMe.pid]={s:g.score,ms:g.ms};}catch(e){}updDuelBtn();}renderDuelPlay();},ok?600:1400);}
+
 loadLbMe().then(()=>{
   fbStream('players','',(path,data,isPatch)=>{const wasLoaded=lbPlayersLoaded;lbPlayers=applyAt(lbPlayers,path,data,isPatch);lbPlayersLoaded=true;
     // Only trust a removal the server tells us about directly (not a first load that may predate joining).
     if(lbMe&&!lbPlayers[lbMe.pid]&&(path==='/'+lbMe.pid||(path==='/'&&wasLoaded)))lbRemoved();
     renderLb();renderChat();lbUpdatePoints();},lbStreamFail);
+  fbStream('duels','',(path,data,isPatch)=>{duelsObj=applyAt(duelsObj,path,data,isPatch);updDuelBtn();if(document.getElementById('duelInboxOverlay').style.display==='flex')renderDuelInbox();},()=>{});
+  fbStream('challenge','',(path,data,isPatch)=>{classChal=applyAt(classChal||{},path,data,isPatch);if(!classChal||!Object.keys(classChal).length)classChal=null;renderClassChallenge();},()=>{});
   fbStream('chat','orderBy=%22$key%22&limitToLast=100',(path,data,isPatch)=>{chatObj=applyAt(chatObj,path,data,isPatch);chatLoaded=true;
     chatMsgs=Object.entries(chatObj).map(([id,m])=>({id,...m})).sort((a,b)=>a.id<b.id?-1:1);renderChat();},
     ()=>{if(!chatLoaded)document.getElementById('chatList').innerHTML='<div class="lb-empty">Couldn’t load the chat. Check your internet connection.</div>';});
@@ -4307,10 +4578,12 @@ const SENT_LINES=[
 "Hostes feroces castra oppugnant.|The fierce enemy attack the camp.|hostes=hostis:nom.pl feroces=ferox:m.nom.pl castra:acc.pl oppugnant=oppugno:pres.3p",
 "Rex servos cenam parare iubet.|The king orders the slaves to prepare dinner.|rex:nom.sg servos=servus:acc.pl cenam=cena:acc.sg parare=paro:inf iubet=iubeo:pres.3s",
 "Senex magnum dolorem in pede habet.|The old man has great pain in his foot.|senex:nom.sg magnum=magnus:m.acc.sg dolorem=dolor:acc.sg in@abl pede=pes:abl.sg habet=habeo:pres.3s"];
-let SENT_BANK=null;
+let SENT_BANK=null;const EXSETS={};
+// Short stories for the Reading tab (same tag format; also used as example sentences).
+const STORIES=[{"id": "dog", "la": "Marcus et canis", "en": "Marcus and the dog", "lines": ["Marcus est puer Romanus; in villa prope urbem habitat.|Marcus is a Roman boy; he lives in a villa near the city.|est=esse:pres.3s puer:nom.sg.c romanus=Romanus@adjectives:m.nom.sg in@abl villa:abl.sg prope urbem=urbs:acc.sg habitat=habito:pres.3s", "Marcus canem magnum habet; canis est niger et ferox.|Marcus has a big dog; the dog is black and fierce.|canem=canis:acc.sg magnum=magnus:m.acc.sg habet=habeo:pres.3s canis:nom.sg est=esse:pres.3s niger:m.nom.sg et ferox:m.nom.sg", "Olim Marcus cum cane in silvam ambulabat.|One day Marcus was walking into the forest with the dog.|olim cum cane=canis:abl.sg in@acc silvam=silva:acc.sg ambulabat=ambulo:impf.3s", "Subito leo ingens e silva venit; puer est territus.|Suddenly a huge lion comes out of the forest; the boy is terrified.|subito leo:nom.sg ingens:m.nom.sg e=ex silva:abl.sg venit=venio:pres.3s puer:nom.sg est=esse:pres.3s territus:m.nom.sg", "Canis tamen fortiter pugnat et leonem repellit.|The dog, however, fights bravely and drives the lion back.|canis:nom.sg tamen fortiter pugnat=pugno:pres.3s et leonem=leo:acc.sg repellit=repello:pres.3s", "Leo fugit; Marcus canem laudat et laete ad villam redit.|The lion flees; Marcus praises the dog and returns happily to the villa.|leo:nom.sg fugit=fugio:pres.3s canem=canis:acc.sg laudat=laudo:pres.3s et laete ad villam=villa:acc.sg redit=redeo:pres.3s"]}, {"id": "storm", "la": "Tempestas", "en": "The storm", "lines": ["Nautae navem conscendunt et ab insula navigant.|The sailors board the ship and sail from the island.|nautae=nauta:nom.pl navem=navis:acc.sg conscendunt=conscendo:pres.3p et ab insula:abl.sg navigant=navigo:pres.3p", "Primo ventus est levis et undae parvae.|At first the wind is light and the waves are small.|ventus:nom.sg est=esse:pres.3s levis:m.nom.sg et undae=unda:nom.pl parvae=parvus:f.nom.pl", "Mox tamen tempestas ingens venit.|Soon, however, a huge storm comes.|mox tamen tempestas:nom.sg ingens:f.nom.sg venit=venio:pres.3s", "Undae navem oppugnant et nautae desperant.|The waves attack the ship and the sailors despair.|undae=unda:nom.pl navem=navis:acc.sg oppugnant=oppugno:pres.3p et nautae=nauta:nom.pl desperant=despero:pres.3p", "Nauta senex deos orat: \"Servate nos, dei!\"|An old sailor begs the gods: \"Save us, gods!\"|nauta:nom.sg senex:nom.sg deos=deus:acc.pl orat=oro:pres.3s servate=servo:imp.p nos:1.acc.pl dei=deus:voc.pl", "Tandem ventus cadit et nautae incolumes ad litus adveniunt.|At last the wind drops and the sailors arrive safely at the shore.|tandem ventus:nom.sg cadit=cado:pres.3s et nautae=nauta:nom.pl incolumes=incolumis:m.nom.pl ad litus:acc.sg adveniunt=advenio:pres.3p"]}, {"id": "school", "la": "In ludo", "en": "At school", "lines": ["Prima luce discipuli ad ludum festinant.|At dawn the students hurry to school.|prima_luce discipuli=discipulus:nom.pl ad ludum=ludus:acc.sg festinant=festino:pres.3p", "Magister in ludo exspectat; est iratus quod discipuli sero veniunt.|The teacher is waiting in the school; he is angry because the students are coming late.|magister:nom.sg in@abl ludo=ludus:abl.sg exspectat=exspecto:pres.3s est=esse:pres.3s iratus:m.nom.sg quod discipuli=discipulus:nom.pl sero veniunt=venio:pres.3p", "\"Cur sero venitis?\" magister rogat.|\"Why are you coming late?\" the teacher asks.|cur sero venitis=venio:pres.2p magister:nom.sg rogat=rogo:pres.3s", "Discipulus unus respondet: \"Erat via longa, magister.\"|One student answers: \"The road was long, teacher.\"|discipulus:nom.sg unus:m.nom.sg respondet=respondeo:pres.3s erat=esse:impf.3s via:nom.sg longa=longus:f.nom.sg magister:voc.sg", "Magister tacet; deinde discipulos libros legere iubet.|The teacher is silent; then he orders the students to read their books.|magister:nom.sg tacet=taceo:pres.3s deinde discipulos=discipulus:acc.pl libros=liber@nouns:acc.pl legere=lego:inf iubet=iubeo:pres.3s", "Discipuli diligenter laborant et magister eos laudat.|The students work carefully and the teacher praises them.|discipuli=discipulus:nom.pl diligenter laborant=laboro:pres.3p et magister:nom.sg eos=is:3.m.acc.pl laudat=laudo:pres.3s"]}, {"id": "battle", "la": "Proelium", "en": "The battle", "lines": ["Romani contra Gallos bellum gerebant.|The Romans were waging war against the Gauls.|romani=Romanus@nouns:nom.pl contra gallos=Gallus:acc.pl bellum:acc.sg gerebant=gero:impf.3p", "Imperator milites convocat et consilium narrat.|The general calls the soldiers together and tells them the plan.|imperator:nom.sg milites=miles:acc.pl convocat=convoco:pres.3s et consilium:acc.sg narrat=narro:pres.3s", "Prima luce Romani castra Gallorum oppugnant.|At dawn the Romans attack the Gauls' camp.|prima_luce romani=Romanus@nouns:nom.pl castra:acc.pl gallorum=Gallus:gen.pl oppugnant=oppugno:pres.3p", "Galli fortiter resistunt, sed Romani tela in castra coniciunt.|The Gauls resist bravely, but the Romans hurl javelins into the camp.|galli=Gallus:nom.pl fortiter resistunt=resisto:pres.3p sed romani=Romanus@nouns:nom.pl tela=telum:acc.pl in@acc castra:acc.pl coniciunt=conicio:pres.3p", "Multi Galli cadunt; ceteri fugiunt.|Many Gauls fall; the rest flee.|multi:m.nom.pl galli=Gallus:nom.pl cadunt=cado:pres.3p ceteri:m.nom.pl fugiunt=fugio:pres.3p", "Post proelium imperator milites laudat et dona dat.|After the battle the general praises the soldiers and gives them gifts.|post proelium:acc.sg imperator:nom.sg milites=miles:acc.pl laudat=laudo:pres.3s et dona=donum:acc.pl dat=do:pres.3s"]}, {"id": "dinner", "la": "Cena", "en": "The dinner party", "lines": ["Hodie dominus amicos ad cenam vocat.|Today the master invites his friends to dinner.|hodie dominus:nom.sg amicos=amicus:acc.pl ad cenam=cena:acc.sg vocat=voco:pres.3s", "Servi et ancillae in villa diu laborant.|The slaves and slave girls work in the villa for a long time.|servi=servus:nom.pl et ancillae=ancilla:nom.pl in@abl villa:abl.sg diu laborant=laboro:pres.3p", "Ancilla mensam parat; servus vinum et cibum portat.|A slave girl prepares the table; a slave carries wine and food.|ancilla:nom.sg mensam=mensa:acc.sg parat=paro:pres.3s servus:nom.sg vinum:acc.sg et cibum=cibus:acc.sg portat=porto:pres.3s", "Vesperi amici adveniunt et dominum salutant.|In the evening the friends arrive and greet the master.|vesperi=vesper amici=amicus:nom.pl adveniunt=advenio:pres.3p et dominum=dominus:acc.sg salutant=saluto:pres.3p", "Omnes cenant, vinum bibunt, fabulas narrant.|Everyone dines, drinks wine and tells stories.|omnes=omnis:m.nom.pl cenant=ceno:pres.3p vinum:acc.sg bibunt=bibo:pres.3p fabulas=fabula:acc.pl narrant=narro:pres.3p", "Media nocte amici laeti abeunt; servi fessi dormiunt.|At midnight the happy friends go away; the tired slaves sleep.|media_nocte amici=amicus:nom.pl laeti=laetus:m.nom.pl abeunt=abeo:pres.3p servi=servus:nom.pl fessi=fessus:m.nom.pl dormiunt=dormio:pres.3p"]}, {"id": "troy", "la": "Equus ligneus", "en": "The wooden horse", "lines": ["Graeci decem annos Troiam oppugnabant, sed urbem capere non poterant.|The Greeks attacked Troy for ten years, but they could not capture the city.|graeci=Graecus:nom.pl decem annos=annus:acc.pl.d troiam=Troia:acc.sg oppugnabant=oppugno:impf.3p sed urbem=urbs:acc.sg capere=capio:inf poterant=posse:impf.3p", "Tandem Graeci equum ligneum et ingentem aedificant.|At last the Greeks build a huge wooden horse.|tandem graeci=Graecus:nom.pl equum=equus:acc.sg ligneum=ligneus:m.acc.sg et ingentem=ingens:m.acc.sg aedificant=aedifico:pres.3p", "Multi milites in equo sedent et tacent.|Many soldiers sit inside the horse and keep quiet.|multi:m.nom.pl milites=miles:nom.pl in@abl equo=equus:abl.sg sedent=sedeo:pres.3p et tacent=taceo:pres.3p", "Troiani equum in urbem laete trahunt.|The Trojans happily drag the horse into the city.|equum=equus:acc.sg in@acc urbem=urbs:acc.sg laete trahunt=traho:pres.3p", "Media nocte Graeci ex equo descendunt et custodes necant.|At midnight the Greeks climb down from the horse and kill the guards.|media_nocte graeci=Graecus:nom.pl ex equo=equus:abl.sg descendunt=descendo:pres.3p et custodes=custos:acc.pl necant=neco:pres.3p", "Sic Graeci Troiam tandem capiunt.|In this way the Greeks at last capture Troy.|sic graeci=Graecus:nom.pl troiam=Troia:acc.sg tandem capiunt=capio:pres.3p"]}, {"id": "farmer", "la": "Agricola et filius", "en": "The farmer and his son", "lines": ["Agricola cum filio in agro laborat.|A farmer works in the field with his son.|agricola:nom.sg cum filio=filius:abl.sg in@abl agro=ager:abl.sg laborat=laboro:pres.3s", "Filius est fessus et sub arbore dormire cupit.|The son is tired and wants to sleep under a tree.|filius:nom.sg est=esse:pres.3s fessus:m.nom.sg et sub arbore=arbor:abl.sg dormire=dormio:inf cupit=cupio:pres.3s", "Pater eum monet: \"Labora, fili! Hiems mox veniet.\"|His father warns him: \"Work, son! Winter will come soon.\"|pater:nom.sg eum=is:3.m.acc.sg monet=moneo:pres.3s labora=laboro:imp.s fili=filius:voc.sg hiems:nom.sg mox veniet=venio:fut.3s", "Filius tamen non laborat; in campo ludit.|The son, however, does not work; he plays on the plain.|filius:nom.sg tamen laborat=laboro:pres.3s in@abl campo=campus:abl.sg ludit=ludo:pres.3s", "Hieme familia multum frumentum habet, quod pater diligenter laborabat.|In winter the family has a lot of wheat, because the father was working hard.|hieme=hiems:abl.sg.t familia:nom.sg multum=multus:n.acc.sg frumentum:acc.sg habet=habeo:pres.3s quod pater:nom.sg diligenter laborabat=laboro:impf.3s", "Nunc filius patrem laudat et semper laborabit.|Now the son praises his father and will always work.|nunc filius:nom.sg patrem=pater:acc.sg laudat=laudo:pres.3s et semper laborabit=laboro:fut.3s"]}, {"id": "journey", "la": "Iter ad urbem", "en": "A journey to the city", "lines": ["Viator cum comite ad urbem Romam contendit.|A traveller hurries with a companion to the city of Rome.|viator:nom.sg cum comite=comes:abl.sg ad urbem=urbs:acc.sg romam=Roma:acc.sg contendit=contendo:pres.3s", "Via est longa et difficilis; viatores per montes et silvas ambulant.|The road is long and difficult; the travellers walk through mountains and forests.|via:nom.sg est=esse:pres.3s longa=longus:f.nom.sg et difficilis:f.nom.sg viatores=viator:nom.pl per montes=mons:acc.pl silvas=silva:acc.pl ambulant=ambulo:pres.3p", "Nocte in taberna manent et cenam bonam emunt.|At night they stay in a tavern and buy a good dinner.|nocte=nox:abl.sg.t in@abl taberna:abl.sg manent=maneo:pres.3p et cenam=cena:acc.sg bonam=bonus:f.acc.sg emunt=emo:pres.3p", "Postridie flumen magnum per pontem transeunt.|On the next day they cross a big river by the bridge.|postridie flumen:acc.sg magnum=magnus:n.acc.sg per pontem=pons:acc.sg transeunt=transeo:pres.3p", "Tandem moenia urbis vident; viatores laeti clamant.|At last they see the city walls; the travellers shout happily.|tandem moenia:acc.pl urbis=urbs:gen.sg vident=video:pres.3p viatores=viator:nom.pl laeti=laetus:m.nom.pl clamant=clamo:pres.3p", "Urbem ineunt et templa et aedificia magna spectant.|They enter the city and look at the temples and the great buildings.|urbem=urbs:acc.sg ineunt=ineo:pres.3p templa=templum:acc.pl aedificia=aedificium:acc.pl magna=magnus:n.acc.pl spectant=specto:pres.3p"]}];
 const wKey=w=>w.catKey+'|'+w.subKey+'|'+w.lat;
 function sentBank(){if(SENT_BANK)return SENT_BANK;const all=allWordsFlat();
-  SENT_BANK=SENT_LINES.map(line=>{const [la,en,tg]=line.split('|');
+  SENT_BANK=SENT_LINES.concat(STORIES.flatMap(st=>st.lines)).map(line=>{const [la,en,tg]=line.split('|');
     const tags=tg.trim().split(/\s+/).map(t=>{let [lhs,code]=t.split(':');let hint=null;const at=lhs.lastIndexOf('@');if(at>0){hint=lhs.slice(at+1);lhs=lhs.slice(0,at);}
       let [surf,lem]=lhs.split('=');lem=(lem||surf).replace(/_/g,' ');surf=surf.replace(/_/g,' ');
       let c=all.filter(w=>w.lat.toLowerCase()===lem.toLowerCase());
@@ -4389,7 +4662,7 @@ function examplesHtml(w){const list=sentencesFor(w);exCurrent=list;if(!list.leng
     +list.map((s,i)=>'<div class="ex-item'+(i>=4?' ex-more':'')+'" data-si="'+i+'"><div class="ex-la">'+sentenceHtml(s,k)+'</div><div class="ex-en">'+esc(s.en)+'</div></div>').join('')
     +'</div>'+(list.length>4?'<button class="lb-more ex-toggle" onclick="this.closest(\'.ex-sec\').classList.toggle(\'all\');this.textContent=this.closest(\'.ex-sec\').classList.contains(\'all\')?\'Show fewer\':\'Show all '+list.length+'\'">Show all '+list.length+'</button>':'')+'</div>';}
 // Tooltip for words in example sentences (hover, keyboard focus, or tap)
-(function(){let tip=null;function show(el){const item=el.closest('.ex-item');if(!item)return;const s=exCurrent[+item.dataset.si];if(!s)return;
+(function(){let tip=null;function show(el){const item=el.closest('.ex-item');if(!item)return;const set=el.closest('[data-exset]');const s=(set?EXSETS[set.dataset.exset]:exCurrent)[+item.dataset.si];if(!s)return;
     const lines=el.dataset.tags.split(',').flatMap(ti=>{const t=s.tags[+ti];return [{b:t.surf},...explainTag(s,t).map(x=>({t:x}))];});
     tip=tip||Object.assign(document.createElement('div'),{className:'ex-tip'});document.body.appendChild(tip);tip.innerHTML='';
     lines.forEach((l,i)=>{const d=document.createElement('div');if(l.b){d.className='ex-tip-w';d.textContent=l.b;if(i)d.style.marginTop='8px';}else d.textContent=l.t;tip.appendChild(d);});
