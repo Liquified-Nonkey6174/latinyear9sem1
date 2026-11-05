@@ -3554,10 +3554,16 @@ async function adminRename(pid){const p=lbPlayers[pid];if(!p)return;const v=prom
   const name=lbCleanName(v);if(name===p.name)return;let err='';if(name.length<2||name.length>30)err='Names must be 2–30 characters.';else if(!/^[\p{L}\p{N} _.'-]+$/u.test(name))err='Use letters, numbers, spaces, - _ . or \' only.';
   else if(Object.entries(lbPlayers).some(([id,x])=>id!==pid&&x&&String(x.name||'').toLowerCase()===name.toLowerCase()))err='Someone already has that name.';
   if(err){alert(err);return;}try{await fbReq('PATCH','players/'+pid,{name},{admin:true});}catch(e){alert('Couldn’t rename: '+e.message);}}
-async function lbAdminEdit(pid,name,cur){const per=lbPeriod,label=LB_PERIOD_NAME[per];
-  const v=prompt('Set '+name+'’s score for '+label+' to:'+(per==='all'?'':'\n(This only changes '+label+'. Pick “All time” to change their overall total.)'),cur);
+// Admin score edit. Periods nest (today ⊂ week ⊂ month ⊂ all time), so a change moves the bigger periods by the
+// same amount, and the smaller ones are capped so none is ever more than the period that contains it.
+async function lbAdminEdit(pid,name,cur){const per=lbPeriod,label=LB_PERIOD_NAME[per],p=lbPlayers[pid]||{},k=lbKeys();
+  const v=prompt('Set '+name+'’s score for '+label+' to:'+(per==='all'?'':'\n(Week, month and all-time totals move up or down by the same amount.)'),cur);
   if(v===null)return;const n=Math.floor(Number(v));if(!Number.isFinite(n)||n<0){alert('Enter a whole number, 0 or more.');return;}
-  const k=lbKeys();try{await fbReq('PATCH','players/'+pid,per==='all'?{total:n}:{[per+'/'+k[per]]:n},{admin:true});}catch(e){alert('Couldn’t save: '+e.message);}}
+  const val={d:lbScore(p,'d',k),w:lbScore(p,'w',k),m:lbScore(p,'m',k),all:lbScore(p,'all',k)},order=['d','w','m','all'],i=order.indexOf(per),delta=n-val[per];
+  order.forEach((x,j)=>{if(j===i)val[x]=n;else if(j>i)val[x]=Math.max(0,val[x]+delta);});
+  for(let j=order.length-2;j>=0;j--)val[order[j]]=Math.min(val[order[j]],val[order[j+1]]);   // smaller periods never exceed bigger ones
+  const body={total:val.all,['d/'+k.d]:val.d,['w/'+k.w]:val.w,['m/'+k.m]:val.m};
+  try{await fbReq('PATCH','players/'+pid,body,{admin:true});}catch(e){alert('Couldn’t save: '+e.message);}}
 function lbStreamFail(){if(!lbPlayersLoaded)document.getElementById('lbList').innerHTML='<div class="lb-empty">Couldn’t load the leaderboard. Check your internet connection.</div>';}
 
 // Looks: avatar + name colour, shown on the leaderboard and in chat
