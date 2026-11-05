@@ -3538,7 +3538,7 @@ function renderClassChallenge(){const box=document.getElementById('classChalleng
   if(isAdmin){const b=document.createElement('button');b.className='lb-act';b.textContent='✎';b.title='Edit challenge';b.onclick=editClassChallenge;box.querySelector('.cc-top').appendChild(b);}}
 async function editClassChallenge(){const t=prompt('Weekly target for the whole class (correct answers). Enter 0 to remove the challenge:',classChal&&classChal.target||1000);if(t===null)return;
   const n=Math.floor(Number(t));if(!Number.isFinite(n)||n<0){alert('Enter a whole number.');return;}
-  try{if(n===0)await fbReq('DELETE','challenge',null,{admin:true});else{const title=prompt('Challenge name (optional):',classChal&&classChal.title||'Class challenge')||'Class challenge';await fbReq('PUT','challenge',{target:n,title:title.slice(0,60)},{admin:true});}}
+  try{if(n===0)await fbReq('DELETE','challenge',null,{admin:true});else{const title=prompt('Challenge name (optional):',classChal&&classChal.title||'Class challenge')||'Class challenge';await fbReq('PUT','challenge',{target:n,title:title.slice(0,60)},{admin:true});}pollShared();}
   catch(e){alert('Couldn’t save: '+e.message+'. The database rules may need updating.');}}
 
 // Chat reactions
@@ -3666,6 +3666,12 @@ function renderParse(){const a=document.getElementById('readArea');if(!parseQ)ne
   a.innerHTML=h+'</div>';const nb=document.getElementById('pzNext');if(nb)nb.focus();}
 function pickParse(i){if(!parseQ||parseQ.picked!=null)return;parseQ.picked=i;const ok=parseQ.opts[i]===parseAnswer(parseQ.t);parseScore.n++;if(ok){parseScore.r++;quizNoPoints=false;lbCount();dailyTick();}playTone(ok);renderParse();}
 
+let pollBusy=false;
+async function pollShared(){if(pollBusy)return;pollBusy=true;
+  try{const [d,c]=await Promise.all([fbReq('GET','duels').catch(()=>undefined),fbReq('GET','challenge').catch(()=>undefined)]);
+    if(d!==undefined){duelsObj=d||{};updDuelBtn();if(document.getElementById('duelInboxOverlay').style.display==='flex')renderDuelInbox();}
+    if(c!==undefined){classChal=c&&c.target?c:null;renderClassChallenge();}}
+  finally{pollBusy=false;}}
 // ── HEAD-TO-HEAD CHALLENGES ──────────────────────────────────────────────────
 // duels/{id}: {from,to,qs:[{k:wordKey,d:'el'|'le'}],t,dir,res:{uid:{s:score,ms:time}}}
 let duelsObj={},duelSel=null,duelGame=null;
@@ -3710,7 +3716,7 @@ function renderDuelInbox(){const box=document.getElementById('duelInbox');if(!bo
   h+=sec('Waiting for them',wait,d=>'<div class="dl-row"><span>vs <b>'+esc(opName(d))+'</b> · you scored '+d.res[me].s+'/'+d.qs.length+'</span>'+(d.from===me?'<button class="lb-link muted" onclick="deleteDuel(\''+d.id+'\')">Cancel</button>':'')+'</div>');
   h+=sec('Finished',done,d=>{const w=duelWinner(d),a=d.res[me],b=d.res[d.from===me?d.to:d.from];return '<div class="dl-row"><span>'+(w===me?'🏆 You beat ':w?'You lost to ':'Draw with ')+'<b>'+esc(opName(d))+'</b> · '+a.s+'–'+b.s+' ('+(a.ms/1000).toFixed(1)+'s vs '+(b.ms/1000).toFixed(1)+'s)</span><button class="lb-link muted" onclick="deleteDuel(\''+d.id+'\')">Clear</button></div>';});
   box.innerHTML=h;}
-async function deleteDuel(id){try{await fbReq('DELETE','duels/'+id);delete duelsObj[id];}catch(e){}renderDuelInbox();updDuelBtn();}
+async function deleteDuel(id){try{await fbReq('DELETE','duels/'+id);delete duelsObj[id];pollShared();}catch(e){}renderDuelInbox();updDuelBtn();}
 function startDuel(id){const d=duelsObj[id];if(!d)return;const qs=d.qs.map(q=>({w:wordByKey(q.k),d:q.d})).filter(q=>q.w);duelGame={id,qs,i:0,score:0,t0:0,fb:null};renderDuelPlay();document.getElementById('duelPlayOverlay').style.display='flex';}
 function renderDuelPlay(){const g=duelGame,box=document.getElementById('duelPlay');if(!g)return;const d=duelsObj[g.id];const op=d.from===lbMe.pid?d.to:d.from,opn=lbPlayers[op]?lbPlayers[op].name:'opponent';
   if(g.i>=g.qs.length){const mine=d.res&&d.res[lbMe.pid],theirs=d.res&&d.res[op];let r='<div class="about-title">Finished!</div><p style="text-align:center;font-size:18px">You scored <b>'+g.score+' / '+g.qs.length+'</b> in '+(g.ms/1000).toFixed(1)+'s</p>';
@@ -3730,7 +3736,7 @@ async function duelCheck(){const g=duelGame;if(!g||g.fb)return;const inp=documen
     if(nearMiss(v,cands,q.d==='el')){g.typo=true;const fb=document.querySelector('#duelPlay .dp-fb');fb.className='dp-fb no';fb.textContent='≈ Very close: check your spelling and try again (no penalty).';inp.focus();try{inp.select();}catch(e){}return;}}
   if(ok){g.score++;dailyTick();}playTone(ok);
   g.fb={cls:ok?'ok':'no',text:ok?'✓ Correct':'✗ '+(q.d==='el'?fullLat(q.w):displayEng(q.w))};renderDuelPlay();
-  setTimeout(async()=>{g.fb=null;g.typo=false;g.i++;if(g.i>=g.qs.length){g.ms=Date.now()-g.t0;try{await fbReq('PUT','duels/'+g.id+'/res/'+lbMe.pid,{s:g.score,ms:g.ms});const d=duelsObj[g.id];d.res=d.res||{};d.res[lbMe.pid]={s:g.score,ms:g.ms};}catch(e){}updDuelBtn();}renderDuelPlay();},ok?600:1400);}
+  setTimeout(async()=>{g.fb=null;g.typo=false;g.i++;if(g.i>=g.qs.length){g.ms=Date.now()-g.t0;try{await fbReq('PUT','duels/'+g.id+'/res/'+lbMe.pid,{s:g.score,ms:g.ms});const d=duelsObj[g.id];d.res=d.res||{};d.res[lbMe.pid]={s:g.score,ms:g.ms};pollShared();}catch(e){}updDuelBtn();}renderDuelPlay();},ok?600:1400);}
 
 loadLbMe().then(()=>{
   fbStream('players','',(path,data,isPatch)=>{const wasLoaded=lbPlayersLoaded;lbPlayers=applyAt(lbPlayers,path,data,isPatch);lbPlayersLoaded=true;
@@ -3738,8 +3744,11 @@ loadLbMe().then(()=>{
     // Only trust a removal the server tells us about directly (not a first load that may predate joining).
     if(lbMe&&!lbPlayers[lbMe.pid]&&(path==='/'+lbMe.pid||(path==='/'&&wasLoaded)))lbRemoved();
     renderLb();renderChat();lbUpdatePoints();},lbStreamFail);
-  fbStream('duels','',(path,data,isPatch)=>{duelsObj=applyAt(duelsObj,path,data,isPatch);updDuelBtn();if(document.getElementById('duelInboxOverlay').style.display==='flex')renderDuelInbox();},()=>{});
-  fbStream('challenge','',(path,data,isPatch)=>{classChal=applyAt(classChal||{},path,data,isPatch);if(!classChal||!Object.keys(classChal).length)classChal=null;renderClassChallenge();},()=>{});
+  // Challenges and the class challenge are checked every 15s (and after your own actions) rather than kept
+  // as live connections: browsers allow only ~6 connections per site across ALL tabs, so live streams are
+  // kept to two per tab (leaderboard + chat).
+  pollShared();setInterval(()=>{if(document.visibilityState==='visible')pollShared();},15000);
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')pollShared();});
   fbStream('chat','orderBy=%22$key%22&limitToLast=100',(path,data,isPatch)=>{chatObj=applyAt(chatObj,path,data,isPatch);chatLoaded=true;
     chatMsgs=Object.entries(chatObj).map(([id,m])=>({id,...m})).sort((a,b)=>a.id<b.id?-1:1);renderChat();},
     ()=>{if(!chatLoaded)document.getElementById('chatList').innerHTML='<div class="lb-empty">Couldn’t load the chat. Check your internet connection.</div>';});
