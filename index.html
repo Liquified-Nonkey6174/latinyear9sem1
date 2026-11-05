@@ -2789,7 +2789,7 @@ function getDailyWords(){
   });
   return ws;
 }
-function renderWordList(){const list=document.getElementById('wordList');const mainWs=getWords();const dailyWs=getDailyWords();const seen=new Set(mainWs.map(w=>w.lat));const extra=dailyWs.filter(w=>!seen.has(w.lat));const ws=[...mainWs,...extra];if(!ws.length){list.innerHTML='<div class="word-empty">Choose some categories to see words here.</div>';return;}list.innerHTML=ws.map(w=>{const r=getSR(w);const due=isDue(w);const isDaily=extra.includes(w);return'<div class="word-row"><div class="word-row-lat">'+fullLat(w)+(isDaily?' <span style="font-size:9px;color:var(--gold)">📅</span>':'')+'</div><div class="word-row-eng">'+displayEng(w)+'</div><div class="word-row-meta">'+(w.catKey&&DATA[w.catKey]?DATA[w.catKey].label+' · '+w.subKey:'daily')+'</div>'+(r.seen>0?'<div class="word-row-sr" style="color:'+(due?'var(--gold)':'var(--green)')+'">SR: '+r.seen+' seen · '+Math.round(r.correct/r.seen*100)+'% · '+(due?'due now':'interval '+r.interval+'d')+'</div>':'')+'</div>';}).join('');}
+function renderWordList(){const list=document.getElementById('wordList');const mainWs=getWords();const dailyWs=getDailyWords();const seen=new Set(mainWs.map(w=>w.lat));const extra=dailyWs.filter(w=>!seen.has(w.lat));const ws=[...mainWs,...extra];if(!ws.length){list.innerHTML='<div class="word-empty">Choose some categories to see words here.</div>';return;}list.innerHTML=ws.map(w=>{const r=getSR(w);const due=isDue(w);const isDaily=extra.includes(w);return'<div class="word-row"><div class="word-row-lat">'+fullLat(w)+(isDaily?' <span style="font-size:9px;color:var(--gold)">📅</span>':'')+'</div><div class="word-row-eng">'+displayEng(w)+'</div><div class="word-row-meta">'+(w.catKey&&DATA[w.catKey]?catSubLabel(w):'daily')+'</div>'+(r.seen>0?'<div class="word-row-sr" style="color:'+(due?'var(--gold)':'var(--green)')+'">SR: '+r.seen+' seen · '+Math.round(r.correct/r.seen*100)+'% · '+(due?'due now':'interval '+r.interval+'d')+'</div>':'')+'</div>';}).join('');}
 const CUSTOM_KEY='latin_custom_v1';
 let customWords=[];
 async function loadCustomWords(){try{const r=await window.storage.get(CUSTOM_KEY);if(r)customWords=JSON.parse(r.value);}catch(e){}customWords.forEach(w=>addWordToData(w));}
@@ -2801,7 +2801,7 @@ function impCatChange(){const cat=document.getElementById('impCat').value;const 
 function addImportWord(){const cat=document.getElementById('impCat').value;const lat=document.getElementById('impLat').value.trim();const engRaw=document.getElementById('impEng').value.trim();const msg=document.getElementById('impMsg');if(!lat){msg.textContent='Enter a Latin word.';msg.style.color='var(--red)';return;}if(!engRaw){msg.textContent='Enter English meaning(s).';msg.style.color='var(--red)';return;}const eng=engRaw.split(',').map(s=>s.trim()).filter(Boolean);if(!eng.length){msg.textContent='Enter English meaning(s).';msg.style.color='var(--red)';return;}let subKey,gender=null,gen=null;if(cat==='nouns'){subKey=document.getElementById('impDecl').value;gender=document.getElementById('impGender').value;if(subKey==='3rd declension'){gen=document.getElementById('impGen').value.trim();if(!gen){msg.textContent='Enter the genitive for 3rd declension nouns.';msg.style.color='var(--red)';return;}}}else if(cat==='verbs'){subKey=document.getElementById('impConj').value;}else if(cat==='adjectives'){subKey=document.getElementById('impAdj').value;}else{const subKeys=Object.keys(DATA[cat].sub);subKey=subKeys[0];}const w={lat,gen,gender,eng,catKey:cat,subKey};const sub=DATA[cat].sub[subKey];if(sub&&sub.words.some(x=>x.lat===lat)){msg.textContent='This word already exists.';msg.style.color='var(--red)';return;}addWordToData(w);customWords.push(w);saveCustomWords();const k=lat.toLowerCase();if(!WORD_MAP[k])WORD_MAP[k]=[];WORD_MAP[k].push(eng[0]);msg.textContent='✓ Added "'+lat+'" ('+eng.join(', ')+')';msg.style.color='var(--green)';document.getElementById('impLat').value='';document.getElementById('impEng').value='';document.getElementById('impGen').value='';buildUI();}
 function showCustomList(){document.getElementById('customListOverlay').style.display='flex';renderCustomList();}
 function hideCustomList(){document.getElementById('customListOverlay').style.display='none';}
-function renderCustomList(){const body=document.getElementById('customListBody');if(!customWords.length){body.innerHTML='<div style="font-family:var(--serif);font-style:italic;color:var(--text3);text-align:center;padding:2rem 0">No custom words added yet.</div>';return;}body.innerHTML=customWords.map((w,i)=>{const catLabel=DATA[w.catKey]?DATA[w.catKey].label:w.catKey;const gen3=w.gen?' ('+w.gen+', '+w.gender+')':'';const genderTag=w.gender&&w.catKey==='nouns'?' · '+(w.gender==='m'?'masc':w.gender==='f'?'fem':'neut'):'';return'<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)"><div style="flex:1"><div style="font-family:var(--serif);font-size:16px;color:var(--text)">'+w.lat+gen3+'</div><div style="font-size:12px;color:var(--text2);margin-top:2px">'+w.eng.join(', ')+'</div><div style="font-size:10px;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:.06em">'+catLabel+' · '+w.subKey+genderTag+'</div></div><button onclick="removeCustomWord('+i+')" style="width:28px;height:28px;border-radius:999px;border:1px solid var(--red-bdr);background:var(--red-bg);color:var(--red);cursor:pointer;font-size:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center" title="Remove">×</button></div>';}).join('');}
+function renderCustomList(){const body=document.getElementById('customListBody');if(!customWords.length){body.innerHTML='<div style="font-family:var(--serif);font-style:italic;color:var(--text3);text-align:center;padding:2rem 0">No custom words added yet.</div>';return;}body.innerHTML=customWords.map((w,i)=>{const catLabel=DATA[w.catKey]?DATA[w.catKey].label:w.catKey;const gen3=w.gen?' ('+w.gen+', '+w.gender+')':'';const genderTag=w.gender&&w.catKey==='nouns'?' · '+(w.gender==='m'?'masc':w.gender==='f'?'fem':'neut'):'';return'<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)"><div style="flex:1"><div style="font-family:var(--serif);font-size:16px;color:var(--text)">'+w.lat+gen3+'</div><div style="font-size:12px;color:var(--text2);margin-top:2px">'+w.eng.join(', ')+'</div><div style="font-size:10px;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:.06em">'+catLabel+(sameLabel(catLabel,w.subKey)?'':' · '+w.subKey)+genderTag+'</div></div><button onclick="removeCustomWord('+i+')" style="width:28px;height:28px;border-radius:999px;border:1px solid var(--red-bdr);background:var(--red-bg);color:var(--red);cursor:pointer;font-size:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center" title="Remove">×</button></div>';}).join('');}
 function removeCustomWord(idx){const w=customWords[idx];if(!w)return;const sub=DATA[w.catKey]&&DATA[w.catKey].sub[w.subKey];if(sub){sub.words=sub.words.filter(x=>x.lat!==w.lat);}const k=w.lat.toLowerCase();if(WORD_MAP[k])WORD_MAP[k]=WORD_MAP[k].filter(e=>e!==w.eng[0]);customWords.splice(idx,1);saveCustomWords();renderCustomList();buildUI();}
 document.addEventListener('keydown',e=>{
   if(tourSteps){if(e.key==='ArrowRight'||e.key==='Enter'){e.preventDefault();tourNext();}else if(e.key==='ArrowLeft'){e.preventDefault();tourBack();}else if(e.key==='Escape'){e.preventDefault();endTour();}return;}
@@ -3476,7 +3476,7 @@ function searchWords(q){q=q.toLowerCase().trim();if(!q)return [];const sc=w=>{co
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function toggleStarOnly(){wdStarOnly=!wdStarOnly;const b=document.getElementById('wdStarBtn');if(b)b.classList.toggle('on',wdStarOnly);renderWordList();}
 function wdRowHTML(w,i,extraTag){const r=getSR(w);const due=isDue(w);const st=isStarred(w);
-  return '<div class="word-row clickable" onclick="openRow('+i+')"><div style="display:flex;align-items:flex-start;gap:8px"><div style="flex:1;min-width:0"><div class="word-row-lat">'+esc(fullLat(w))+(extraTag||'')+'</div><div class="word-row-eng">'+esc(displayEng(w))+'</div></div><button class="row-star'+(st?' on':'')+'" title="Mark as hard" onclick="event.stopPropagation();starRow('+i+')">'+(st?'★':'☆')+'</button></div><div class="word-row-meta">'+esc(DATA[w.catKey]?DATA[w.catKey].label+' · '+w.subKey:'daily')+'</div>'+(r.seen>0?'<div class="word-row-sr" style="color:'+(due?'var(--gold)':'var(--green)')+'">SR: '+r.seen+' seen · '+Math.round(r.correct/r.seen*100)+'% · '+(due?'due now':'interval '+r.interval+'d')+'</div>':'')+'</div>';}
+  return '<div class="word-row clickable" onclick="openRow('+i+')"><div style="display:flex;align-items:flex-start;gap:8px"><div style="flex:1;min-width:0"><div class="word-row-lat">'+esc(fullLat(w))+(extraTag||'')+'</div><div class="word-row-eng">'+esc(displayEng(w))+'</div></div><button class="row-star'+(st?' on':'')+'" title="Mark as hard" onclick="event.stopPropagation();starRow('+i+')">'+(st?'★':'☆')+'</button></div><div class="word-row-meta">'+esc(DATA[w.catKey]?catSubLabel(w):'daily')+'</div>'+(r.seen>0?'<div class="word-row-sr" style="color:'+(due?'var(--gold)':'var(--green)')+'">SR: '+r.seen+' seen · '+Math.round(r.correct/r.seen*100)+'% · '+(due?'due now':'interval '+r.interval+'d')+'</div>':'')+'</div>';}
 function openRow(i){const w=wdRows[i];if(w)showWordForms(w);}
 function starRow(i){const w=wdRows[i];if(!w)return;toggleStar(w);}
 renderWordList=function(){const list=document.getElementById('wordList');const inp=document.getElementById('wordSearch');const q=inp?inp.value.trim():'';const cnt=document.getElementById('wordDrawerCount');
@@ -3536,11 +3536,11 @@ const SENT_LINES=[
 "Discipuli libellos legunt et verba scribunt.|The students read booklets and write words.|discipuli=discipulus:nom.pl libellos=libellus:acc.pl legunt=lego:pres.3p et verba=verbum:acc.pl scribunt=scribo:pres.3p",
 "Discipulus stultus numquam studet.|The stupid student never studies.|discipulus:nom.sg stultus:m.nom.sg numquam studet=studeo:pres.3s",
 "Caudex! Cur non respondes?|Blockhead! Why don't you answer?|caudex:voc.sg cur respondes=respondeo:pres.2s",
-"Ludus noster prope templum est.|Our school is near the temple.|ludus:nom.sg noster:m.nom.sg prope templum:acc.sg est=esse:pres.3s",
+"Ludus noster est prope templum.|Our school is near the temple.|ludus:nom.sg noster:m.nom.sg prope templum:acc.sg est=esse:pres.3s",
 "Lanista iuvenes in ludo exercet.|The trainer trains the young men in the school.|lanista:nom.sg iuvenes=iuvenis:acc.pl in@abl ludo=ludus:abl.sg exercet=exerceo:pres.3s",
 "Agricola agrum suum amat.|The farmer loves his own field.|agricola:nom.sg agrum=ager:acc.sg suum=suus:m.acc.sg amat=amo:pres.3s",
 "Ubi est magister vester, pueri?|Where is your teacher, boys?|ubi est=esse:pres.3s magister:nom.sg vester:m.nom.sg pueri=puer:voc.pl",
-"Vir quem vides meus pater est.|The man whom you see is my father.|vir:nom.sg quem=qui_quae_quod:m.acc.sg vides=video:pres.2s meus:m.nom.sg pater:nom.sg.c est=esse:pres.3s",
+"Vir quem vides est pater meus.|The man whom you see is my father.|vir:nom.sg quem=qui_quae_quod:m.acc.sg vides=video:pres.2s meus:m.nom.sg pater:nom.sg.c est=esse:pres.3s",
 "Puella quae in villa habitat fabulas amat.|The girl who lives in the villa loves stories.|puella:nom.sg quae=qui_quae_quod:f.nom.sg in@abl villa:abl.sg habitat=habito:pres.3s fabulas=fabula:acc.pl amat=amo:pres.3s",
 "Ea est soror mea; id donum ei do.|She is my sister; I give that gift to her.|ea:3.f.nom.sg est=esse:pres.3s soror:nom.sg.c mea=meus:f.nom.sg id:3.n.acc.sg donum:acc.sg ei=ea:3.f.dat.sg do:pres.1s",
 "Esto fortis, mi fili!|Be brave, my son!|esto fortis:m.nom.sg mi=meus:m.voc.sg fili=filius:voc.sg",
@@ -3548,16 +3548,16 @@ const SENT_LINES=[
 "Pater filium monet: \"Noli in silvam noctu ire!\"|The father warns his son: \"Don't go into the forest at night!\"|pater:nom.sg filium=filius:acc.sg monet=moneo:pres.3s noli=nolo:imp.s in@acc silvam=silva:acc.sg noctu ire=eo:inf",
 "Fratres saepe sororibus invident.|Brothers often envy their sisters.|fratres=frater:nom.pl saepe sororibus=soror:dat.pl.dv invident=invideo:pres.3p",
 "Mater filiae flores ostendit.|The mother shows her daughter the flowers.|mater:nom.sg filiae=filia:dat.sg flores=flos:acc.pl ostendit=ostendo:pres.3s",
-"Gaudeo quod amicus meus adest.|I am glad because my friend is here.|gaudeo:pres.1s quod amicus:nom.sg meus:m.nom.sg adest=adesse:pres.3s",
-"Hodie Marcus a ludo abest.|Today Marcus is absent from school.|hodie a=ab ludo=ludus:abl.sg abest=abesse:pres.3s",
+"Gaudeo quod adest amicus meus.|I am glad because my friend is here.|gaudeo:pres.1s quod amicus:nom.sg meus:m.nom.sg adest=adesse:pres.3s",
+"Hodie Marcus abest a ludo.|Today Marcus is absent from school.|hodie a=ab ludo=ludus:abl.sg abest=abesse:pres.3s",
 "Mater pueros mane excitat.|Mother wakes the boys up in the morning.|mater:nom.sg pueros=puer:acc.pl mane excitat=excito:pres.3s",
 "Prima luce puer evigilat et surgit.|At dawn the boy wakes up and gets up.|prima_luce puer:nom.sg evigilat=evigilo:pres.3s et surgit=surgo:pres.3s",
 "Vesperi familia cenat et laete cantat.|In the evening the family dines and sings happily.|vesperi=vesper familia:nom.sg cenat=ceno:pres.3s et laete cantat=canto:pres.3s",
 "Media nocte omnes dormiunt.|At midnight everyone is asleep.|media_nocte omnes=omnis:m.nom.pl dormiunt=dormio:pres.3p",
 "Interdiu laboramus, noctu dormimus.|By day we work, by night we sleep.|interdiu laboramus=laboro:pres.1p noctu dormimus=dormio:pres.1p",
 "Cenamus primo, deinde dormimus.|First we dine, then we sleep.|cenamus=ceno:pres.1p deinde dormimus=dormio:pres.1p",
-"Iam nox est; pueri, statim dormite!|It is already night; boys, sleep at once!|iam nox:nom.sg est=esse:pres.3s pueri=puer:voc.pl statim dormite=dormio:imp.p",
-"Festinate, pueri! Hora sexta est.|Hurry, boys! It is the sixth hour.|festinate=festino:imp.p pueri=puer:voc.pl hora:nom.sg sexta=sextus:f.nom.sg est=esse:pres.3s",
+"Iam est nox; pueri, statim dormite!|It is already night; boys, sleep at once!|iam nox:nom.sg est=esse:pres.3s pueri=puer:voc.pl statim dormite=dormio:imp.p",
+"Festinate, pueri! Est hora sexta.|Hurry, boys! It is the sixth hour.|festinate=festino:imp.p pueri=puer:voc.pl hora:nom.sg sexta=sextus:f.nom.sg est=esse:pres.3s",
 "Abite, pueri! Exite e villa!|Go away, boys! Get out of the villa!|abite=abeo:imp.p pueri=puer:voc.pl exite=exeo:imp.p e=ex villa:abl.sg",
 "Nolumus in villa manere; ad mare ire volumus.|We don't want to stay in the villa; we want to go to the sea.|nolumus=nolo:pres.1p in@abl villa:abl.sg manere=maneo:inf ad mare:acc.sg ire=eo:inf volumus=volo:pres.1p",
 "Huc veni, amice! Sic laboramus.|Come here, friend! This is how we work.|huc veni=venio:imp.s amice=amicus:voc.sg sic laboramus=laboro:pres.1p",
@@ -3568,11 +3568,11 @@ const SENT_LINES=[
 "Vos, discipuli, laudo; nam bene laboratis.|I praise you, students; for you work well.|vos:2.acc.pl discipuli=discipulus:voc.pl laudo:pres.1s nam bene laboratis=laboro:pres.2p",
 "Ego Romam amo; frater quoque Romam amat.|I love Rome; my brother also loves Rome.|ego:1.nom.sg romam=Roma:acc.sg amo:pres.1s frater:nom.sg quoque amat=amo:pres.3s",
 "Quid est nomen tuum?|What is your name?|quid est=esse:pres.3s nomen:nom.sg tuum=tuus:n.nom.sg",
-"Homo sine amicis miser est.|A person without friends is miserable.|homo:nom.sg sine amicis=amicus:abl.pl miser:m.nom.sg est=esse:pres.3s",
+"Homo sine amicis est miser.|A person without friends is miserable.|homo:nom.sg sine amicis=amicus:abl.pl miser:m.nom.sg est=esse:pres.3s",
 "Senex unum oculum et paucos dentes habet.|The old man has one eye and few teeth.|senex:nom.sg unum=unus:m.acc.sg oculum=oculus:acc.sg et paucos=pauci:m.acc.pl dentes=dens:acc.pl habet=habeo:pres.3s",
 "Puer pedem in aqua ponit.|The boy puts his foot in the water.|puer:nom.sg pedem=pes:acc.sg in@abl aqua:abl.sg ponit=pono:pres.3s",
 "Quem colorem amas? Rubrum an nigrum?|Which colour do you love? Red or black?|quem=quis:m.acc.sg colorem=color:acc.sg amas=amo:pres.2s rubrum=ruber:m.acc.sg nigrum=niger:m.acc.sg",
-"Mensa lignea et magna est.|The table is wooden and big.|mensa:nom.sg lignea=ligneus:f.nom.sg et magna=magnus:f.nom.sg est=esse:pres.3s",
+"Mensa est lignea et magna.|The table is wooden and big.|mensa:nom.sg lignea=ligneus:f.nom.sg et magna=magnus:f.nom.sg est=esse:pres.3s",
 "Magister discipulos rogat: \"Ubi est liber meus?\"|The teacher asks the students: \"Where is my book?\"|magister:nom.sg discipulos=discipulus:acc.pl rogat=rogo:pres.3s ubi est=esse:pres.3s liber@nouns:nom.sg meus:m.nom.sg",
 "Discipuli magistrum salutant.|The students greet the teacher.|discipuli=discipulus:nom.pl magistrum=magister:acc.sg salutant=saluto:pres.3p",
 "Discipuli taciti magistrum audiunt.|The silent students listen to the teacher.|discipuli=discipulus:nom.pl taciti=tacitus:m.nom.pl magistrum=magister:acc.sg audiunt=audio:pres.3p",
@@ -3597,7 +3597,7 @@ const SENT_LINES=[
 "Barbari tela et hastas in muros conicient.|The barbarians will hurl javelins and spears onto the walls.|barbari=barbarus:nom.pl tela=telum:acc.pl et hastas=hasta:acc.pl in@acc muros=murus:acc.pl conicient=conicio:fut.3p",
 "Miles scutum et gladium tenet.|The soldier holds a shield and a sword.|miles:nom.sg scutum:acc.sg et gladium=gladius:acc.sg tenet=teneo:pres.3s",
 "In proelio multi milites vulnera accipiunt.|In the battle many soldiers receive wounds.|in@abl proelio=proelium:abl.sg multi:m.nom.pl milites=miles:nom.pl vulnera=vulnus:acc.pl accipiunt=accipio:pres.3p",
-"Bellum longum et crudele erat.|The war was long and cruel.|bellum:nom.sg longum=longus:n.nom.sg et crudele=crudelis:n.nom.sg erat=esse:impf.3s",
+"Bellum erat longum et crudele.|The war was long and cruel.|bellum:nom.sg longum=longus:n.nom.sg et crudele=crudelis:n.nom.sg erat=esse:impf.3s",
 "Post pugnam milites fessi in castra redeunt.|After the fight the tired soldiers return to the camp.|post pugnam=pugna:acc.sg milites=miles:nom.pl fessi=fessus:m.nom.pl in@acc castra:acc.pl redeunt=redeo:pres.3p",
 "Consul senatores in templum convocat.|The consul calls the senators together into the temple.|consul:nom.sg senatores=senator:acc.pl in@acc templum:acc.sg convocat=convoco:pres.3s",
 "Dictator Romanis leges novas dabit.|The dictator will give new laws to the Romans.|dictator:nom.sg romanis=Romanus@nouns:dat.pl leges=lex:acc.pl novas=novus:f.acc.pl dabit=do:fut.3s",
@@ -3615,7 +3615,7 @@ const SENT_LINES=[
 "Hostes ad muros accedunt.|The enemy approach the walls.|hostes=hostis:nom.pl ad muros=murus:acc.pl accedunt=accedo:pres.3p",
 "Arma capite, milites! Hostes adveniunt!|Take up your weapons, soldiers! The enemy are arriving!|arma:acc.pl capite=capio:imp.p milites=miles:voc.pl hostes=hostis:nom.pl adveniunt=advenio:pres.3p",
 "Si hostes venient, fortiter pugnabimus.|If the enemy come, we will fight bravely.|si hostes=hostis:nom.pl venient=venio:fut.3p fortiter pugnabimus=pugno:fut.1p",
-"Hostes multi sunt; tamen milites non timent.|The enemy are many; however, the soldiers are not afraid.|hostes=hostis:nom.pl multi:m.nom.pl sunt=esse:pres.3p tamen milites=miles:nom.pl timent=timeo:pres.3p",
+"Hostes sunt multi; tamen milites non timent.|The enemy are many; however, the soldiers are not afraid.|hostes=hostis:nom.pl multi:m.nom.pl sunt=esse:pres.3p tamen milites=miles:nom.pl timent=timeo:pres.3p",
 "Milites pro patria fortiter pugnabunt.|The soldiers will fight bravely for their homeland.|milites=miles:nom.pl pro patria:abl.sg fortiter pugnabunt=pugno:fut.3p",
 "Imperator milites procedere iubet.|The general orders the soldiers to go forward.|imperator:nom.sg milites=miles:acc.pl procedere=procedo:inf iubet=iubeo:pres.3s",
 "Dux captivos dimittit.|The leader sends the prisoners away.|dux:nom.sg captivos=captivus:acc.pl dimittit=dimitto:pres.3s",
@@ -3633,35 +3633,35 @@ const SENT_LINES=[
 "Post bellum Romani pontem novum aedificabunt.|After the war the Romans will build a new bridge.|post bellum:acc.sg romani=Romanus@nouns:nom.pl pontem=pons:acc.sg novum=novus:m.acc.sg aedificabunt=aedifico:fut.3p",
 "Eques in equo albo sedet.|The horseman sits on a white horse.|eques:nom.sg in@abl equo=equus:abl.sg albo=albus:m.abl.sg sedet=sedeo:pres.3s",
 "Dux et milites Alpes altas ascendunt.|The leader and the soldiers climb the high Alps.|dux:nom.sg et milites=miles:nom.pl alpes=Alpes:acc.pl altas=altus:f.acc.pl ascendunt=ascendo:pres.3p",
-"Mille milites in castris erant.|There were a thousand soldiers in the camp.|mille milites=miles:nom.pl in@abl castris=castra:abl.pl erant=esse:impf.3p",
+"Mille milites erant in castris.|There were a thousand soldiers in the camp.|mille milites=miles:nom.pl in@abl castris=castra:abl.pl erant=esse:impf.3p",
 "Pauci milites manent; ceteri fugiunt.|A few soldiers stay; the rest flee.|pauci:m.nom.pl milites=miles:nom.pl manent=maneo:pres.3p ceteri:m.nom.pl fugiunt=fugio:pres.3p",
-"Reliqui captivi in castris erant.|The remaining prisoners were in the camp.|reliqui=reliquus:m.nom.pl captivi=captivus:nom.pl in@abl castris=castra:abl.pl erant=esse:impf.3p",
-"Milites ad proelium parati sunt.|The soldiers are prepared for battle.|milites=miles:nom.pl ad proelium:acc.sg parati=paratus:m.nom.pl sunt=esse:pres.3p",
+"Reliqui captivi erant in castris.|The remaining prisoners were in the camp.|reliqui=reliquus:m.nom.pl captivi=captivus:nom.pl in@abl castris=castra:abl.pl erant=esse:impf.3p",
+"Milites sunt parati ad proelium.|The soldiers are prepared for battle.|milites=miles:nom.pl ad proelium:acc.sg parati=paratus:m.nom.pl sunt=esse:pres.3p",
 "Hic miles dignus est gloria.|This soldier is worthy of glory.|hic=hic_haec_hoc:m.nom.sg miles:nom.sg dignus:m.nom.sg est=esse:pres.3s gloria:abl.sg",
-"Gloria et virtus militibus carae sunt.|Glory and courage are dear to soldiers.|gloria:nom.sg et virtus:nom.sg militibus=miles:dat.pl carae=carus:f.nom.pl sunt=esse:pres.3p",
+"Gloria et virtus sunt carae militibus.|Glory and courage are dear to soldiers.|gloria:nom.sg et virtus:nom.sg militibus=miles:dat.pl carae=carus:f.nom.pl sunt=esse:pres.3p",
 "Miles infelix in proelio cadit.|The unlucky soldier falls in battle.|miles:nom.sg infelix:m.nom.sg in@abl proelio=proelium:abl.sg cadit=cado:pres.3s",
 "Miles vulnera in capite et in corpore habet.|The soldier has wounds on his head and body.|miles:nom.sg vulnera=vulnus:acc.pl in@abl capite=caput:abl.sg et corpore=corpus:abl.sg habet=habeo:pres.3s",
 "Medicus militem a morte servat.|The doctor saves the soldier from death.|medicus:nom.sg militem=miles:acc.sg a=ab morte=mors:abl.sg servat=servo:pres.3s",
 "Medicus dolorem militis curat.|The doctor treats the soldier's pain.|medicus:nom.sg dolorem=dolor:acc.sg militis=miles:gen.sg curat=curo:pres.3s",
 "Medicus militem mortuum invenit.|The doctor finds the dead soldier.|medicus:nom.sg militem=miles:acc.sg mortuum=mortuus:m.acc.sg invenit=invenio:pres.3s",
-"Timor et clamor in castris erant.|There was fear and shouting in the camp.|timor:nom.sg et clamor:nom.sg in@abl castris=castra:abl.pl erant=esse:impf.3p",
+"Timor et clamor erant in castris.|There was fear and shouting in the camp.|timor:nom.sg et clamor:nom.sg in@abl castris=castra:abl.pl erant=esse:impf.3p",
 "Postridie hostes iterum oppugnabant.|On the next day the enemy were attacking again.|postridie hostes=hostis:nom.pl iterum oppugnabant=oppugno:impf.3p",
 "Mox nuntius veniet; postea consilium capiemus.|Soon a messenger will come; afterwards we will make a plan.|mox nuntius:nom.sg veniet=venio:fut.3s postea consilium:acc.sg capiemus=capio:fut.1p",
 "Nuntius mortem regis nuntiat.|The messenger announces the death of the king.|nuntius:nom.sg mortem=mors:acc.sg regis=rex:gen.sg nuntiat=nuntio:pres.3s",
-"Cives in via clamant quod hostes adsunt.|The citizens shout in the street because the enemy are here.|cives=civis:nom.pl in@abl via:abl.sg clamant=clamo:pres.3p quod hostes=hostis:nom.pl adsunt=adesse:pres.3p",
+"Cives in via clamant quod adsunt hostes.|The citizens shout in the street because the enemy are here.|cives=civis:nom.pl in@abl via:abl.sg clamant=clamo:pres.3p quod hostes=hostis:nom.pl adsunt=adesse:pres.3p",
 "Cives pacem et libertatem postulant.|The citizens demand peace and freedom.|cives=civis:nom.pl pacem=pax:acc.sg et libertatem=libertas:acc.sg postulant=postulo:pres.3p",
 "Custodes portas urbis noctu custodiunt.|The guards guard the city gates by night.|custodes=custos:nom.pl portas=porta:acc.pl urbis=urbs:gen.sg noctu custodiunt=custodio:pres.3p",
-"Moenia urbis alta et lata sunt.|The city walls are high and wide.|moenia:nom.pl urbis=urbs:gen.sg alta=altus:n.nom.pl et lata=latus:n.nom.pl sunt=esse:pres.3p",
+"Moenia urbis sunt alta et lata.|The city walls are high and wide.|moenia:nom.pl urbis=urbs:gen.sg alta=altus:n.nom.pl et lata=latus:n.nom.pl sunt=esse:pres.3p",
 "In summo monte custodes stant.|On top of the mountain stand guards.|in@abl summo=summus:m.abl.sg monte=mons:abl.sg custodes=custos:nom.pl stant=sto:pres.3p",
 "Nullus Romanus solus in silvam ire vult.|No Roman wants to go into the forest alone.|nullus:m.nom.sg romanus=Romanus@nouns:nom.sg solus:m.nom.sg in@acc silvam=silva:acc.sg ire=eo:inf vult=volo:pres.3s",
 "Potestne orator populo persuadere?|Can the orator persuade the people?|potestne=posse:pres.3s potestne=-ne orator:nom.sg populo=populus:dat.sg.dv persuadere=persuadeo:inf",
-"Nonne Roma pulchra est? Num barbari Romam vincent?|Surely Rome is beautiful? Surely the barbarians will not conquer Rome?|nonne roma=Roma:nom.sg pulchra=pulcher:f.nom.sg est=esse:pres.3s num barbari=barbarus:nom.pl romam=Roma:acc.sg vincent=vinco:fut.3p",
+"Nonne Roma est pulchra? Num barbari Romam vincent?|Surely Rome is beautiful? Surely the barbarians will not conquer Rome?|nonne roma=Roma:nom.sg pulchra=pulcher:f.nom.sg est=esse:pres.3s num barbari=barbarus:nom.pl romam=Roma:acc.sg vincent=vinco:fut.3p",
 "Quis est ille vir? Is est consul.|Who is that man? He is the consul.|quis:m.nom.sg est=esse:pres.3s ille=ille_illa_illud:m.nom.sg vir:nom.sg is:3.m.nom.sg consul:nom.sg.c",
 "Rex bonus populum bene regit.|A good king rules the people well.|rex:nom.sg bonus:m.nom.sg populum=populus:acc.sg bene regit=rego:pres.3s",
 "Regina ipsa nuntium audit.|The queen herself hears the messenger.|regina:nom.sg ipsa:f.nom.sg nuntium=nuntius:acc.sg audit=audio:pres.3s",
-"Regina gracilis et pulchra erat.|The queen was slender and beautiful.|regina:nom.sg gracilis:f.nom.sg et pulchra=pulcher:f.nom.sg erat=esse:impf.3s",
+"Regina erat gracilis et pulchra.|The queen was slender and beautiful.|regina:nom.sg gracilis:f.nom.sg et pulchra=pulcher:f.nom.sg erat=esse:impf.3s",
 "Rex togam purpuream gerit.|The king wears a purple toga.|rex:nom.sg togam=toga:acc.sg purpuream=purpureus:f.acc.sg gerit=gero:pres.3s",
-"Toga senatoris alba est.|The senator's toga is white.|toga:nom.sg senatoris=senator:gen.sg alba=albus:f.nom.sg est=esse:pres.3s",
+"Toga senatoris est alba.|The senator's toga is white.|toga:nom.sg senatoris=senator:gen.sg alba=albus:f.nom.sg est=esse:pres.3s",
 "Senatores templum ineunt.|The senators go into the temple.|senatores=senator:nom.pl templum:acc.sg ineunt=ineo:pres.3p",
 "Idibus Martiis senatores conveniebant.|On the Ides of March the senators used to meet.|idibus=Idus:abl.pl.t martiis=Martius:f.abl.pl senatores=senator:nom.pl conveniebant=convenio:impf.3p",
 "Multos annos Romani regem non habebant.|For many years the Romans did not have a king.|multos=multi:m.acc.pl annos=annus:acc.pl.d romani=Romanus@nouns:nom.pl regem=rex:acc.sg habebant=habeo:impf.3p",
@@ -3680,10 +3680,10 @@ const SENT_LINES=[
 "Nauta felix incolumis ad patriam redit.|The lucky sailor returns safe to his homeland.|nauta:nom.sg felix:m.nom.sg incolumis:m.nom.sg ad patriam=patria:acc.sg redit=redeo:pres.3s",
 "Quattuor nautae navem parvam habent.|Four sailors have a small ship.|quattuor nautae=nauta:nom.pl navem=navis:acc.sg parvam=parvus:f.acc.sg habent=habeo:pres.3p",
 "Prope litus multae naves stant.|Near the shore many ships stand.|prope litus:acc.sg multae=multi:f.nom.pl naves=navis:nom.pl stant=sto:pres.3p",
-"Sexto mense, septimo, octavo navis in mari erat.|In the sixth, seventh and eighth months the ship was at sea.|sexto=sextus:m.abl.sg mense=mensis:abl.sg.t septimo=septimus:m.abl.sg octavo=octavus:m.abl.sg navis:nom.sg in@abl mari=mare:abl.sg erat=esse:impf.3s",
-"Mare hodie caeruleum est.|The sea is blue today.|mare:nom.sg hodie caeruleum=caeruleus:n.nom.sg est=esse:pres.3s",
+"Sexto mense, septimo, octavo navis erat in mari.|In the sixth, seventh and eighth months the ship was at sea.|sexto=sextus:m.abl.sg mense=mensis:abl.sg.t septimo=septimus:m.abl.sg octavo=octavus:m.abl.sg navis:nom.sg in@abl mari=mare:abl.sg erat=esse:impf.3s",
+"Mare hodie est caeruleum.|The sea is blue today.|mare:nom.sg hodie caeruleum=caeruleus:n.nom.sg est=esse:pres.3s",
 "Nautae vinum ex Hispania in Italiam portant.|Sailors carry wine from Spain to Italy.|nautae=nauta:nom.pl vinum:acc.sg ex hispania=Hispania:abl.sg in@acc italiam=Italia:acc.sg portant=porto:pres.3p",
-"Roma in Italia est; Athenae in Graecia sunt.|Rome is in Italy; Athens is in Greece.|roma=Roma:nom.sg in@abl italia=Italia:abl.sg est=esse:pres.3s athenae=Athenae:nom.pl graecia=Graecia:abl.sg sunt=esse:pres.3p",
+"Roma est in Italia; Athenae sunt in Graecia.|Rome is in Italy; Athens is in Greece.|roma=Roma:nom.sg in@abl italia=Italia:abl.sg est=esse:pres.3s athenae=Athenae:nom.pl graecia=Graecia:abl.sg sunt=esse:pres.3p",
 "Olim in Graecia rex crudelis habitabat.|Once upon a time a cruel king lived in Greece.|olim in@abl graecia=Graecia:abl.sg rex:nom.sg crudelis:m.nom.sg habitabat=habito:impf.3s",
 "Viator per viam longam ambulat.|The traveller walks along the long road.|viator:nom.sg per viam=via:acc.sg longam=longus:f.acc.sg ambulat=ambulo:pres.3s",
 "Viatores ab urbe ad oppidum contendunt.|The travellers hurry from the city to the town.|viatores=viator:nom.pl ab urbe=urbs:abl.sg ad oppidum:acc.sg contendunt=contendo:pres.3p",
@@ -3691,43 +3691,43 @@ const SENT_LINES=[
 "Viator leonem ferocem timet.|The traveller fears the fierce lion.|viator:nom.sg leonem=leo:acc.sg ferocem=ferox:m.acc.sg timet=timeo:pres.3s",
 "Viatores de monte lente descendunt.|The travellers come down slowly from the mountain.|viatores=viator:nom.pl de monte=mons:abl.sg lente descendunt=descendo:pres.3p",
 "Hieme viatores trans Alpes ire non possunt.|In winter travellers cannot go across the Alps.|hieme=hiems:abl.sg.t viatores=viator:nom.pl trans alpes=Alpes:acc.pl ire=eo:inf possunt=posse:pres.3p",
-"Nox erat; viatores in taberna cenabant.|It was night; the travellers were dining in the tavern.|nox:nom.sg erat=esse:impf.3s viatores=viator:nom.pl in@abl taberna:abl.sg cenabant=ceno:impf.3p",
+"Erat nox; viatores in taberna cenabant.|It was night; the travellers were dining in the tavern.|nox:nom.sg erat=esse:impf.3s viatores=viator:nom.pl in@abl taberna:abl.sg cenabant=ceno:impf.3p",
 "Primo die viatores fessi erant, secundo laeti.|On the first day the travellers were tired, on the second happy.|primo=primus:m.abl.sg die=dies:abl.sg.t viatores=viator:nom.pl fessi=fessus:m.nom.pl erant=esse:impf.3p secundo=secundus:m.abl.sg laeti=laetus:m.nom.pl",
 "Quinque horas ambulabamus; tandem ad urbem advenimus.|We were walking for five hours; at last we arrive at the city.|quinque horas=hora:acc.pl.d ambulabamus=ambulo:impf.1p tandem ad urbem=urbs:acc.sg advenimus=advenio:pres.1p",
-"Flumen latum est; itaque per pontem transimus.|The river is wide; and so we cross by the bridge.|flumen:nom.sg latum=latus:n.nom.sg est=esse:pres.3s itaque per pontem=pons:acc.sg transimus=transeo:pres.1p",
+"Flumen est latum; itaque per pontem transimus.|The river is wide; and so we cross by the bridge.|flumen:nom.sg latum=latus:n.nom.sg est=esse:pres.3s itaque per pontem=pons:acc.sg transimus=transeo:pres.1p",
 "Inter flumen et silvam villa stat.|Between the river and the forest stands a villa.|inter flumen:acc.sg et silvam=silva:acc.sg villa:nom.sg stat=sto:pres.3s",
 "Constituimus ad urbem redire.|We decide to return to the city.|constituimus=constituo:pres.1p ad urbem=urbs:acc.sg redire=redeo:inf",
 "Quando ad villam venies, et quo modo?|When will you come to the villa, and how?|quando ad villam=villa:acc.sg venies=venio:fut.2s quo_modo",
 "Pridie Nonas Februarias ad villam veniemus.|We will come to the villa on the day before the Nones of February.|pridie nonas=Nonae:acc.pl februarias=Februarius:f.acc.pl ad villam=villa:acc.sg veniemus=venio:fut.1p",
 "Decem dies in villa manebimus.|We will stay at the villa for ten days.|decem dies:acc.pl.d in@abl villa:abl.sg manebimus=maneo:fut.1p",
-"Heri in silva errabam; cras in oppido ero.|Yesterday I was wandering in the forest; tomorrow I will be in the town.|heri in@abl silva:abl.sg errabam=erro:impf.1s cras oppido=oppidum:abl.sg ero=esse:fut.1s",
+"Heri in silva errabam; cras ero in oppido.|Yesterday I was wandering in the forest; tomorrow I will be in the town.|heri in@abl silva:abl.sg errabam=erro:impf.1s cras oppido=oppidum:abl.sg ero=esse:fut.1s",
 "In campo agricolae frumentum colunt.|In the plain the farmers grow wheat.|in@abl campo=campus:abl.sg agricolae=agricola:nom.pl frumentum:acc.sg colunt=colo:pres.3p",
 "Colonus in agro laborat dum filius dormit.|The farmer works in the field while his son sleeps.|colonus:nom.sg in@abl agro=ager:abl.sg laborat=laboro:pres.3s dum filius:nom.sg dormit=dormio:pres.3s",
 "Equi in campo viridi stant.|The horses stand in the green plain.|equi=equus:nom.pl in@abl campo=campus:abl.sg viridi=viridis:m.abl.sg stant=sto:pres.3p",
 "Octo equi et novem canes in agro currunt.|Eight horses and nine dogs are running in the field.|octo equi=equus:nom.pl et novem canes=canis:nom.pl in@abl agro=ager:abl.sg currunt=curro:pres.3p",
-"Flores flavi et purpurei in horto sunt.|There are yellow and purple flowers in the garden.|flores=flos:nom.pl flavi=flavus:m.nom.pl et purpurei=purpureus:m.nom.pl in@abl horto=hortus:abl.sg sunt=esse:pres.3p",
-"Arbores in colle altae sunt.|The trees on the hill are tall.|arbores=arbor:nom.pl in@abl colle=collis:abl.sg altae=altus:f.nom.pl sunt=esse:pres.3p",
+"Flores flavi et purpurei sunt in horto.|There are yellow and purple flowers in the garden.|flores=flos:nom.pl flavi=flavus:m.nom.pl et purpurei=purpureus:m.nom.pl in@abl horto=hortus:abl.sg sunt=esse:pres.3p",
+"Arbores in colle sunt altae.|The trees on the hill are tall.|arbores=arbor:nom.pl in@abl colle=collis:abl.sg altae=altus:f.nom.pl sunt=esse:pres.3p",
 "Leo ingens e silva subito venit.|Suddenly a huge lion comes out of the forest.|leo:nom.sg ingens:m.nom.sg e=ex silva:abl.sg subito venit=venio:pres.3s",
 "Quantus est hic leo? Tantum leonem numquam videbo.|How big is this lion? I will never see so big a lion.|quantus:m.nom.sg est=esse:pres.3s hic=hic_haec_hoc:m.nom.sg leo:nom.sg tantum=tantus:m.acc.sg leonem=leo:acc.sg numquam videbo=video:fut.1s",
-"Ver pulchrum est; flores in hortis sunt.|Spring is beautiful; there are flowers in the gardens.|ver:nom.sg pulchrum=pulcher:n.nom.sg est=esse:pres.3s flores=flos:nom.pl in@abl hortis=hortus:abl.pl sunt=esse:pres.3p",
+"Ver est pulchrum; flores sunt in hortis.|Spring is beautiful; there are flowers in the gardens.|ver:nom.sg pulchrum=pulcher:n.nom.sg est=esse:pres.3s flores=flos:nom.pl in@abl hortis=hortus:abl.pl sunt=esse:pres.3p",
 "Aestate pueri in mari ludunt.|In summer the boys play in the sea.|aestate=aestas:abl.sg.t pueri=puer:nom.pl in@abl mari=mare:abl.sg ludunt=ludo:pres.3p",
 "Autumno agricolae diu laborant.|In autumn the farmers work for a long time.|autumno=autumnus:abl.sg.t agricolae=agricola:nom.pl diu laborant=laboro:pres.3p",
-"Mense Aprili et mense Maio ver est.|In April and May it is spring.|mense=mensis:abl.sg.t aprili=Aprilis:m.abl.sg maio=Maius:m.abl.sg ver:nom.sg est=esse:pres.3s",
-"Mensibus Iunio, Iulio, Augusto aestas est.|In June, July and August it is summer.|mensibus=mensis:abl.pl.t iunio=Iunius:m.abl.sg iulio=Iulius:m.abl.sg augusto=Augustus:m.abl.sg aestas:nom.sg est=esse:pres.3s",
-"Mense Octobri et mense Novembri autumnus est; mense Decembri hiems venit.|In October and November it is autumn; in December winter comes.|mense=mensis:abl.sg.t octobri=October:m.abl.sg novembri=November:m.abl.sg autumnus:nom.sg est=esse:pres.3s decembri=December:m.abl.sg hiems:nom.sg venit=venio:pres.3s",
-"Hodie Kalendae Ianuariae sunt.|Today is the Kalends (1st) of January.|hodie kalendae=Kalendae:nom.pl ianuariae=Ianuarius:f.nom.pl sunt=esse:pres.3p",
+"Mense Aprili et mense Maio est ver.|In April and May it is spring.|mense=mensis:abl.sg.t aprili=Aprilis:m.abl.sg maio=Maius:m.abl.sg ver:nom.sg est=esse:pres.3s",
+"Mensibus Iunio, Iulio, Augusto est aestas.|In June, July and August it is summer.|mensibus=mensis:abl.pl.t iunio=Iunius:m.abl.sg iulio=Iulius:m.abl.sg augusto=Augustus:m.abl.sg aestas:nom.sg est=esse:pres.3s",
+"Mense Octobri et mense Novembri est autumnus; mense Decembri hiems venit.|In October and November it is autumn; in December winter comes.|mense=mensis:abl.sg.t octobri=October:m.abl.sg novembri=November:m.abl.sg autumnus:nom.sg est=esse:pres.3s decembri=December:m.abl.sg hiems:nom.sg venit=venio:pres.3s",
+"Hodie sunt Kalendae Ianuariae.|Today is the Kalends (1st) of January.|hodie kalendae=Kalendae:nom.pl ianuariae=Ianuarius:f.nom.pl sunt=esse:pres.3p",
 "Saeculum centum annos habet.|A century has a hundred years.|saeculum:nom.sg centum annos=annus:acc.pl habet=habeo:pres.3s",
 "Meridie servi sub arboribus iacent.|At midday the slaves lie under the trees.|meridie=meridies:abl.sg.t servi=servus:nom.pl sub arboribus=arbor:abl.pl iacent=iaceo:pres.3p",
-"Senex sub arbore dormit et somnus dulcis est.|The old man sleeps under the tree, and sleep is sweet.|senex:nom.sg sub arbore=arbor:abl.sg dormit=dormio:pres.3s et somnus:nom.sg dulcis:m.nom.sg est=esse:pres.3s",
-"Nocte nulla lux in via erat.|At night there was no light in the road.|nocte=nox:abl.sg.t nulla=nullus:f.nom.sg lux:nom.sg in@abl via:abl.sg erat=esse:impf.3s",
+"Senex sub arbore dormit et somnus est dulcis.|The old man sleeps under the tree, and sleep is sweet.|senex:nom.sg sub arbore=arbor:abl.sg dormit=dormio:pres.3s et somnus:nom.sg dulcis:m.nom.sg est=esse:pres.3s",
+"Nocte nulla lux erat in via.|At night there was no light in the road.|nocte=nox:abl.sg.t nulla=nullus:f.nom.sg lux:nom.sg in@abl via:abl.sg erat=esse:impf.3s",
 "Subito sonum ingentem audimus.|Suddenly we hear a huge sound.|subito sonum=sonus:acc.sg ingentem=ingens:m.acc.sg audimus=audio:pres.1p",
-"Nemo in via erat; nihil audiebam.|No one was in the road; I heard nothing.|nemo:nom.sg in@abl via:abl.sg erat=esse:impf.3s nihil audiebam=audio:impf.1s",
-"Hunc locum amo; nam pulcher et tacitus est.|I love this place; for it is beautiful and quiet.|hunc=hic_haec_hoc:m.acc.sg locum=locus:acc.sg amo:pres.1s nam pulcher:m.nom.sg et tacitus:m.nom.sg est=esse:pres.3s",
-"Terra patriae nostrae pulchra est.|The land of our homeland is beautiful.|terra:nom.sg patriae=patria:gen.sg nostrae=noster:f.gen.sg pulchra=pulcher:f.nom.sg est=esse:pres.3s",
+"Nemo erat in via; nihil audiebam.|No one was in the road; I heard nothing.|nemo:nom.sg in@abl via:abl.sg erat=esse:impf.3s nihil audiebam=audio:impf.1s",
+"Hunc locum amo; nam est pulcher et tacitus.|I love this place; for it is beautiful and quiet.|hunc=hic_haec_hoc:m.acc.sg locum=locus:acc.sg amo:pres.1s nam pulcher:m.nom.sg et tacitus:m.nom.sg est=esse:pres.3s",
+"Terra patriae nostrae est pulchra.|The land of our homeland is beautiful.|terra:nom.sg patriae=patria:gen.sg nostrae=noster:f.gen.sg pulchra=pulcher:f.nom.sg est=esse:pres.3s",
 "Amor patriae magnus est in animis civium.|Love of the homeland is great in the minds of the citizens.|amor:nom.sg patriae=patria:gen.sg magnus:m.nom.sg est=esse:pres.3s in@abl animis=animus:abl.pl civium=civis:gen.pl",
 "Olim homines in silvis vivebant.|Once upon a time people lived in the forests.|olim homines=homo:nom.pl in@abl silvis=silva:abl.pl vivebant=vivo:impf.3p",
-"Multum vinum in taberna est.|There is a lot of wine in the tavern.|multum=multus:n.nom.sg vinum:nom.sg in@abl taberna:abl.sg est=esse:pres.3s",
-"Ludi in urbe hodie sunt; omnes cives spectare volunt.|There are games in the city today; all the citizens want to watch.|ludi:nom.pl in@abl urbe=urbs:abl.sg hodie sunt=esse:pres.3p omnes=omnis:m.nom.pl cives=civis:nom.pl spectare=specto:inf volunt=volo:pres.3p",
+"Multum vinum est in taberna.|There is a lot of wine in the tavern.|multum=multus:n.nom.sg vinum:nom.sg in@abl taberna:abl.sg est=esse:pres.3s",
+"Hodie sunt ludi in urbe; omnes cives spectare volunt.|There are games in the city today; all the citizens want to watch.|ludi:nom.pl in@abl urbe=urbs:abl.sg hodie sunt=esse:pres.3p omnes=omnis:m.nom.pl cives=civis:nom.pl spectare=specto:inf volunt=volo:pres.3p",
 "Et senes et iuvenes ad ludos veniunt.|Both old men and young men come to the games.|et=et...et senes=senex:nom.pl iuvenes=iuvenis:nom.pl ad ludos=ludi:acc.pl veniunt=venio:pres.3p",
 "Etiam senex ad ludos venit.|Even the old man comes to the games.|etiam senex:nom.sg ad ludos=ludi:acc.pl venit=venio:pres.3s",
 "Aedificium novum in media urbe stat.|A new building stands in the middle of the city.|aedificium:nom.sg novum=novus:n.nom.sg in@abl media=medius:f.abl.sg urbe=urbs:abl.sg stat=sto:pres.3s",
@@ -3735,8 +3735,8 @@ const SENT_LINES=[
 "Servus cibum in taberna emit.|The slave buys food in the tavern.|servus:nom.sg cibum=cibus:acc.sg in@abl taberna:abl.sg emit=emo:pres.3s",
 "Pecuniam reddere debes!|You ought to give back the money!|pecuniam=pecunia:acc.sg reddere=reddo:inf debes=debeo:pres.2s",
 "Iuvenis aquam bibit, senex vinum.|The young man drinks water, the old man wine.|iuvenis:nom.sg aquam=aqua:acc.sg bibit=bibo:pres.3s senex:nom.sg vinum:acc.sg",
-"Vinum dulce est.|The wine is sweet.|vinum:nom.sg dulce=dulcis:n.nom.sg est=esse:pres.3s",
-"Ianuam claude, serve! Hiems est.|Close the door, slave! It is winter.|ianuam=ianua:acc.sg claude=claudo:imp.s serve=servus:voc.sg hiems:nom.sg est=esse:pres.3s",
+"Vinum est dulce.|The wine is sweet.|vinum:nom.sg dulce=dulcis:n.nom.sg est=esse:pres.3s",
+"Ianuam claude, serve! Est hiems.|Close the door, slave! It is winter.|ianuam=ianua:acc.sg claude=claudo:imp.s serve=servus:voc.sg hiems:nom.sg est=esse:pres.3s",
 "Servi villam intrant et cenam in mensa ponunt.|The slaves enter the villa and put the dinner on the table.|servi=servus:nom.pl villam=villa:acc.sg intrant=intro:pres.3p et cenam=cena:acc.sg in@abl mensa:abl.sg ponunt=pono:pres.3p",
 "Ante cenam pueri in horto ludunt.|Before dinner the boys play in the garden.|ante cenam=cena:acc.sg pueri=puer:nom.pl in@abl horto=hortus:abl.sg ludunt=ludo:pres.3p",
 "Interea servi cenam parabant.|Meanwhile the slaves were preparing dinner.|interea=interea/interim servi=servus:nom.pl cenam=cena:acc.sg parabant=paro:impf.3p",
@@ -3747,7 +3747,7 @@ const SENT_LINES=[
 "Ancilla in flumine togas lavat.|The slave girl washes the togas in the river.|ancilla:nom.sg in@abl flumine=flumen:abl.sg togas=toga:acc.pl lavat=lavo:pres.3s",
 "Dominus iratus servum malum punit.|The angry master punishes the bad slave.|dominus:nom.sg iratus:m.nom.sg servum=servus:acc.sg malum=malus:m.acc.sg punit=punio:pres.3s",
 "Dominus benignus servum bonum liberat.|The kind master frees the good slave.|dominus:nom.sg benignus:m.nom.sg servum=servus:acc.sg bonum=bonus:m.acc.sg liberat=libero:pres.3s",
-"Libertus nunc liber est.|The freedman is now free.|libertus:nom.sg nunc liber@adjectives:m.nom.sg est=esse:pres.3s",
+"Libertus nunc est liber.|The freedman is now free.|libertus:nom.sg nunc liber@adjectives:m.nom.sg est=esse:pres.3s",
 "Servus miser semper laborat et numquam ludit.|The miserable slave always works and never plays.|servus:nom.sg miser:m.nom.sg semper laborat=laboro:pres.3s et numquam ludit=ludo:pres.3s",
 "Unus vir duas feminas et tres pueros videt.|One man sees two women and three boys.|unus:m.nom.sg vir:nom.sg duas=duo:f.acc.pl feminas=femina:acc.pl et tres:m.acc.pl pueros=puer:acc.pl videt=video:pres.3s",
 "Puer saxum in flumen iacit.|The boy throws a rock into the river.|puer:nom.sg saxum:acc.sg in@acc flumen:acc.sg iacit=iacio:pres.3s",
@@ -3756,18 +3756,18 @@ const SENT_LINES=[
 "Iuvenis puellae in aqua succurrit.|The young man helps the girl in the water.|iuvenis:nom.sg puellae=puella:dat.sg.dv in@abl aqua:abl.sg succurrit=succurro:pres.3s",
 "Hercules saxum ingens tollit.|Hercules lifts a huge rock.|saxum:acc.sg ingens:n.acc.sg tollit=tollo:pres.3s",
 "Saxum grave est sed scutum leve.|The rock is heavy but the shield is light.|saxum:nom.sg grave=gravis:n.nom.sg est=esse:pres.3s sed scutum:nom.sg leve=levis:n.nom.sg",
-"Haec via brevis et facilis est; illa longa et difficilis.|This road is short and easy; that one is long and difficult.|haec=hic_haec_hoc:f.nom.sg via:nom.sg brevis:f.nom.sg et facilis:f.nom.sg est=esse:pres.3s illa=ille_illa_illud:f.nom.sg longa=longus:f.nom.sg difficilis:f.nom.sg",
+"Haec via est brevis et facilis; illa longa et difficilis.|This road is short and easy; that one is long and difficult.|haec=hic_haec_hoc:f.nom.sg via:nom.sg brevis:f.nom.sg et facilis:f.nom.sg est=esse:pres.3s illa=ille_illa_illud:f.nom.sg longa=longus:f.nom.sg difficilis:f.nom.sg",
 "Fama de proelio per urbem currit.|A rumour about the battle runs through the city.|fama:nom.sg de proelio=proelium:abl.sg per urbem=urbs:acc.sg currit=curro:pres.3s",
 "Ego quoque cum amicis ad ludos ibo.|I too will go to the games with my friends.|ego:1.nom.sg quoque cum amicis=amicus:abl.pl ad ludos=ludi:acc.pl ibo=eo:fut.1s",
 "Graeci multos deos colebant.|The Greeks used to worship many gods.|graeci=Graecus:nom.pl multos=multi:m.acc.pl deos=deus:acc.pl colebant=colo:impf.3p",
 "Romani in templis statuas deorum ponunt.|The Romans place statues of the gods in the temples.|romani=Romanus@nouns:nom.pl in@abl templis=templum:abl.pl statuas=statua:acc.pl deorum=deus:gen.pl ponunt=pono:pres.3p",
 "Femina deam orat et dona fert.|The woman begs the goddess and brings gifts.|femina:nom.sg deam=dea:acc.sg orat=oro:pres.3s et dona=donum:acc.pl fert=fero:pres.3s",
-"Hoc templum sacrum est.|This temple is sacred.|hoc=hic_haec_hoc:n.nom.sg templum:nom.sg sacrum=sacer:n.nom.sg est=esse:pres.3s",
-"Templum ipsum magnum non est.|The temple itself is not big.|templum:nom.sg ipsum:n.nom.sg magnum=magnus:n.nom.sg est=esse:pres.3s",
+"Hoc templum est sacrum.|This temple is sacred.|hoc=hic_haec_hoc:n.nom.sg templum:nom.sg sacrum=sacer:n.nom.sg est=esse:pres.3s",
+"Templum ipsum non est magnum.|The temple itself is not big.|templum:nom.sg ipsum:n.nom.sg magnum=magnus:n.nom.sg est=esse:pres.3s",
 "In silva est templum; ibi deam colimus.|In the forest there is a temple; there we worship the goddess.|in@abl silva:abl.sg est=esse:pres.3s templum:nom.sg ibi deam=dea:acc.sg colimus=colo:pres.1p",
 "Poeta carmen de deis divinis canit.|The poet sings a song about the divine gods.|poeta:nom.sg carmen:acc.sg de deis=deus:abl.pl divinis=divinus:m.abl.pl canit=cano:pres.3s",
 "Hic poeta notus est, ille ignotus.|This poet is famous, that one unknown.|hic=hic_haec_hoc:m.nom.sg poeta:nom.sg notus:m.nom.sg est=esse:pres.3s ille=ille_illa_illud:m.nom.sg ignotus:m.nom.sg",
-"Forma statuae pulchra est.|The shape of the statue is beautiful.|forma:nom.sg statuae=statua:gen.sg pulchra=pulcher:f.nom.sg est=esse:pres.3s",
+"Forma statuae est pulchra.|The shape of the statue is beautiful.|forma:nom.sg statuae=statua:gen.sg pulchra=pulcher:f.nom.sg est=esse:pres.3s",
 "Puella laeta est quod donum accipit.|The girl is happy because she is receiving a gift.|puella:nom.sg laeta=laetus:f.nom.sg est=esse:pres.3s quod donum:acc.sg accipit=accipio:pres.3s",
 "Cur tristis es, amice? Quid times?|Why are you sad, friend? What are you afraid of?|cur tristis:m.nom.sg es=esse:pres.2s amice=amicus:voc.sg quid times=timeo:pres.2s",
 "Mater anxia et sollicita filium exspectat.|The anxious and worried mother waits for her son.|mater:nom.sg anxia=anxius:f.nom.sg et sollicita=sollicitus:f.nom.sg filium=filius:acc.sg exspectat=exspecto:pres.3s",
@@ -3870,6 +3870,9 @@ function examplesHtml(w){const list=sentencesFor(w);exCurrent=list;if(!list.leng
   document.addEventListener('focusout',e=>{if(e.target.classList&&e.target.classList.contains('ex-w'))hide();});
   document.addEventListener('click',e=>{const el=e.target.closest&&e.target.closest('.ex-w');if(el)show(el);else hide();},true);
   document.addEventListener('scroll',hide,true);})();
+// "Adverbs · adverbs" → just "Adverbs" when the group has the same name as its category.
+function sameLabel(a,b){return String(a||'').toLowerCase()===String(b||'').toLowerCase();}
+function catSubLabel(w){const l=DATA[w.catKey].label;return sameLabel(l,w.subKey)?l:l+' · '+w.subKey;}
 function showWordForms(w){
   const body=document.getElementById('formsBody');if(!body)return;
   w=(w.catKey&&DATA[w.catKey]&&DATA[w.catKey].sub[w.subKey])?w:(allWordsFlat().find(x=>x.lat===w.lat)||w);
@@ -3884,7 +3887,7 @@ function showWordForms(w){
   if(!tbl)tbl='<p class="forms-note">This word doesn’t change its ending, so there are no forms to learn'+(w.catKey==='prepositions'?' — just remember the case it takes ('+esc(w.subKey)+').':'.')+'</p>';
   const st=isStarred(w);
   body.innerHTML='<div class="forms-head"><div><div class="forms-lat">'+esc(fullLat(w)).replace(/\//g,' / ')+'</div><div class="forms-eng">'+esc(displayEng(w))+'</div></div><button class="row-star big'+(st?' on':'')+'" id="formsStar" title="Mark as hard" onclick="toggleStar(window._formsW);this.classList.toggle(\'on\',isStarred(window._formsW));this.textContent=isStarred(window._formsW)?\'★\':\'☆\'">'+(st?'★':'☆')+'</button></div>'
-    +'<div class="forms-tags"><span class="tag decl">'+esc(DATA[w.catKey]?DATA[w.catKey].label:w.catKey)+'</span><span class="tag">'+esc(w.subKey||'')+'</span>'+(w.gender?'<span class="tag gend">'+(w.gender==='f'?'feminine':w.gender==='m'?'masculine':'neuter')+'</span>':'')+boxes.map(b=>'<span class="tag" style="color:var(--gold)">📅 '+esc(b)+'</span>').join('')+'</div>'+tbl+examplesHtml(w);
+    +'<div class="forms-tags"><span class="tag decl">'+esc(DATA[w.catKey]?DATA[w.catKey].label:w.catKey)+'</span>'+(w.subKey&&!sameLabel(DATA[w.catKey]&&DATA[w.catKey].label,w.subKey)?'<span class="tag">'+esc(w.subKey)+'</span>':'')+(w.gender?'<span class="tag gend">'+(w.gender==='f'?'feminine':w.gender==='m'?'masculine':'neuter')+'</span>':'')+boxes.map(b=>'<span class="tag" style="color:var(--gold)">📅 '+esc(b)+'</span>').join('')+'</div>'+tbl+examplesHtml(w);
   window._formsW=w;document.getElementById('formsOverlay').style.display='flex';}
 function hideForms(){document.getElementById('formsOverlay').style.display='none';}
 function openQuizForms(){const w=currentCardWord();if(!w)return;if(!answered&&!(mode==='le'&&!isDrill)){toast('Answer first, then check the forms.');return;}showWordForms(w);}
