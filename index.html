@@ -3506,7 +3506,7 @@ function lbMyPoints(){if(!lbMe)return 0;const me=lbPlayers[lbMe.pid],server=(me&
   if(lbInFlight&&server<lbInFlightBase+lbInFlight)return lbInFlightBase+lbInFlight+lbPending;return server+lbPending;}
 function lbUpdatePoints(bump){const pill=document.getElementById('pointsPill');const pts=lbMyPoints().toLocaleString();
   if(pill){pill.style.display=lbMe?'':'none';pill.textContent='⭐ '+pts;if(bump){pill.classList.remove('bump');void pill.offsetWidth;pill.classList.add('bump');}}
-  const sp=document.getElementById('lbMyPts');if(sp)sp.textContent=pts;}
+  const sp=document.getElementById('lbMyPts');if(sp)sp.textContent=pts;updChatInput();}
 // Anti point-farming: a short quiz (5 questions or fewer) repeated a 3rd time in a day earns no more points.
 const ATTEMPTS_KEY='latin_quiz_attempts';let quizNoPoints=false,ptsNoteTimer=null;
 function quizSig(){const ks=isDrill?drillQs.map(q=>wKey(q.word)+'>'+q.key):quizWords.map(wKey);return [quizType,mode,isMatch?'match':inputMode,...ks.sort()].join('|');}
@@ -3553,8 +3553,11 @@ function renderLbProfile(msg,isErr){document.querySelectorAll('.lb-profile').for
   updChatInput();}
 // Chat input state: not joined, blocked by the admin (mute/{uid}), or normal.
 let chatMuted=false;
-function updChatInput(){const ci=document.getElementById('chatInput'),cs=document.getElementById('chatSend');if(!ci)return;
-  ci.disabled=cs.disabled=!lbMe||chatMuted;ci.placeholder=!lbMe?'Join above to chat':chatMuted?'The admin has blocked you from sending messages':'Message everyone…';}
+// New accounts need CHAT_MIN_PTS points before they can chat (stops spam from throwaway accounts; the database rules check it too).
+const CHAT_MIN_PTS=50;
+function updChatInput(){const ci=document.getElementById('chatInput'),cs=document.getElementById('chatSend');if(!ci)return;const pts=lbMyPoints(),short=!!lbMe&&pts<CHAT_MIN_PTS;
+  ci.disabled=cs.disabled=!lbMe||chatMuted||short;
+  ci.placeholder=!lbMe?'Join above to chat':chatMuted?'The admin has blocked you from sending messages':short?'Earn '+CHAT_MIN_PTS+' ⭐ to unlock chat ('+(CHAT_MIN_PTS-pts)+' to go)':'Message everyone…';}
 function setChatMuted(m){m=!!m;if(m===chatMuted)return;chatMuted=m;updChatInput();}
 async function lbSaveName(raw){const name=lbCleanName(raw);const err=lbNameError(name);if(err){renderLbProfile(err,true);return;}
   let pid;const prev=lbMe?lbMe.name:null;   // remember it now: the live stream may update lbMe.name while we wait
@@ -3772,6 +3775,8 @@ function renderChat(){const list=document.getElementById('chatList');if(!list||!
   if(atBottom||list.dataset.first!=='1'){list.scrollTop=list.scrollHeight;list.dataset.first='1';}}
 async function sendChat(){const inp=document.getElementById('chatInput'),err=document.getElementById('chatErr');const text=inp.value.replace(/\s+/g,' ').trim();err.textContent='';
   if(!lbMe||!text)return;if(Date.now()-chatLastSend<3000){err.textContent='Slow down a little!';return;}
+  if(lbMyPoints()<CHAT_MIN_PTS){err.textContent='Earn '+CHAT_MIN_PTS+' ⭐ to unlock chat.';return;}
+  if(((lbPlayers[lbMe.pid]||{}).total||0)<CHAT_MIN_PTS)await lbFlush();   // make sure the server has the points first
   chatLastSend=Date.now();inp.value='';document.getElementById('chatList').dataset.first='';
   const msg={pid:lbMe.pid,text:text.slice(0,300),t:{'.sv':'timestamp'}};if(chatReplyTo&&chatObj[chatReplyTo])msg.re=chatReplyTo;
   const was=chatReplyTo;setChatReply(null);

@@ -51,7 +51,7 @@
     "chat": {
       ".read": "auth != null",
       "$msg": {
-        ".write": "auth != null && ((!data.exists() && newData.child('pid').val() === auth.uid && root.child('players').child(auth.uid).exists() && root.child('mute').child(auth.uid).val() !== true) || (!newData.exists() && (data.child('pid').val() === auth.uid || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2'))) || (auth != null && auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2' && data.exists() && newData.exists())",
+        ".write": "auth != null && ((!data.exists() && newData.child('pid').val() === auth.uid && root.child('players').child(auth.uid).child('total').val() >= 50 && root.child('mute').child(auth.uid).val() !== true) || (!newData.exists() && (data.child('pid').val() === auth.uid || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2'))) || (auth != null && auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2' && data.exists() && newData.exists())",
         ".validate": "newData.hasChildren(['pid', 'text', 't'])",
         "pid": {
           ".validate": "newData.isString()"
