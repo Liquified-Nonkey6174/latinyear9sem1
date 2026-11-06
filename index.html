@@ -1886,7 +1886,7 @@ body.calm .nfx-type .tw-caret{display:none}
       <div class="guide-section"><h3>Seeing a word's forms</h3><p>Click any word in the drawer to open its forms: a case table for nouns and adjectives, a present / imperfect / future table plus imperatives for verbs, and the full paradigm for pronouns. During a quiz the <strong>Forms</strong> button on the card does the same — after you've answered (or any time in Latin → English). Press Escape to close.</p></div>
       <div class="guide-section"><h3>Speed mode</h3><p>Toggle speed mode in the start bar. A countdown timer appears — if it hits zero, your current typed text is auto-submitted (correct if right, wrong if wrong). Empty input counts as a skip. For sentences, the timer goes up to 60 seconds.</p></div>
       <div class="guide-section"><h3>Verb tenses</h3><p>In verb conjugation mode, checkboxes let you choose any mix of <strong>Present</strong> (<em>porto, portas, portat</em>), <strong>Imperfect</strong> (<em>portabam, portabas</em>), <strong>Future</strong> (<em>portabo, portabis</em>) and <strong>Imperative</strong> (<em>porta, portate</em>). The irregular verbs <em>sum</em>, <em>eo</em>, <em>volo</em>, <em>nolo</em>, <em>fero</em> and others are covered.</p></div>
-      <div class="guide-section"><h3>Sentences</h3><p>Sentence mode builds a random sentence for you to translate. Tick the tenses you want: <strong>Present</strong> (<em>miles gladium portat</em>), <strong>Past</strong> (<em>portabat</em> — “was carrying”), <strong>Future</strong> (<em>portabit</em> — “will carry”) and <strong>Commands</strong> (<em>porta gladium!</em>; plural commands add “all of you”). The difficulty levels move from simple sentences to prepositions, adverbs and time phrases, then clauses joined by quod/sed, relative clauses, and finally three- and four-clause compounds. Hover or tap a word in the sentence for its meaning.</p></div>
+      <div class="guide-section"><h3>Sentences</h3><p>Sentence mode builds a random sentence for you to translate. Subjects can be <strong>I, you, we, you (pl.)</strong> (shown only by the verb ending, so <em>ego/tu/nos/vos</em> are optional), or nouns in the singular or plural; sentences also use the genitive (<em>filius regis</em>), dative (<em>pueris dona damus</em>) and vocative (<em>Servi, portate cibum!</em>). “You” on its own means one person; “you (pl.)” means more than one. Tick the tenses you want: <strong>Present</strong> (<em>miles gladium portat</em>), <strong>Past</strong> (<em>portabat</em> — “was carrying”), <strong>Future</strong> (<em>portabit</em> — “will carry”) and <strong>Commands</strong> (<em>porta gladium!</em>; plural commands add “all of you”). The difficulty levels move from simple sentences to prepositions, adverbs and time phrases, then clauses joined by quod/sed, relative clauses, and finally three- and four-clause compounds. Hover or tap a word in the sentence for its meaning.</p></div>
       <div class="guide-section"><h3>Sentences — eius vs suus</h3><p>Sentences distinguish possessives: <strong>[own]</strong> means reflexive (<em>suus/sua/suum</em> — refers back to the subject). <strong>[someone else's]</strong> means <em>eius</em> (indeclinable — refers to a different person).</p></div>
       <div class="guide-section"><h3>Daily practice</h3><p>Date-stamped boxes at the bottom of the Practice tab contain curated word sets for specific lessons, grouped by month. Tick a month or individual date collections, expand one to choose word types, and press “Practice these” for a focused quiz. Every daily word is also in the main categories.</p></div>
       <div class="guide-section"><h3>Word packs</h3><p>Under Daily Practice there is a <strong>Word Packs</strong> box for themed word sets (not tied to a date). Tick one or more packs and press Practice, or tick categories too and press Start to practise them all together. Current packs: Colours, Time &amp; calendar.</p></div>
@@ -2608,6 +2608,85 @@ function sInsanePrep(){const s1=sSVOPrep(),s2=sSVOPrep();return{latin:s1.latin.s
 function sInsaneAdjConj(){const s1=sSVOPrep();const s2=pAnim(),a=pPredAdj();const sN=declineN(s2,'nominative','singular'),aF=declineA(a,s2.gender,'nominative','singular');const c=rnd(['Itaque','Sed','Tamen']),cE={'Itaque':'and so','Sed':'but','Tamen':'however'};return{latin:s1.latin+' '+c+', '+sN+' '+aF+' est.',english:s1.english+' '+cE[c]+', the '+eN(s2)+' is '+a.eng[0]+'.',wordMap:{...s1.wordMap,[c.toLowerCase()]:cE[c],[sN.toLowerCase()]:s2.eng[0],[aF.toLowerCase()]:a.eng[0],est:'is'}};}
 function sInsaneDatPrep(){const s1=sSVOPrep();const DATV=wordsOf('verbs').filter(w=>['persuadeo','resisto','credo','occurro','invideo','impero','placeo','succurro'].includes(w.lat));const v=rnd(DATV),s2=pAnim(),obj=pAnim([s2.lat]);const sN=declineN(s2,'nominative','singular'),objD=declineN(obj,'dative','singular'),vF=conjV(v,'3rd','singular');return{latin:s1.latin.slice(0,-1)+', itaque '+sN+' '+objD+' '+vF+'.',english:s1.english.slice(0,-1)+', and so the '+eN(s2)+' '+eV3(v)+' the '+eN(obj)+'.',wordMap:{...s1.wordMap,itaque:'and so',[sN.toLowerCase()]:s2.eng[0],[objD.toLowerCase()]:obj.eng[0],[vF.toLowerCase()]:v.eng[0]}};}
 
+// ── VARIED SENTENCES ───────────────────────────────────────────────────────────
+// Different persons (I / you / we / you pl.), plural subjects and objects, genitive, dative and vocative,
+// in present, past (imperfect) and future. About half of all sentences come from here.
+const MASS_N=new Set(['aqua','cibus','frumentum','vinum','pecunia','auxilium']);
+const PL_ONLY_N=new Set(['arma','castra','moenia']);
+const ENG_PL_IRR={'man':'men','woman':'women','old man':'old men','young man':'young men','freedman':'freedmen','horseman':'horsemen','child':'children'};
+const VAR_SKIP_V=new Set(['volo','nolo','esto','este','esse','adesse','abesse','posse']);
+function ePl(w){const e=w.eng[0].replace(/\s*\([^)]*\)/g,'').trim();if(PL_ONLY_N.has(w.lat))return e;if(ENG_PL_IRR[e])return ENG_PL_IRR[e];
+  const ps=e.split(' '),l=ps.pop();let pl;if(/(s|sh|ch|x|z)$/.test(l))pl=l+'es';else if(/[^aeiou]y$/.test(l))pl=l.slice(0,-1)+'ies';else pl=l+'s';return [...ps,pl].join(' ');}
+// a noun in a case and number → {lat, eng}
+function vNP(w,cas,num){if(MASS_N.has(w.lat))num='singular';if(PL_ONLY_N.has(w.lat))num='plural';const f=getNounForms(w)||{};const lat=f[cas+' '+num]||f[cas+' singular']||f[cas+' plural']||w.lat;
+  return {lat,eng:num==='plural'?ePl(w):eN(w),num,w};}
+const rNum=()=>Math.random()<.5?'singular':'plural';
+const lc1=t=>/^I\b/.test(t)?t:t.charAt(0).toLowerCase()+t.slice(1);   // join clauses without lower-casing "I"
+// adjectives that make sense for people / for things
+const PERSON_ADJ=['bonus','laetus','iratus','fessus','magnus','parvus','malus','benignus','anxius','sollicitus','miser','liber','pulcher','Romanus','territus','carus','paratus','dignus','stultus','notus','ignotus','tacitus','fortis','incolumis','crudelis','tristis','felix','infelix','ferox','insignis','ingens'];
+const THING_ADJ=['ligneus','ruber','albus','niger','flavus','caeruleus','purpureus','magnus','parvus','latus','longus','novus','pulcher','sacer','Romanus','altus','carus','gravis','levis','brevis','ingens','notus','bonus','malus'];
+function vAdjFor(n){const list=ANIMATE.includes(n.lat)?PERSON_ADJ:THING_ADJ;return rnd(wordsOf('adjectives').filter(a=>list.includes(a.lat)));}
+const PRON_SUBJ={'1st singular':['ego','I'],'2nd singular':['tu','you'],'1st plural':['nos','we'],'2nd plural':['vos','you (pl.)']};
+// Subject: a noun (singular or plural) or a person shown only by the verb ending (ego/tu/nos/vos left out, as in Latin).
+function vSubj(ex=[],nounOnly){if(!nounOnly&&Math.random()<.35){const k=rnd(Object.keys(PRON_SUBJ));const [person,num]=k.split(' ');return {person,num,lat:'',eng:PRON_SUBJ[k][1],pron:PRON_SUBJ[k][0]};}
+  const w=pAnim(ex),num=rNum(),np=vNP(w,'nominative',num);return {person:'3rd',num,lat:np.lat,eng:'the '+np.eng,w,gender:w.gender||'m'};}
+function vVerbLat(v,t,s){const f=t==='fut'?getVerbFut(v):t==='past'?getVerbImpf(v):getVerbConj(v);return f&&f[s.person+' '+s.num];}
+function vVerbEng(v,t,s){const sg3=s.person==='3rd'&&s.num==='singular',iSg=s.person==='1st'&&s.num==='singular';
+  if(t==='fut')return eFut(v);
+  if(t==='past'){const p=ePast(v);return (sg3||iSg)?p:p.replace(/^was\b/,'were');}
+  if(sg3)return eV3(v);let b=v.eng[0].replace(/\s*\([^)]*\)/g,'').replace(/^to /,'').trim();
+  if(b==='be'||b.startsWith('be '))b=(iSg?'am':'are')+b.slice(2);return b;}
+function vDone(lat,eng,map,extra){const latin=cap(lat.replace(/\s+/g,' ').trim()),english=cap(eng.replace(/\s+/g,' ').trim());const r={latin,english,wordMap:Object.fromEntries(Object.entries(map).filter(([k,v])=>k&&v))};if(extra&&extra.pron)r.altLatin=[extra.pron+' '+latin.charAt(0).toLowerCase()+latin.slice(1)];return r;}
+function vTry(fn){for(let i=0;i<12;i++){try{const r=fn();if(r)return r;}catch(e){}}return sSVO();}
+function vEx(w){return w?[w.lat,...latSynonyms(w).map(x=>x.lat)]:[];}
+function vTrans(ex){let v;do{v=pTrans(ex);}while(VAR_SKIP_V.has(v.lat));return v;}
+function vIntrans(){let v;do{v=pIntrans();}while(VAR_SKIP_V.has(v.lat));return v;}
+// "The girls carry the spears." / "We were praising the king." / "You (pl.) will see the slaves."
+function varSVO(t){return vTry(()=>{const s=vSubj();const v=vTrans();const o=pickObjForVerb(v,vEx(s.w));const on=vNP(o,'accusative',rNum());const vf=vVerbLat(v,t,s);if(!vf)return null;
+  return vDone(s.lat+' '+on.lat+' '+vf+'.',s.eng+' '+vVerbEng(v,t,s)+' the '+on.eng+'.',{[s.lat.toLowerCase()]:s.w?s.w.eng[0]:'',[on.lat.toLowerCase()]:o.eng[0],[vf.toLowerCase()]:v.eng[0]},s);});}
+// "The sailors were walking in the forest."
+function varIntransPlace(t){return vTry(()=>{const s=vSubj();const v=vIntrans(),pl=pPlace();const pa=vNP(pl,'ablative','singular');const vf=vVerbLat(v,t,s);if(!vf)return null;
+  return vDone(s.lat+' in '+pa.lat+' '+vf+'.',s.eng+' '+vVerbEng(v,t,s)+' '+locIn(pl)+' the '+pa.eng+'.',{[s.lat.toLowerCase()]:s.w?s.w.eng[0]:'',in:'in',[pa.lat.toLowerCase()]:pl.eng[0],[vf.toLowerCase()]:v.eng[0]},s);});}
+// genitive: "The son of the farmers praises the slaves."
+function varGen(t){return vTry(()=>{const s=vSubj([],true);const g=pAnim(vEx(s.w));const gn=vNP(g,'genitive',rNum());const v=vTrans();const o=pickObjForVerb(v,[...vEx(s.w),...vEx(g)]);const on=vNP(o,'accusative',rNum());const vf=vVerbLat(v,t,s);if(!vf)return null;
+  return vDone(s.lat+' '+gn.lat+' '+on.lat+' '+vf+'.',s.eng+' of the '+gn.eng+' '+vVerbEng(v,t,s)+' the '+on.eng+'.',{[s.lat.toLowerCase()]:s.w.eng[0],[gn.lat.toLowerCase()]:'of the '+g.eng[0],[on.lat.toLowerCase()]:o.eng[0],[vf.toLowerCase()]:v.eng[0]},s);});}
+// dative: "We give the gifts to the girls."
+function varDat(t){return vTry(()=>{const s=vSubj();const v=pGiveVerb();const ex=vEx(s.w);const d=pickObjForVerb(v,ex),io=pAnim(ex);if(ANIMATE.includes(d.lat))return null;const dn=vNP(d,'accusative',rNum()),iod=vNP(io,'dative',rNum());const vf=vVerbLat(v,t,s);if(!vf)return null;
+  return vDone(s.lat+' '+iod.lat+' '+dn.lat+' '+vf+'.',s.eng+' '+vVerbEng(v,t,s)+' the '+dn.eng+' to the '+iod.eng+'.',{[s.lat.toLowerCase()]:s.w?s.w.eng[0]:'',[iod.lat.toLowerCase()]:'to the '+io.eng[0],[dn.lat.toLowerCase()]:d.eng[0],[vf.toLowerCase()]:v.eng[0]},s);});}
+// predicate adjective with a plural subject: "The soldiers were brave."
+const EST={pres:{singular:'est',plural:'sunt'},past:{singular:'erat',plural:'erant'},fut:{singular:'erit',plural:'erunt'}};
+const EST_E={pres:{singular:'is',plural:'are'},past:{singular:'was',plural:'were'},fut:{singular:'will be',plural:'will be'}};
+function varPredAdj(t){return vTry(()=>{const s=vSubj([],true);const a=vAdjFor(s.w);const af=declineA(a,s.gender,'nominative',s.num);if(!af||af===a.lat&&s.num==='plural')return null;const e=EST[t][s.num];
+  return vDone(s.lat+' '+af+' '+e+'.',s.eng+' '+EST_E[t][s.num]+' '+a.eng[0]+'.',{[s.lat.toLowerCase()]:s.w.eng[0],[af.toLowerCase()]:a.eng[0],[e]:EST_E[t][s.num]},null);});}
+// adjective + object: "You (pl.) were praising the brave soldiers."
+function varAdjObj(t){return vTry(()=>{const s=vSubj();const v=vTrans();const o=pickObjForVerb(v,vEx(s.w));if(MASS_N.has(o.lat)||PL_ONLY_N.has(o.lat))return null;const a=vAdjFor(o);const num=rNum();const on=vNP(o,'accusative',num);const af=declineA(a,o.gender||'m','accusative',num);const vf=vVerbLat(v,t,s);if(!vf||!af)return null;
+  return vDone(s.lat+' '+af+' '+on.lat+' '+vf+'.',s.eng+' '+vVerbEng(v,t,s)+' the '+a.eng[0]+' '+on.eng+'.',{[s.lat.toLowerCase()]:s.w?s.w.eng[0]:'',[af.toLowerCase()]:a.eng[0],[on.lat.toLowerCase()]:o.eng[0],[vf.toLowerCase()]:v.eng[0]},s);});}
+// two varied clauses: "We praise the soldiers because they defend the city."
+function varTwo(t,cj){return vTry(()=>{const a=varSVO(t),b=rnd([varSVO,varIntransPlace,varDat])(t);const c=cj||rnd([['quod','because'],['sed','but'],['et','and']]);
+  const r={latin:a.latin.slice(0,-1)+', '+c[0]+' '+b.latin.charAt(0).toLowerCase()+b.latin.slice(1),english:a.english.slice(0,-1)+', '+c[1]+' '+lc1(b.english),wordMap:{...a.wordMap,...b.wordMap,[c[0]]:c[1]}};
+  const alts=[];if(a.altLatin)alts.push(a.altLatin[0].slice(0,-1)+', '+c[0]+' '+b.latin.charAt(0).toLowerCase()+b.latin.slice(1));if(b.altLatin)alts.push(a.latin.slice(0,-1)+', '+c[0]+' '+b.altLatin[0]);if(alts.length)r.altLatin=alts;return r;});}
+function varThree(t){return vTry(()=>{const a=varTwo(t,['quod','because']),b=varSVO(t);const c=rnd([['Itaque','And so'],['Sed','But'],['Tamen','However']]);
+  const r={latin:a.latin+' '+c[0]+' '+b.latin.charAt(0).toLowerCase()+b.latin.slice(1),english:a.english+' '+c[1]+(c[1]==='But'?' ':', ')+lc1(b.english),wordMap:{...a.wordMap,...b.wordMap,[c[0].toLowerCase()]:c[1].toLowerCase()}};
+  const alts=[...(a.altLatin||[]).map(x=>x+' '+c[0]+' '+b.latin.charAt(0).toLowerCase()+b.latin.slice(1)),...(b.altLatin||[]).map(x=>a.latin+' '+c[0]+' '+x)];if(alts.length)r.altLatin=alts;return r;});}
+// vocative + command: "Slaves, carry the spears!" / "Slave, carry the spear!"
+function sImpVoc(){return vTry(()=>{const num=rNum();const w=pAnim();const voc=vNP(w,'vocative',num);const v=vTrans();if(['eo','fero'].includes(v.lat))return null;const o=pickObjForVerb(v,[w.lat]);const on=vNP(o,'accusative',rNum());
+  const sg=makeImp0(v),pl=impPluralOf(v);const imp=num==='plural'?pl:sg;if(!imp)return null;
+  return {latin:cap(voc.lat)+', '+imp+' '+on.lat+'!',english:cap(voc.eng)+', '+eImp(v).toLowerCase()+' the '+on.eng+'!',wordMap:{[voc.lat.toLowerCase()]:w.eng[0],[imp.toLowerCase()]:v.eng[0],[on.lat.toLowerCase()]:o.eng[0]}};});}
+function vSVO(){return varSVO('pres');}function vSVOPast(){return varSVO('past');}function vSVOFut(){return varSVO('fut');}
+function vIntransPlace(){return varIntransPlace('pres');}function vIntransPlacePast(){return varIntransPlace('past');}function vIntransPlaceFut(){return varIntransPlace('fut');}
+function vPredAdj(){return varPredAdj('pres');}function vPredAdjPast(){return varPredAdj('past');}function vPredAdjFut(){return varPredAdj('fut');}
+function vGen(){return varGen('pres');}function vGenPast(){return varGen('past');}function vGenFut(){return varGen('fut');}
+function vDat(){return varDat('pres');}function vDatPast(){return varDat('past');}function vDatFut(){return varDat('fut');}
+function vAdjObj(){return varAdjObj('pres');}function vAdjObjPast(){return varAdjObj('past');}function vAdjObjFut(){return varAdjObj('fut');}
+function vTwo(){return varTwo('pres');}function vTwoPast(){return varTwo('past');}function vTwoFut(){return varTwo('fut');}
+function vThree(){return varThree('pres');}function vThreePast(){return varThree('past');}function vThreeFut(){return varThree('fut');}
+const VAR_POOLS={
+  easy:[vSVO,vSVOPast,vSVOFut,vIntransPlace,vIntransPlacePast,vIntransPlaceFut,vPredAdj,vPredAdjPast,vPredAdjFut,sImpVoc],
+  medium:[vSVO,vSVOPast,vSVOFut,vGen,vGenPast,vGenFut,vDat,vDatPast,vDatFut,vAdjObj,vAdjObjPast,vAdjObjFut,sImpVoc],
+  hard:[vTwo,vTwoPast,vTwoFut,vGen,vGenPast,vGenFut,vDat,vDatPast,vDatFut,vAdjObj,vAdjObjPast,vAdjObjFut],
+  insane:[vTwo,vTwoPast,vTwoFut,vThree,vThreePast,vThreeFut],
+  expert:[vThree,vThreePast,vThreeFut]};
+
 function buildSentence(){IMP_USED=[];const r=buildSentenceRaw();if(r)r.imps=IMP_USED.filter(x=>x.sg&&x.pl);if(r&&r.english)r.english=r.english.replace(/([.!?]) ([a-z])/g,(m,p,c)=>p+' '+c.toUpperCase());return r;}
 function buildSentenceRaw(){
   const pools={
@@ -2620,7 +2699,10 @@ function buildSentenceRaw(){
     insane:[sInsane,sTriple,sInsanePrep,sInsaneAdjConj,sInsaneDatPrep,sExtRelSVO,sExtIpseRel,sInsaneFut,sTripleFut,sImpTwo],
     expert:[sExtRelSVO,sExtIpseRel,sExtTimeSuus,sExtQuadClause,sQuadFut,sImpThree]
   };
-  const pool=sentFilter(pools[difficulty]||pools.expert);
+  const d=pools[difficulty]?difficulty:'expert';
+  const vp=sentFilter(VAR_POOLS[d]).filter(fn=>sentTenses[sentTenseOf(fn)]);
+  if(vp.length&&Math.random()<.5)return rnd(vp)();   // half the time, a varied sentence (persons, plurals, cases)
+  const pool=sentFilter(pools[d]);
   return rnd(pool)();
 }
 
@@ -3007,6 +3089,8 @@ const SENT_DIFF_BONUS={expert:4};
 function sentPoints(sd){sd=sd||sentData;if(!sd)return 1;return Math.max(1,mode==='el'?Math.floor(wordCount(sd.english)*1.2):wordCount(sd.latin))+(SENT_DIFF_BONUS[difficulty]||0);}
 // Other correct answers: a command can be to one person or several unless the English says ("all of you").
 function sentAlternatives(ca){const alts=[ca];if(!sentData)return alts;
+  if(mode==='el'&&sentData.altLatin)alts.push(...sentData.altLatin);   // e.g. "Nos cibum portamus" as well as "Cibum portamus"
+  if(mode==='le'&&/\(pl\.\)/.test(ca))alts.push(ca.replace(/\s*\(pl\.\)/g,''));
   if(mode==='el'&&sentData.imps&&sentData.imps.length&&!/all of you/i.test(sentData.english)){let pl=ca;
     sentData.imps.forEach(({sg,pl:p})=>{pl=pl.replace(new RegExp('(^|[^A-Za-z])('+sg+')(?=[^A-Za-z]|$)','i'),(m,a,w)=>a+(w[0]===w[0].toUpperCase()?p[0].toUpperCase()+p.slice(1):p));});if(pl!==ca)alts.push(pl);}
   if(mode==='le'&&/, all of you!/i.test(ca))alts.push(ca.replace(/, all of you!/gi,'!'));
