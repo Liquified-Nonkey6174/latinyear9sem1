@@ -3763,7 +3763,19 @@ function openPlayerCard(pid){const p=lbPlayers[pid];if(!p)return;const k=lbKeys(
     const mb=document.createElement('button');mb.className='btn-secondary';mb.style.margin='0 0 8px 6px';mb.textContent='…';mb.disabled=true;box.insertBefore(mb,hist);
     let muted=false;const setMb=()=>{mb.textContent=muted?'🚫 Blocked from chat (unblock)':'Block from chat';mb.title=muted?'They can’t send chat messages. Click to allow it again.':'Stop them sending chat messages (they can still read chat and play).';mb.disabled=false;};
     fbReq('GET','mute/'+pid,null,{admin:true}).then(v=>{muted=v===true;setMb();}).catch(()=>{mb.textContent='Block from chat (unavailable)';});
-    mb.onclick=async()=>{mb.disabled=true;try{await fbReq(muted?'DELETE':'PUT','mute/'+pid,muted?null:true,{admin:true});muted=!muted;}catch(e){alert('Couldn’t save: '+e.message);}setMb();};}
+    mb.onclick=async()=>{mb.disabled=true;try{await fbReq(muted?'DELETE':'PUT','mute/'+pid,muted?null:true,{admin:true});muted=!muted;}catch(e){alert('Couldn’t save: '+e.message);}setMb();};
+    // Premium: remove it (also takes off any premium look items) or give it for free.
+    const pb=document.createElement('button');pb.className='btn-secondary';pb.style.margin='0 0 8px 6px';pb.textContent='…';pb.disabled=true;box.insertBefore(pb,hist);
+    let prem=null;const setPb=()=>{pb.textContent=prem?'👑 Premium'+(prem.c&&prem.c!=='admin'?' (code “'+prem.c+'”)':'')+' · remove':'Give premium';pb.disabled=false;};
+    fbReq('GET','prem/'+pid,null,{admin:true}).then(v=>{prem=v||null;setPb();}).catch(()=>{pb.textContent='Premium (unavailable)';});
+    pb.onclick=async()=>{const pl=lbPlayers[pid]||{};
+      if(prem){if(!confirm('Remove premium from '+(pl.name||'this player')+'? Their premium avatar, fonts and effects will be taken off.'))return;}
+      pb.disabled=true;
+      try{if(prem){await fbReq('DELETE','prem/'+pid,null,{admin:true});
+          const strip={};if(pl.av===PREMIUM_AV)strip.av=null;if(PREMIUM_FONTS.includes(pl.font))strip.font=null;if(PREMIUM_FX.includes(pl.fx))strip.fx=null;
+          if(Object.keys(strip).length)await fbReq('PATCH','players/'+pid,strip,{admin:true});prem=null;}
+        else{prem={c:'admin',t:{'.sv':'timestamp'}};await fbReq('PUT','prem/'+pid,prem,{admin:true});}}
+      catch(e){alert('Couldn’t save: '+e.message);}setPb();};}
   if(lbMe&&pid!==lbMe.pid){const b=document.createElement('button');b.className='btn-primary';b.textContent='⚔ Challenge '+p.name;b.onclick=()=>{closeOverlay('playerOverlay');openDuelSetup(pid);};box.appendChild(b);}
   else if(!lbMe){const n=document.createElement('p');n.className='forms-note';n.textContent='Join the leaderboard to challenge other players.';box.appendChild(n);}
   document.getElementById('playerOverlay').style.display='flex';}
@@ -3920,7 +3932,7 @@ let pollBusy=false;
 async function pollShared(){if(pollBusy)return;pollBusy=true;
   try{const [d,c,mu]=await Promise.all([fbReq('GET','duels').catch(()=>undefined),fbReq('GET','challenge').catch(()=>undefined),lbMe?fbReq('GET','mute/'+lbMe.pid).catch(()=>undefined):undefined]);
     if(mu!==undefined)setChatMuted(mu===true);
-    if(lbMe&&!premMe){const pr=await fbReq('GET','prem/'+lbMe.pid).catch(()=>null);if(pr)premMe=true;}
+    if(lbMe){const pr=await fbReq('GET','prem/'+lbMe.pid).catch(()=>undefined);if(pr!==undefined&&!!pr!==premMe){premMe=!!pr;if(document.getElementById('lookOverlay').style.display==='flex')renderLook();}}
     if(d!==undefined){duelsObj=d||{};updDuelBtn();if(document.getElementById('duelInboxOverlay').style.display==='flex')renderDuelInbox();}
     if(c!==undefined){classChal=c&&c.target?c:null;renderClassChallenge();}}
   finally{pollBusy=false;}}
