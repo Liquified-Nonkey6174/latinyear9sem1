@@ -4159,7 +4159,7 @@ renderWordList=function(){const list=document.getElementById('wordList');const i
 /* ---------- forms viewer ---------- */
 const CASES6=['nominative','vocative','accusative','genitive','dative','ablative'];
 function caseTable(f,pre,title){const has=n=>CASES6.some(c=>f[pre+c+' '+n]!=null);const nums=['singular','plural'].filter(has);
-  const rows=CASES6.filter(c=>nums.some(n=>f[pre+c+' '+n]!=null)&&!(c==='vocative'&&nums.every(n=>f[pre+'vocative '+n]===f[pre+'nominative '+n])));if(!rows.length)return '';
+  const rows=CASES6.filter(c=>nums.some(n=>f[pre+c+' '+n]!=null));if(!rows.length)return '';
   return '<div class="tbl-scroll"><table class="decl-table" style="min-width:0"><thead><tr><th class="dt-left">'+esc(title||'')+'</th>'+nums.map(n=>'<th>'+(n==='singular'?'Singular':'Plural')+'</th>').join('')+'</tr></thead><tbody>'+rows.map(c=>'<tr><td class="dt-case">'+c+'</td>'+nums.map(n=>'<td>'+esc(f[pre+c+' '+n]||'—')+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>';}
 const PCASE={nom:'nominative',voc:'vocative',acc:'accusative',gen:'genitive',dat:'dative',abl:'ablative'};
 const PPRE={m:'Masculine',f:'Feminine',n:'Neuter','1st':'1st person','2nd':'2nd person','3rd':'3rd person','3rd m':'3rd masc.','3rd f':'3rd fem.','3rd n':'3rd neut.'};
