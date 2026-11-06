@@ -2129,7 +2129,22 @@ function adj12F(nom){let mst,fnom,nnom,mGen=null;if(nom.endsWith('us')){mst=nom.
 const ADJ3_ONE={'ingens':'ingent','ferox':'feroc','felix':'felic','infelix':'infelic'};
 function adj3F(nom){const one=ADJ3_ONE[nom];const s=one||(nom.endsWith('is')?nom.slice(0,-2):nom);const mf={'nominative singular':nom,'genitive singular':s+'is','dative singular':s+'i','accusative singular':s+'em','ablative singular':s+'i','vocative singular':nom,'nominative plural':s+'es','genitive plural':s+'ium','dative plural':s+'ibus','accusative plural':s+'es','ablative plural':s+'ibus','vocative plural':s+'es'};const ne=one?nom:s+'e';const nf={'nominative singular':ne,'genitive singular':s+'is','dative singular':s+'i','accusative singular':ne,'ablative singular':s+'i','vocative singular':ne,'nominative plural':s+'ia','genitive plural':s+'ium','dative plural':s+'ibus','accusative plural':s+'ia','ablative plural':s+'ibus','vocative plural':s+'ia'};const r={};Object.entries(mf).forEach(([k,v])=>{r['m '+k]=v;r['f '+k]=v;});Object.entries(nf).forEach(([k,v])=>r['n '+k]=v);return r;}
 function decl5F(nom,gen){const s=nom.slice(0,-2);return{'nominative singular':nom,'genitive singular':s+'ei','dative singular':s+'ei','accusative singular':s+'em','ablative singular':s+'e','vocative singular':nom,'nominative plural':nom,'genitive plural':s+'erum','dative plural':s+'ebus','accusative plural':nom,'ablative plural':s+'ebus','vocative plural':nom};}
-function getNounForms(w){const sk=w.subKey;if(sk==='1st declension')return decl1F(w.lat);if(sk==='2nd declension (masc)')return decl2MF(w.lat,w.gen);if(sk==='2nd declension (neut)')return decl2NF(w.lat);if(sk==='3rd declension')return decl3F(w.lat,w.gen,w.gender);if(sk==='5th declension')return decl5F(w.lat,w.gen);if(w.lat==='nemo')return{'nominative singular':'nemo','genitive singular':'neminis','dative singular':'nemini','accusative singular':'neminem','ablative singular':'nemine'};return null;}
+// Nouns from word packs (Time & calendar) aren't in a declension group, so their forms are listed here.
+// Plural-only words (Kalendae, Nonae, Idus) only have plural forms; ver, vesper and meridies are used in the singular.
+const sgOnly=f=>Object.fromEntries(Object.entries(f).filter(([k])=>k.endsWith('singular')));
+const PL_CASES=['nominative','genitive','dative','accusative','ablative','vocative'];
+const plOnly=(...v)=>Object.fromEntries(PL_CASES.map((c,i)=>[c+' plural',v[i]]));
+const PACK_NOUN_FORMS={
+  ver:()=>({'nominative singular':'ver','genitive singular':'veris','dative singular':'veri','accusative singular':'ver','ablative singular':'vere','vocative singular':'ver'}),
+  aestas:()=>decl3F('aestas','aestatis','f'),
+  autumnus:()=>decl2MF('autumnus','autumni'),saeculum:()=>decl2NF('saeculum'),
+  vesper:()=>sgOnly(decl2MF('vesper','vesperi')),
+  meridies:()=>sgOnly(decl5F('meridies','meridiei')),
+  Kalendae:()=>plOnly('Kalendae','Kalendarum','Kalendis','Kalendas','Kalendis','Kalendae'),
+  Nonae:()=>plOnly('Nonae','Nonarum','Nonis','Nonas','Nonis','Nonae'),
+  Idus:()=>plOnly('Idus','Iduum','Idibus','Idus','Idibus','Idus')};
+const isNounWord=w=>w.catKey==='nouns'||w.pos==='noun';
+function getNounForms(w){if(w.pos==='noun'&&PACK_NOUN_FORMS[w.lat])return PACK_NOUN_FORMS[w.lat]();const sk=w.subKey;if(sk==='1st declension')return decl1F(w.lat);if(sk==='2nd declension (masc)')return decl2MF(w.lat,w.gen);if(sk==='2nd declension (neut)')return decl2NF(w.lat);if(sk==='3rd declension')return decl3F(w.lat,w.gen,w.gender);if(sk==='5th declension')return decl5F(w.lat,w.gen);if(w.lat==='nemo')return{'nominative singular':'nemo','genitive singular':'neminis','dative singular':'nemini','accusative singular':'neminem','ablative singular':'nemine'};return null;}
 
 // Number declension paradigms (irregular)
 const NUMBER_FORMS={
@@ -2257,8 +2272,8 @@ function genDrillQs(words){
   const SINGULAR_NOUN=new Set(['Latina','Roma','Italia','Hispania','Germania','Britannia','Gallia','Graecia','Troia']);
   const allowedCat=DRILL_CAT_MAP[quizType]||null;
   words.forEach(w=>{
-    if(allowedCat&&w.catKey!==allowedCat)return;
-    if(w.catKey==='nouns'){
+    if(allowedCat&&w.catKey!==allowedCat&&!(allowedCat==='nouns'&&w.pos==='noun'))return;
+    if(isNounWord(w)){
       if(SKIP_NOUN.has(w.lat))return;
       const f=getNounForms(w);
       if(!f)return;
@@ -2366,7 +2381,7 @@ function checkWithSynonyms(ua,ca){
 // ── L→E DRILL IDENTIFICATION ───────────────────────────────────────────────────
 function getAllMatchingKeys(q){
   const results=[];
-  if(q.word.catKey==='nouns'){const f=getNounForms(q.word);if(f)Object.entries(f).forEach(([k,v])=>{if(v===q.form)results.push(k);});}
+  if(isNounWord(q.word)){const f=getNounForms(q.word);if(f)Object.entries(f).forEach(([k,v])=>{if(v===q.form)results.push(k);});}
   else if(q.word.catKey==='adjectives'){const f=getAdjForms(q.word);if(f)Object.entries(f).forEach(([k,v])=>{if(v===q.form)results.push(k);});}
   else if(q.word.catKey==='verbs'){
     const fp=getVerbConj(q.word);if(fp)Object.entries(fp).forEach(([k,v])=>{if(v===q.form)results.push('pres. '+k);});
@@ -4094,7 +4109,7 @@ function updStarUI(){const n=Object.keys(starred).length;const b=document.getEle
   const drw=document.getElementById('wordDrawer');if(drw&&drw.classList.contains('open'))renderWordList();}
 function startStarred(){const ws=starWords();if(!ws.length){toast('No starred words yet — tap ☆ on a question.');return;}
   if(quizType==='sentences')setQuizType('vocab');
-  let use=ws;if(DRILL_TYPES.has(quizType)){const cat=DRILL_CAT_MAP[quizType];use=ws.filter(w=>w.catKey===cat);if(!use.length){toast('None of your starred words fit this quiz type.');return;}}
+  let use=ws;if(DRILL_TYPES.has(quizType)){const cat=DRILL_CAT_MAP[quizType];use=ws.filter(w=>w.catKey===cat||(cat==='nouns'&&w.pos==='noun'));if(!use.length){toast('None of your starred words fit this quiz type.');return;}}
   beginQuiz(shuffle([...use]));}
 function clearStarred(){if(!Object.keys(starred).length)return;starred={};saveStarred();updStarUI();toast('Starred list cleared.');}
 (function(){const _q=showQ,_d=showDrill;showQ=function(){_q.apply(this,arguments);updStarUI();};showDrill=function(){_d.apply(this,arguments);updStarUI();};})();
@@ -5004,7 +5019,7 @@ function showWordForms(w){
   w=(w.catKey&&DATA[w.catKey]&&DATA[w.catKey].sub[w.subKey])?w:(allWordsFlat().find(x=>x.lat===w.lat)||w);
   const boxes=dailyBoxesOf(w);let tbl='';
   try{
-    if(w.catKey==='nouns'){const f=NUMBER_FORMS[w.lat]||getNounForms(w);tbl=f?caseTable(f,'','Case'):'';}
+    if(isNounWord(w)){const f=NUMBER_FORMS[w.lat]||getNounForms(w);tbl=f?caseTable(f,'','Case'):'';}
     else if(w.catKey==='adjectives'){const f=NUMBER_FORMS[w.lat]||getAdjForms(w);if(f){const gk=Object.keys(f).some(k=>/^[mfn] /.test(k));const oneNum=gk&&!Object.keys(f).some(k=>/ singular$/.test(k))||gk&&!Object.keys(f).some(k=>/ plural$/.test(k));if(gk){const AB={nominative:'nom',vocative:'voc',accusative:'acc',genitive:'gen',dative:'dat',ablative:'abl'};const pf={};Object.entries(f).forEach(([k,v])=>{const t=k.split(' ');pf[t[0]+' '+AB[t[1]]+' '+(t[2]==='singular'?'sg':'pl')]=v;});tbl=pronTable(pf);}else tbl=gk?[['m','Masculine'],['f','Feminine'],['n','Neuter']].map(g=>caseTable(f,g[0]+' ',g[1])).join(''):caseTable(f,'','Case');}}
     else if(w.catKey==='verbs'){tbl=verbTable(w);}
     else if(w.catKey==='pronouns'&&PRONOUN_FORMS[w.subKey]){tbl='<p class="forms-note">Full paradigm for <strong>'+esc(w.subKey)+'</strong>:</p>'+pronTable(PRONOUN_FORMS[w.subKey]);}
@@ -5072,7 +5087,7 @@ function dmg(a,b){const m=a.length,n=b.length;const d=[];for(let i=0;i<=m;i++){d
 function nrmT(s){return String(s).toLowerCase().replace(/\.\.\./g,' ').replace(/[.,!?;:()]/g,'').replace(/\s+/g,' ').trim();}
 let _known=null;
 function knownForms(){if(_known)return _known;const s=new Set();const add=f=>{if(f)Object.values(f).forEach(v=>String(v).toLowerCase().split(/[\s\/]+/).forEach(x=>s.add(x)));};
-  allWordsFlat().forEach(w=>{String(w.lat).toLowerCase().split(/[\s\/]+/).forEach(x=>s.add(x));try{if(w.catKey==='nouns')add(NUMBER_FORMS[w.lat]||getNounForms(w));else if(w.catKey==='adjectives')add(NUMBER_FORMS[w.lat]||getAdjForms(w));else if(w.catKey==='verbs')[getVerbConj,getVerbImpf,getVerbFut,getVerbImp].forEach(fn=>{try{add(fn(w));}catch(e){}});}catch(e){}});
+  allWordsFlat().forEach(w=>{String(w.lat).toLowerCase().split(/[\s\/]+/).forEach(x=>s.add(x));try{if(isNounWord(w))add(NUMBER_FORMS[w.lat]||getNounForms(w));else if(w.catKey==='adjectives')add(NUMBER_FORMS[w.lat]||getAdjForms(w));else if(w.catKey==='verbs')[getVerbConj,getVerbImpf,getVerbFut,getVerbImp].forEach(fn=>{try{add(fn(w));}catch(e){}});}catch(e){}});
   Object.values(PRONOUN_FORMS).forEach(add);_known=s;return s;}
 function nearMiss(typed,cands,latin){const t=nrmT(typed).split(' ');if(!t[0])return false;
   for(const c of cands){if(!c)continue;const cc=nrmT(c).split(' ');if(cc.length!==t.length)continue;let bad=0,ok=true;
