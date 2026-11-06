@@ -32,16 +32,16 @@
           }
         },
         "av": {
-          ".validate": "newData.isString() && newData.val().length <= 8 && (newData.val() !== '👑' || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2')"
+          ".validate": "newData.isString() && newData.val().length <= 8 && (newData.val() !== '👑' || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2' || root.child('prem').child($uid).exists())"
         },
         "color": {
           ".validate": "newData.isString() && newData.val().length <= 12"
         },
         "font": {
-          ".validate": "newData.isString() && newData.val().length <= 12 && (!newData.val().matches(/^(gothic|elegant|block3d|fire|candy|honk)$/) || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2')"
+          ".validate": "newData.isString() && newData.val().length <= 12 && (!newData.val().matches(/^(gothic|elegant|block3d|fire|candy|honk)$/) || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2' || root.child('prem').child($uid).exists())"
         },
         "fx": {
-          ".validate": "newData.isString() && newData.val().length <= 10 && (!newData.val().matches(/^(rainbow|shimmer|glow|fire|rwave|type)$/) || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2')"
+          ".validate": "newData.isString() && newData.val().length <= 10 && (!newData.val().matches(/^(rainbow|shimmer|glow|fire|rwave|type)$/) || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2' || root.child('prem').child($uid).exists())"
         },
         "$other": {
           ".validate": false
@@ -176,6 +176,38 @@
       "$uid": {
         ".write": "auth != null && auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2'",
         ".validate": "newData.val() === true"
+      }
+    },
+    "codes": {
+      ".read": "auth != null && auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2'",
+      ".write": "auth != null && auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2'",
+      "$c": {
+        ".read": "auth != null",
+        ".validate": "newData.hasChildren(['left']) && $c.matches(/^[a-z0-9 ]{1,40}$/)",
+        "left": {
+          ".write": "auth != null && data.isNumber() && data.val() > 0 && newData.val() === data.val() - 1 && newData.parent().parent().parent().child('prem').child(auth.uid).child('c').val() === $c && !root.child('prem').child(auth.uid).exists()",
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "prem": {
+      ".read": "auth != null && auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2'",
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && (auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2' || (auth.uid === $uid && !data.exists() && newData.child('c').isString() && root.child('codes').child(newData.child('c').val()).child('left').val() > 0 && newData.parent().parent().child('codes').child(newData.child('c').val()).child('left').val() === root.child('codes').child(newData.child('c').val()).child('left').val() - 1))",
+        ".validate": "newData.hasChildren(['c', 't'])",
+        "c": {
+          ".validate": "newData.isString() && newData.val().length <= 40"
+        },
+        "t": {
+          ".validate": "newData.isNumber() && newData.val() <= now"
+        },
+        "$other": {
+          ".validate": false
+        }
       }
     }
   }
