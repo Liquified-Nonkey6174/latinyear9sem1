@@ -3042,7 +3042,11 @@ document.addEventListener('keydown',e=>{
   const t=e.target,typing=t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'||t.isContentEditable);
   if(e.key==='?'&&!typing){showShortcuts();return;}
   if(!inQ)return;
-  if(isSent){if(e.key==='Escape'&&!answered){e.preventDefault();skipSentence();}return;}
+  // Sentences: Enter checks the translation, then Enter again goes to the next sentence (Shift+Enter still makes a new line).
+  if(isSent){if(e.key==='Escape'&&!answered){e.preventDefault();skipSentence();}
+    else if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&!(typing&&t.id!=='sentInput')){e.preventDefault();
+      if(!answered)checkSentence();else if(document.getElementById('sentNext').style.display!=='none')nextSentence();}
+    return;}
   if(inputMode==='mc'&&!answered&&['1','2','3','4'].includes(e.key)){const btns=document.getElementById('mcGrid').querySelectorAll('.mc-btn');const idx=parseInt(e.key)-1;if(btns[idx]){e.preventDefault();btns[idx].click();}return;}
   if(e.key==='Enter'){e.preventDefault();if(inputMode==='typed'){if(!answered)dispatchCheck();else if(document.getElementById('nextBtn').style.display!=='none'||document.getElementById('mcNextBtn').style.display!=='none')nextQ();}else if(answered)nextQ();return;}
   if(e.key==='Escape'){e.preventDefault();if(!answered)dispatchSkip();return;}
