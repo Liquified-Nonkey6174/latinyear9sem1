@@ -553,6 +553,10 @@ body.calm *,body.calm *::before,body.calm *::after{transition:none!important;ani
 @keyframes nfxBlink{50%{opacity:0}}
 body.calm .nfx-type .tw-caret{display:none}
 .look-opt.fxo{overflow:visible}
+.pw-code{margin-top:16px;padding-top:12px;border-top:1px solid var(--border2)}.pw-code-h{font-size:12px;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
+.pw-code-row{display:flex;gap:6px;justify-content:center}.pw-code-row input{flex:1;min-width:0;background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:8px;padding:7px 10px;font:inherit}
+.pw-code-msg{min-height:1.2em;margin-top:6px;font-size:13px;color:var(--text2)}.pw-code-msg.err{color:#e07a6a}.pw-code-msg.ok{color:#6dbf8a}.pw-have{color:#6dbf8a;margin:0}
+.look-box #lookCodes{display:block;margin:8px auto 0}.pw-admin{margin-top:14px;padding-top:10px;border-top:1px dashed var(--border2);text-align:left;font-size:13px}.pw-admin-row{display:flex;justify-content:space-between;align-items:center;gap:6px;padding:3px 0}
 </style>
 </head>
 <body>
@@ -3680,7 +3684,40 @@ function openPaywall(){let o=document.getElementById('paywallOverlay');
   let price=67;const buy=o.querySelector('#pwBuy'),pr=o.querySelector('.pw-price');
   buy.onclick=()=>{price++;pr.innerHTML='<span class="pw-ask">Actually, what about…</span><b>$'+price+'</b><span>one-time payment</span>';buy.textContent='Buy now: $'+price;
     pr.classList.remove('bump');void pr.offsetWidth;pr.classList.add('bump');};
+  const box=o.querySelector('.pw-box'),code=document.createElement('div');code.className='pw-code';box.appendChild(code);
+  if(premMe||isAdmin){code.innerHTML='<p class="pw-have">✓ You have Latin Trainer Premium'+(isAdmin&&!premMe?' (admin)':'')+'.</p>';}
+  else if(!lbMe){code.innerHTML='<p class="pw-have">Join the leaderboard to use a premium code.</p>';}
+  else{code.innerHTML='<div class="pw-code-h">Have a code?</div><form class="pw-code-row"><input id="pwCode" maxlength="40" placeholder="Enter code" autocomplete="off"><button class="btn-secondary">Redeem</button></form><div class="pw-code-msg" id="pwCodeMsg"></div>';
+    code.querySelector('form').onsubmit=e=>{e.preventDefault();redeemCode(code.querySelector('#pwCode').value);};}
+  if(isAdmin)adminCodes(box);
   o.style.display='flex';}
+// Premium codes: codes/{code}/left = uses left (only readable if you know the code). Redeeming takes one use and adds
+// prem/{uid} in the same write; the database rules check both and only allow one code per player.
+let premMe=false;
+function hasPremium(){return isAdmin||premMe;}
+const cleanCode=v=>String(v||'').toLowerCase().replace(/\s+/g,' ').trim();
+async function redeemCode(raw){const msg=document.getElementById('pwCodeMsg'),c=cleanCode(raw);msg.className='pw-code-msg';
+  if(!lbMe){msg.textContent='Join the leaderboard first.';return;}if(premMe){msg.textContent='You already have premium.';return;}
+  if(!/^[a-z0-9 ]{1,40}$/.test(c)){msg.className+=' err';msg.textContent='That code doesn’t exist.';return;}
+  msg.textContent='Checking…';let left;
+  try{left=await fbReq('GET','codes/'+c+'/left');}catch(e){msg.className+=' err';msg.textContent='Couldn’t check the code. Try again.';return;}
+  if(left==null){msg.className+=' err';msg.textContent='That code doesn’t exist.';return;}
+  if(!(left>0)){msg.className+=' err';msg.textContent='Sorry, that code has been used up.';return;}
+  try{await fbReq('PATCH','',{['codes/'+c+'/left']:left-1,['prem/'+lbMe.pid]:{c,t:{'.sv':'timestamp'}}});}
+  catch(e){let again=null;try{again=await fbReq('GET','prem/'+lbMe.pid);}catch(e2){}
+    if(!again){msg.className+=' err';msg.textContent='Sorry, that code has just been used up (or the database rules need updating).';return;}}
+  premMe=true;msg.className+=' ok';msg.textContent='🎉 Premium unlocked! Pick your new look.';
+  setTimeout(()=>{closeOverlay('paywallOverlay');if(document.getElementById('lookOverlay').style.display==='flex')renderLook();},1600);}
+async function adminCodes(box){const w=document.createElement('div');w.className='pw-admin';box.appendChild(w);
+  const draw=async()=>{let codes={},prem={};try{[codes,prem]=await Promise.all([fbReq('GET','codes',null,{admin:true}),fbReq('GET','prem',null,{admin:true})]);}catch(e){w.textContent='Couldn’t load codes: '+e.message;return;}codes=codes||{};prem=prem||{};
+    const used={};Object.entries(prem).forEach(([uid,x])=>{if(x&&x.c)(used[x.c]=used[x.c]||[]).push(lbPlayers[uid]?lbPlayers[uid].name:'(left)');});
+    w.innerHTML='<div class="pw-code-h">Admin: premium codes</div>';
+    Object.entries(codes).forEach(([c,v])=>{const r=document.createElement('div');r.className='pw-admin-row';const t=document.createElement('span');t.textContent='“'+c+'”: '+((v&&v.left)||0)+' use'+(((v&&v.left)===1)?'':'s')+' left'+(used[c]?' · used by '+used[c].join(', '):'');r.appendChild(t);
+      const d=document.createElement('button');d.className='lb-act del';d.textContent='×';d.title='Delete code';d.onclick=async()=>{if(!confirm('Delete the code “'+c+'”? (People who already used it keep premium.)'))return;await fbReq('DELETE','codes/'+c,null,{admin:true}).catch(e=>alert(e.message));draw();};r.appendChild(d);w.appendChild(r);});
+    const f=document.createElement('form');f.className='pw-code-row';f.innerHTML='<input placeholder="new code" maxlength="40"><input type="number" min="1" max="1000" value="3" style="width:64px;flex:none" title="uses"><button class="btn-secondary">Add</button>';
+    f.onsubmit=async e=>{e.preventDefault();const [ci,ni]=f.querySelectorAll('input');const c=cleanCode(ci.value),n=Math.floor(+ni.value);if(!/^[a-z0-9 ]{1,40}$/.test(c)){alert('Codes can use letters, numbers and spaces only.');return;}if(!(n>=1)){alert('Uses must be 1 or more.');return;}
+      try{await fbReq('PUT','codes/'+c,{left:n},{admin:true});}catch(err){alert('Couldn’t save: '+err.message);}draw();};w.appendChild(f);};
+  draw();}
 function applyNameFont(el,f){const nf=NAME_FONTS[f];if(!nf)return;loadNameFonts();el.style.fontFamily=nf[1];if(nf[2]!==1)el.style.fontSize=nf[2]+'em';}
 function nameEl(pid,name){const p=lbPlayers[pid]||{};const s=document.createElement('span');s.className='pname';
   if(p.av&&AVATARS.includes(p.av)){const a=document.createElement('span');a.className='pav';a.textContent=p.av;s.appendChild(a);}
@@ -3689,26 +3726,28 @@ function closeOverlay(id){document.getElementById(id).style.display='none';}
 let lookSel={};
 function openLook(){if(!lbMe)return;const p=lbPlayers[lbMe.pid]||{};lookSel={av:p.av||'',color:p.color||'',font:p.font||'',fx:p.fx||''};loadNameFonts();renderLook();document.getElementById('lookErr').textContent='';document.getElementById('lookOverlay').style.display='flex';}
 function renderLook(){const av=document.getElementById('lookAvatars'),co=document.getElementById('lookColors'),fo=document.getElementById('lookFonts'),fe=document.getElementById('lookFx');av.innerHTML='';co.innerHTML='';fo.innerHTML='';fe.innerHTML='';
-  [['',['None',0,0]]].concat(Object.entries(NAME_FX)).forEach(([k,f])=>{const locked=f[1]&&!isAdmin;const b=document.createElement('button');b.className='look-opt fnt fxo'+(lookSel.fx===k?' on':'')+(f[1]?' prem':'');
+  [['',['None',0,0]]].concat(Object.entries(NAME_FX)).forEach(([k,f])=>{const locked=f[1]&&!hasPremium();const b=document.createElement('button');b.className='look-opt fnt fxo'+(lookSel.fx===k?' on':'')+(f[1]?' prem':'');
     const lab=document.createElement('span');lab.textContent=f[0];if(k)applyNameFx(lab,k,f[0]);b.appendChild(lab);
     if(f[1]){const t=document.createElement('span');t.className='fnt-tag';t.textContent=locked?'🔒 $67':'👑';b.appendChild(t);}
     b.onclick=()=>{if(locked){openPaywall();return;}lookSel.fx=k;renderLook();};fe.appendChild(b);});
   let grp=null;[['',['Normal','',1,'Classic']]].concat(Object.entries(NAME_FONTS)).forEach(([k,f])=>{
     if(f[3]!==grp){grp=f[3];if(grp!=='Classic'){const h=document.createElement('div');h.className='fnt-h';h.textContent=grp==='Colour'?'Colour (built-in colours)':grp;fo.appendChild(h);}}
-    const prem=PREMIUM_FONTS.includes(k),locked=prem&&!isAdmin;const b=document.createElement('button');b.className='look-opt fnt'+(lookSel.font===k?' on':'')+(prem?' prem':'');b.textContent=f[0];applyNameFont(b,k);
+    const prem=PREMIUM_FONTS.includes(k),locked=prem&&!hasPremium();const b=document.createElement('button');b.className='look-opt fnt'+(lookSel.font===k?' on':'')+(prem?' prem':'');b.textContent=f[0];applyNameFont(b,k);
     if(prem){const t=document.createElement('span');t.className='fnt-tag';t.textContent=locked?'🔒 $67':'👑';b.appendChild(t);b.title=locked?'Premium font':'Premium (admin)';}
     b.onclick=()=>{if(locked){openPaywall();return;}lookSel.font=k;renderLook();};fo.appendChild(b);});
-  [''].concat(AVATARS).forEach(a=>{const b=document.createElement('button');const prem=a===PREMIUM_AV,locked=prem&&!isAdmin;b.className='look-opt'+(lookSel.av===a?' on':'')+(prem?' prem':'');b.textContent=a||'—';b.title=a?(prem?(locked?'Premium avatar ($67)':'Premium (admin)'):''):'No avatar';
+  [''].concat(AVATARS).forEach(a=>{const b=document.createElement('button');const prem=a===PREMIUM_AV,locked=prem&&!hasPremium();b.className='look-opt'+(lookSel.av===a?' on':'')+(prem?' prem':'');b.textContent=a||'—';b.title=a?(prem?(locked?'Premium avatar ($67)':'Premium (admin)'):''):'No avatar';
     if(locked){const t=document.createElement('span');t.className='av-lock';t.textContent='🔒';b.appendChild(t);}
     b.onclick=()=>{if(locked){openPaywall();return;}lookSel.av=a;renderLook();};av.appendChild(b);});
   [['', 'var(--text)']].concat(Object.entries(NAME_COLORS)).forEach(([k,c])=>{const b=document.createElement('button');b.className='look-opt sw'+(lookSel.color===k?' on':'');b.style.background=c;b.title=k||'Default';b.onclick=()=>{lookSel.color=k;renderLook();};co.appendChild(b);});
+  let pc=document.getElementById('lookCodes');if(isAdmin&&!pc){pc=document.createElement('button');pc.id='lookCodes';pc.className='lb-link';pc.textContent='👑 Premium codes (admin)';pc.onclick=openPaywall;document.querySelector('.look-actions').after(pc);}
+  if(pc)pc.style.display=isAdmin?'':'none';
   const pv=document.getElementById('lookPreview');pv.innerHTML='';const s=document.createElement('span');s.className='pname';if(lookSel.av){const a=document.createElement('span');a.className='pav';a.textContent=lookSel.av;s.appendChild(a);}
   const n=document.createElement('b');n.textContent=lbMe.name;if(NAME_COLORS[lookSel.color])n.style.color=NAME_COLORS[lookSel.color];applyNameFont(n,lookSel.font);applyNameFx(n,lookSel.fx,lbMe.name);if(NAME_FX[lookSel.fx])s.classList.add('has-fx');s.appendChild(n);pv.appendChild(s);}
 async function saveLook(){const me=lbPlayers[lbMe.pid]||{},fontChanged=lookSel.font!==(me.font||''),avChanged=lookSel.av!==(me.av||''),fxChanged=lookSel.fx!==(me.fx||'');
   const needAdmin=(fontChanged&&PREMIUM_FONTS.includes(lookSel.font))||(avChanged&&lookSel.av===PREMIUM_AV)||(fxChanged&&PREMIUM_FX.includes(lookSel.fx));
-  if(needAdmin&&!isAdmin){openPaywall();return;}
+  if(needAdmin&&!hasPremium()){openPaywall();return;}
   const body={color:lookSel.color||null};if(fontChanged)body.font=lookSel.font||null;if(avChanged)body.av=lookSel.av||null;if(fxChanged)body.fx=lookSel.fx||null;   // unchanged premium items aren't re-sent
-  try{await fbReq('PATCH','players/'+lbMe.pid,body,{admin:needAdmin});
+  try{await fbReq('PATCH','players/'+lbMe.pid,body,{admin:needAdmin&&!premMe});   // premium players save with their own account
     lbPlayers[lbMe.pid]={...(lbPlayers[lbMe.pid]||{}),av:lookSel.av||undefined,color:lookSel.color||undefined,font:lookSel.font||undefined,fx:lookSel.fx||undefined};closeOverlay('lookOverlay');renderLb();renderChat();renderLbProfile();}
   catch(e){document.getElementById('lookErr').textContent='Couldn’t save. If this keeps happening, the database rules need updating (ask the admin).';}}
 function openPlayerCard(pid){const p=lbPlayers[pid];if(!p)return;const k=lbKeys();const box=document.getElementById('playerCard');box.innerHTML='';
@@ -3881,6 +3920,7 @@ let pollBusy=false;
 async function pollShared(){if(pollBusy)return;pollBusy=true;
   try{const [d,c,mu]=await Promise.all([fbReq('GET','duels').catch(()=>undefined),fbReq('GET','challenge').catch(()=>undefined),lbMe?fbReq('GET','mute/'+lbMe.pid).catch(()=>undefined):undefined]);
     if(mu!==undefined)setChatMuted(mu===true);
+    if(lbMe&&!premMe){const pr=await fbReq('GET','prem/'+lbMe.pid).catch(()=>null);if(pr)premMe=true;}
     if(d!==undefined){duelsObj=d||{};updDuelBtn();if(document.getElementById('duelInboxOverlay').style.display==='flex')renderDuelInbox();}
     if(c!==undefined){classChal=c&&c.target?c:null;renderClassChallenge();}}
   finally{pollBusy=false;}}
