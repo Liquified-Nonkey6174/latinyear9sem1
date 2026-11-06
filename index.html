@@ -557,6 +557,7 @@ body.calm .nfx-type .tw-caret{display:none}
 .pw-code-row{display:flex;gap:6px;justify-content:center}.pw-code-row input{flex:1;min-width:0;background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:8px;padding:7px 10px;font:inherit}
 .pw-code-msg{min-height:1.2em;margin-top:6px;font-size:13px;color:var(--text2)}.pw-code-msg.err{color:#e07a6a}.pw-code-msg.ok{color:#6dbf8a}.pw-have{color:#6dbf8a;margin:0}
 .look-box #lookCodes{display:block;margin:8px auto 0}.pw-admin{margin-top:14px;padding-top:10px;border-top:1px dashed var(--border2);text-align:left;font-size:13px}.pw-admin-row{display:flex;justify-content:space-between;align-items:center;gap:6px;padding:3px 0}
+.prem-badge{display:inline-block;font-family:system-ui,sans-serif;font-size:11px;font-weight:700;letter-spacing:.04em;padding:2px 8px;border-radius:999px;background:linear-gradient(90deg,#d4a84a,#e08ab8,#6aa2e0);color:#1c1a17;vertical-align:middle;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -3547,6 +3548,7 @@ function renderLbProfile(msg,isErr){document.querySelectorAll('.lb-profile').for
     box.appendChild(row);
   }else{const line=document.createElement('div');line.append('You’re ');line.appendChild(nameEl(lbMe.pid,lbMe.name));
     line.append(' · ');const pts=document.createElement('span');pts.className='lb-pts';pts.append('⭐ ');const n=document.createElement('span');n.id='lbMyPts';n.textContent=lbMyPoints().toLocaleString();pts.appendChild(n);line.appendChild(pts);line.append(' ');
+    if(premMe){const pb=document.createElement('span');pb.className='prem-badge';pb.textContent='✨ Premium';pb.title='You have Latin Trainer Premium';line.appendChild(pb);line.append(' ');}
     const look=document.createElement('button');look.className='lb-link';look.textContent='Look';look.onclick=openLook;line.appendChild(look);
     const ed=document.createElement('button');ed.className='lb-link';ed.textContent='Change name';ed.onclick=async()=>{let locked=false;try{locked=(await fbReq('GET','nlock/'+lbMe.pid))===true;}catch(e){}
       if(locked){renderLbProfile('The admin has turned off name changes for you.',true);return;}lbEditing=true;renderLbProfile();};line.appendChild(ed);
@@ -3706,7 +3708,7 @@ async function redeemCode(raw){const msg=document.getElementById('pwCodeMsg'),c=
   try{await fbReq('PATCH','',{['codes/'+c+'/left']:left-1,['prem/'+lbMe.pid]:{c,t:{'.sv':'timestamp'}}});}
   catch(e){let again=null;try{again=await fbReq('GET','prem/'+lbMe.pid);}catch(e2){}
     if(!again){msg.className+=' err';msg.textContent='Sorry, that code has just been used up (or the database rules need updating).';return;}}
-  premMe=true;msg.className+=' ok';msg.textContent='🎉 Premium unlocked! Pick your new look.';
+  premMe=true;renderLbProfile();msg.className+=' ok';msg.textContent='🎉 Premium unlocked! Pick your new look.';
   setTimeout(()=>{closeOverlay('paywallOverlay');if(document.getElementById('lookOverlay').style.display==='flex')renderLook();},1600);}
 async function adminCodes(box){const w=document.createElement('div');w.className='pw-admin';box.appendChild(w);
   const draw=async()=>{let codes={},prem={};try{[codes,prem]=await Promise.all([fbReq('GET','codes',null,{admin:true}),fbReq('GET','prem',null,{admin:true})]);}catch(e){w.textContent='Couldn’t load codes: '+e.message;return;}codes=codes||{};prem=prem||{};
@@ -3741,6 +3743,7 @@ function renderLook(){const av=document.getElementById('lookAvatars'),co=documen
   [['', 'var(--text)']].concat(Object.entries(NAME_COLORS)).forEach(([k,c])=>{const b=document.createElement('button');b.className='look-opt sw'+(lookSel.color===k?' on':'');b.style.background=c;b.title=k||'Default';b.onclick=()=>{lookSel.color=k;renderLook();};co.appendChild(b);});
   let pc=document.getElementById('lookCodes');if(isAdmin&&!pc){pc=document.createElement('button');pc.id='lookCodes';pc.className='lb-link';pc.textContent='👑 Premium codes (admin)';pc.onclick=openPaywall;document.querySelector('.look-actions').after(pc);}
   if(pc)pc.style.display=isAdmin?'':'none';
+  const lt=document.querySelector('#lookOverlay .about-title');if(lt)lt.innerHTML='Your look'+(premMe?' <span class="prem-badge">✨ Premium</span>':'');
   const pv=document.getElementById('lookPreview');pv.innerHTML='';const s=document.createElement('span');s.className='pname';if(lookSel.av){const a=document.createElement('span');a.className='pav';a.textContent=lookSel.av;s.appendChild(a);}
   const n=document.createElement('b');n.textContent=lbMe.name;if(NAME_COLORS[lookSel.color])n.style.color=NAME_COLORS[lookSel.color];applyNameFont(n,lookSel.font);applyNameFx(n,lookSel.fx,lbMe.name);if(NAME_FX[lookSel.fx])s.classList.add('has-fx');s.appendChild(n);pv.appendChild(s);}
 async function saveLook(){const me=lbPlayers[lbMe.pid]||{},fontChanged=lookSel.font!==(me.font||''),avChanged=lookSel.av!==(me.av||''),fxChanged=lookSel.fx!==(me.fx||'');
@@ -3763,7 +3766,19 @@ function openPlayerCard(pid){const p=lbPlayers[pid];if(!p)return;const k=lbKeys(
     const mb=document.createElement('button');mb.className='btn-secondary';mb.style.margin='0 0 8px 6px';mb.textContent='…';mb.disabled=true;box.insertBefore(mb,hist);
     let muted=false;const setMb=()=>{mb.textContent=muted?'🚫 Blocked from chat (unblock)':'Block from chat';mb.title=muted?'They can’t send chat messages. Click to allow it again.':'Stop them sending chat messages (they can still read chat and play).';mb.disabled=false;};
     fbReq('GET','mute/'+pid,null,{admin:true}).then(v=>{muted=v===true;setMb();}).catch(()=>{mb.textContent='Block from chat (unavailable)';});
-    mb.onclick=async()=>{mb.disabled=true;try{await fbReq(muted?'DELETE':'PUT','mute/'+pid,muted?null:true,{admin:true});muted=!muted;}catch(e){alert('Couldn’t save: '+e.message);}setMb();};}
+    mb.onclick=async()=>{mb.disabled=true;try{await fbReq(muted?'DELETE':'PUT','mute/'+pid,muted?null:true,{admin:true});muted=!muted;}catch(e){alert('Couldn’t save: '+e.message);}setMb();};
+    // Premium: remove it (also takes off any premium look items) or give it for free.
+    const pb=document.createElement('button');pb.className='btn-secondary';pb.style.margin='0 0 8px 6px';pb.textContent='…';pb.disabled=true;box.insertBefore(pb,hist);
+    let prem=null;const setPb=()=>{pb.textContent=prem?'👑 Premium'+(prem.c&&prem.c!=='admin'?' (code “'+prem.c+'”)':'')+' · remove':'Give premium';pb.disabled=false;};
+    fbReq('GET','prem/'+pid,null,{admin:true}).then(v=>{prem=v||null;setPb();}).catch(()=>{pb.textContent='Premium (unavailable)';});
+    pb.onclick=async()=>{const pl=lbPlayers[pid]||{};
+      if(prem){if(!confirm('Remove premium from '+(pl.name||'this player')+'? Their premium avatar, fonts and effects will be taken off.'))return;}
+      pb.disabled=true;
+      try{if(prem){await fbReq('DELETE','prem/'+pid,null,{admin:true});
+          const strip={};if(pl.av===PREMIUM_AV)strip.av=null;if(PREMIUM_FONTS.includes(pl.font))strip.font=null;if(PREMIUM_FX.includes(pl.fx))strip.fx=null;
+          if(Object.keys(strip).length)await fbReq('PATCH','players/'+pid,strip,{admin:true});prem=null;}
+        else{prem={c:'admin',t:{'.sv':'timestamp'}};await fbReq('PUT','prem/'+pid,prem,{admin:true});}}
+      catch(e){alert('Couldn’t save: '+e.message);}setPb();};}
   if(lbMe&&pid!==lbMe.pid){const b=document.createElement('button');b.className='btn-primary';b.textContent='⚔ Challenge '+p.name;b.onclick=()=>{closeOverlay('playerOverlay');openDuelSetup(pid);};box.appendChild(b);}
   else if(!lbMe){const n=document.createElement('p');n.className='forms-note';n.textContent='Join the leaderboard to challenge other players.';box.appendChild(n);}
   document.getElementById('playerOverlay').style.display='flex';}
@@ -3920,7 +3935,7 @@ let pollBusy=false;
 async function pollShared(){if(pollBusy)return;pollBusy=true;
   try{const [d,c,mu]=await Promise.all([fbReq('GET','duels').catch(()=>undefined),fbReq('GET','challenge').catch(()=>undefined),lbMe?fbReq('GET','mute/'+lbMe.pid).catch(()=>undefined):undefined]);
     if(mu!==undefined)setChatMuted(mu===true);
-    if(lbMe&&!premMe){const pr=await fbReq('GET','prem/'+lbMe.pid).catch(()=>null);if(pr)premMe=true;}
+    if(lbMe){const pr=await fbReq('GET','prem/'+lbMe.pid).catch(()=>undefined);if(pr!==undefined&&!!pr!==premMe){premMe=!!pr;renderLbProfile();if(document.getElementById('lookOverlay').style.display==='flex')renderLook();}}
     if(d!==undefined){duelsObj=d||{};updDuelBtn();if(document.getElementById('duelInboxOverlay').style.display==='flex')renderDuelInbox();}
     if(c!==undefined){classChal=c&&c.target?c:null;renderClassChallenge();}}
   finally{pollBusy=false;}}
