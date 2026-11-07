@@ -2878,10 +2878,7 @@ const TOUR_BASIC=[
   {el:'#readView',title:'Reading: stories',body:'Short <b>stories</b> to translate one sentence at a time. Hover over any word for its meaning and form, type your translation, then compare it with the model and mark yourself.',pre:()=>{showMainTab('read');storyIdx=-1;setReadMode('stories');}},
   {el:'#readArea',title:'Reading: parse it',body:'<b>Parse it</b> highlights a word in a sentence and asks what form it is (e.g. <i>dative plural</i> or <i>present, 3rd person plural</i>). Afterwards it explains why the word has that ending. Correct answers earn points.',pre:()=>{showMainTab('read');setReadMode('parse');}},
   {el:'#statsView',title:'Stats &amp; backup',body:'See total answers, accuracy, streak and per-category progress. Backing up and restoring your progress is covered in the advanced tour.',pre:()=>{showMainTab('stats');}},
-  {el:'#mistakeBox',title:'Mistake review',body:'The questions you get wrong most often collect here. Press <b>Practise these words</b> to drill them. Each one drops off once you’ve got it right as many times as you missed it.',pre:()=>{showMainTab('stats');}},
-  {el:'.nav-tab:nth-child(4)',title:'Information reference',body:'Grammar tables for declensions, conjugations (present, imperfect, future, imperative), adjectives, pronouns, and special cases — all in one place. Wide tables scroll sideways on small screens.',pre:()=>{showMainTab('info');}},
-  {el:'.lb-profile',title:'Join the leaderboard',body:'Join with a first name or nickname to appear on the leaderboard and use the chat. Once you’ve joined, <b>Look</b> lets you pick an avatar and name colour, and <b>⚔ Challenges</b> shows challenges from other players.',pre:()=>{showMainTab('practice');}},
-  {el:'.side-lb',title:'Leaderboard',body:'One point for every correct answer, ranked for today, this week, this month and all time. Search for anyone (they keep their real place), or show the top 10, top 25 or everyone. Click a player to see their scores and <b>⚔ challenge</b> them.'},
+  {el:'#mistakeBox',title:'Mistake review',body:'Your <b>10 least accurate words</b>, with your accuracy for each (all question types). A word only leaves the list when another word’s accuracy is worse. Press <b>Practise these words</b> to drill them.'},
   {el:'.side-chat',title:'Chat',body:'Talk to everyone using the trainer. Hover over a message to <b>Reply</b> or react with 👍 😂 ❤️ 😮. Be kind: everyone can read it.'},
   {el:null,title:'You\'re all set!',body:'That covers the basics. Want to learn about advanced features? <div style="margin-top:12px"><button class="btn-primary" style="font-size:12px;padding:6px 16px" onclick="endTour();setTimeout(()=>startTour(\'advanced\'),300)">Start advanced tour →</button></div>',pre:()=>{showMainTab('practice');setQuizType('vocab');}}
 ];
@@ -4035,21 +4032,23 @@ function renderDaily(){const box=document.getElementById('dailyGoal');if(!box)re
   box.className='dg'+(today>=g?' done':'');box.innerHTML='<div class="dg-top"><span>'+(today>=g?'✓ Daily goal reached':'Daily goal')+'</span><span>'+today+' / '+g+'</span></div><div class="dg-bar"><div style="width:'+pct+'%"></div></div><div class="dg-sub">'+(st?'🔥 '+st+'-day streak':'Reach your goal to start a streak 🔥')+'</div>';}
 
 // ── MISTAKE REVIEW (this browser) ────────────────────────────────────────────
-const MISTAKE_KEY='latin_mistakes';
-function mistakeData(){try{return JSON.parse(localStorage.getItem(MISTAKE_KEY)||'{}')||{};}catch(e){return {};}}
-function trackMistake(w,ok){if(!w||!w.catKey||isSent)return;const d=mistakeData();const q=isDrill&&drillQs[drillIdx]&&drillQs[drillIdx].word&&drillQs[drillIdx].word.lat===w.lat?drillQs[drillIdx]:null;
-  const key=wKey(w)+'|'+mode+(q?'|'+q.key:'');
-  if(!ok){d[key]=d[key]||{w:{lat:w.lat,catKey:w.catKey,subKey:w.subKey},mode,form:q?q.key:'',n:0};d[key].n++;d[key].t=Date.now();}
-  else if(d[key]){d[key].n--;if(d[key].n<=0)delete d[key];}else return;
-  try{localStorage.setItem(MISTAKE_KEY,JSON.stringify(d));}catch(e){}}
-function mistakeWord(m){return allWordsFlat().find(x=>x.lat===m.w.lat&&x.catKey===m.w.catKey&&x.subKey===m.w.subKey);}
-function renderMistakes(){const box=document.getElementById('mistakeBox');if(!box)return;const list=Object.values(mistakeData()).filter(m=>mistakeWord(m)).sort((a,b)=>b.n-a.n||b.t-a.t);
-  if(!list.length){box.innerHTML='<p style="margin:0">No mistakes recorded yet. Questions you get wrong will appear here, and drop off once you get them right.</p>';return;}
-  box.innerHTML='<p>Your most-missed questions. Each one drops off once you’ve got it right as many times as you missed it.</p><div class="mk-list">'+list.slice(0,20).map(m=>'<div class="mk-row"><span class="mk-w">'+esc(m.w.lat)+'</span><span class="mk-d">'+esc(m.form?m.form:(m.mode==='el'?'English → Latin':'Latin → English'))+'</span><span class="mk-n">missed ×'+m.n+'</span></div>').join('')+'</div>'
-    +'<div class="backup-btns" style="margin-top:12px"><button class="btn-primary" onclick="practiseMistakes()">Practise these words</button><button class="btn-secondary" onclick="if(confirm(\'Clear your mistake list?\')){localStorage.removeItem(MISTAKE_KEY);renderMistakes();}">Clear list</button></div>';}
-function practiseMistakes(){const list=Object.values(mistakeData()).sort((a,b)=>b.n-a.n).slice(0,20);const seen=new Set(),ws=[];list.forEach(m=>{const w=mistakeWord(m);if(w&&!seen.has(wKey(w))){seen.add(wKey(w));ws.push(w);}});if(!ws.length)return;
-  showMainTab('practice');setQuizType('vocab');const drill=list.find(m=>m.form);if(drill){const ck=drill.w.catKey;const qt={nouns:'nounDecl',adjectives:'adjDecl',verbs:'verbConj',pronouns:'pronDecl'}[ck];if(qt&&ws.every(w=>w.catKey===ck))setQuizType(qt);}
-  setMode(list[0].mode);beginQuiz(shuffle(ws));}
+// Accuracy per word (all question types). The list shows the 10 words with the lowest accuracy that you've
+// missed at least once; a word only leaves the list when another word's accuracy is worse.
+const ACC_KEY='latin_accuracy';
+function accData(){try{const r=localStorage.getItem(ACC_KEY);if(r)return JSON.parse(r)||{};}catch(e){}
+  // first time: start from the answers already recorded for spaced repetition
+  const d={};try{Object.entries(srData||{}).forEach(([k,v])=>{if(v&&v.seen>0)d[k]={s:v.seen,c:Math.min(v.correct||0,v.seen)};});localStorage.setItem(ACC_KEY,JSON.stringify(d));}catch(e){}return d;}
+function trackMistake(w,ok){if(!w||!w.catKey||isSent)return;const d=accData();const k=wKey(w);const r=d[k]=d[k]||{s:0,c:0};r.s++;if(ok)r.c++;r.t=Date.now();
+  try{localStorage.setItem(ACC_KEY,JSON.stringify(d));}catch(e){}}
+function worstWords(){const all=allWordsFlat(),byKey=new Map(all.map(w=>[wKey(w),w]));
+  return Object.entries(accData()).filter(([k,r])=>r&&r.s>0&&r.c<r.s&&byKey.has(k)).map(([k,r])=>({w:byKey.get(k),acc:r.c/r.s,s:r.s,c:r.c,t:r.t||0}))
+    .sort((a,b)=>a.acc-b.acc||(b.s-b.c)-(a.s-a.c)||b.t-a.t).slice(0,10);}
+function renderMistakes(){const box=document.getElementById('mistakeBox');if(!box)return;const list=worstWords();
+  if(!list.length){box.innerHTML='<p style="margin:0">No mistakes recorded yet. Words you get wrong will appear here with your accuracy.</p>';return;}
+  box.innerHTML='<p>Your 10 least accurate words (every question type). A word only leaves this list when another word’s accuracy is worse.</p><div class="mk-list">'
+    +list.map((m,i)=>{const pct=Math.round(m.acc*100);return '<div class="mk-row"><span class="mk-w">'+(i+1)+'. '+esc(fullLat(m.w))+'</span><span class="mk-d">'+esc(displayEng(m.w))+'</span><span class="mk-n" style="color:'+(pct<50?'var(--red,#e07a6a)':pct<80?'var(--accent)':'var(--green,#6dbf8a)')+'">'+pct+'% <small style="opacity:.7">('+m.c+'/'+m.s+')</small></span></div>';}).join('')+'</div>'
+    +'<div class="backup-btns" style="margin-top:12px"><button class="btn-primary" onclick="practiseMistakes()">Practise these words</button><button class="btn-secondary" onclick="if(confirm(\'Reset your accuracy list?\')){try{localStorage.setItem(ACC_KEY,\'{}\');}catch(e){}renderMistakes();}">Reset list</button></div>';}
+function practiseMistakes(){const ws=worstWords().map(m=>m.w);if(!ws.length)return;showMainTab('practice');setQuizType('vocab');beginQuiz(shuffle(ws));}
 
 // ── READING: stories + parse it ──────────────────────────────────────────────
 let readMode='stories',storyIdx=-1,storyPos=0,storyMarks=[],storyAuto=[],parseQ=null,parseFilter='all',parseScore={r:0,n:0};
