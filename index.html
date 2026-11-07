@@ -582,6 +582,15 @@ body.calm .nfx-type .tw-caret{display:none}
 .bd-pin{margin-top:4px;font-size:11px;padding:3px 8px;border-radius:999px;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer}.bd-pin.on{border-color:var(--accent);color:var(--accent)}
 .badge-card.pinned{box-shadow:0 0 0 2px var(--accent) inset}
 .lb-name{display:flex;align-items:center;padding:4px 8px 5px 0;margin:-4px 0 -5px}.lb-name .pname{min-width:0;flex:0 1 auto}.lb-name .bchips{flex-shrink:0}
+.badge-box{max-width:920px;width:94%;max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px);display:flex;flex-direction:column}
+.badge-scroll{overflow-y:auto;overscroll-behavior:contain;margin:0 -6px;padding:2px 6px 6px}
+.rside{display:none;flex:0 0 250px;position:sticky;top:16px;margin-top:16px;min-width:0}
+.rside .side-sec{padding:0 0 8px}.rside .bs-list{padding:0 14px}
+@media(min-width:1400px){.rside{display:block}.layout{padding-right:44px}}
+.bs-list{display:flex;flex-direction:column;gap:10px;margin-top:8px}.bs-row{display:flex;gap:9px;align-items:center}
+.bs-i{font-size:20px;width:26px;text-align:center;flex-shrink:0}.bs-main{flex:1;min-width:0}
+.bs-top{display:flex;justify-content:space-between;gap:6px;font-size:12.5px}.bs-n{color:var(--text);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bs-v{color:var(--text3);font-size:11px;white-space:nowrap}
+.bs-bar{height:6px;border-radius:999px;background:var(--surface2);margin-top:4px;overflow:hidden}.bs-bar>div{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--accent),#e6b422)}
 </style>
 </head>
 <body>
@@ -633,7 +642,7 @@ body.calm .nfx-type .tw-caret{display:none}
       </div>
     </div>
   </div>
-  <div class="settings-row"><button class="settings-btn" onclick="showSettings()">⚙ Settings</button></div>
+  <div class="settings-row"><button class="settings-btn" onclick="showSettings()">⚙ Settings</button> <button class="settings-btn" onclick="openBadges()">🏅 Badges <span id="badgeBtnCount" style="opacity:.7;font-size:12px"></span></button></div>
   <div class="nav-tabs">
     <button class="nav-tab active" onclick="showMainTab('practice')">Practice</button>
     <button class="nav-tab" onclick="showMainTab('read')">Reading</button>
@@ -822,8 +831,8 @@ body.calm .nfx-type .tw-caret{display:none}
   <div class="session-chart" id="sessionChart"></div>
   <p class="section-title">By category</p>
   <div class="cat-stats-grid" id="catStatsGrid"></div>
-  <p class="section-title">🏅 Badges <span id="badgeCount" style="font-size:12px;color:var(--text3);font-weight:400"></span></p>
-  <div id="badgeGrid" class="badge-grid" style="margin-bottom:2rem"></div>
+  <p class="section-title">🏅 Badges</p>
+  <div style="margin-bottom:2rem"><button class="btn-secondary" onclick="openBadges()">Open badges <span id="badgeStatsCount"></span></button></div>
   <p class="section-title">Mistake review</p>
   <div id="mistakeBox" class="backup-box" style="margin-bottom:2rem"></div>
   <p class="section-title">Backup &amp; transfer</p>
@@ -2096,6 +2105,15 @@ body.calm .nfx-type .tw-caret{display:none}
   </div>
 </div>
 
+<!-- BADGES -->
+<div id="badgeOverlay" class="overlay" style="display:none" onclick="closeOverlay('badgeOverlay')">
+  <div class="about-box badge-box" onclick="event.stopPropagation()"><button class="about-close" onclick="closeOverlay('badgeOverlay')">×</button>
+    <div class="about-title">🏅 Badges</div>
+    <div id="badgeCount" style="text-align:center;font-size:12px;color:var(--text3);margin:-6px 0 12px"></div>
+    <div class="badge-scroll"><div id="badgeGrid" class="badge-grid"></div></div>
+  </div>
+</div>
+
 <!-- FORMS VIEWER -->
 <div id="formsOverlay" class="overlay" style="display:none" onclick="hideForms()">
   <div class="forms-box" onclick="event.stopPropagation()">
@@ -2966,7 +2984,7 @@ function showMainTab(t){
   const iv=document.getElementById('infoView');
   if(iv)iv.style.display=t==='info'?'block':'none';
   const rv=document.getElementById('readView');if(rv)rv.style.display=t==='read'?'block':'none';
-  if(t==='stats'){renderStats();renderMistakes();badgeCheck();renderBadges();}
+  if(t==='stats'){renderStats();renderMistakes();badgeCheck();}
   if(t==='read')renderReading();
 }
 function selectAll(){Object.entries(DATA).forEach(([ck,cat])=>{if(cat.packOnly)return;Object.keys(DATA[ck].sub).forEach(sk=>{selected[ck][sk]=true;const sc=document.getElementById('sbox_'+ck+'_'+sk);if(sc)sc.className='sbox checked';});updCatBox(ck);});updCount();}
@@ -4174,7 +4192,7 @@ function badgeCheck(){const got=bjson(BADGE_KEY);let changed=false;const b=bstat
     if(l>old){got[bd.id]={l,t:Date.now()};changed=true;{const nm=badgeTierName(bd,l)+(bd.metal!=null?' '+ROMAN[bd.metal]:'');toast('🏅 Badge unlocked: '+nm+(nm.endsWith('!')?'':'!'));}}});
   if(changed){try{localStorage.setItem(BADGE_KEY,JSON.stringify(got));}catch(e){}}
   syncShownBadges();
-  if(document.getElementById('statsView')&&document.getElementById('statsView').style.display!=='none')renderBadges();}
+  if(document.getElementById('badgeOverlay')&&document.getElementById('badgeOverlay').style.display==='flex')renderBadges();renderBadgeSide();}
 function renderBadges(){const g=document.getElementById('badgeGrid');if(!g)return;const got=bjson(BADGE_KEY);let earned=0,total=0;g.innerHTML='';
   BADGES.forEach(bd=>{const e=got[bd.id],l=e?e.l:0;total+=bd.lv.length;earned+=l;if(bd.secret&&!l){const c=document.createElement('div');c.className='badge-card locked';c.innerHTML='<div class="bd-icon">❔</div><div class="bd-name">Secret badge</div><div class="bd-desc">Keep exploring…</div>';g.appendChild(c);return;}
     let v=0;try{v=bd.stat();}catch(e){}const next=bd.lv[l];const c=document.createElement('div');c.className='badge-card'+(l?' earned':' locked')+(bd.metal!=null?' m-'+METAL[bd.metal]:l?' lvl'+Math.min(l,7):'');
@@ -4207,6 +4225,20 @@ async function syncShownBadges(){if(!lbMe||_bdSaving)return;const got=bjson(BADG
 let bdSaveErr='';
 function toggleBadgePin(id){let pins=badgePins();if(pins.includes(id))pins=pins.filter(x=>x!==id);else{if(pins.length>=3){toast('You can show up to 3 badges. Unpin one first.');return;}pins.push(id);}
   try{localStorage.setItem(PIN_KEY,JSON.stringify(pins));}catch(e){}renderBadges();syncShownBadges();}
+
+// Progress towards each badge's next level (for the side panel)
+function badgeProgress(bd){const got=bjson(BADGE_KEY),l=got[bd.id]?got[bd.id].l:0;if(l>=bd.lv.length||bd.secret)return null;let v=0,next=bd.lv[l];try{v=bd.stat();}catch(e){}
+  if(bd.id.startsWith('lex')||bd.id.startsWith('doct')){const [a,b]=lexProgress(bd.id==='lexicon'||bd.id==='doctus'?'main':'all',bd.id.startsWith('lex')?'seen':'correct').split(' / ').map(Number);v=a;next=b;}
+  const name=bd.metal!=null?bd.name+' '+ROMAN[bd.metal]:bd.lv.length>1?bd.name+' '+ROMAN[l]:bd.name;
+  return {bd,v:Math.min(v,next),next,frac:next?Math.min(1,v/next):0,name};}
+function renderBadgeSide(){const box=document.getElementById('badgeSide');const got=bjson(BADGE_KEY);let earned=0,total=0;BADGES.forEach(bd=>{total+=bd.lv.length;earned+=got[bd.id]?got[bd.id].l:0;});
+  const bc=document.getElementById('badgeBtnCount');if(bc)bc.textContent=earned+'/'+total;const sc=document.getElementById('badgeStatsCount');if(sc)sc.textContent='('+earned+' / '+total+')';
+  if(!box)return;const list=BADGES.map(badgeProgress).filter(x=>x&&x.next>0).sort((a,b)=>b.frac-a.frac).slice(0,5);
+  box.innerHTML='<div class="side-h"><span>🏅 Next badges</span><span class="side-sub">'+earned+' / '+total+'</span></div><div class="bs-list">'
+    +list.map(x=>'<div class="bs-row" title="'+esc(x.bd.desc)+'"><span class="bs-i">'+x.bd.icon+'</span><div class="bs-main"><div class="bs-top"><span class="bs-n">'+esc(x.name)+'</span><span class="bs-v">'+x.v.toLocaleString()+' / '+x.next.toLocaleString()+'</span></div><div class="bs-bar"><div style="width:'+Math.round(x.frac*100)+'%"></div></div></div></div>').join('')
+    +'</div><button class="lb-link" style="margin:8px 0 2px;display:block;width:100%;text-align:center" onclick="openBadges()">See all badges</button>';}
+function openBadges(){badgeCheck();renderBadges();document.getElementById('badgeOverlay').style.display='flex';}
+(function(){const lay=document.querySelector('.layout');if(!lay)return;const a=document.createElement('aside');a.className='rside';a.innerHTML='<div class="side-sec" id="badgeSide"></div>';lay.appendChild(a);setTimeout(()=>{try{renderBadgeSide();}catch(e){}},300);})();
 
 // ── READING: stories + parse it ──────────────────────────────────────────────
 let readMode='stories',storyIdx=-1,storyPos=0,storyMarks=[],storyAuto=[],parseQ=null,parseFilter='all',parseScore={r:0,n:0};
