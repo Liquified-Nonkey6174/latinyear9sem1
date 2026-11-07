@@ -3155,7 +3155,10 @@ function enMeaningAlts(sd,eng){const clean=x=>String(x).replace(/\s*\([^)]*\)/g,
   pairs.forEach(([a,b])=>{if(!a||!b||a===b)return;const re=new RegExp('\\b'+esc2(a)+'\\b','g');const add=[];out.forEach(v=>{if(re.test(v)){re.lastIndex=0;add.push(v.replace(re,b));}re.lastIndex=0;});out=out.concat(add).slice(0,96);});
   return out.slice(1);}
 function sentAlternatives(ca){const alts=[ca];if(!sentData)return alts;
-  if(mode==='le')alts.push(...enMeaningAlts(sentData,ca));   // any listed meaning of the words in the sentence
+  if(mode==='le'){
+    // hints in [ ] like "his [own] father" or "his [someone else's] master" are optional: "his father" and "his own father" both count
+    const bases=[ca];if(/\[[^\]]*\]/.test(ca)){bases.push(ca.replace(/\s*\[[^\]]*\]/g,''),ca.replace(/[\[\]]/g,''));}
+    bases.slice(1).forEach(b=>alts.push(b));bases.forEach(b=>alts.push(...enMeaningAlts(sentData,b)));}
   if(mode==='el'&&sentData.altLatin)alts.push(...sentData.altLatin);   // e.g. "Nos cibum portamus" as well as "Cibum portamus"
   if(mode==='le'&&/\(pl\.\)/.test(ca))alts.push(ca.replace(/\s*\(pl\.\)/g,''));
   if(mode==='el'&&sentData.imps&&sentData.imps.length&&!/all of you/i.test(sentData.english)){let pl=ca;
