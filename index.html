@@ -2368,7 +2368,7 @@ const FORM_SYNS={};
 })();
 
 function checkWithSynonyms(ua,ca){
-  const norm=s=>s.toLowerCase().replace(/[^a-z\s]/g,'').replace(/\s+/g,' ').trim();
+  const norm=s=>{let t=s.toLowerCase().replace(/[^a-z\s]/g,'');if(mode==='le')t=t.replace(/\b(the|a|an)\b/g,' ');return t.replace(/\s+/g,' ').trim();};
   const nua=norm(ua),nca=norm(ca);
   if(nua===nca)return true;
   const uaWords=nua.split(' ');
@@ -3146,7 +3146,16 @@ const wordCount=t=>(String(t||'').replace(/\[[^\]]*\]|\([^)]*\)/g,' ').match(/[A
 const SENT_DIFF_BONUS={expert:4};
 function sentPoints(sd){sd=sd||sentData;if(!sd)return 1;return Math.max(1,mode==='el'?Math.floor(wordCount(sd.english)*1.2):wordCount(sd.latin))+(SENT_DIFF_BONUS[difficulty]||0);}
 // Other correct answers: a command can be to one person or several unless the English says ("all of you").
+function enMeaningAlts(sd,eng){const clean=x=>String(x).replace(/\s*\([^)]*\)/g,'').replace(/^to /,'').trim().toLowerCase();
+  const vals=new Set();Object.values(sd.wordMap||{}).forEach(x=>{const c=clean(x);vals.add(c);vals.add(c.replace(/^(of|to) the /,''));});
+  const v3=x=>{try{return eV3({eng:[x]});}catch(e){return null;}},ing=x=>{try{return ePast({eng:[x]}).replace(/^was /,'');}catch(e){return null;}},pl=x=>{try{return ePl({lat:'',eng:[x]});}catch(e){return null;}};
+  const pairs=[];allWordsFlat().forEach(w=>{if(!w.eng||w.eng.length<2)return;const e0=clean(w.eng[0]);if(!vals.has(e0))return;
+    w.eng.slice(1).map(clean).forEach(m=>{if(!m||m===e0)return;pairs.push([e0,m]);if(w.catKey==='verbs'){pairs.push([v3(e0),v3(m)],[ing(e0),ing(m)]);}if(w.catKey==='nouns')pairs.push([pl(e0),pl(m)]);});});
+  let out=[eng.toLowerCase()];const esc2=x=>x.replace(/[.*+?^\${}()|[\]\\]/g,'\\$&');
+  pairs.forEach(([a,b])=>{if(!a||!b||a===b)return;const re=new RegExp('\\b'+esc2(a)+'\\b','g');const add=[];out.forEach(v=>{if(re.test(v)){re.lastIndex=0;add.push(v.replace(re,b));}re.lastIndex=0;});out=out.concat(add).slice(0,96);});
+  return out.slice(1);}
 function sentAlternatives(ca){const alts=[ca];if(!sentData)return alts;
+  if(mode==='le')alts.push(...enMeaningAlts(sentData,ca));   // any listed meaning of the words in the sentence
   if(mode==='el'&&sentData.altLatin)alts.push(...sentData.altLatin);   // e.g. "Nos cibum portamus" as well as "Cibum portamus"
   if(mode==='le'&&/\(pl\.\)/.test(ca))alts.push(ca.replace(/\s*\(pl\.\)/g,''));
   if(mode==='el'&&sentData.imps&&sentData.imps.length&&!/all of you/i.test(sentData.english)){let pl=ca;
@@ -5265,8 +5274,8 @@ let _known=null;
 function knownForms(){if(_known)return _known;const s=new Set();const add=f=>{if(f)Object.values(f).forEach(v=>String(v).toLowerCase().split(/[\s\/]+/).forEach(x=>s.add(x)));};
   allWordsFlat().forEach(w=>{String(w.lat).toLowerCase().split(/[\s\/]+/).forEach(x=>s.add(x));try{if(isNounWord(w))add(NUMBER_FORMS[w.lat]||getNounForms(w));else if(w.catKey==='adjectives')add(NUMBER_FORMS[w.lat]||getAdjForms(w));else if(w.catKey==='verbs')[getVerbConj,getVerbImpf,getVerbFut,getVerbImp].forEach(fn=>{try{add(fn(w));}catch(e){}});}catch(e){}});
   Object.values(PRONOUN_FORMS).forEach(add);_known=s;return s;}
-function nearMiss(typed,cands,latin){const t=nrmT(typed).split(' ');if(!t[0])return false;
-  for(const c of cands){if(!c)continue;const cc=nrmT(c).split(' ');if(cc.length!==t.length)continue;let bad=0,ok=true;
+function nearMiss(typed,cands,latin){const na=x=>latin?nrmT(x):nrmT(x).replace(/\b(the|a|an)\b/g,' ').replace(/\s+/g,' ').trim();const t=na(typed).split(' ');if(!t[0])return false;
+  for(const c of cands){if(!c)continue;const cc=na(c).split(' ');if(cc.length!==t.length)continue;let bad=0,ok=true;
     for(let i=0;i<t.length;i++){if(t[i]===cc[i])continue;const L=Math.max(t[i].length,cc[i].length);const lim=L>=9?2:L>=5?1:0;if(!lim||dmg(t[i],cc[i])>lim){ok=false;break;}if(latin&&knownForms().has(t[i])){ok=false;break;}bad++;}
     if(ok&&bad>0&&bad<=2)return true;}
   return false;}
