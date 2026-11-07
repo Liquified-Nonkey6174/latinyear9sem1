@@ -569,6 +569,19 @@ body.calm .nfx-type .tw-caret{display:none}
 .badge-card.m-gold.earned{border-color:#e6b422;background:linear-gradient(160deg,rgba(230,180,34,.22),transparent)}.m-gold .bd-metal{background:#e6b422;color:#222}
 .badge-card.m-diamond.earned{border-color:#7fdbff;background:linear-gradient(160deg,rgba(127,219,255,.22),rgba(200,160,255,.12))}.m-diamond .bd-metal{background:linear-gradient(90deg,#7fdbff,#c8a0ff);color:#222}
 .badge-card.earned.lvl4,.badge-card.earned.lvl5{border-color:#e6b422}.badge-card.earned.lvl6,.badge-card.earned.lvl7{border-color:#7fdbff;box-shadow:0 0 10px rgba(127,219,255,.25)}
+.bchips{display:inline-flex;gap:3px;margin-left:6px;vertical-align:middle}
+.bchip{position:relative;display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--surface2);border:1.5px solid var(--border2);font-size:12px;line-height:1;flex-shrink:0}
+.bchip.big{width:30px;height:30px;font-size:17px}
+.bchip .bc-n{position:absolute;bottom:-5px;right:-7px;font-family:var(--serif,serif);font-size:8.5px;font-weight:700;line-height:1;padding:1px 2px;border-radius:4px;background:var(--surface);border:1px solid currentColor;color:var(--text2)}
+.bchip.big .bc-n{font-size:10px;bottom:-6px;right:-8px}
+.bchip.m-bronze{border-color:#b87333;box-shadow:0 0 0 1px rgba(184,115,51,.35)}.bchip.m-silver{border-color:#c0c0c0;box-shadow:0 0 0 1px rgba(192,192,192,.4)}
+.bchip.m-gold{border-color:#e6b422;box-shadow:0 0 6px rgba(230,180,34,.45)}.bchip.m-diamond{border-color:#7fdbff;box-shadow:0 0 8px rgba(127,219,255,.6),0 0 2px rgba(200,160,255,.8) inset}
+.bchip.lv1 .bc-n,.bchip.lv2 .bc-n{color:#cd8a4f}.bchip.lv3 .bc-n,.bchip.lv4 .bc-n{color:#c9c9c9}.bchip.lv5 .bc-n{color:#e6b422}.bchip.lv6 .bc-n,.bchip.lv7 .bc-n{color:#7fdbff}
+.bchip.lv5,.bchip.lv6,.bchip.lv7{border-color:#e6b422}.bchip.lv6,.bchip.lv7{border-color:#7fdbff;box-shadow:0 0 6px rgba(127,219,255,.45)}
+.bd-icon{position:relative;display:inline-block}.bd-num{position:absolute;bottom:-4px;right:-14px;font-family:var(--serif,serif);font-size:11px;font-weight:700;padding:0 4px;border-radius:5px;background:var(--surface2);border:1px solid var(--accent);color:var(--accent)}
+.bd-pin{margin-top:4px;font-size:11px;padding:3px 8px;border-radius:999px;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer}.bd-pin.on{border-color:var(--accent);color:var(--accent)}
+.badge-card.pinned{box-shadow:0 0 0 2px var(--accent) inset}
+.lb-name{display:flex;align-items:center;padding:4px 8px 5px 0;margin:-4px 0 -5px}.lb-name .pname{min-width:0;flex:0 1 auto}.lb-name .bchips{flex-shrink:0}
 </style>
 </head>
 <body>
@@ -3818,7 +3831,7 @@ function renderLb(){const list=document.getElementById('lbList');if(!list||!lbPl
     const rank=r.rank;
     const it=document.createElement('div');it.className='lb-item'+(lbMe&&r.pid===lbMe.pid?' me':'')+(rank<=3&&r.n>0?' top':'');
     const rk=document.createElement('span');rk.className='lb-rank';rk.textContent=SET.ordinal?ordinal(rank):rank;
-    const nm=document.createElement('span');nm.className='lb-name';nm.appendChild(nameEl(r.pid,r.name));if(isAdmin&&lbHidden.has(r.pid)){it.style.opacity='.55';nm.title='Hidden from everyone else';nm.append(' 👻');}
+    const nm=document.createElement('span');nm.className='lb-name';nm.appendChild(nameEl(r.pid,r.name));{const bc=badgeChipsEl(lbPlayers[r.pid]);if(bc)nm.appendChild(bc);}if(isAdmin&&lbHidden.has(r.pid)){it.style.opacity='.55';nm.title='Hidden from everyone else';nm.append(' 👻');}
     const ct=document.createElement('span');ct.className='lb-count';ct.textContent=r.n.toLocaleString();
     it.append(rk,nm,ct);it.classList.add('click');it.title=lbMe&&r.pid===lbMe.pid?'Change your look':'View '+r.name;
     it.onclick=e=>{if(e.target.closest('.lb-act'))return;if(lbMe&&r.pid===lbMe.pid)openLook();else openPlayerCard(r.pid);};
@@ -3971,7 +3984,7 @@ async function saveLook(){const me=lbPlayers[lbMe.pid]||{},fontChanged=lookSel.f
     lbPlayers[lbMe.pid]={...(lbPlayers[lbMe.pid]||{}),av:lookSel.av||undefined,color:lookSel.color||undefined,font:lookSel.font||undefined,fx:lookSel.fx||undefined};closeOverlay('lookOverlay');renderLb();renderChat();renderLbProfile();}
   catch(e){document.getElementById('lookErr').textContent='Couldn’t save. If this keeps happening, the database rules need updating (ask the admin).';}}
 function openPlayerCard(pid){const p=lbPlayers[pid];if(!p)return;const k=lbKeys();const box=document.getElementById('playerCard');box.innerHTML='';
-  const h=document.createElement('div');h.className='pc-name';const big=nameEl(pid,p.name);h.appendChild(big);box.appendChild(h);
+  const h=document.createElement('div');h.className='pc-name';const big=nameEl(pid,p.name);h.appendChild(big);box.appendChild(h);{const bc=badgeChipsEl(p,true);if(bc){const r=document.createElement('div');r.style.cssText='text-align:center;margin:-4px 0 10px';r.appendChild(bc);box.appendChild(r);}}
   const g=document.createElement('div');g.className='pc-grid';[['Today','d'],['Week','w'],['Month','m'],['All time','all']].forEach(([l,per])=>{const c=document.createElement('div');c.innerHTML='<b>'+lbScore(p,per,k).toLocaleString()+'</b><span>'+l+'</span>';g.appendChild(c);});box.appendChild(g);
   if(isAdmin){const rb=document.createElement('button');rb.className='btn-secondary';rb.style.marginBottom='8px';rb.textContent='Rename (admin)';rb.onclick=()=>{closeOverlay('playerOverlay');adminRename(pid);};box.appendChild(rb);
     const hb=document.createElement('button');hb.className='btn-secondary';hb.style.margin='0 0 8px 6px';hb.textContent='Name history';const hist=document.createElement('div');hist.className='nh-box';
@@ -4160,15 +4173,35 @@ function badgeCheck(){const got=bjson(BADGE_KEY);let changed=false;const b=bstat
   BADGES.forEach(bd=>{let v=0;try{v=bd.stat();}catch(e){}const l=badgeLevel(bd,v);const old=got[bd.id]?got[bd.id].l:0;
     if(l>old){got[bd.id]={l,t:Date.now()};changed=true;toast('🏅 Badge unlocked: '+badgeTierName(bd,l)+'!');}});
   if(changed){try{localStorage.setItem(BADGE_KEY,JSON.stringify(got));}catch(e){}}
+  syncShownBadges();
   if(document.getElementById('statsView')&&document.getElementById('statsView').style.display!=='none')renderBadges();}
 function renderBadges(){const g=document.getElementById('badgeGrid');if(!g)return;const got=bjson(BADGE_KEY);let earned=0,total=0;g.innerHTML='';
   BADGES.forEach(bd=>{const e=got[bd.id],l=e?e.l:0;total+=bd.lv.length;earned+=l;if(bd.secret&&!l){const c=document.createElement('div');c.className='badge-card locked';c.innerHTML='<div class="bd-icon">❔</div><div class="bd-name">Secret badge</div><div class="bd-desc">Keep exploring…</div>';g.appendChild(c);return;}
     let v=0;try{v=bd.stat();}catch(e){}const next=bd.lv[l];const c=document.createElement('div');c.className='badge-card'+(l?' earned':' locked')+(bd.metal!=null?' m-'+METAL[bd.metal]:l?' lvl'+Math.min(l,7):'');
     let prog='';if(next!=null){if(bd.id.startsWith('lex')||bd.id.startsWith('doct'))prog=lexProgress(bd.id==='lexicon'||bd.id==='doctus'?'main':'all',bd.id.startsWith('lex')?'seen':'correct');else if(bd.lv.length>1||next>1)prog=Math.min(v,next).toLocaleString()+' / '+next.toLocaleString()+(bd.unit?' '+bd.unit:'');}
-    c.innerHTML='<div class="bd-icon">'+bd.icon+'</div><div class="bd-name">'+esc(l?badgeTierName(bd,l):bd.name)+(bd.metal!=null?' <span class="bd-metal">'+METAL[bd.metal]+'</span>':'')+'</div>'+(bd.lat?'<div class="bd-lat">'+esc(bd.lat)+'</div>':'')
+    c.innerHTML='<div class="bd-icon">'+bd.icon+(l&&bd.lv.length>1?'<span class="bd-num">'+ROMAN[l-1]+'</span>':'')+'</div><div class="bd-name">'+esc(l?badgeTierName(bd,l):bd.name)+(bd.metal!=null?' <span class="bd-metal">'+METAL[bd.metal]+'</span>':'')+'</div>'+(bd.lat?'<div class="bd-lat">'+esc(bd.lat)+'</div>':'')
       +'<div class="bd-desc">'+esc(bd.desc)+(bd.lv.length>1?' Levels: '+bd.lv.map(x=>x.toLocaleString()).join(' · ')+'.':'')+'</div>'+(prog?'<div class="bd-prog">'+(l?'Next: ':'')+prog+'</div>':'')+(e?'<div class="bd-date">'+new Date(e.t).toLocaleDateString()+'</div>':'');
+    if(l&&lbMe){const pinned=badgePins().includes(bd.id);const pb=document.createElement('button');pb.className='bd-pin'+(pinned?' on':'');pb.textContent=pinned?'📌 Shown':'📌 Show';pb.title=pinned?'Shown next to your name on the leaderboard. Click to hide.':'Show next to your name on the leaderboard (up to 3).';pb.onclick=()=>toggleBadgePin(bd.id);c.appendChild(pb);if(pinned)c.classList.add('pinned');}
     g.appendChild(c);});
-  const cnt=document.getElementById('badgeCount');if(cnt)cnt.textContent=earned+' / '+total;}
+  const cnt=document.getElementById('badgeCount');if(cnt)cnt.textContent=earned+' / '+total+(lbMe?' · showing '+badgePins().filter(id=>got[id]).length+'/3 on the leaderboard':'');}
+
+// Badges shown on the leaderboard: players pick up to 3 (players/{uid}/bd = "id:level,id:level").
+const PIN_KEY='latin_badge_pins';
+function badgePins(){try{const a=JSON.parse(localStorage.getItem(PIN_KEY)||'[]');return Array.isArray(a)?a.slice(0,3):[];}catch(e){return [];}}
+function badgeById(id){return BADGES.find(b=>b.id===id);}
+// a small badge chip: icon + level numeral (tiered) or metal ring (points badges)
+function badgeChip(id,l,big){const bd=badgeById(id);if(!bd||!l)return null;const c=document.createElement('span');
+  c.className='bchip'+(big?' big':'')+(bd.metal!=null?' m-'+METAL[bd.metal]:bd.lv.length>1?' lv'+Math.min(l,7):'');c.title=badgeTierName(bd,l)+(bd.lat?' ('+bd.lat+')':'');
+  const i=document.createElement('span');i.className='bc-i';i.textContent=bd.icon;c.appendChild(i);
+  if(bd.lv.length>1){const n=document.createElement('span');n.className='bc-n';n.textContent=ROMAN[l-1];c.appendChild(n);}
+  return c;}
+function shownBadges(p){return String((p&&p.bd)||'').split(',').map(x=>x.split(':')).filter(([id,l])=>badgeById(id)&&+l>0).slice(0,3).map(([id,l])=>[id,Math.min(+l,badgeById(id).lv.length)]);}
+function badgeChipsEl(p,big){const w=document.createElement('span');w.className='bchips';shownBadges(p).forEach(([id,l])=>{const c=badgeChip(id,l,big);if(c)w.appendChild(c);});return w.childNodes.length?w:null;}
+let _bdSaving=false;
+async function syncShownBadges(){if(!lbMe||_bdSaving)return;const got=bjson(BADGE_KEY);const str=badgePins().filter(id=>got[id]).map(id=>id+':'+got[id].l).join(',');
+  const cur=(lbPlayers[lbMe.pid]||{}).bd||'';if(str===cur)return;_bdSaving=true;try{await fbReq('PATCH','players/'+lbMe.pid,{bd:str||null});if(lbPlayers[lbMe.pid])lbPlayers[lbMe.pid].bd=str||undefined;renderLb();}catch(e){}_bdSaving=false;}
+function toggleBadgePin(id){let pins=badgePins();if(pins.includes(id))pins=pins.filter(x=>x!==id);else{if(pins.length>=3){toast('You can show up to 3 badges. Unpin one first.');return;}pins.push(id);}
+  try{localStorage.setItem(PIN_KEY,JSON.stringify(pins));}catch(e){}renderBadges();syncShownBadges();}
 
 // ── READING: stories + parse it ──────────────────────────────────────────────
 let readMode='stories',storyIdx=-1,storyPos=0,storyMarks=[],storyAuto=[],parseQ=null,parseFilter='all',parseScore={r:0,n:0};
