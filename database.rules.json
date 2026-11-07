@@ -161,6 +161,9 @@
           "by": {
             ".validate": "(newData.val() === 'admin' && auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2') || ((newData.val() === 'self' || newData.val() === 'join') && auth.uid === $uid)"
           },
+          "p": {
+            ".validate": "newData.isString() && newData.val().length <= 30"
+          },
           "$other": {
             ".validate": false
           }
