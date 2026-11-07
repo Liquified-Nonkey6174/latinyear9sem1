@@ -558,6 +558,17 @@ body.calm .nfx-type .tw-caret{display:none}
 .pw-code-msg{min-height:1.2em;margin-top:6px;font-size:13px;color:var(--text2)}.pw-code-msg.err{color:#e07a6a}.pw-code-msg.ok{color:#6dbf8a}.pw-have{color:#6dbf8a;margin:0}
 .look-box #lookCodes{display:block;margin:8px auto 0}.pw-admin{margin-top:14px;padding-top:10px;border-top:1px dashed var(--border2);text-align:left;font-size:13px}.pw-admin-row{display:flex;justify-content:space-between;align-items:center;gap:6px;padding:3px 0}
 .prem-badge{display:inline-block;font-family:system-ui,sans-serif;font-size:11px;font-weight:700;letter-spacing:.04em;padding:2px 8px;border-radius:999px;background:linear-gradient(90deg,#d4a84a,#e08ab8,#6aa2e0);color:#1c1a17;vertical-align:middle;white-space:nowrap}
+.badge-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.badge-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 10px;text-align:center;display:flex;flex-direction:column;gap:3px;align-items:center}
+.badge-card.locked{opacity:.5;filter:grayscale(1)}.badge-card.earned{border-color:var(--accent)}
+.bd-icon{font-size:28px;line-height:1.1}.bd-name{font-weight:600;font-size:14px;color:var(--text)}.bd-lat{font-size:11px;font-style:italic;color:var(--text3)}
+.bd-desc{font-size:11.5px;color:var(--text2);line-height:1.35}.bd-prog{font-size:11px;color:var(--accent);margin-top:2px}.bd-date{font-size:10px;color:var(--text3)}
+.bd-metal{font-size:9px;text-transform:uppercase;letter-spacing:.06em;padding:1px 5px;border-radius:6px;vertical-align:middle}
+.badge-card.m-bronze.earned{border-color:#b87333;background:linear-gradient(160deg,rgba(184,115,51,.18),transparent)}.m-bronze .bd-metal{background:#b87333;color:#fff}
+.badge-card.m-silver.earned{border-color:#c0c0c0;background:linear-gradient(160deg,rgba(192,192,192,.2),transparent)}.m-silver .bd-metal{background:#c0c0c0;color:#222}
+.badge-card.m-gold.earned{border-color:#e6b422;background:linear-gradient(160deg,rgba(230,180,34,.22),transparent)}.m-gold .bd-metal{background:#e6b422;color:#222}
+.badge-card.m-diamond.earned{border-color:#7fdbff;background:linear-gradient(160deg,rgba(127,219,255,.22),rgba(200,160,255,.12))}.m-diamond .bd-metal{background:linear-gradient(90deg,#7fdbff,#c8a0ff);color:#222}
+.badge-card.earned.lvl4,.badge-card.earned.lvl5{border-color:#e6b422}.badge-card.earned.lvl6,.badge-card.earned.lvl7{border-color:#7fdbff;box-shadow:0 0 10px rgba(127,219,255,.25)}
 </style>
 </head>
 <body>
@@ -798,6 +809,8 @@ body.calm .nfx-type .tw-caret{display:none}
   <div class="session-chart" id="sessionChart"></div>
   <p class="section-title">By category</p>
   <div class="cat-stats-grid" id="catStatsGrid"></div>
+  <p class="section-title">🏅 Badges <span id="badgeCount" style="font-size:12px;color:var(--text3);font-weight:400"></span></p>
+  <div id="badgeGrid" class="badge-grid" style="margin-bottom:2rem"></div>
   <p class="section-title">Mistake review</p>
   <div id="mistakeBox" class="backup-box" style="margin-bottom:2rem"></div>
   <p class="section-title">Backup &amp; transfer</p>
@@ -2914,7 +2927,7 @@ const TOUR_ADV=[
 ];
 
 let tourSteps=null,tourIdx=0;
-function startTour(type){showMainTab('practice');setQuizType('vocab');tourSteps=type==='advanced'?TOUR_ADV:TOUR_BASIC;tourIdx=0;showTourStep();}
+function startTour(type){bump('tours');showMainTab('practice');setQuizType('vocab');tourSteps=type==='advanced'?TOUR_ADV:TOUR_BASIC;tourIdx=0;showTourStep();}
 function showTourStep(){if(!tourSteps||tourIdx>=tourSteps.length){endTour();return;}const step=tourSteps[tourIdx];if(step.pre)step.pre();document.getElementById('spotOverlay').style.display='';const hole=document.getElementById('spotHole'),card=document.getElementById('spotCard'),bd=document.getElementById('spotBackdrop');document.getElementById('spotStep').textContent='Step '+(tourIdx+1)+' of '+tourSteps.length;document.getElementById('spotTitle').textContent=step.title;document.getElementById('spotBody').innerHTML=step.body;document.getElementById('spotBackBtn').style.display=tourIdx>0?'':'none';document.getElementById('spotNextBtn').textContent=tourIdx===tourSteps.length-1?'Finish':'Next →';card.style.transform='none';card.style.top='';card.style.left='';card.style.bottom='';card.style.right='';if(step.el){const target=document.querySelector(step.el);if(target){bd.style.display='none';target.scrollIntoView({behavior:'smooth',block:'nearest'});setTimeout(()=>{const r=target.getBoundingClientRect(),pad=8;hole.style.display='';hole.style.position='fixed';hole.style.left=(r.left-pad)+'px';hole.style.top=(r.top-pad)+'px';hole.style.width=(r.width+pad*2)+'px';hole.style.height=(r.height+pad*2)+'px';const cw=Math.min(340,window.innerWidth-24);const spaceBelow=window.innerHeight-r.bottom;const spaceAbove=r.top;const spaceRight=window.innerWidth-r.right;const spaceLeft=r.left;let ct,cl;if(spaceBelow>=240){ct=r.bottom+14;cl=Math.max(12,Math.min(r.left,window.innerWidth-cw-12));}else if(spaceAbove>=240){ct=r.top-240;cl=Math.max(12,Math.min(r.left,window.innerWidth-cw-12));}else if(spaceRight>=cw+20){ct=Math.max(12,r.top);cl=r.right+14;}else if(spaceLeft>=cw+20){ct=Math.max(12,r.top);cl=r.left-cw-14;}else{ct=window.innerHeight/2-120;cl=(window.innerWidth-cw)/2;}card.style.position='fixed';card.style.top=Math.max(8,ct)+'px';card.style.left=Math.max(8,cl)+'px';card.style.maxWidth=cw+'px';},250);}else{showCentered();};}else{showCentered();}function showCentered(){bd.style.display='';hole.style.display='none';card.style.position='fixed';card.style.top='50%';card.style.left='50%';card.style.transform='translate(-50%,-50%)';card.style.maxWidth='340px';}}
 function tourNext(){tourIdx++;if(tourIdx>=tourSteps.length)endTour();else showTourStep();}
 function tourBack(){if(tourIdx>0){tourIdx--;showTourStep();}}
@@ -2940,7 +2953,7 @@ function showMainTab(t){
   const iv=document.getElementById('infoView');
   if(iv)iv.style.display=t==='info'?'block':'none';
   const rv=document.getElementById('readView');if(rv)rv.style.display=t==='read'?'block':'none';
-  if(t==='stats'){renderStats();renderMistakes();}
+  if(t==='stats'){renderStats();renderMistakes();badgeCheck();renderBadges();}
   if(t==='read')renderReading();
 }
 function selectAll(){Object.entries(DATA).forEach(([ck,cat])=>{if(cat.packOnly)return;Object.keys(DATA[ck].sub).forEach(sk=>{selected[ck][sk]=true;const sc=document.getElementById('sbox_'+ck+'_'+sk);if(sc)sc.className='sbox checked';});updCatBox(ck);});updCount();}
@@ -3174,12 +3187,12 @@ function sentAlternatives(ca){const alts=[ca];if(!sentData)return alts;
     sentData.imps.forEach(({sg,pl:p})=>{pl=pl.replace(new RegExp('(^|[^A-Za-z])('+sg+')(?=[^A-Za-z]|$)','i'),(m,a,w)=>a+(w[0]===w[0].toUpperCase()?p[0].toUpperCase()+p.slice(1):p));});if(pl!==ca)alts.push(pl);}
   if(mode==='le'&&/, all of you!/i.test(ca))alts.push(ca.replace(/, all of you!/gi,'!'));
   return alts;}
-function checkSentence(){if(answered)return;const ua=document.getElementById('sentInput').value.trim();if(!ua)return;answered=true;document.getElementById('sentCheckBtn').disabled=true;document.getElementById('sentInput').disabled=true;const ca=mode==='el'?sentData.latin:sentData.english;const alts=sentAlternatives(ca);const exact=alts.some(a=>checkWithSynonyms(ua,a));const ok=exact||nearMiss(ua,alts,mode==='el');const fb=document.getElementById('sentFb');if(ok){const pts=sentPoints();sentScore++;score++;quizNoPoints=false;lbCount(pts);dailyTick();fb.className='sent-fb ok';fb.textContent='✓ Correct!'+(exact?'':' (check the spelling: '+ca+')')+(lbMe?'  +'+pts+' ⭐':'');}else{fb.className='sent-fb no';fb.textContent='✗ '+ca;}sentTotal++;updScorePill(sentScore);updPct();saveSessionSnapshot();document.getElementById('sentNext').style.display='block';afterAnswer(ok);}
+function checkSentence(){if(answered)return;const ua=document.getElementById('sentInput').value.trim();if(!ua)return;answered=true;document.getElementById('sentCheckBtn').disabled=true;document.getElementById('sentInput').disabled=true;const ca=mode==='el'?sentData.latin:sentData.english;const alts=sentAlternatives(ca);const exact=alts.some(a=>checkWithSynonyms(ua,a));const ok=exact||nearMiss(ua,alts,mode==='el');const fb=document.getElementById('sentFb');badgeAnswer(ok);if(ok){const pts=sentPoints();sentScore++;score++;quizNoPoints=false;lbCount(pts);dailyTick();fb.className='sent-fb ok';fb.textContent='✓ Correct!'+(exact?'':' (check the spelling: '+ca+')')+(lbMe?'  +'+pts+' ⭐':'');}else{fb.className='sent-fb no';fb.textContent='✗ '+ca;}sentTotal++;updScorePill(sentScore);updPct();saveSessionSnapshot();document.getElementById('sentNext').style.display='block';afterAnswer(ok);}
 function skipSentence(){if(answered)return;answered=true;document.getElementById('sentCheckBtn').disabled=true;document.getElementById('sentInput').disabled=true;const ca=mode==='el'?sentData.latin:sentData.english;const fb=document.getElementById('sentFb');fb.className='sent-fb no';fb.textContent='→ '+ca;sentTotal++;updPct();saveSessionSnapshot();document.getElementById('sentNext').style.display='block';}
 function nextSentence(){clearTimeout(autoNextTimer);renderSentence();}
-function recAns(w,ok){const ck=w.catKey;if(!statsData.catStats[ck])statsData.catStats[ck]={seen:0,correct:0};statsData.catStats[ck].seen++;if(ok)statsData.catStats[ck].correct++;saveStats();if(ok){lbCount(isDrill&&!isSent?2:1);dailyTick();}trackMistake(w,ok);}   // declension/conjugation questions are worth 2 ⭐
+function recAns(w,ok){const ck=w.catKey;if(!statsData.catStats[ck])statsData.catStats[ck]={seen:0,correct:0};statsData.catStats[ck].seen++;if(ok)statsData.catStats[ck].correct++;saveStats();if(ok){lbCount(isDrill&&!isSent?2:1);dailyTick();}trackMistake(w,ok);badgeAnswer(ok);}   // declension/conjugation questions are worth 2 ⭐
 let sessionFinished=true;
-function finishSession(){sessionFinished=true;const total=isDrill?drillQs.length:isSent?sentTotal:quizWords.length;const pct=total>0?Math.round(score/total*100):0;if(window.resumeDate)statsData.sessions=statsData.sessions.filter(s=>s.date!==window.resumeDate);statsData.sessions.push({date:Date.now(),score,total,pct});window.resumeDate=null;if(statsData.sessions.length>20)statsData.sessions=statsData.sessions.slice(-20);saveStats();}
+function finishSession(){sessionFinished=true;const total=isDrill?drillQs.length:isSent?sentTotal:quizWords.length;const pct=total>0?Math.round(score/total*100):0;if(window.resumeDate)statsData.sessions=statsData.sessions.filter(s=>s.date!==window.resumeDate);statsData.sessions.push({date:Date.now(),score,total,pct});if(total>=50&&score>=total)bump('perfect');window.resumeDate=null;if(statsData.sessions.length>20)statsData.sessions=statsData.sessions.slice(-20);saveStats();}
 const PHRASES=[[100,'Optime! Perfectly done.'],[80,'Bene! Well done.'],[60,'Satis bene. Keep going.'],[0,'Persevera. Try again.']];
 function showResult(){finishSession();showView('resultView');const total=isDrill?drillQs.length:quizWords.length;const pct=total>0?Math.round(score/total*100):0;document.getElementById('resLabel').textContent='Result';document.getElementById('resScore').textContent=fmtScore(score)+' / '+total;document.getElementById('resTotal').textContent=pct+'%';document.getElementById('resPhrase').textContent=(PHRASES.find(([t])=>pct>=t)||PHRASES[PHRASES.length-1])[1];const banner=document.getElementById('reviewBanner');if(!isDrill&&wrongWords.length>0){banner.style.display='flex';document.getElementById('reviewBannerTitle').textContent=wrongWords.length+' word'+(wrongWords.length===1?' needs':' words need')+' more practice';document.getElementById('reviewBannerSub').textContent='Round '+(round+1)+' will drill just these words.';}else banner.style.display='none';}
 function continueReview(){round++;quizWords=shuffle([...wrongWords]);wrongWords=[];current=0;score=0;answered=false;showView('quizView');showQ();}
@@ -3646,7 +3659,7 @@ function updPacks(){try{updCount();}catch(e){}const n=packWords().length;const c
 function startPacks(){const ws=packWords();if(!ws.length)return;
   setQuizType('vocab');beginQuiz(shuffle([...ws]));}
 buildPackUI();
-loadPersisted();
+loadPersisted();setTimeout(()=>{try{badgeCheck();}catch(e){}},4000);
 loadCustomWords().then(()=>buildUI());
 loadDescription();
 // ── LEADERBOARD & CHAT (Firebase Realtime Database, REST + live streams) ──────
@@ -3709,7 +3722,7 @@ function lbMyPoints(){if(!lbMe)return 0;const me=lbPlayers[lbMe.pid],server=(me&
   if(lbInFlight&&server<lbInFlightBase+lbInFlight)return lbInFlightBase+lbInFlight+lbPending;return server+lbPending;}
 function lbUpdatePoints(bump){const pill=document.getElementById('pointsPill');const pts=lbMyPoints().toLocaleString();
   if(pill){pill.style.display=lbMe?'':'none';pill.textContent='⭐ '+pts;if(bump){pill.classList.remove('bump');void pill.offsetWidth;pill.classList.add('bump');}}
-  const sp=document.getElementById('lbMyPts');if(sp)sp.textContent=pts;updChatInput();}
+  const sp=document.getElementById('lbMyPts');if(sp)sp.textContent=pts;updChatInput();badgeCheckSoon();}
 // Anti point-farming: a short quiz (5 questions or fewer) repeated a 3rd time in a day earns no more points.
 const ATTEMPTS_KEY='latin_quiz_attempts';let quizNoPoints=false,ptsNoteTimer=null;
 function quizSig(){const ks=isDrill?drillQs.map(q=>wKey(q.word)+'>'+q.key):quizWords.map(wKey);return [quizType,mode,isMatch?'match':inputMode,...ks.sort()].join('|');}
@@ -3888,7 +3901,7 @@ function openPaywall(){let o=document.getElementById('paywallOverlay');
     +'<div id="pwBtns" style="display:flex;gap:8px;justify-content:center"><button class="btn-primary" id="pwBuy">Buy now: $67</button><button class="btn-secondary" onclick="closeOverlay(\'paywallOverlay\')">Maybe later</button></div></div>';
   // "Buy now" never buys anything: every press, the price goes up by $1.
   let price=67;const buy=o.querySelector('#pwBuy'),pr=o.querySelector('.pw-price');
-  buy.onclick=()=>{price++;pr.innerHTML='<span class="pw-ask">Actually, what about…</span><b>$'+price+'</b><span>one-time payment</span>';buy.textContent='Buy now: $'+price;
+  buy.onclick=()=>{price++;bump('buy');pr.innerHTML='<span class="pw-ask">Actually, what about…</span><b>$'+price+'</b><span>one-time payment</span>';buy.textContent='Buy now: $'+price;
     pr.classList.remove('bump');void pr.offsetWidth;pr.classList.add('bump');};
   const box=o.querySelector('.pw-box'),code=document.createElement('div');code.className='pw-code';box.appendChild(code);
   if(premMe||isAdmin){code.innerHTML='<p class="pw-have">✓ You have Latin Trainer Premium'+(isAdmin&&!premMe?' (admin)':'')+'.</p>';}
@@ -4043,7 +4056,7 @@ async function sendChat(){const inp=document.getElementById('chatInput'),err=doc
   chatLastSend=Date.now();inp.value='';document.getElementById('chatList').dataset.first='';
   const msg={pid:lbMe.pid,text:text.slice(0,300),t:{'.sv':'timestamp'}};if(chatReplyTo&&chatObj[chatReplyTo])msg.re=chatReplyTo;
   const was=chatReplyTo;setChatReply(null);
-  try{await fbReq('POST','chat',msg);}
+  try{await fbReq('POST','chat',msg);bump('chat');}
   catch(e){// older database rules don't allow replies yet: send it as a normal message instead
     if(msg.re){delete msg.re;try{await fbReq('POST','chat',msg);err.textContent='Sent, but not as a reply: the database rules need updating (ask the admin).';return;}catch(e2){}}
     inp.value=text;setChatReply(was);
@@ -4089,6 +4102,73 @@ function renderMistakes(){const box=document.getElementById('mistakeBox');if(!bo
     +list.map((m,i)=>{const pct=Math.round(m.acc*100);return '<div class="mk-row"><span class="mk-w">'+(i+1)+'. '+esc(fullLat(m.w))+'</span><span class="mk-d">'+esc(displayEng(m.w))+'</span><span class="mk-n" style="color:'+(pct<50?'var(--red,#e07a6a)':pct<80?'var(--accent)':'var(--green,#6dbf8a)')+'">'+pct+'% <small style="opacity:.7">('+m.c+'/'+m.s+')</small></span></div>';}).join('')+'</div>'
     +'<div class="backup-btns" style="margin-top:12px"><button class="btn-primary" onclick="practiseMistakes()">Practise these words</button><button class="btn-secondary" onclick="if(confirm(\'Reset your accuracy list?\')){try{localStorage.setItem(ACC_KEY,\'{}\');}catch(e){}renderMistakes();}">Reset list</button></div>';}
 function practiseMistakes(){const ws=worstWords().map(m=>m.w);if(!ws.length)return;showMainTab('practice');setQuizType('vocab');beginQuiz(shuffle(ws));}
+
+// ── BADGES / ACHIEVEMENTS (stored in this browser) ───────────────────────────
+const BADGE_KEY='latin_badges',BSTAT_KEY='latin_badge_stats';
+const ROMAN=['I','II','III','IV','V','VI','VII'];
+const METAL=['bronze','silver','gold','diamond'];
+// lv: thresholds for tiered badges; stat(): current value. secret: hidden until earned.
+const BADGES=[
+ {id:'salve',icon:'👋',name:'Salve!',desc:'Join the leaderboard.',stat:()=>lbMe?1:0,lv:[1]},
+ {id:'primus',icon:'🥇',name:'Primus Gradus',lat:'first step',desc:'Get your first correct answer.',stat:()=>bstat().correct||0,lv:[1]},
+ {id:'scriptor',icon:'✍️',name:'Scriptor',lat:'writer',desc:'Send your first chat message.',stat:()=>bstat().chat||0,lv:[1]},
+ {id:'centurio',icon:'⭐',name:'Centurio',desc:'Earn 100 ⭐ in total.',stat:()=>lbMyPoints(),lv:[100],metal:0},
+ {id:'legatus',icon:'⭐',name:'Legatus',desc:'Earn 1,000 ⭐ in total.',stat:()=>lbMyPoints(),lv:[1000],metal:1},
+ {id:'imperator',icon:'⭐',name:'Imperator',desc:'Earn 10,000 ⭐ in total.',stat:()=>lbMyPoints(),lv:[10000],metal:2},
+ {id:'optimus',icon:'💎',name:'Optimus',desc:'Earn 100,000 ⭐ in total.',stat:()=>lbMyPoints(),lv:[100000],metal:3},
+ {id:'diesmagnus',icon:'☀️',name:'Dies Magnus',lat:'big day',desc:'Earn lots of ⭐ in a single day.',unit:'⭐ in a day',stat:()=>Math.max(bstat().bestDay||0,lbTodayPts()),lv:[100,200,300,500,1000,2000,5000]},
+ {id:'constans',icon:'🔥',name:'Constans',lat:'steady',desc:'Reach your daily goal several days in a row.',unit:'day streak',stat:()=>Math.max(bstat().bestStreak||0,dailyStreak()),lv:[3,7,30,50,100,200,365]},
+ {id:'matutinus',icon:'🌅',name:'Matutinus',lat:'early riser',desc:'Get a question right before 8 am.',stat:()=>bstat().early||0,lv:[1]},
+ {id:'nocturnus',icon:'🦉',name:'Nocturnus',lat:'night owl',desc:'Get a question right after 10 pm.',stat:()=>bstat().late||0,lv:[1]},
+ {id:'sineerrore',icon:'🎯',name:'Sine Errore',lat:'without error',desc:'Get questions right in a row (any type).',unit:'in a row',stat:()=>bstat().bestRun||0,lv:[10,20,30,50,100,200,300]},
+ {id:'perfectus',icon:'💯',name:'Perfectus',desc:'Score 100% on a quiz of 50 or more questions.',stat:()=>bstat().perfect||0,lv:[1]},
+ {id:'lexicon',icon:'📖',name:'Lexicon',desc:'See every word in the main list (word packs not included). New words make it harder, but once earned it stays.',stat:()=>lexStat('main','seen'),lv:[1]},
+ {id:'lexiconmagnus',icon:'📚',name:'Lexicon Magnum',lat:'great dictionary',desc:'See every word in the main list and all word packs.',stat:()=>lexStat('all','seen'),lv:[1]},
+ {id:'doctus',icon:'🎓',name:'Doctus',lat:'learned',desc:'Get every word in the main list right at least once.',stat:()=>lexStat('main','correct'),lv:[1]},
+ {id:'doctissimus',icon:'🏛️',name:'Doctissimus',lat:'most learned',desc:'Get every word in the main list and all word packs right at least once.',stat:()=>lexStat('all','correct'),lv:[1]},
+ {id:'gladiator',icon:'⚔️',name:'Gladiator',desc:'Win your first challenge.',stat:()=>duelStats().wins,lv:[1]},
+ {id:'victor',icon:'🏆',name:'Victor',desc:'Win 10 challenges.',stat:()=>duelStats().wins,lv:[10]},
+ {id:'invictus',icon:'🛡️',name:'Invictus',lat:'unbeaten',desc:'Win 5 challenges in a row.',stat:()=>duelStats().bestRun,lv:[5]},
+ {id:'rival',icon:'🤺',name:'Rival',desc:'Challenge 5 different people.',stat:()=>(bstat().rivals||[]).length,lv:[5]},
+ {id:'popularis',icon:'👍',name:'Popularis',lat:'popular',desc:'Get reactions on your chat messages from other people.',unit:'reactions',stat:()=>Math.max(bstat().reacts||0,reactsReceived()),lv:[3,10,20,50,100]},
+ {id:'civis',icon:'🤝',name:'Civis Bonus',lat:'good citizen',desc:'Contribute 500 ⭐ to a weekly class challenge.',stat:()=>bstat().civis||0,lv:[1]},
+ {id:'avarus',icon:'💸',name:'Avarus',lat:'greedy',desc:'Press “Buy now” on the premium paywall 10 times.',secret:true,stat:()=>bstat().buy||0,lv:[10]},
+ {id:'iterum',icon:'🔁',name:'Iterum',lat:'again',desc:'Take the tour twice.',secret:true,stat:()=>bstat().tours||0,lv:[2]}];
+function bjson(k){try{return JSON.parse(localStorage.getItem(k)||'{}')||{};}catch(e){return {};}}
+let _bstat=null;function bstat(){return _bstat||(_bstat=bjson(BSTAT_KEY));}
+function bsave(){try{localStorage.setItem(BSTAT_KEY,JSON.stringify(bstat()));}catch(e){}}
+function bump(k,n){const b=bstat();b[k]=(b[k]||0)+(n||1);bsave();badgeCheckSoon();}
+function lbTodayPts(){if(!lbMe)return 0;const me=lbPlayers[lbMe.pid]||{},k=lbKeys();return ((me.d||{})[k.d]||0)+lbPending;}
+// every answer (vocab, drills, sentences, parse, challenges)
+function badgeAnswer(ok){const b=bstat();if(ok){b.correct=(b.correct||0)+1;b.run=(b.run||0)+1;if(b.run>(b.bestRun||0))b.bestRun=b.run;const h=new Date().getHours();if(h<8)b.early=1;if(h>=22)b.late=1;}else b.run=0;bsave();badgeCheckSoon();}
+function lexWords(scope){const main=[];Object.entries(DATA).forEach(([ck,c])=>{if(c.packOnly)return;Object.entries(c.sub).forEach(([sk,sub])=>sub.words.forEach(w=>{if(!(typeof customWords!=='undefined'&&customWords.some(x=>x.lat===w.lat&&x.catKey===ck)))main.push({...w,catKey:ck,subKey:sk});}));});
+  if(scope==='main')return main;const seen=new Set(main.map(wKey)),all=[...main];WORD_PACKS.forEach(pk=>pk.words.forEach(w=>{if(!seen.has(wKey(w))){seen.add(wKey(w));all.push(w);}}));return all;}
+function lexStat(scope,what){const acc=accData();const ws=lexWords(scope);const ok=w=>{const k=wKey(w),a=acc[k],r=srData[k];return what==='seen'?((a&&a.s>0)||(r&&r.seen>0)):((a&&a.c>0)||(r&&r.correct>0));};
+  return ws.length&&ws.every(ok)?1:0;}
+function lexProgress(scope,what){const acc=accData();const ws=lexWords(scope);let n=0;ws.forEach(w=>{const k=wKey(w),a=acc[k],r=srData[k];if(what==='seen'?((a&&a.s>0)||(r&&r.seen>0)):((a&&a.c>0)||(r&&r.correct>0)))n++;});return n+' / '+ws.length;}
+// challenges: remember results locally (finished challenges can be deleted later)
+function duelStats(){const b=bstat();const res=b.duels||{};if(lbMe)Object.entries(duelsObj||{}).forEach(([id,d])=>{if(!d||!d.res||!d.res[d.from]||!d.res[d.to])return;if(d.from!==lbMe.pid&&d.to!==lbMe.pid)return;if(res[id])return;const w=duelWinner(d);res[id]={t:d.t||Date.now(),r:w===lbMe.pid?'w':w?'l':'d'};b.duels=res;bsave();});
+  const list=Object.values(res).sort((a,c)=>a.t-c.t);let wins=0,run=0,best=0;list.forEach(x=>{if(x.r==='w'){wins++;run++;best=Math.max(best,run);}else run=0;});return {wins,bestRun:best};}
+function reactsReceived(){if(!lbMe)return 0;let n=0;Object.values(chatObj||{}).forEach(m=>{if(!m||m.pid!==lbMe.pid||!m.rx)return;Object.values(m.rx).forEach(u=>{n+=Object.keys(u||{}).filter(x=>x!==lbMe.pid).length;});});return n;}
+function badgeLevel(bd,v){let l=0;bd.lv.forEach((t,i)=>{if(v>=t)l=i+1;});return l;}
+function badgeTierName(bd,l){return bd.lv.length>1?bd.name+' '+ROMAN[l-1]:bd.name;}
+let _bTimer=null;function badgeCheckSoon(){if(_bTimer)return;_bTimer=setTimeout(()=>{_bTimer=null;badgeCheck();},700);}
+function badgeCheck(){const got=bjson(BADGE_KEY);let changed=false;const b=bstat();
+  // remember personal bests that the live data might forget
+  b.bestDay=Math.max(b.bestDay||0,lbTodayPts());b.bestStreak=Math.max(b.bestStreak||0,dailyStreak());b.reacts=Math.max(b.reacts||0,reactsReceived());
+  if(lbMe&&classChal&&+classChal.target){const me=lbPlayers[lbMe.pid]||{};if(((me.w||{})[lbKeys().w]||0)>=500)b.civis=1;}bsave();
+  BADGES.forEach(bd=>{let v=0;try{v=bd.stat();}catch(e){}const l=badgeLevel(bd,v);const old=got[bd.id]?got[bd.id].l:0;
+    if(l>old){got[bd.id]={l,t:Date.now()};changed=true;toast('🏅 Badge unlocked: '+badgeTierName(bd,l)+'!');}});
+  if(changed){try{localStorage.setItem(BADGE_KEY,JSON.stringify(got));}catch(e){}}
+  if(document.getElementById('statsView')&&document.getElementById('statsView').style.display!=='none')renderBadges();}
+function renderBadges(){const g=document.getElementById('badgeGrid');if(!g)return;const got=bjson(BADGE_KEY);let earned=0,total=0;g.innerHTML='';
+  BADGES.forEach(bd=>{const e=got[bd.id],l=e?e.l:0;total+=bd.lv.length;earned+=l;if(bd.secret&&!l){const c=document.createElement('div');c.className='badge-card locked';c.innerHTML='<div class="bd-icon">❔</div><div class="bd-name">Secret badge</div><div class="bd-desc">Keep exploring…</div>';g.appendChild(c);return;}
+    let v=0;try{v=bd.stat();}catch(e){}const next=bd.lv[l];const c=document.createElement('div');c.className='badge-card'+(l?' earned':' locked')+(bd.metal!=null?' m-'+METAL[bd.metal]:l?' lvl'+Math.min(l,7):'');
+    let prog='';if(next!=null){if(bd.id.startsWith('lex')||bd.id.startsWith('doct'))prog=lexProgress(bd.id==='lexicon'||bd.id==='doctus'?'main':'all',bd.id.startsWith('lex')?'seen':'correct');else if(bd.lv.length>1||next>1)prog=Math.min(v,next).toLocaleString()+' / '+next.toLocaleString()+(bd.unit?' '+bd.unit:'');}
+    c.innerHTML='<div class="bd-icon">'+bd.icon+'</div><div class="bd-name">'+esc(l?badgeTierName(bd,l):bd.name)+(bd.metal!=null?' <span class="bd-metal">'+METAL[bd.metal]+'</span>':'')+'</div>'+(bd.lat?'<div class="bd-lat">'+esc(bd.lat)+'</div>':'')
+      +'<div class="bd-desc">'+esc(bd.desc)+(bd.lv.length>1?' Levels: '+bd.lv.map(x=>x.toLocaleString()).join(' · ')+'.':'')+'</div>'+(prog?'<div class="bd-prog">'+(l?'Next: ':'')+prog+'</div>':'')+(e?'<div class="bd-date">'+new Date(e.t).toLocaleDateString()+'</div>':'');
+    g.appendChild(c);});
+  const cnt=document.getElementById('badgeCount');if(cnt)cnt.textContent=earned+' / '+total;}
 
 // ── READING: stories + parse it ──────────────────────────────────────────────
 let readMode='stories',storyIdx=-1,storyPos=0,storyMarks=[],storyAuto=[],parseQ=null,parseFilter='all',parseScore={r:0,n:0};
@@ -4138,7 +4218,7 @@ function renderParse(){const a=document.getElementById('readArea');if(!parseQ)ne
     +opts.map((o,i)=>'<button class="mc-btn pz-opt'+(picked!=null?(o===right?' correct':o===opts[picked]?' wrong':''):'')+'" '+(picked!=null?'disabled':'')+' onclick="pickParse('+i+')">'+esc(o)+'</button>').join('')+'</div>';
   if(picked!=null){const ok=opts[picked]===right;h+='<div class="pz-fb '+(ok?'ok':'no')+'">'+(ok?'✓ Correct!':'✗ It’s '+esc(right)+'.')+'</div><div class="pz-why">'+explainTag(s,t).map(esc).join('<br>')+'</div><div class="pz-en" data-exset="parse"><div class="ex-item" data-si="0"><div class="ex-la">'+sentenceHtml(s,null)+'</div><div class="ex-en">'+esc(s.en)+'</div></div></div><div class="st-btns"><button class="btn-primary" id="pzNext" onclick="parseQ=null;renderParse()">Next →</button></div>';}
   a.innerHTML=h+'</div>';const nb=document.getElementById('pzNext');if(nb)nb.focus();}
-function pickParse(i){if(!parseQ||parseQ.picked!=null)return;parseQ.picked=i;const ok=parseQ.opts[i]===parseAnswer(parseQ.t);parseScore.n++;if(ok){parseScore.r++;quizNoPoints=false;lbCount();dailyTick();}playTone(ok);renderParse();}
+function pickParse(i){if(!parseQ||parseQ.picked!=null)return;parseQ.picked=i;const ok=parseQ.opts[i]===parseAnswer(parseQ.t);parseScore.n++;badgeAnswer(ok);if(ok){parseScore.r++;quizNoPoints=false;lbCount();dailyTick();}playTone(ok);renderParse();}
 
 let pollBusy=false;
 async function pollShared(){if(pollBusy)return;pollBusy=true;
@@ -4157,7 +4237,7 @@ const DUEL_N=10;
 function myDuels(){if(!lbMe)return [];return Object.entries(duelsObj).filter(([,d])=>d&&(d.from===lbMe.pid||d.to===lbMe.pid)).map(([id,d])=>({id,...d})).sort((a,b)=>(b.t||0)-(a.t||0));}
 function duelState(d){const me=lbMe.pid,op=d.from===me?d.to:d.from,r=d.res||{};if(!r[me])return 'play';if(!r[op])return 'wait';return 'done';}
 function duelWinner(d){const a=d.res[d.from],b=d.res[d.to];if(a.s!==b.s)return a.s>b.s?d.from:d.to;if(a.ms!==b.ms)return a.ms<b.ms?d.from:d.to;return null;}
-function updDuelBtn(){const b=document.getElementById('duelBtn');if(!b)return;const ds=myDuels();const toPlay=ds.filter(d=>duelState(d)==='play').length;
+function updDuelBtn(){badgeCheckSoon();const b=document.getElementById('duelBtn');if(!b)return;const ds=myDuels();const toPlay=ds.filter(d=>duelState(d)==='play').length;
   b.innerHTML='⚔ Challenges'+(toPlay?' <span class="duel-badge">'+toPlay+'</span>':'');
   // Challenges sent to you that you haven't played yet, listed right under the button.
   const pend=document.getElementById('duelPending');if(!pend)return;const inc=ds.filter(d=>d.to===lbMe.pid&&duelState(d)==='play');
@@ -4181,7 +4261,7 @@ function duelSection(ck,on){if(ck==='packs')WORD_PACKS.forEach(pk=>{duelSel.pack
 function duelAll(on){Object.entries(DATA).forEach(([ck,cat])=>{if(!cat.packOnly)duelSection(ck,on);});duelSection('packs',on);}
 async function sendDuel(){const pool=shuffle(duelPool());if(pool.length<5)return;const qs=[];for(let i=0;i<DUEL_N;i++){const w=pool[i%pool.length];qs.push({k:wKey(w),d:duelSel.dir==='mixed'?(Math.random()<.5?'el':'le'):duelSel.dir});}
   try{const r=await fbReq('POST','duels',{from:lbMe.pid,to:duelSel.to,qs,t:{'.sv':'timestamp'}});closeOverlay('duelSetupOverlay');
-    duelsObj[r.name]={from:lbMe.pid,to:duelSel.to,qs,t:Date.now()};updDuelBtn();startDuel(r.name);}
+    duelsObj[r.name]={from:lbMe.pid,to:duelSel.to,qs,t:Date.now()};{const b=bstat();b.rivals=[...new Set([...(b.rivals||[]),duelSel.to])];bsave();badgeCheckSoon();}updDuelBtn();startDuel(r.name);}
   catch(e){document.getElementById('duelErr').textContent='Couldn’t send the challenge. The database rules may need updating (ask the admin).';}}
 function openDuelInbox(){renderDuelInbox();document.getElementById('duelInboxOverlay').style.display='flex';}
 function renderDuelInbox(){const box=document.getElementById('duelInbox');if(!box)return;const ds=myDuels();const me=lbMe&&lbMe.pid;
@@ -4214,7 +4294,7 @@ async function duelCheck(){const g=duelGame;if(!g||g.fb)return;const inp=documen
     if(nearMiss(v,cands,q.d==='el')){g.typo=true;const fb=document.querySelector('#duelPlay .dp-fb');fb.className='dp-fb no';fb.textContent='≈ Very close: check your spelling and try again (no penalty).';inp.focus();try{inp.select();}catch(e){}return;}}
   // Each correct answer earns 1 ⭐ like normal practice (only the first time a challenge is played).
   const dd=duelsObj[g.id],earn=ok&&lbMe&&!(dd&&dd.res&&dd.res[lbMe.pid]);
-  if(ok){g.score++;dailyTick();if(earn)lbCount();}playTone(ok);
+  badgeAnswer(ok);if(ok){g.score++;dailyTick();if(earn)lbCount();}playTone(ok);
   g.fb={cls:ok?'ok':'no',text:ok?'✓ Correct'+(earn?'  +1 ⭐':''):'✗ '+(q.d==='el'?fullLat(q.w):displayEng(q.w))};renderDuelPlay();
   setTimeout(async()=>{g.fb=null;g.typo=false;g.i++;if(g.i>=g.qs.length){g.ms=Date.now()-g.t0;try{await fbReq('PUT','duels/'+g.id+'/res/'+lbMe.pid,{s:g.score,ms:g.ms});const d=duelsObj[g.id];d.res=d.res||{};d.res[lbMe.pid]={s:g.score,ms:g.ms};pollShared();}catch(e){}updDuelBtn();}renderDuelPlay();},ok?600:1400);}
 
@@ -5244,7 +5324,7 @@ function openQuizForms(){const w=currentCardWord();if(!w)return;if(!answered&&!(
 /* ---------- export / import ---------- */
 let pendingBackup=null;
 function backupMsg(t,ok){const el=document.getElementById('backupMsg');if(!el)return;el.textContent=t||'';el.style.color=ok===false?'var(--red)':ok?'var(--green)':'var(--text3)';}
-function buildBackup(){return{app:'latin-trainer',version:1,exported:new Date().toISOString(),theme:currentTheme,sr:Object.fromEntries(Object.entries(srData).filter(([k,v])=>v&&v.seen>0)),stats:statsData,custom:customWords,starred:starred,lb:lbMe&&playerAuth?{pid:lbMe.pid,name:lbMe.name,rt:playerAuth.refreshToken}:null};}
+function buildBackup(){return{app:'latin-trainer',version:1,exported:new Date().toISOString(),badges:bjson(BADGE_KEY),badgeStats:bstat(),accuracy:accData(),theme:currentTheme,sr:Object.fromEntries(Object.entries(srData).filter(([k,v])=>v&&v.seen>0)),stats:statsData,custom:customWords,starred:starred,lb:lbMe&&playerAuth?{pid:lbMe.pid,name:lbMe.name,rt:playerAuth.refreshToken}:null};}
 function exportProgress(){const text=JSON.stringify(buildBackup());const name='latin-trainer-progress-'+new Date().toISOString().slice(0,10)+'.json';
   try{const blob=new Blob([text],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);backupMsg('Exported “'+name+'”. Keep it somewhere safe.',true);}
   catch(e){const ta=document.getElementById('backupText');if(ta){ta.value=text;document.getElementById('backupDetails').open=true;}backupMsg('Download blocked here — copy the text below instead.',false);}}
@@ -5274,6 +5354,7 @@ async function applyImport(modeSel){const b=pendingBackup;if(!b)return;
     b.custom.forEach(w=>{if(!customWords.some(x=>x.lat===w.lat&&x.catKey===w.catKey))customWords.push(w);});
     Object.assign(starred,b.starred);
   }
+  try{if(b.badges)localStorage.setItem(BADGE_KEY,JSON.stringify(b.badges));if(b.badgeStats){localStorage.setItem(BSTAT_KEY,JSON.stringify(b.badgeStats));_bstat=null;}if(b.accuracy)localStorage.setItem(ACC_KEY,JSON.stringify(b.accuracy));}catch(e){}
   if(b.lb&&b.lb.pid&&b.lb.name&&b.lb.rt){playerAuth={uid:b.lb.pid,refreshToken:b.lb.rt};savePlayerAuth();lbMe={pid:b.lb.pid,name:b.lb.name};saveLbMe();renderLbProfile();}
   customWords.forEach(w=>addWordToData(w));
   if(b.theme&&THEMES.some(t=>t.id===b.theme))setTheme(b.theme);
