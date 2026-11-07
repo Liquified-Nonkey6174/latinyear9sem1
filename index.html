@@ -4171,7 +4171,7 @@ function badgeCheck(){const got=bjson(BADGE_KEY);let changed=false;const b=bstat
   b.bestDay=Math.max(b.bestDay||0,lbTodayPts());b.bestStreak=Math.max(b.bestStreak||0,dailyStreak());b.reacts=Math.max(b.reacts||0,reactsReceived());
   if(lbMe&&classChal&&+classChal.target){const me=lbPlayers[lbMe.pid]||{};if(((me.w||{})[lbKeys().w]||0)>=500)b.civis=1;}bsave();
   BADGES.forEach(bd=>{let v=0;try{v=bd.stat();}catch(e){}const l=badgeLevel(bd,v);const old=got[bd.id]?got[bd.id].l:0;
-    if(l>old){got[bd.id]={l,t:Date.now()};changed=true;toast('🏅 Badge unlocked: '+badgeTierName(bd,l)+'!');}});
+    if(l>old){got[bd.id]={l,t:Date.now()};changed=true;{const nm=badgeTierName(bd,l)+(bd.metal!=null?' '+ROMAN[bd.metal]:'');toast('🏅 Badge unlocked: '+nm+(nm.endsWith('!')?'':'!'));}}});
   if(changed){try{localStorage.setItem(BADGE_KEY,JSON.stringify(got));}catch(e){}}
   syncShownBadges();
   if(document.getElementById('statsView')&&document.getElementById('statsView').style.display!=='none')renderBadges();}
@@ -4179,7 +4179,7 @@ function renderBadges(){const g=document.getElementById('badgeGrid');if(!g)retur
   BADGES.forEach(bd=>{const e=got[bd.id],l=e?e.l:0;total+=bd.lv.length;earned+=l;if(bd.secret&&!l){const c=document.createElement('div');c.className='badge-card locked';c.innerHTML='<div class="bd-icon">❔</div><div class="bd-name">Secret badge</div><div class="bd-desc">Keep exploring…</div>';g.appendChild(c);return;}
     let v=0;try{v=bd.stat();}catch(e){}const next=bd.lv[l];const c=document.createElement('div');c.className='badge-card'+(l?' earned':' locked')+(bd.metal!=null?' m-'+METAL[bd.metal]:l?' lvl'+Math.min(l,7):'');
     let prog='';if(next!=null){if(bd.id.startsWith('lex')||bd.id.startsWith('doct'))prog=lexProgress(bd.id==='lexicon'||bd.id==='doctus'?'main':'all',bd.id.startsWith('lex')?'seen':'correct');else if(bd.lv.length>1||next>1)prog=Math.min(v,next).toLocaleString()+' / '+next.toLocaleString()+(bd.unit?' '+bd.unit:'');}
-    c.innerHTML='<div class="bd-icon">'+bd.icon+(l&&bd.lv.length>1?'<span class="bd-num">'+ROMAN[l-1]+'</span>':'')+'</div><div class="bd-name">'+esc(l?badgeTierName(bd,l):bd.name)+(bd.metal!=null?' <span class="bd-metal">'+METAL[bd.metal]+'</span>':'')+'</div>'+(bd.lat?'<div class="bd-lat">'+esc(bd.lat)+'</div>':'')
+    c.innerHTML='<div class="bd-icon">'+bd.icon+(bd.metal!=null?'<span class="bd-num">'+ROMAN[bd.metal]+'</span>':l&&bd.lv.length>1?'<span class="bd-num">'+ROMAN[l-1]+'</span>':'')+'</div><div class="bd-name">'+esc(l?badgeTierName(bd,l):bd.name)+(bd.metal!=null?' '+ROMAN[bd.metal]:'')+'</div>'+(bd.lat?'<div class="bd-lat">'+esc(bd.lat)+'</div>':'')
       +'<div class="bd-desc">'+esc(bd.desc)+(bd.lv.length>1?' Levels: '+bd.lv.map(x=>x.toLocaleString()).join(' · ')+'.':'')+'</div>'+(prog?'<div class="bd-prog">'+(l?'Next: ':'')+prog+'</div>':'')+(e?'<div class="bd-date">'+new Date(e.t).toLocaleDateString()+'</div>':'');
     if(l&&lbMe){const pinned=badgePins().includes(bd.id);const pb=document.createElement('button');pb.className='bd-pin'+(pinned?' on':'');pb.textContent=pinned?'📌 Shown':'📌 Show';pb.title=pinned?'Shown next to your name on the leaderboard. Click to hide.':'Show next to your name on the leaderboard (up to 3).';pb.onclick=()=>toggleBadgePin(bd.id);c.appendChild(pb);if(pinned)c.classList.add('pinned');}
     g.appendChild(c);});
@@ -4191,9 +4191,10 @@ function badgePins(){try{const a=JSON.parse(localStorage.getItem(PIN_KEY)||'[]')
 function badgeById(id){return BADGES.find(b=>b.id===id);}
 // a small badge chip: icon + level numeral (tiered) or metal ring (points badges)
 function badgeChip(id,l,big){const bd=badgeById(id);if(!bd||!l)return null;const c=document.createElement('span');
-  c.className='bchip'+(big?' big':'')+(bd.metal!=null?' m-'+METAL[bd.metal]:bd.lv.length>1?' lv'+Math.min(l,7):'');c.title=badgeTierName(bd,l)+(bd.lat?' ('+bd.lat+')':'');
+  c.className='bchip'+(big?' big':'')+(bd.metal!=null?' m-'+METAL[bd.metal]:bd.lv.length>1?' lv'+Math.min(l,7):'');c.title=badgeTierName(bd,l)+(bd.metal!=null?' '+ROMAN[bd.metal]:'')+(bd.lat?' ('+bd.lat+')':'');
   const i=document.createElement('span');i.className='bc-i';i.textContent=bd.icon;c.appendChild(i);
-  if(bd.lv.length>1){const n=document.createElement('span');n.className='bc-n';n.textContent=ROMAN[l-1];c.appendChild(n);}
+  const num=bd.metal!=null?ROMAN[bd.metal]:bd.lv.length>1?ROMAN[l-1]:'';   // points badges: Centurio I, Legatus II, Imperator III, Optimus IV
+  if(num){const n=document.createElement('span');n.className='bc-n';n.textContent=num;c.appendChild(n);}
   return c;}
 function shownBadges(p){return String((p&&p.bd)||'').split(',').map(x=>x.split(':')).filter(([id,l])=>badgeById(id)&&+l>0).slice(0,3).map(([id,l])=>[id,Math.min(+l,badgeById(id).lv.length)]);}
 function badgeChipsEl(p,big){const w=document.createElement('span');w.className='bchips';shownBadges(p).forEach(([id,l])=>{const c=badgeChip(id,l,big);if(c)w.appendChild(c);});return w.childNodes.length?w:null;}
