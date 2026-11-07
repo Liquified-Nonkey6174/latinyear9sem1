@@ -2472,14 +2472,15 @@ const VERB_OBJ={
  video:'AO',audio:'AO',specto:'AO'
 };
 function verbAccepts(v,o){const m=VERB_OBJ[v.lat];if(!m)return OBJECTS.includes(o.lat);if(m==='AO')return true;if(m==='A'||(Array.isArray(m)&&m.length===1&&m[0]==='A'))return ANIMATE.includes(o.lat);return m.includes(o.lat);}
-function pTransA(ex=[]){const ok=w=>{const m=VERB_OBJ[w.lat];return m==='A'||m==='AO'||(Array.isArray(m)&&m.includes('A'))||COMBAT_VERBS.includes(w.lat);};const pool=wordsOf('verbs').filter(w=>!INTRANS.includes(w.lat)&&!ex.includes(w.lat)&&w.lat!=='gero'&&ok(w));return pool.length?rnd(pool):pTrans(ex);}
+function pTransA(ex=[]){const ok=w=>{const m=VERB_OBJ[w.lat];return m==='A'||m==='AO'||(Array.isArray(m)&&m.includes('A'))||COMBAT_VERBS.includes(w.lat);};const pool=wordsOf('verbs').filter(w=>!INTRANS.includes(w.lat)&&!ex.includes(w.lat)&&!SENT_SKIP_V.includes(w.lat)&&ok(w));return pool.length?rnd(pool):pTrans(ex);}
 function pickObjForVerb(v,ex=[]){if(COMBAT_VERBS.includes(v.lat)&&!VERB_OBJ[v.lat])return pAnim(ex);const m=VERB_OBJ[v.lat];if(!m)return pObj(ex);
  if(m==='A'||(Array.isArray(m)&&m.length===1&&m[0]==='A'))return pAnim(ex);
  if(m==='AO')return Math.random()<.5?pAnim(ex):pObj(ex);
  const pool=wordsOf('nouns').filter(w=>m.includes(w.lat)&&!ex.includes(w.lat));return pool.length?rnd(pool):pObj(ex);}
 function pGiveVerb(){return rnd(wordsOf('verbs').filter(w=>GIVE_VERBS.includes(w.lat)));}
-function pTrans(ex=[]){return rnd(wordsOf('verbs').filter(w=>!INTRANS.includes(w.lat)&&!ex.includes(w.lat)&&w.lat!=='gero'));}   // gero has its own sentences (bellum / togam gero)
-function pIntrans(ex=[]){return rnd(wordsOf('verbs').filter(w=>INTRANS.includes(w.lat)&&!ex.includes(w.lat)&&!['gero','esse','adesse','abesse','posse','impero','placeo','succurro','persuadeo','resisto','esto','este','volo','nolo','fero','credo','occurro','invideo','ineo','transeo'].includes(w.lat)));}
+const SENT_SKIP_V=['gero','iubeo','taceo'];   // gero has its own sentences; iubeo (= impero + dative) and taceo (= est tacitus) have two equally right answers
+function pTrans(ex=[]){return rnd(wordsOf('verbs').filter(w=>!INTRANS.includes(w.lat)&&!ex.includes(w.lat)&&!SENT_SKIP_V.includes(w.lat)));}   // gero has its own sentences (bellum / togam gero)
+function pIntrans(ex=[]){return rnd(wordsOf('verbs').filter(w=>INTRANS.includes(w.lat)&&!ex.includes(w.lat)&&!['gero','taceo','iubeo','esse','adesse','abesse','posse','impero','placeo','succurro','persuadeo','resisto','esto','este','volo','nolo','fero','credo','occurro','invideo','ineo','transeo'].includes(w.lat)));}
 const PLURAL_ONLY_ADJ=new Set(['pauci','ceteri','multi']);
 const NON_PRED_ADJ=new Set(['medius','nullus','multus','multi','pauci','ceteri','decimus','tuus','vester','meus','unus','duo','tres','suus','noster']);
 const NON_ATTR_ADJ=new Set(['medius','nullus','solus','tantus','multus','multi','pauci','ceteri','decimus','unus','duo','tres','suus','noster','tuus','vester','meus']);
@@ -2518,7 +2519,7 @@ function sThreePart(){const s1=pAnim(),s2=pAnim(),v1=pTrans(),v2=pTrans([v1.lat]
 function sSVOQuod(){const s1=sSVO(),s2=sSVO();return{latin:s1.latin.slice(0,-1)+', quod '+s2.latin[0].toLowerCase()+s2.latin.slice(1),english:s1.english.slice(0,-1)+', because '+s2.english[0].toLowerCase()+s2.english.slice(1),wordMap:{...s1.wordMap,...s2.wordMap,quod:'because'}};}
 function sSVOSed(){const s1=sSVOAdv(),s2=sSVOPrep();return{latin:s1.latin.slice(0,-1)+', sed '+s2.latin[0].toLowerCase()+s2.latin.slice(1),english:s1.english.slice(0,-1)+', but '+s2.english[0].toLowerCase()+s2.english.slice(1),wordMap:{...s1.wordMap,...s2.wordMap,sed:'but'}};}
 function sInsane(){const p1=sSVOPrep(),p2=sSVOAdv(),c=rnd(['Itaque','Sed','Tamen']),cE={'Itaque':'and so','Sed':'but','Tamen':'however'};return{latin:p1.latin+' '+c+', '+p2.latin[0].toLowerCase()+p2.latin.slice(1),english:p1.english+' '+cE[c]+', '+p2.english[0].toLowerCase()+p2.english.slice(1),wordMap:{...p1.wordMap,...p2.wordMap,[c.toLowerCase()]:cE[c]}};}
-function sDativeVO(){const DATV=wordsOf('verbs').filter(w=>['persuadeo','resisto','credo','occurro','invideo','impero','placeo','succurro'].includes(w.lat));const v=rnd(DATV),s=pAnim(),obj=pAnim([s.lat]);const sN=declineN(s,'nominative','singular'),objD=declineN(obj,'dative','singular'),vF=conjV(v,'3rd','singular');return{latin:cap(sN)+' '+objD+' '+vF+'.',english:'The '+eN(s)+' '+eV3(v)+' the '+eN(obj)+'.',wordMap:{[sN.toLowerCase()]:s.eng[0],[objD.toLowerCase()]:obj.eng[0],[vF.toLowerCase()]:v.eng[0]}};}
+function sDativeVO(){const DATV=wordsOf('verbs').filter(w=>['persuadeo','resisto','credo','occurro','invideo','placeo','succurro'].includes(w.lat));const v=rnd(DATV),s=pAnim(),obj=pAnim([s.lat]);const sN=declineN(s,'nominative','singular'),objD=declineN(obj,'dative','singular'),vF=conjV(v,'3rd','singular');return{latin:cap(sN)+' '+objD+' '+vF+'.',english:'The '+eN(s)+' '+eV3(v)+' the '+eN(obj)+'.',wordMap:{[sN.toLowerCase()]:s.eng[0],[objD.toLowerCase()]:obj.eng[0],[vF.toLowerCase()]:v.eng[0]}};}
 
 // ── PAST TENSE HELPERS ─────────────────────────────────────────────────────────
 function conjVI(w){const f=getVerbImpf(w);return f?f['3rd singular']:w.lat;}
@@ -2595,7 +2596,7 @@ function sAdjObjSVO(){const s=pAnim(),v=pTrans(),a=pAttrAdj();const o=pickObjFor
 function sIntransPrep(){const s=pAnim(),v=pIntrans(),cas=rnd(['abl','acc']),prep=pPrep(cas),pl=pPrepNoun(prep,[s.lat]);const sN=declineN(s,'nominative','singular'),vF=conjV(v,'3rd','singular'),pF=declineN(pl,cas==='abl'?'ablative':'accusative','singular');const ep=prepEng(prep,pl);return{latin:cap(sN)+' '+prep.lat+' '+pF+' '+vF+'.',english:'The '+eN(s)+' '+eV3(v)+' '+ep+' the '+eN(pl)+'.',wordMap:{[sN.toLowerCase()]:s.eng[0],[vF.toLowerCase()]:v.eng[0],[prep.lat.toLowerCase()]:prep.eng[0],[pF.toLowerCase()]:pl.eng[0]}};}
 function sImpPrep(){const v=pTrans(),o=pickObjForVerb(v),cas=rnd(['abl','acc']),prep=pPrep(cas),pl=pPrepNoun(prep,[o.lat]);const imp=makeImp(v),oA=declineN(o,'accusative','singular'),pF=declineN(pl,cas==='abl'?'ablative':'accusative','singular');const ep=prepEng(prep,pl);return{latin:cap(imp)+' '+oA+' '+prep.lat+' '+pF+'!',english:eImp(v)+' the '+eN(o)+' '+ep+' the '+eN(pl)+'!',wordMap:{[imp.toLowerCase()]:v.eng[0],[oA.toLowerCase()]:o.eng[0],[prep.lat.toLowerCase()]:prep.eng[0],[pF.toLowerCase()]:pl.eng[0]}};}
 function sTwoIntrans(){const s1=pAnim(),s2=pAnim([s1.lat]),v1=pIntrans(),v2=pIntrans([v1.lat]),c=pConj();const sN1=declineN(s1,'nominative','singular'),vF1=conjV(v1,'3rd','singular'),sN2=declineN(s2,'nominative','singular'),vF2=conjV(v2,'3rd','singular');return{latin:cap(sN1)+' '+vF1+' '+c.lat+' '+sN2+' '+vF2+'.',english:'The '+eN(s1)+' '+eV3(v1)+' '+c.eng[0]+' the '+eN(s2)+' '+eV3(v2)+'.',wordMap:{[sN1.toLowerCase()]:s1.eng[0],[vF1.toLowerCase()]:v1.eng[0],[c.lat]:c.eng[0],[sN2.toLowerCase()]:s2.eng[0],[vF2.toLowerCase()]:v2.eng[0]}};}
-function sDativeVOAdv(){const DATV=wordsOf('verbs').filter(w=>['persuadeo','resisto','credo','occurro','invideo','impero','placeo','succurro'].includes(w.lat));const v=rnd(DATV),s=pAnim(),obj=pAnim([s.lat]),adv=pAdv();const sN=declineN(s,'nominative','singular'),objD=declineN(obj,'dative','singular'),vF=conjV(v,'3rd','singular');return{latin:cap(sN)+' '+objD+' '+adv.lat+' '+vF+'.',english:'The '+eN(s)+' '+adv.eng[0]+' '+eV3(v)+' the '+eN(obj)+'.',wordMap:{[sN.toLowerCase()]:s.eng[0],[objD.toLowerCase()]:obj.eng[0],[adv.lat]:adv.eng[0],[vF.toLowerCase()]:v.eng[0]}};}
+function sDativeVOAdv(){const DATV=wordsOf('verbs').filter(w=>['persuadeo','resisto','credo','occurro','invideo','placeo','succurro'].includes(w.lat));const v=rnd(DATV),s=pAnim(),obj=pAnim([s.lat]),adv=pAdv();const sN=declineN(s,'nominative','singular'),objD=declineN(obj,'dative','singular'),vF=conjV(v,'3rd','singular');return{latin:cap(sN)+' '+objD+' '+adv.lat+' '+vF+'.',english:'The '+eN(s)+' '+adv.eng[0]+' '+eV3(v)+' the '+eN(obj)+'.',wordMap:{[sN.toLowerCase()]:s.eng[0],[objD.toLowerCase()]:obj.eng[0],[adv.lat]:adv.eng[0],[vF.toLowerCase()]:v.eng[0]}};}
 
 // ── NEW HARD ───────────────────────────────────────────────────────────────────
 function sSVOTamenAdj(){const s1=sSVO();const s2=pAnim(),a=pPredAdj();const sN=declineN(s2,'nominative','singular'),aF=declineA(a,s2.gender,'nominative','singular');return{latin:s1.latin.slice(0,-1)+', tamen '+sN+' est '+aF+'.',english:s1.english.slice(0,-1)+', however the '+eN(s2)+' is '+a.eng[0]+'.',wordMap:{...s1.wordMap,tamen:'however',[sN.toLowerCase()]:s2.eng[0],[aF.toLowerCase()]:a.eng[0],est:'is'}};}
@@ -2608,7 +2609,7 @@ function sSVIODOQuod(){const s1=sSVIODO(),s2=sSVO();return{latin:s1.latin.slice(
 function sTriple(){const c1=pConj(),c2=pConj();const s1=sSVO(),s2=sSVO(),s3=sSVO();return{latin:s1.latin.slice(0,-1)+' '+c1.lat+' '+s2.latin[0].toLowerCase()+s2.latin.slice(1).slice(0,-1)+', '+c2.lat+' '+s3.latin[0].toLowerCase()+s3.latin.slice(1),english:s1.english.slice(0,-1)+' '+c1.eng[0]+' '+s2.english[0].toLowerCase()+s2.english.slice(1).slice(0,-1)+', '+c2.eng[0]+' '+s3.english[0].toLowerCase()+s3.english.slice(1),wordMap:{...s1.wordMap,...s2.wordMap,...s3.wordMap,[c1.lat]:c1.eng[0],[c2.lat]:c2.eng[0]}};}
 function sInsanePrep(){const s1=sSVOPrep(),s2=sSVOPrep();return{latin:s1.latin.slice(0,-1)+', quod '+s2.latin[0].toLowerCase()+s2.latin.slice(1),english:s1.english.slice(0,-1)+', because '+s2.english[0].toLowerCase()+s2.english.slice(1),wordMap:{...s1.wordMap,...s2.wordMap,quod:'because'}};}
 function sInsaneAdjConj(){const s1=sSVOPrep();const s2=pAnim(),a=pPredAdj();const sN=declineN(s2,'nominative','singular'),aF=declineA(a,s2.gender,'nominative','singular');const c=rnd(['Itaque','Sed','Tamen']),cE={'Itaque':'and so','Sed':'but','Tamen':'however'};return{latin:s1.latin+' '+c+', '+sN+' est '+aF+'.',english:s1.english+' '+cE[c]+', the '+eN(s2)+' is '+a.eng[0]+'.',wordMap:{...s1.wordMap,[c.toLowerCase()]:cE[c],[sN.toLowerCase()]:s2.eng[0],[aF.toLowerCase()]:a.eng[0],est:'is'}};}
-function sInsaneDatPrep(){const s1=sSVOPrep();const DATV=wordsOf('verbs').filter(w=>['persuadeo','resisto','credo','occurro','invideo','impero','placeo','succurro'].includes(w.lat));const v=rnd(DATV),s2=pAnim(),obj=pAnim([s2.lat]);const sN=declineN(s2,'nominative','singular'),objD=declineN(obj,'dative','singular'),vF=conjV(v,'3rd','singular');return{latin:s1.latin.slice(0,-1)+', itaque '+sN+' '+objD+' '+vF+'.',english:s1.english.slice(0,-1)+', and so the '+eN(s2)+' '+eV3(v)+' the '+eN(obj)+'.',wordMap:{...s1.wordMap,itaque:'and so',[sN.toLowerCase()]:s2.eng[0],[objD.toLowerCase()]:obj.eng[0],[vF.toLowerCase()]:v.eng[0]}};}
+function sInsaneDatPrep(){const s1=sSVOPrep();const DATV=wordsOf('verbs').filter(w=>['persuadeo','resisto','credo','occurro','invideo','placeo','succurro'].includes(w.lat));const v=rnd(DATV),s2=pAnim(),obj=pAnim([s2.lat]);const sN=declineN(s2,'nominative','singular'),objD=declineN(obj,'dative','singular'),vF=conjV(v,'3rd','singular');return{latin:s1.latin.slice(0,-1)+', itaque '+sN+' '+objD+' '+vF+'.',english:s1.english.slice(0,-1)+', and so the '+eN(s2)+' '+eV3(v)+' the '+eN(obj)+'.',wordMap:{...s1.wordMap,itaque:'and so',[sN.toLowerCase()]:s2.eng[0],[objD.toLowerCase()]:obj.eng[0],[vF.toLowerCase()]:v.eng[0]}};}
 
 // ── VARIED SENTENCES ───────────────────────────────────────────────────────────
 // Different persons (I / you / we / you pl.), plural subjects and objects, genitive, dative and vocative,
@@ -2640,14 +2641,15 @@ const PERSON_ADJ=['bonus','laetus','iratus','fessus','magnus','parvus','malus','
 const THING_ADJ=['ligneus','ruber','albus','niger','flavus','caeruleus','purpureus','magnus','parvus','latus','longus','novus','pulcher','sacer','Romanus','altus','carus','gravis','levis','brevis','ingens','notus','bonus','malus'];
 const PLACE_ADJ=['magnus','parvus','latus','longus','novus','pulcher','sacer','Romanus','altus','notus','bonus','malus','ingens','carus','ignotus'];
 // verbs that make sense "in a place" (navigo only on water)
-const LOC_V=['habito','sedeo','maneo','iaceo','dormio','laboro','ceno','ambulo','curro','pugno','taceo','sto','erro','ludo','clamo'];
+const LOC_V=['habito','sedeo','maneo','iaceo','dormio','laboro','ceno','ambulo','curro','pugno','sto','erro','ludo','clamo'];
 function vLocVerb(P){const water=['mare','flumen'].includes(P.lat);const pool=wordsOf('verbs').filter(w=>LOC_V.includes(w.lat)||(water&&w.lat==='navigo'));return water&&Math.random()<.5?pool.find(w=>w.lat==='navigo')||rnd(pool):rnd(pool);}
 function vAdjFor(n){const list=ANIMATE.includes(n.lat)?PERSON_ADJ:PLACES.includes(n.lat)?PLACE_ADJ:THING_ADJ;return rnd(wordsOf('adjectives').filter(a=>list.includes(a.lat)));}
 const PRON_SUBJ={'1st singular':['ego','I'],'2nd singular':['tu','you'],'1st plural':['nos','we'],'2nd plural':['vos','you (pl.)']};
 // Subject: a noun (singular or plural) or a person shown only by the verb ending (ego/tu/nos/vos left out, as in Latin).
 function vSubj(ex=[],nounOnly){if(!nounOnly&&Math.random()<.35){const k=rnd(Object.keys(PRON_SUBJ));const [person,num]=k.split(' ');return {person,num,lat:'',eng:PRON_SUBJ[k][1],pron:PRON_SUBJ[k][0]};}
   const w=pAnim(ex),num=rNum(),np=vNP(w,'nominative',num);return {person:'3rd',num,lat:np.lat,eng:np.full,w,gender:w.gender||'m',core:np.core};}
-function vVerbLat(v,t,s){const f=t==='fut'?getVerbFut(v):t==='past'?getVerbImpf(v):getVerbConj(v);return f&&f[s.person+' '+s.num];}
+let VAR_YOU=[];
+function vVerbLat(v,t,s){const f=t==='fut'?getVerbFut(v):t==='past'?getVerbImpf(v):getVerbConj(v);const r=f&&f[s.person+' '+s.num];if(r&&s.person==='2nd'&&s.num==='singular'&&f['2nd plural'])VAR_YOU.push({sg:r,pl:f['2nd plural']});return r;}
 function vVerbEng(v,t,s){const sg3=s.person==='3rd'&&s.num==='singular',iSg=s.person==='1st'&&s.num==='singular';
   if(t==='fut')return eFut(v);
   if(t==='past'){const p=ePast(v);return (sg3||iSg)?p:p.replace(/^was\b/,'were');}
@@ -2748,7 +2750,7 @@ function sentTensesOf(r){const e=String(r.english||''),T=new Set();if(/!/.test(e
 function buildSentence(){let r=null,best=null;
   for(let i=0;i<40;i++){r=buildSentence1();if(!r)continue;const T=sentTensesOf(r);if([...T].every(t=>sentTenses[t]))return r;if(!best)best=r;}
   return r||best;}
-function buildSentence1(){IMP_USED=[];const r=buildSentenceRaw();if(r)r.imps=IMP_USED.filter(x=>x.sg&&x.pl);if(r&&r.english)r.english=r.english.replace(/([.!?]) ([a-z])/g,(m,p,c)=>p+' '+c.toUpperCase());return r;}
+function buildSentence1(){IMP_USED=[];VAR_YOU=[];const r=buildSentenceRaw();if(r)r.youAlts=VAR_YOU.slice();if(r)r.imps=IMP_USED.filter(x=>x.sg&&x.pl);if(r&&r.english)r.english=r.english.replace(/([.!?]) ([a-z])/g,(m,p,c)=>p+' '+c.toUpperCase());return r;}
 function buildSentenceRaw(){
   const pools={
     easy:[sSVO,sAdjPred,sImp,sAdvIntrans,sDativeVO,sIntrans,sIntransLoc,sAdjSVO,sEstLoc,sSVOPast,sIntransPast,sAdjPredPast,sEstLocPast,sAdvIntransPast,sIntransLocPast,sSuus,sEius,sHicSVO,sIlleSVO,
@@ -3149,17 +3151,24 @@ function sentPoints(sd){sd=sd||sentData;if(!sd)return 1;return Math.max(1,mode==
 function enMeaningAlts(sd,eng){const clean=x=>String(x).replace(/\s*\([^)]*\)/g,'').replace(/^to /,'').trim().toLowerCase();
   const vals=new Set();Object.values(sd.wordMap||{}).forEach(x=>{const c=clean(x);vals.add(c);vals.add(c.replace(/^(of|to) the /,''));});
   const v3=x=>{try{return eV3({eng:[x]});}catch(e){return null;}},ing=x=>{try{return ePast({eng:[x]}).replace(/^was /,'');}catch(e){return null;}},pl=x=>{try{return ePl({lat:'',eng:[x]});}catch(e){return null;}};
-  const pairs=[];allWordsFlat().forEach(w=>{if(!w.eng||w.eng.length<2)return;const e0=clean(w.eng[0]);if(!vals.has(e0))return;
+  const pairs=[];
+  // English tense variants of the verbs in the sentence (Latin present = "carries" or "is carrying"; imperfect = "was carrying" or "used to carry")
+  wordsOf('verbs').forEach(w=>{const ms=w.eng.map(clean).filter(Boolean);if(!ms.some(m=>vals.has(m)))return;ms.forEach(m=>{const g=ing(m),t3=v3(m);if(!g||/^be\b/.test(m))return;
+    if(t3)pairs.push([t3,'is '+g]);pairs.push(['was '+g,'used to '+m],['were '+g,'used to '+m],['you '+m,'you are '+g],['we '+m,'we are '+g],['they '+m,'they are '+g],['i '+m,'i am '+g]);});});
+  allWordsFlat().forEach(w=>{if(!w.eng||w.eng.length<2)return;const e0=clean(w.eng[0]);if(!vals.has(e0))return;
     w.eng.slice(1).map(clean).forEach(m=>{if(!m||m===e0)return;pairs.push([e0,m]);if(w.catKey==='verbs'){pairs.push([v3(e0),v3(m)],[ing(e0),ing(m)]);}if(w.catKey==='nouns')pairs.push([pl(e0),pl(m)]);});});
   let out=[eng.toLowerCase()];const esc2=x=>x.replace(/[.*+?^\${}()|[\]\\]/g,'\\$&');
-  pairs.forEach(([a,b])=>{if(!a||!b||a===b)return;const re=new RegExp('\\b'+esc2(a)+'\\b','g');const add=[];out.forEach(v=>{if(re.test(v)){re.lastIndex=0;add.push(v.replace(re,b));}re.lastIndex=0;});out=out.concat(add).slice(0,96);});
+  pairs.forEach(([a,b])=>{if(!a||!b||a===b)return;const re=new RegExp('\\b'+esc2(a)+'\\b','g');const add=[];out.forEach(v=>{if(re.test(v)){re.lastIndex=0;add.push(v.replace(re,b));}re.lastIndex=0;});out=out.concat(add).slice(0,400);});
   return out.slice(1);}
 function sentAlternatives(ca){const alts=[ca];if(!sentData)return alts;
   if(mode==='le'){
     // hints in [ ] like "his [own] father" or "his [someone else's] master" are optional: "his father" and "his own father" both count
     const bases=[ca];if(/\[[^\]]*\]/.test(ca)){bases.push(ca.replace(/\s*\[[^\]]*\]/g,''),ca.replace(/[\[\]]/g,''));}
     bases.slice(1).forEach(b=>alts.push(b));bases.forEach(b=>alts.push(...enMeaningAlts(sentData,b)));}
-  if(mode==='el'&&sentData.altLatin)alts.push(...sentData.altLatin);   // e.g. "Nos cibum portamus" as well as "Cibum portamus"
+  if(mode==='el'&&sentData.altLatin)alts.push(...sentData.altLatin);
+  // "you" without "(pl.)" could mean several people, so the plural verb (and vos) is right too
+  if(mode==='el'&&sentData.youAlts&&sentData.youAlts.length&&/\byou\b(?! \(pl)/i.test(sentData.english)){const sw=x=>{let y=x;sentData.youAlts.forEach(({sg,pl})=>{y=y.replace(new RegExp('(^|[^A-Za-z])('+sg+')(?=[^A-Za-z]|$)','gi'),(m,a,w)=>a+(w[0]===w[0].toUpperCase()?pl[0].toUpperCase()+pl.slice(1):pl));});return y.replace(/(^|[^A-Za-z])(tu)(?=[^A-Za-z]|$)/gi,(m,a,w)=>a+(w[0]==='T'?'Vos':'vos'));};
+    alts.slice().forEach(a=>{const b=sw(a);if(b!==a)alts.push(b);});}   // e.g. "Nos cibum portamus" as well as "Cibum portamus"
   if(mode==='le'&&/\(pl\.\)/.test(ca))alts.push(ca.replace(/\s*\(pl\.\)/g,''));
   if(mode==='el'&&sentData.imps&&sentData.imps.length&&!/all of you/i.test(sentData.english)){let pl=ca;
     sentData.imps.forEach(({sg,pl:p})=>{pl=pl.replace(new RegExp('(^|[^A-Za-z])('+sg+')(?=[^A-Za-z]|$)','i'),(m,a,w)=>a+(w[0]===w[0].toUpperCase()?p[0].toUpperCase()+p.slice(1):p));});if(pl!==ca)alts.push(pl);}
