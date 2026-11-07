@@ -3201,6 +3201,8 @@ function enMeaningAlts(sd,eng){const clean=x=>String(x).replace(/\s*\([^)]*\)/g,
     if(t3)pairs.push([t3,'is '+g]);pairs.push(['was '+g,'used to '+m],['were '+g,'used to '+m],['you '+m,'you are '+g],['we '+m,'we are '+g],['they '+m,'they are '+g],['i '+m,'i am '+g]);});});
   allWordsFlat().forEach(w=>{if(!w.eng||w.eng.length<2)return;const e0=clean(w.eng[0]);if(!vals.has(e0))return;
     w.eng.slice(1).map(clean).forEach(m=>{if(!m||m===e0)return;pairs.push([e0,m]);if(w.catKey==='verbs'){pairs.push([v3(e0),v3(m)],[ing(e0),ing(m)]);}if(w.catKey==='nouns')pairs.push([pl(e0),pl(m)]);});});
+  // "female teacher" can just be "teacher" (the Latin ending already shows it's female)
+  vals.forEach(v=>{const m=v.match(/^(female|male) (.+)$/);if(m){pairs.push([v,m[2]]);try{pairs.push([ePl({lat:'',eng:[v]}),ePl({lat:'',eng:[m[2]]})]);}catch(e){}}});
   // Latin "in" + ablative is both "in" and "on"
   if(/(^|[^a-z])in([^a-z]|$)/i.test(sd.latin||''))pairs.push(['on the','in the'],['in the','on the']);
   let out=[eng.toLowerCase()];const esc2=x=>x.replace(/[.*+?^\${}()|[\]\\]/g,'\\$&');
