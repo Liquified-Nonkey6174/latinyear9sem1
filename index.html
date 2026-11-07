@@ -3757,12 +3757,18 @@ function renderLbProfile(msg,isErr){document.querySelectorAll('.lb-profile').for
   updChatInput();}
 // Chat input state: not joined, blocked by the admin (mute/{uid}), or normal.
 let chatMuted=false;
+// "Shadow" blocks set by the admin: mute/{uid} hides someone's chat messages, lbhide/{uid} hides them from the
+// leaderboard. They still see themselves normally; everyone else (except the admin) doesn't see them.
+let mutedSet=new Set(),lbHidden=new Set();
+const seesPid=pid=>isAdmin||(lbMe&&pid===lbMe.pid);
+const chatVisible=pid=>!mutedSet.has(pid)||seesPid(pid);
+const lbVisible=pid=>!lbHidden.has(pid)||seesPid(pid);
 // New accounts need CHAT_MIN_PTS points before they can chat (stops spam from throwaway accounts; the database rules check it too).
 const CHAT_MIN_PTS=50;
 function updChatInput(){const ci=document.getElementById('chatInput'),cs=document.getElementById('chatSend');if(!ci)return;const pts=lbMyPoints(),short=!!lbMe&&pts<CHAT_MIN_PTS;
   ci.disabled=cs.disabled=!lbMe||chatMuted||short;
   ci.placeholder=!lbMe?'Join above to chat':chatMuted?'The admin has blocked you from sending messages':short?'Earn '+CHAT_MIN_PTS+' ⭐ to unlock chat ('+(CHAT_MIN_PTS-pts)+' to go)':'Message everyone…';}
-function setChatMuted(m){m=!!m;if(m===chatMuted)return;chatMuted=m;updChatInput();}
+function setChatMuted(m){chatMuted=false;}
 async function lbSaveName(raw){const name=lbCleanName(raw);const err=lbNameError(name);if(err){renderLbProfile(err,true);return;}
   let pid;const prev=lbMe?lbMe.name:null;   // remember it now: the live stream may update lbMe.name while we wait
   try{await playerToken();pid=playerAuth.uid;await fbReq('PATCH','players/'+pid,lbMe?{name}:{name,total:0});}catch(e){
@@ -3780,7 +3786,7 @@ const LB_PERIOD_NAME={d:'today',w:'this week',m:'this month',all:'all time'};
 function lbScore(p,period,k){return period==='all'?(p.total||0):((p[period]||{})[k[period]]||0);}
 function setLbPeriod(p){lbPeriod=p;document.querySelectorAll('.lb-periods .mode-btn').forEach(b=>b.classList.toggle('active',b.dataset.period===p));renderLb();}
 function renderLb(){const list=document.getElementById('lbList');if(!list||!lbPlayersLoaded)return;const k=lbKeys();
-  const rows=Object.entries(lbPlayers).filter(([,p])=>p&&p.name).map(([pid,p])=>({pid,name:p.name,n:lbScore(p,lbPeriod,k)}));
+  const rows=Object.entries(lbPlayers).filter(([pid,p])=>p&&p.name&&lbVisible(pid)).map(([pid,p])=>({pid,name:p.name,n:lbScore(p,lbPeriod,k)}));
   // Add points not yet confirmed by the server to your own row, so it moves the moment you answer.
   if(lbMe){const me=rows.find(r=>r.pid===lbMe.pid);if(me)me.n+=lbMyPoints()-((lbPlayers[lbMe.pid]||{}).total||0);}
   rows.sort((a,b)=>b.n-a.n||a.name.localeCompare(b.name));list.innerHTML='';
@@ -3799,7 +3805,7 @@ function renderLb(){const list=document.getElementById('lbList');if(!list||!lbPl
     const rank=r.rank;
     const it=document.createElement('div');it.className='lb-item'+(lbMe&&r.pid===lbMe.pid?' me':'')+(rank<=3&&r.n>0?' top':'');
     const rk=document.createElement('span');rk.className='lb-rank';rk.textContent=SET.ordinal?ordinal(rank):rank;
-    const nm=document.createElement('span');nm.className='lb-name';nm.appendChild(nameEl(r.pid,r.name));
+    const nm=document.createElement('span');nm.className='lb-name';nm.appendChild(nameEl(r.pid,r.name));if(isAdmin&&lbHidden.has(r.pid)){it.style.opacity='.55';nm.title='Hidden from everyone else';nm.append(' 👻');}
     const ct=document.createElement('span');ct.className='lb-count';ct.textContent=r.n.toLocaleString();
     it.append(rk,nm,ct);it.classList.add('click');it.title=lbMe&&r.pid===lbMe.pid?'Change your look':'View '+r.name;
     it.onclick=e=>{if(e.target.closest('.lb-act'))return;if(lbMe&&r.pid===lbMe.pid)openLook();else openPlayerCard(r.pid);};
@@ -3962,9 +3968,13 @@ function openPlayerCard(pid){const p=lbPlayers[pid];if(!p)return;const k=lbKeys(
     fbReq('GET','nlock/'+pid,null,{admin:true}).then(v=>{locked=v===true;setLk();}).catch(()=>{lk.textContent='Lock name (unavailable)';});
     lk.onclick=async()=>{lk.disabled=true;try{await fbReq(locked?'DELETE':'PUT','nlock/'+pid,locked?null:true,{admin:true});locked=!locked;}catch(e){alert('Couldn’t save: '+e.message);}setLk();};
     const mb=document.createElement('button');mb.className='btn-secondary';mb.style.margin='0 0 8px 6px';mb.textContent='…';mb.disabled=true;box.insertBefore(mb,hist);
-    let muted=false;const setMb=()=>{mb.textContent=muted?'🚫 Blocked from chat (unblock)':'Block from chat';mb.title=muted?'They can’t send chat messages. Click to allow it again.':'Stop them sending chat messages (they can still read chat and play).';mb.disabled=false;};
+    let muted=false;const setMb=()=>{mb.textContent=muted?'🚫 Chat hidden (unhide)':'Hide their chat';mb.title=muted?'Only they (and you) can see their messages. Click to show them to everyone again.':'Their messages will only be visible to them (and you). They won’t know.';mb.disabled=false;};
     fbReq('GET','mute/'+pid,null,{admin:true}).then(v=>{muted=v===true;setMb();}).catch(()=>{mb.textContent='Block from chat (unavailable)';});
-    mb.onclick=async()=>{mb.disabled=true;try{await fbReq(muted?'DELETE':'PUT','mute/'+pid,muted?null:true,{admin:true});muted=!muted;}catch(e){alert('Couldn’t save: '+e.message);}setMb();};
+    mb.onclick=async()=>{mb.disabled=true;try{await fbReq(muted?'DELETE':'PUT','mute/'+pid,muted?null:true,{admin:true});muted=!muted;if(muted)mutedSet.add(pid);else mutedSet.delete(pid);renderChat();}catch(e){alert('Couldn’t save: '+e.message);}setMb();};
+    const hb2=document.createElement('button');hb2.className='btn-secondary';hb2.style.margin='0 0 8px 6px';hb2.textContent='…';hb2.disabled=true;box.insertBefore(hb2,hist);
+    let hid=false;const setHb=()=>{hb2.textContent=hid?'👻 Hidden from leaderboard (unhide)':'Hide from leaderboard';hb2.title=hid?'Only they (and you) can see them on the leaderboard. Click to show them again.':'They’ll still see themselves on the leaderboard, but nobody else will. They won’t know.';hb2.disabled=false;};
+    fbReq('GET','lbhide/'+pid,null,{admin:true}).then(v=>{hid=v===true;setHb();}).catch(()=>{hb2.textContent='Hide from leaderboard (unavailable)';});
+    hb2.onclick=async()=>{hb2.disabled=true;try{await fbReq(hid?'DELETE':'PUT','lbhide/'+pid,hid?null:true,{admin:true});hid=!hid;if(hid)lbHidden.add(pid);else lbHidden.delete(pid);renderLb();renderClassChallenge();}catch(e){alert('Couldn’t save: '+e.message);}setHb();};
     // Premium: remove it (also takes off any premium look items) or give it for free.
     const pb=document.createElement('button');pb.className='btn-secondary';pb.style.margin='0 0 8px 6px';pb.textContent='…';pb.disabled=true;box.insertBefore(pb,hist);
     let prem=null;const setPb=()=>{pb.textContent=prem?'👑 Premium'+(prem.c&&prem.c!=='admin'?' (code “'+prem.c+'”)':'')+' · remove':'Give premium';pb.disabled=false;};
@@ -3985,7 +3995,7 @@ function openPlayerCard(pid){const p=lbPlayers[pid];if(!p)return;const k=lbKeys(
 let classChal=null;
 function renderClassChallenge(){const box=document.getElementById('classChallenge');if(!box)return;box.innerHTML='';
   const target=classChal&&+classChal.target;if(!target){if(isAdmin){const b=document.createElement('button');b.className='lb-link';b.textContent='+ Set a class challenge';b.onclick=editClassChallenge;box.appendChild(b);}return;}
-  const wk=lbKeys().w;const total=Object.values(lbPlayers).reduce((a,p)=>a+((p&&p.w&&p.w[wk])||0),0);const pct=Math.min(100,Math.round(total/target*100));
+  const wk=lbKeys().w;const total=Object.entries(lbPlayers).filter(([pid])=>lbVisible(pid)).reduce((a,[,p])=>a+((p&&p.w&&p.w[wk])||0),0);const pct=Math.min(100,Math.round(total/target*100));
   box.className='cc-box'+(total>=target?' done':'');
   box.innerHTML='<div class="cc-top"><span>🏆 '+esc(classChal.title||'Class challenge')+'</span><span>'+total.toLocaleString()+' / '+target.toLocaleString()+'</span></div><div class="cc-bar"><div style="width:'+pct+'%"></div></div><div class="cc-sub">'+(total>=target?'Goal reached this week! 🎉':'Correct answers by everyone this week')+'</div>';
   if(isAdmin){const b=document.createElement('button');b.className='lb-act';b.textContent='✎';b.title='Edit challenge';b.onclick=editClassChallenge;box.querySelector('.cc-top').appendChild(b);}}
@@ -4005,7 +4015,7 @@ function chatTime(t){if(!t)return '';const d=new Date(t),now=new Date();const hm
 let chatLoaded=false;
 function renderChat(){const list=document.getElementById('chatList');if(!list||!chatLoaded)return;const atBottom=list.scrollHeight-list.scrollTop-list.clientHeight<40;list.innerHTML='';
   if(!chatMsgs.length){list.innerHTML='<div class="lb-empty">No messages yet. Say salve!</div>';return;}
-  chatMsgs.forEach(m=>{if(!m||typeof m.text!=='string')return;const el=document.createElement('div');el.className='chat-m'+(lbMe&&m.pid===lbMe.pid?' me':'');
+  chatMsgs.forEach(m=>{if(!m||typeof m.text!=='string'||!chatVisible(m.pid))return;const el=document.createElement('div');el.className='chat-m'+(lbMe&&m.pid===lbMe.pid?' me':'');if(isAdmin&&mutedSet.has(m.pid)){el.style.opacity='.55';el.title='Hidden from everyone else';}
     const who=document.createElement('span');who.className='chat-who';who.appendChild(nameEl(m.pid,lbName(m.pid)));
     const tx=document.createElement('span');tx.textContent=m.text;
     const tm=document.createElement('span');tm.className='chat-time';tm.textContent=chatTime(m.t);
@@ -4036,8 +4046,6 @@ async function sendChat(){const inp=document.getElementById('chatInput'),err=doc
   catch(e){// older database rules don't allow replies yet: send it as a normal message instead
     if(msg.re){delete msg.re;try{await fbReq('POST','chat',msg);err.textContent='Sent, but not as a reply: the database rules need updating (ask the admin).';return;}catch(e2){}}
     inp.value=text;setChatReply(was);
-    let mu=false;try{mu=(await fbReq('GET','mute/'+lbMe.pid))===true;}catch(e3){}
-    if(mu){setChatMuted(true);inp.value='';err.textContent='The admin has blocked you from sending messages.';return;}
     err.textContent='Message not sent. Check your internet and try again.';}}
 // Admin: edit any chat message (marked "(edited)" for everyone).
 async function adminEditMsg(id){const m=chatObj[id];if(!m)return;const v=prompt('Edit message from '+lbName(m.pid)+':',m.text);if(v===null)return;
@@ -4133,8 +4141,10 @@ function pickParse(i){if(!parseQ||parseQ.picked!=null)return;parseQ.picked=i;con
 
 let pollBusy=false;
 async function pollShared(){if(pollBusy)return;pollBusy=true;
-  try{const [d,c,mu]=await Promise.all([fbReq('GET','duels').catch(()=>undefined),fbReq('GET','challenge').catch(()=>undefined),lbMe?fbReq('GET','mute/'+lbMe.pid).catch(()=>undefined):undefined]);
-    if(mu!==undefined)setChatMuted(mu===true);
+  try{const [d,c,mu,lh]=await Promise.all([fbReq('GET','duels').catch(()=>undefined),fbReq('GET','challenge').catch(()=>undefined),fbReq('GET','mute').catch(()=>undefined),fbReq('GET','lbhide').catch(()=>undefined)]);
+    const setsKey=()=>[...mutedSet].sort().join()+'|'+[...lbHidden].sort().join();const before=setsKey();
+    if(mu!==undefined)mutedSet=new Set(Object.keys(mu||{}));if(lh!==undefined)lbHidden=new Set(Object.keys(lh||{}));
+    if(setsKey()!==before){renderLb();renderChat();}
     if(lbMe){const pr=await fbReq('GET','prem/'+lbMe.pid).catch(()=>undefined);if(pr!==undefined&&!!pr!==premMe){premMe=!!pr;renderLbProfile();if(document.getElementById('lookOverlay').style.display==='flex')renderLook();}}
     if(d!==undefined){duelsObj=d||{};updDuelBtn();if(document.getElementById('duelInboxOverlay').style.display==='flex')renderDuelInbox();}
     if(c!==undefined){classChal=c&&c.target?c:null;renderClassChallenge();}}
