@@ -4029,7 +4029,8 @@ function renderChat(){const list=document.getElementById('chatList');if(!list||!
     if(lbMe){const r=document.createElement('button');r.className='chat-reply';r.title='Reply';r.textContent='Reply';r.onclick=()=>setChatReply(m.id);el.appendChild(r);
       const pick=document.createElement('span');pick.className='chat-pick';REACTS.forEach(([k,e])=>{const b=document.createElement('button');b.textContent=e;b.title='React '+e;b.onclick=()=>toggleReact(m.id,k);pick.appendChild(b);});el.appendChild(pick);}
     const rx=m.rx&&typeof m.rx==='object'?m.rx:null;if(rx){const row=document.createElement('div');row.className='chat-rx';
-      REACTS.forEach(([k,e])=>{const who=rx[k]?Object.keys(rx[k]):[];if(!who.length)return;const c=document.createElement('button');c.className='rx-chip'+(lbMe&&who.includes(lbMe.pid)?' mine':'');
+      REACTS.forEach(([k,e])=>{const who=rx[k]?Object.keys(rx[k]).filter(chatVisible):[];if(!who.length)return;   // reactions from hidden-chat players only show to them (and the admin)
+        const c=document.createElement('button');c.className='rx-chip'+(lbMe&&who.includes(lbMe.pid)?' mine':'');
         c.textContent=e+' '+who.length;c.title=who.map(lbName).join(', ');c.onclick=()=>{if(lbMe)toggleReact(m.id,k);};row.appendChild(c);});if(row.childNodes.length)el.appendChild(row);}
     if(isAdmin){const ed=document.createElement('button');ed.className='lb-act';ed.title='Edit message';ed.textContent='✎';ed.onclick=()=>adminEditMsg(m.id);el.appendChild(ed);}
     if(isAdmin){const d=document.createElement('button');d.className='lb-act del';d.title='Delete message';d.textContent='×';d.onclick=async()=>{try{await fbReq('DELETE','chat/'+m.id,null,{admin:true});}catch(e){alert('Couldn’t delete: '+e.message);}};el.appendChild(d);}
