@@ -4083,14 +4083,15 @@ function renderChat(){const list=document.getElementById('chatList');if(!list||!
     if(isAdmin){const d=document.createElement('button');d.className='lb-act del';d.title='Delete message';d.textContent='×';d.onclick=async()=>{try{await fbReq('DELETE','chat/'+m.id,null,{admin:true});}catch(e){alert('Couldn’t delete: '+e.message);}};el.appendChild(d);}
     list.appendChild(el);});
   if(atBottom||list.dataset.first!=='1'){list.scrollTop=list.scrollHeight;list.dataset.first='1';}}
-async function sendChat(){const inp=document.getElementById('chatInput'),err=document.getElementById('chatErr');const text=inp.value.replace(/\s+/g,' ').trim();err.textContent='';
+async function sendChat(){const sentAt=new Date();   // for time-based badges: the time you pressed Send
+  const inp=document.getElementById('chatInput'),err=document.getElementById('chatErr');const text=inp.value.replace(/\s+/g,' ').trim();err.textContent='';
   if(!lbMe||!text)return;if(Date.now()-chatLastSend<3000){err.textContent='Slow down a little!';return;}
   if(lbMyPoints()<CHAT_MIN_PTS){err.textContent='Earn '+CHAT_MIN_PTS+' ⭐ to unlock chat.';return;}
   if(((lbPlayers[lbMe.pid]||{}).total||0)<CHAT_MIN_PTS)await lbFlush();   // make sure the server has the points first
   chatLastSend=Date.now();inp.value='';document.getElementById('chatList').dataset.first='';
   const msg={pid:lbMe.pid,text:text.slice(0,300),t:{'.sv':'timestamp'}};if(chatReplyTo&&chatObj[chatReplyTo])msg.re=chatReplyTo;
   const was=chatReplyTo;setChatReply(null);
-  try{await fbReq('POST','chat',msg);bump('chat');chatBadgeChecks(text);}
+  try{await fbReq('POST','chat',msg);bump('chat');chatBadgeChecks(text,sentAt);}
   catch(e){// older database rules don't allow replies yet: send it as a normal message instead
     if(msg.re){delete msg.re;try{await fbReq('POST','chat',msg);err.textContent='Sent, but not as a reply: the database rules need updating (ask the admin).';return;}catch(e2){}}
     inp.value=text;setChatReply(was);
@@ -4177,7 +4178,7 @@ function bump(k,n){const b=bstat();b[k]=(b[k]||0)+(n||1);bsave();badgeCheckSoon(
 function lbTodayPts(){if(!lbMe)return 0;const me=lbPlayers[lbMe.pid]||{},k=lbKeys();return ((me.d||{})[k.d]||0)+lbPending;}
 // every answer (vocab, drills, sentences, parse, challenges)
 // secret chat badges
-function chatBadgeChecks(text){const t=String(text).toLowerCase().replace(/[^a-z0-9 ]/g,'').replace(/\s+/g,' ').trim();const b=bstat();const d=new Date();
+function chatBadgeChecks(text,when){const t=String(text).toLowerCase().replace(/[^a-z0-9 ]/g,'').replace(/\s+/g,' ').trim();const b=bstat();const d=when||new Date();
   if(t==='i want a badge')b.askBadge=1;if(t==='67'&&d.getMinutes()===7&&(d.getHours()===6||d.getHours()===18))b.sixSeven=1;bsave();badgeCheckSoon();}
 function badgeAnswer(ok){const b=bstat();if(ok){b.correct=(b.correct||0)+1;b.run=(b.run||0)+1;if(b.run>(b.bestRun||0))b.bestRun=b.run;const h=new Date().getHours();if(h<8)b.early=1;if(h>=22)b.late=1;}else b.run=0;bsave();badgeCheckSoon();}
 function lexWords(scope){const main=[];Object.entries(DATA).forEach(([ck,c])=>{if(c.packOnly)return;Object.entries(c.sub).forEach(([sk,sub])=>sub.words.forEach(w=>{if(!(typeof customWords!=='undefined'&&customWords.some(x=>x.lat===w.lat&&x.catKey===ck)))main.push({...w,catKey:ck,subKey:sk});}));});
