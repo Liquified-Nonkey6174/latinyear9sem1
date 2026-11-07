@@ -569,7 +569,7 @@ body.calm .nfx-type .tw-caret{display:none}
 .badge-card.m-gold.earned{border-color:#e6b422;background:linear-gradient(160deg,rgba(230,180,34,.22),transparent)}.m-gold .bd-metal{background:#e6b422;color:#222}
 .badge-card.m-diamond.earned{border-color:#7fdbff;background:linear-gradient(160deg,rgba(127,219,255,.22),rgba(200,160,255,.12))}.m-diamond .bd-metal{background:linear-gradient(90deg,#7fdbff,#c8a0ff);color:#222}
 .badge-card.earned.lvl4,.badge-card.earned.lvl5{border-color:#e6b422}.badge-card.earned.lvl6,.badge-card.earned.lvl7{border-color:#7fdbff;box-shadow:0 0 10px rgba(127,219,255,.25)}
-.bchips{display:inline-flex;gap:3px;margin-left:6px;vertical-align:middle}
+.bchips{display:inline-flex;gap:8px;margin-left:6px;margin-right:8px;vertical-align:middle}
 .bchip{position:relative;display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--surface2);border:1.5px solid var(--border2);font-size:12px;line-height:1;flex-shrink:0}
 .bchip.big{width:30px;height:30px;font-size:17px}
 .bchip .bc-n{position:absolute;bottom:-5px;right:-7px;font-family:var(--serif,serif);font-size:8.5px;font-weight:700;line-height:1;padding:1px 2px;border-radius:4px;background:var(--surface);border:1px solid currentColor;color:var(--text2)}
@@ -4209,13 +4209,13 @@ function renderBadges(){const g=document.getElementById('badgeGrid');if(!g)retur
     let prog='';if(next!=null){if(bd.id.startsWith('lex')||bd.id.startsWith('doct'))prog=lexProgress(bd.id==='lexicon'||bd.id==='doctus'?'main':'all',bd.id.startsWith('lex')?'seen':'correct');else if(bd.lv.length>1||next>1)prog=Math.min(v,next).toLocaleString()+' / '+next.toLocaleString()+(bd.unit?' '+bd.unit:'');}
     c.innerHTML='<div class="bd-icon">'+bd.icon+(bd.metal!=null?'<span class="bd-num">'+ROMAN[bd.metal]+'</span>':l&&bd.lv.length>1?'<span class="bd-num">'+ROMAN[l-1]+'</span>':'')+'</div><div class="bd-name">'+esc(l?badgeTierName(bd,l):bd.name)+(bd.metal!=null?' '+ROMAN[bd.metal]:'')+'</div>'+(bd.lat?'<div class="bd-lat">'+esc(bd.lat)+'</div>':'')
       +'<div class="bd-desc">'+esc(bd.desc)+(bd.lv.length>1?' Levels: '+bd.lv.map(x=>x.toLocaleString()).join(' · ')+'.':'')+'</div>'+(prog?'<div class="bd-prog">'+(l?'Next: ':'')+prog+'</div>':'')+(e?'<div class="bd-date">'+new Date(e.t).toLocaleDateString()+'</div>':'');
-    if(l&&lbMe){const pinned=badgePins().includes(bd.id);const pb=document.createElement('button');pb.className='bd-pin'+(pinned?' on':'');pb.textContent=pinned?'📌 Shown':'📌 Show';pb.title=pinned?'Shown next to your name on the leaderboard. Click to hide.':'Show next to your name on the leaderboard (up to 3).';pb.onclick=()=>toggleBadgePin(bd.id);c.appendChild(pb);if(pinned)c.classList.add('pinned');}
+    if(l&&lbMe){const pinned=badgePins().includes(bd.id);const pb=document.createElement('button');pb.className='bd-pin'+(pinned?' on':'');pb.textContent=pinned?'📌 Shown':'📌 Show';pb.title=pinned?'Shown next to your name on the leaderboard. Click to hide.':'Show next to your name on the leaderboard (up to 6).';pb.onclick=()=>toggleBadgePin(bd.id);c.appendChild(pb);if(pinned)c.classList.add('pinned');}
     g.appendChild(c);});
-  const cnt=document.getElementById('badgeCount');if(cnt)cnt.textContent=earned+' / '+total+(lbMe?' · showing '+badgePins().filter(id=>got[id]).length+'/3 on the leaderboard':' · join the leaderboard to show badges there')+(bdSaveErr==='rules'?' · ⚠ not saved: the database rules need updating':bdSaveErr?' · ⚠ not saved yet (offline?)':'');}
+  const cnt=document.getElementById('badgeCount');if(cnt)cnt.textContent=earned+' / '+total+(lbMe?' · showing '+badgePins().filter(id=>got[id]).length+'/'+MAX_PINS+' on the leaderboard':' · join the leaderboard to show badges there')+(bdSaveErr==='rules'?' · ⚠ not saved: the database rules need updating':bdSaveErr?' · ⚠ not saved yet (offline?)':'');}
 
-// Badges shown on the leaderboard: players pick up to 3 (players/{uid}/bd = "id:level,id:level").
-const PIN_KEY='latin_badge_pins';
-function badgePins(){try{const a=JSON.parse(localStorage.getItem(PIN_KEY)||'[]');return Array.isArray(a)?a.slice(0,3):[];}catch(e){return [];}}
+// Badges shown on the leaderboard: players pick up to 6 (players/{uid}/bd = "id:level,id:level").
+const PIN_KEY='latin_badge_pins',MAX_PINS=6;
+function badgePins(){try{const a=JSON.parse(localStorage.getItem(PIN_KEY)||'[]');return Array.isArray(a)?a.slice(0,MAX_PINS):[];}catch(e){return [];}}
 function badgeById(id){return BADGES.find(b=>b.id===id);}
 // a small badge chip: icon + level numeral (tiered) or metal ring (points badges)
 function badgeChip(id,l,big){const bd=badgeById(id);if(!bd||!l)return null;const c=document.createElement('span');
@@ -4224,7 +4224,7 @@ function badgeChip(id,l,big){const bd=badgeById(id);if(!bd||!l)return null;const
   const num=bd.metal!=null?ROMAN[bd.metal]:bd.lv.length>1?ROMAN[l-1]:'';   // points badges: Centurio I, Legatus II, Imperator III, Optimus IV
   if(num){const n=document.createElement('span');n.className='bc-n';n.textContent=num;c.appendChild(n);}
   return c;}
-function shownBadges(p){return String((p&&p.bd)||'').split(',').map(x=>x.split(':')).filter(([id,l])=>badgeById(id)&&+l>0).slice(0,3).map(([id,l])=>[id,Math.min(+l,badgeById(id).lv.length)]);}
+function shownBadges(p){return String((p&&p.bd)||'').split(',').map(x=>x.split(':')).filter(([id,l])=>badgeById(id)&&+l>0).slice(0,MAX_PINS).map(([id,l])=>[id,Math.min(+l,badgeById(id).lv.length)]);}
 function badgeChipsEl(p,big){const w=document.createElement('span');w.className='bchips';shownBadges(p).forEach(([id,l])=>{const c=badgeChip(id,l,big);if(c)w.appendChild(c);});return w.childNodes.length?w:null;}
 let _bdSaving=false;
 async function syncShownBadges(){if(!lbMe||_bdSaving)return;const got=bjson(BADGE_KEY);const str=badgePins().filter(id=>got[id]).map(id=>id+':'+got[id].l).join(',');
@@ -4233,7 +4233,7 @@ async function syncShownBadges(){if(!lbMe||_bdSaving)return;const got=bjson(BADG
   catch(e){const was=bdSaveErr;bdSaveErr=/HTTP 40[13]/.test(e.message)?'rules':'net';if(was!==bdSaveErr)toast(bdSaveErr==='rules'?'Couldn’t show your badges: the database rules need updating (ask the admin).':'Couldn’t show your badges right now. Check your internet.');}
   _bdSaving=false;if(document.getElementById('badgeGrid'))renderBadges();}
 let bdSaveErr='';
-function toggleBadgePin(id){let pins=badgePins();if(pins.includes(id))pins=pins.filter(x=>x!==id);else{if(pins.length>=3){toast('You can show up to 3 badges. Unpin one first.');return;}pins.push(id);}
+function toggleBadgePin(id){let pins=badgePins();if(pins.includes(id))pins=pins.filter(x=>x!==id);else{if(pins.length>=MAX_PINS){toast('You can show up to '+MAX_PINS+' badges. Unpin one first.');return;}pins.push(id);}
   try{localStorage.setItem(PIN_KEY,JSON.stringify(pins));}catch(e){}renderBadges();syncShownBadges();}
 
 // Progress towards each badge's next level (for the side panel)

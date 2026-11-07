@@ -44,7 +44,7 @@
           ".validate": "newData.isString() && newData.val().length <= 10 && (!newData.val().matches(/^(rainbow|shimmer|glow|fire|rwave|type)$/) || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2' || root.child('prem').child($uid).exists())"
         },
         "bd": {
-          ".validate": "newData.isString() && newData.val().length <= 80"
+          ".validate": "newData.isString() && newData.val().length <= 160"
         },
         "$other": {
           ".validate": false
