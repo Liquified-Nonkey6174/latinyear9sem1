@@ -3212,6 +3212,8 @@ function sentAlternatives(ca){const alts=[ca];if(!sentData)return alts;
   if(mode==='le'){
     // hints in [ ] like "his [own] father" or "his [someone else's] master" are optional: "his father" and "his own father" both count
     const bases=[ca];if(/\[[^\]]*\]/.test(ca)){bases.push(ca.replace(/\s*\[[^\]]*\]/g,''),ca.replace(/[\[\]]/g,''));}
+    // "(pl.)" is optional too, combined with everything else
+    if(/\(pl\.\)/.test(ca))bases.slice().forEach(b=>bases.push(b.replace(/\s*\(pl\.\)/g,'')));
     bases.slice(1).forEach(b=>alts.push(b));bases.forEach(b=>alts.push(...enMeaningAlts(sentData,b)));}
   if(mode==='el'&&sentData.altLatin)alts.push(...sentData.altLatin);
   // "you" without "(pl.)" could mean several people, so the plural verb (and vos) is right too
