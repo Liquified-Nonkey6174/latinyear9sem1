@@ -3818,7 +3818,7 @@ async function lbSaveName(raw){const name=lbCleanName(raw);const err=lbNameError
   try{await playerToken();pid=playerAuth.uid;await fbReq('PATCH','players/'+pid,lbMe?{name}:{name,total:0});}catch(e){
     if(lbMe&&/HTTP 40[13]/.test(e.message)){lbEditing=false;renderLbProfile('The admin has turned off name changes for you.',true);return;}
     renderLbProfile('Couldn’t reach the server. Check your internet and try again.',true);return;}
-  if(prev!==name)logName(pid,name,prev===null?'join':'self');
+  if(prev!==name)logName(pid,name,prev===null?'join':'self',false,prev);
   lbPlayers[pid]={...(lbPlayers[pid]||{total:0}),name};
   lbMe={pid,name};lbEditing=false;saveLbMe();renderLbProfile();lbUpdatePoints();renderLb();renderChat();}
 async function lbLeave(){if(!lbMe||!confirm('Leave the leaderboard and chat? Your name and points will be removed. Your chat messages will show as “(left)”.'))return;
@@ -3869,18 +3869,21 @@ function renderLb(){const list=document.getElementById('lbList');if(!list||!lbPl
 async function adminRename(pid){const p=lbPlayers[pid];if(!p)return;const v=prompt('New name for '+p.name+':',p.name);if(v===null)return;
   const name=lbCleanName(v);if(name===p.name)return;let err='';if(name.length<2||name.length>30)err='Names must be 2–30 characters.';else if(!/^[\p{L}\p{N} _.'-]+$/u.test(name))err='Use letters, numbers, spaces, - _ . or \' only.';
   else if(Object.entries(lbPlayers).some(([id,x])=>id!==pid&&x&&String(x.name||'').toLowerCase()===name.toLowerCase()))err='Someone already has that name.';
-  if(err){alert(err);return;}try{await fbReq('PATCH','players/'+pid,{name},{admin:true});}catch(e){alert('Couldn’t rename: '+e.message);return;}
-  logName(pid,name,'admin',true);}
+  const old=p.name;if(err){alert(err);return;}try{await fbReq('PATCH','players/'+pid,{name},{admin:true});}catch(e){alert('Couldn’t rename: '+e.message);return;}
+  logName(pid,name,'admin',true,old);}
 // Name history (only the admin can read it). Each join/rename adds an entry; entries can't be changed or deleted.
-function logName(pid,name,by,admin){const key=Date.now().toString(36)+Math.random().toString(36).slice(2,7);
-  fbReq('PUT','names/'+pid+'/'+key,{n:name,t:{'.sv':'timestamp'},by},{admin:!!admin}).catch(()=>{});}
+// p = the name before this change (older database rules don't allow it yet, so then it's saved without it)
+function logName(pid,name,by,admin,prev){const key=Date.now().toString(36)+Math.random().toString(36).slice(2,7);const e={n:name,t:{'.sv':'timestamp'},by};if(prev&&prev!==name)e.p=String(prev).slice(0,30);
+  fbReq('PUT','names/'+pid+'/'+key,e,{admin:!!admin}).catch(()=>{if(e.p){delete e.p;fbReq('PUT','names/'+pid+'/'+key,e,{admin:!!admin}).catch(()=>{});}});}
 async function showNameHistory(pid,box){box.textContent='Loading…';let h;
   try{h=await fbReq('GET','names/'+pid,null,{admin:true});}catch(e){box.textContent='Couldn’t load name history: '+e.message;return;}
   const list=Object.values(h||{}).filter(x=>x&&x.n).sort((a,b)=>(b.t||0)-(a.t||0));box.innerHTML='';
+  // the name before each change: saved with it, or else the entry before it
+  list.forEach((x,i)=>{if(!x.p&&x.by!=='join'&&list[i+1])x.p=list[i+1].n;});
   if(!list.length){box.textContent='No name changes recorded yet. (History starts from when this feature was added.)';return;}
   const tb=document.createElement('table');tb.className='nh-table';
   list.forEach(x=>{const tr=document.createElement('tr');const d=new Date(x.t||0);
-    [d.toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'})+' '+d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'}),x.n,x.by==='admin'?'renamed by admin':x.by==='join'?'joined':'changed it']
+    [d.toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'})+' '+d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'}),x.by==='join'?x.n:(x.p||'?')+' → '+x.n,x.by==='admin'?'renamed by admin':x.by==='join'?'joined':'changed it'+(x.p?'':' (old name not recorded)')]
       .forEach((v,i)=>{const td=document.createElement('td');td.textContent=v;if(i===1)td.style.fontWeight='600';else td.className='muted';tr.appendChild(td);});tb.appendChild(tr);});
   box.appendChild(tb);}
 // Admin score edit. Periods nest (today ⊂ week ⊂ month ⊂ all time), so a change moves the bigger periods by the
