@@ -2958,9 +2958,9 @@ const TOUR_ADV=[
 ];
 
 let tourSteps=null,tourIdx=0;
-function startTour(type){bump('tours');showMainTab('practice');setQuizType('vocab');tourSteps=type==='advanced'?TOUR_ADV:TOUR_BASIC;tourIdx=0;showTourStep();}
+function startTour(type){showMainTab('practice');setQuizType('vocab');tourSteps=type==='advanced'?TOUR_ADV:TOUR_BASIC;tourIdx=0;showTourStep();}
 function showTourStep(){if(!tourSteps||tourIdx>=tourSteps.length){endTour();return;}const step=tourSteps[tourIdx];if(step.pre)step.pre();document.getElementById('spotOverlay').style.display='';const hole=document.getElementById('spotHole'),card=document.getElementById('spotCard'),bd=document.getElementById('spotBackdrop');document.getElementById('spotStep').textContent='Step '+(tourIdx+1)+' of '+tourSteps.length;document.getElementById('spotTitle').textContent=step.title;document.getElementById('spotBody').innerHTML=step.body;document.getElementById('spotBackBtn').style.display=tourIdx>0?'':'none';document.getElementById('spotNextBtn').textContent=tourIdx===tourSteps.length-1?'Finish':'Next →';card.style.transform='none';card.style.top='';card.style.left='';card.style.bottom='';card.style.right='';if(step.el){const target=document.querySelector(step.el);if(target){bd.style.display='none';target.scrollIntoView({behavior:'smooth',block:'nearest'});setTimeout(()=>{const r=target.getBoundingClientRect(),pad=8;hole.style.display='';hole.style.position='fixed';hole.style.left=(r.left-pad)+'px';hole.style.top=(r.top-pad)+'px';hole.style.width=(r.width+pad*2)+'px';hole.style.height=(r.height+pad*2)+'px';const cw=Math.min(340,window.innerWidth-24);const spaceBelow=window.innerHeight-r.bottom;const spaceAbove=r.top;const spaceRight=window.innerWidth-r.right;const spaceLeft=r.left;let ct,cl;if(spaceBelow>=240){ct=r.bottom+14;cl=Math.max(12,Math.min(r.left,window.innerWidth-cw-12));}else if(spaceAbove>=240){ct=r.top-240;cl=Math.max(12,Math.min(r.left,window.innerWidth-cw-12));}else if(spaceRight>=cw+20){ct=Math.max(12,r.top);cl=r.right+14;}else if(spaceLeft>=cw+20){ct=Math.max(12,r.top);cl=r.left-cw-14;}else{ct=window.innerHeight/2-120;cl=(window.innerWidth-cw)/2;}card.style.position='fixed';card.style.top=Math.max(8,ct)+'px';card.style.left=Math.max(8,cl)+'px';card.style.maxWidth=cw+'px';},250);}else{showCentered();};}else{showCentered();}function showCentered(){bd.style.display='';hole.style.display='none';card.style.position='fixed';card.style.top='50%';card.style.left='50%';card.style.transform='translate(-50%,-50%)';card.style.maxWidth='340px';}}
-function tourNext(){tourIdx++;if(tourIdx>=tourSteps.length)endTour();else showTourStep();}
+function tourNext(){tourIdx++;if(tourIdx>=tourSteps.length){try{bump(tourSteps===TOUR_ADV?'toursAdv':'toursBasic');}catch(e){}endTour();}else showTourStep();}
 function tourBack(){if(tourIdx>0){tourIdx--;showTourStep();}}
 function endTour(){document.getElementById('spotOverlay').style.display='none';tourSteps=null;}
 window.addEventListener('scroll',()=>{if(tourSteps)showTourStep();},{passive:true});
@@ -4167,7 +4167,7 @@ const BADGES=[
  {id:'popularis',icon:'👍',name:'Popularis',lat:'popular',desc:'Get reactions on your chat messages from other people.',unit:'reactions',stat:()=>Math.max(bstat().reacts||0,reactsReceived()),lv:[3,10,20,50,100]},
  {id:'civis',icon:'🤝',name:'Civis Bonus',lat:'good citizen',desc:'Contribute 500 ⭐ to a weekly class challenge.',stat:()=>bstat().civis||0,lv:[1]},
  {id:'avarus',icon:'💸',name:'Avarus',lat:'greedy',desc:'Press “Buy now” on the premium paywall 10 times.',secret:true,stat:()=>bstat().buy||0,lv:[10]},
- {id:'iterum',icon:'🔁',name:'Iterum',lat:'again',desc:'Take the tour twice.',secret:true,stat:()=>bstat().tours||0,lv:[2]}];
+ {id:'iterum',icon:'🔁',name:'Iterum',lat:'again',desc:'Finish both the basic and the advanced tour twice.',secret:true,stat:()=>Math.min(bstat().toursBasic||0,bstat().toursAdv||0),lv:[2]}];
 function bjson(k){try{return JSON.parse(localStorage.getItem(k)||'{}')||{};}catch(e){return {};}}
 let _bstat=null;function bstat(){return _bstat||(_bstat=bjson(BSTAT_KEY));}
 function bsave(){try{localStorage.setItem(BSTAT_KEY,JSON.stringify(bstat()));}catch(e){}}
