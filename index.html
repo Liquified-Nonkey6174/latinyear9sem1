@@ -2738,7 +2738,17 @@ const VAR_POOLS={
   insane:[vTwo,vTwoPast,vTwoFut,vThree,vThreePast,vThreeFut,vRel,vRelPast,vRelFut,vRelPlace,vRelPlacePast,vRelPlaceFut],
   expert:[vThree,vThreePast,vThreeFut]};
 
-function buildSentence(){IMP_USED=[];const r=buildSentenceRaw();if(r)r.imps=IMP_USED.filter(x=>x.sg&&x.pl);if(r&&r.english)r.english=r.english.replace(/([.!?]) ([a-z])/g,(m,p,c)=>p+' '+c.toUpperCase());return r;}
+// Which tenses a generated sentence actually uses (some patterns mix tenses or pick one at random), read from the English.
+let _enVerbs=null;
+function enVerbForms(){if(_enVerbs)return _enVerbs;_enVerbs=new Set(['is','are','am','has','have']);wordsOf('verbs').forEach(v=>{const b=String(v.eng[0]).replace(/\s*\([^)]*\)/g,'').replace(/^to /,'').trim().split(' ')[0];if(b&&b!=='be')_enVerbs.add(b);try{_enVerbs.add(eV3(v).split(' ')[0]);}catch(e){}});return _enVerbs;}
+function sentTensesOf(r){const e=String(r.english||''),T=new Set();if(/!/.test(e))T.add('imperative');if(/\bwill\b/.test(e))T.add('future');if(/\b(was|were)\b/.test(e))T.add('past');
+  if(!T.has('imperative')){const rest=e.toLowerCase().replace(/\bwill( not)? \w+/g,' ').replace(/\b(was|were)( not)? \w+/g,' ').replace(/[^a-z' ]/g,' ').split(/\s+/);const V=enVerbForms();
+    for(let i=0;i<rest.length;i++){const w=rest[i],prev=rest[i-1]||'';if(V.has(w)&&!/^(the|a|an|this|that|these|those|same|of|to|for|with|his|her|their|our|your|my)$/.test(prev)){T.add('present');break;}}}
+  if(!T.size)T.add('present');return T;}
+function buildSentence(){let r=null,best=null;
+  for(let i=0;i<40;i++){r=buildSentence1();if(!r)continue;const T=sentTensesOf(r);if([...T].every(t=>sentTenses[t]))return r;if(!best)best=r;}
+  return r||best;}
+function buildSentence1(){IMP_USED=[];const r=buildSentenceRaw();if(r)r.imps=IMP_USED.filter(x=>x.sg&&x.pl);if(r&&r.english)r.english=r.english.replace(/([.!?]) ([a-z])/g,(m,p,c)=>p+' '+c.toUpperCase());return r;}
 function buildSentenceRaw(){
   const pools={
     easy:[sSVO,sAdjPred,sImp,sAdvIntrans,sDativeVO,sIntrans,sIntransLoc,sAdjSVO,sEstLoc,sSVOPast,sIntransPast,sAdjPredPast,sEstLocPast,sAdvIntransPast,sIntransLocPast,sSuus,sEius,sHicSVO,sIlleSVO,
@@ -4240,7 +4250,7 @@ function sImpThree(){const a=impClause(),b=impClause(),c=impClause();return{lati
 /* ---------- sentence tense filter ---------- */
 let sentTenses={present:true,past:true,future:true,imperative:true};
 const _tenseCache=new Map();
-function sentTenseOf(fn){if(_tenseCache.has(fn))return _tenseCache.get(fn);const n=fn.name;let t='present';if(n.startsWith('sImp'))t='imperative';else if(n.endsWith('Fut'))t='future';else{const src=fn.toString();if(n.endsWith('Past')||/ePast|conjVI|Past\(|sTimeDuration\(|sTimeWhen\(/.test(src))t='past';}_tenseCache.set(fn,t);return t;}
+function sentTenseOf(fn){if(_tenseCache.has(fn))return _tenseCache.get(fn);const n=fn.name;let t='present';if(n.startsWith('sImp'))t='imperative';else if(n.endsWith('Fut')||n==='sFutSed')t='future';else{const src=fn.toString();if(n.endsWith('Past')||/ePast|conjVI|Past\(|sTimeDuration\(|sTimeWhen\(/.test(src))t='past';}_tenseCache.set(fn,t);return t;}
 function sentFilter(pool){const f=pool.filter(fn=>sentTenses[sentTenseOf(fn)]);return f.length?f:pool;}
 function setSentTense(k,el){sentTenses[k]=el.checked;if(!Object.values(sentTenses).some(Boolean)){sentTenses[k]=true;el.checked=true;toast('Keep at least one tense ticked.');}}
 
