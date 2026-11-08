@@ -592,6 +592,11 @@ body.calm .nfx-type .tw-caret{display:none}
 .bs-top{display:flex;justify-content:space-between;gap:6px;font-size:12.5px}.bs-n{color:var(--text);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bs-v{color:var(--text3);font-size:11px;white-space:nowrap}
 .bs-bar{height:6px;border-radius:999px;background:var(--surface2);margin-top:4px;overflow:hidden}.bs-bar>div{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--accent),#e6b422)}
 .badge-sec-h{grid-column:1/-1;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin:12px 0 2px;border-top:1px solid var(--border2);padding-top:12px}.badge-card.meta.earned{border-color:#c8a0ff;box-shadow:0 0 10px rgba(200,160,255,.25)}
+.arc-num{font-family:var(--serif,serif);font-size:44px;font-weight:700;line-height:1;margin-bottom:2px;background:linear-gradient(180deg,#f3e2ff,#c8a0ff 55%,#8b5cf6);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 8px rgba(200,160,255,.55))}
+.badge-card.meta.locked .arc-num{filter:none}
+.bchip.arc{border-color:#c8a0ff;box-shadow:0 0 6px rgba(200,160,255,.5)}
+.bchip.arc .bc-n{font-family:var(--sans,sans-serif);font-size:10px;font-weight:800;color:#1c1a17;background:linear-gradient(180deg,#e9d5ff,#c8a0ff);border:none;padding:1px 4px;border-radius:7px;right:-9px;bottom:-6px;box-shadow:0 0 5px rgba(200,160,255,.7)}
+.bchip.big.arc .bc-n{font-size:13px;right:-10px;bottom:-7px}
 </style>
 </head>
 <body>
@@ -4235,7 +4240,7 @@ function renderBadges(){const g=document.getElementById('badgeGrid');if(!g)retur
   const sh=document.createElement('div');sh.className='badge-sec-h';sh.textContent='Special (not counted)';g.appendChild(sh);
   META_BADGES.forEach(bd=>{const e=got[bd.id],l=e?e.l:0,v=metaValue(bd,got);const c=document.createElement('div');const on=bd.meta==='count'?v>0:!!l;c.className='badge-card meta'+(on?' earned':' locked');
     let prog='';if(bd.meta==='count')prog='';else{const need=BADGES.length,have=bd.meta==='all'?BADGES.filter(b=>got[b.id]).length:BADGES.filter(b=>got[b.id]&&got[b.id].l>=b.lv.length).length;prog=have+' / '+need+' badges'+(bd.meta==='max'?' maxed':'');}
-    c.innerHTML='<div class="bd-icon">'+bd.icon+(bd.meta==='count'?'<span class="bd-num">'+v+'</span>':'')+'</div><div class="bd-name">'+esc(bd.name)+(bd.meta==='count'?' · '+v:'')+'</div><div class="bd-lat">'+esc(bd.lat)+'</div><div class="bd-desc">'+esc(bd.desc)+'</div>'+(prog&&!l?'<div class="bd-prog">'+prog+'</div>':'')+(e&&bd.meta!=='count'?'<div class="bd-date">'+new Date(e.t).toLocaleDateString()+'</div>':'');
+    c.innerHTML=(bd.meta==='count'?'<div class="arc-num">'+v+'</div>':'')+'<div class="bd-icon">'+bd.icon+'</div><div class="bd-name">'+esc(bd.name)+'</div><div class="bd-lat">'+esc(bd.lat)+'</div><div class="bd-desc">'+esc(bd.desc)+'</div>'+(prog&&!l?'<div class="bd-prog">'+prog+'</div>':'')+(e&&bd.meta!=='count'?'<div class="bd-date">'+new Date(e.t).toLocaleDateString()+'</div>':'');
     if(on&&lbMe){const pinned=badgePins().includes(bd.id);const pb=document.createElement('button');pb.className='bd-pin'+(pinned?' on':'');pb.textContent=pinned?'📌 Shown':'📌 Show';pb.onclick=()=>toggleBadgePin(bd.id);c.appendChild(pb);if(pinned)c.classList.add('pinned');}
     g.appendChild(c);});
   const cnt=document.getElementById('badgeCount');if(cnt)cnt.textContent=earned+' / '+total+(lbMe?' · showing '+badgePins().filter(id=>got[id]).length+'/'+MAX_PINS+' on the leaderboard':' · join the leaderboard to show badges there')+(bdSaveErr==='rules'?' · ⚠ not saved: the database rules need updating':bdSaveErr?' · ⚠ not saved yet (offline?)':'');}
@@ -4246,7 +4251,7 @@ function badgePins(){try{const a=JSON.parse(localStorage.getItem(PIN_KEY)||'[]')
 function badgeById(id){return BADGES.find(b=>b.id===id)||META_BADGES.find(b=>b.id===id);}
 // a small badge chip: icon + level numeral (tiered) or metal ring (points badges)
 function badgeChip(id,l,big){const bd=badgeById(id);if(!bd||!l)return null;const c=document.createElement('span');
-  c.className='bchip'+(big?' big':'')+(bd.metal!=null?' m-'+METAL[bd.metal]:bd.lv.length>1?' lv'+Math.min(l,7):'');c.title=(bd.meta==='count'?bd.name+': '+l+' secret badge'+(l===1?'':'s'):badgeTierName(bd,l)+(bd.metal!=null?' '+ROMAN[bd.metal]:''))+(bd.lat?' ('+bd.lat+')':'');
+  c.className='bchip'+(big?' big':'')+(bd.meta==='count'?' arc':'')+(bd.metal!=null?' m-'+METAL[bd.metal]:bd.lv.length>1?' lv'+Math.min(l,7):'');c.title=(bd.meta==='count'?bd.name+': '+l+' secret badge'+(l===1?'':'s'):badgeTierName(bd,l)+(bd.metal!=null?' '+ROMAN[bd.metal]:''))+(bd.lat?' ('+bd.lat+')':'');
   const i=document.createElement('span');i.className='bc-i';i.textContent=bd.icon;c.appendChild(i);
   const num=bd.meta==='count'?String(l):bd.metal!=null?ROMAN[bd.metal]:bd.lv.length>1?ROMAN[l-1]:'';   // points badges: Centurio I, Legatus II, Imperator III, Optimus IV
   if(num){const n=document.createElement('span');n.className='bc-n';n.textContent=num;c.appendChild(n);}
