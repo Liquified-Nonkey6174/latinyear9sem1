@@ -601,6 +601,7 @@ body.calm .nfx-type .tw-caret{display:none}
 .bchip.art{width:auto;height:auto;border:none!important;background:none!important;box-shadow:none!important;border-radius:0;line-height:0}.bchip.art svg{display:block;overflow:visible}
 .bchips{gap:5px!important}.bs-i{width:32px!important}.bs-i svg{display:block;margin:0 auto}
 .arc-inline{font-family:var(--serif,serif);font-weight:800;color:#d9b8ff;font-size:1.15em}
+.cloud-st{margin:0 0 10px}.cloud-code{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0}.cloud-code code{font-size:17px;font-weight:700;letter-spacing:.5px;padding:6px 10px;border-radius:8px;background:var(--bg3,rgba(255,255,255,.06));border:1px solid var(--gold,#e6b422);color:var(--gold,#e6b422);user-select:all}.cloud-note{font-size:12.5px;color:var(--text3);margin:4px 0 10px}
 .ba-rainbow{animation:baHue 3s linear infinite}.ba-pulse{animation:baPulse 2.6s ease-in-out infinite}@keyframes baPulse{50%{opacity:.55}}
 .badge-card.earned.grand1,.badge-card.earned.grand2{border-color:rgba(230,180,34,.55)}
 .badge-card.earned.grand3{border-color:#e6b422;box-shadow:0 0 0 1px rgba(230,180,34,.35),0 0 18px rgba(255,213,74,.35);background:linear-gradient(180deg,rgba(255,213,74,.10),transparent 70%)}
@@ -856,9 +857,11 @@ body.calm .nfx-type .tw-caret{display:none}
   <div style="margin-bottom:2rem"><button class="btn-secondary" onclick="openBadges()">Open badges <span id="badgeStatsCount"></span></button></div>
   <p class="section-title">Mistake review</p>
   <div id="mistakeBox" class="backup-box" style="margin-bottom:2rem"></div>
+  <p class="section-title">☁ Cloud save</p>
+  <div class="backup-box" id="cloudBox" style="margin-bottom:2rem"></div>
   <p class="section-title">Backup &amp; transfer</p>
   <div class="backup-box" id="backupBox">
-    <p>Your progress is stored in this browser only. Export it to keep a safe copy or move to another device, then import it there.</p>
+    <p>You can also export everything to a file to keep a copy yourself, then import it on any device.</p>
     <div class="backup-btns">
       <button class="btn-primary" onclick="exportProgress()">Export progress</button>
       <button class="btn-secondary" onclick="document.getElementById('importFile').click()">Import progress</button>
@@ -3858,7 +3861,7 @@ async function lbSaveName(raw){const name=lbCleanName(raw);if(lbMe&&name===lbMe.
     renderLbProfile('Couldn’t reach the server. Check your internet and try again.',true);return;}
   if(prev!==name)logName(pid,name,prev===null?'join':'self',false,prev);
   lbPlayers[pid]={...(lbPlayers[pid]||{total:0}),name};
-  lbMe={pid,name};lbEditing=false;saveLbMe();renderLbProfile();lbUpdatePoints();renderLb();renderChat();}
+  lbMe={pid,name};lbEditing=false;saveLbMe();renderLbProfile();lbUpdatePoints();renderLb();renderChat();if(!cloudPulled)cloudPull();}
 async function lbLeave(){if(!lbMe||!confirm('Leave the leaderboard and chat? Your name and points will be removed. Your chat messages will show as “(left)”.'))return;
   const pid=lbMe.pid;try{await fbReq('DELETE','players/'+pid);}catch(e){renderLbProfile('Couldn’t reach the server. Try again.',true);return;}
   lbMe=null;lbPending=0;saveLbMe();renderLbProfile();lbUpdatePoints();renderLb();}
@@ -4576,6 +4579,7 @@ async function duelCheck(){const g=duelGame;if(!g||g.fb)return;const inp=documen
   setTimeout(async()=>{g.fb=null;g.typo=false;g.i++;if(g.i>=g.qs.length){g.ms=Date.now()-g.t0;try{await fbReq('PUT','duels/'+g.id+'/res/'+lbMe.pid,{s:g.score,ms:g.ms});const d=duelsObj[g.id];d.res=d.res||{};d.res[lbMe.pid]={s:g.score,ms:g.ms};pollShared();}catch(e){}updDuelBtn();}renderDuelPlay();},ok?600:1400);}
 
 loadLbMe().then(()=>{
+  setTimeout(()=>{renderCloud();cloudPull();},1500);   // cloud save code is in a later <script>
   fbStream('players','',(path,data,isPatch)=>{const wasLoaded=lbPlayersLoaded;lbPlayers=applyAt(lbPlayers,path,data,isPatch);lbPlayersLoaded=true;
     if(lbMe&&lbPlayers[lbMe.pid]&&lbPlayers[lbMe.pid].name&&lbPlayers[lbMe.pid].name!==lbMe.name){lbMe.name=lbPlayers[lbMe.pid].name;saveLbMe();renderLbProfile();}
     // Only trust a removal the server tells us about directly (not a first load that may predate joining).
@@ -5601,7 +5605,7 @@ function openQuizForms(){const w=currentCardWord();if(!w)return;if(!answered&&!(
 /* ---------- export / import ---------- */
 let pendingBackup=null;
 function backupMsg(t,ok){const el=document.getElementById('backupMsg');if(!el)return;el.textContent=t||'';el.style.color=ok===false?'var(--red)':ok?'var(--green)':'var(--text3)';}
-function buildBackup(){return{app:'latin-trainer',version:1,exported:new Date().toISOString(),badges:bjson(BADGE_KEY),badgeStats:bstat(),accuracy:accData(),theme:currentTheme,sr:Object.fromEntries(Object.entries(srData).filter(([k,v])=>v&&v.seen>0)),stats:statsData,custom:customWords,starred:starred,lb:lbMe&&playerAuth?{pid:lbMe.pid,name:lbMe.name,rt:playerAuth.refreshToken}:null};}
+function buildBackup(){return{app:'latin-trainer',version:1,exported:new Date().toISOString(),badges:bjson(BADGE_KEY),badgeStats:bstat(),accuracy:accData(),theme:currentTheme,sr:Object.fromEntries(Object.entries(srData).filter(([k,v])=>v&&v.seen>0)),stats:statsData,custom:customWords,starred:starred,pins:badgePins(),daily:dailyData(),stories:storyDone(),lb:lbMe&&playerAuth?{pid:lbMe.pid,name:lbMe.name,rt:playerAuth.refreshToken}:null};}
 function exportProgress(){const text=JSON.stringify(buildBackup());const name='latin-trainer-progress-'+new Date().toISOString().slice(0,10)+'.json';
   try{const blob=new Blob([text],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);backupMsg('Exported “'+name+'”. Keep it somewhere safe.',true);}
   catch(e){const ta=document.getElementById('backupText');if(ta){ta.value=text;document.getElementById('backupDetails').open=true;}backupMsg('Download blocked here — copy the text below instead.',false);}}
@@ -5609,18 +5613,32 @@ async function copyProgress(){const text=JSON.stringify(buildBackup());try{await
 function importFileChosen(inp){const f=inp.files&&inp.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{parseBackup(String(rd.result));inp.value='';};rd.onerror=()=>backupMsg('Could not read that file.',false);rd.readAsText(f);}
 function importFromText(){parseBackup(document.getElementById('backupText').value);}
 function parseBackup(text){let o;try{o=JSON.parse(text);}catch(e){backupMsg('That isn’t a valid backup (could not read it).',false);return;}
-  if(!o||o.app!=='latin-trainer'||typeof o.sr!=='object'||!o.stats||!Array.isArray(o.stats.sessions)){backupMsg('That file isn’t a Latin Trainer backup.',false);return;}
+  const clean=cleanBackup(o);if(!clean){backupMsg('That file isn’t a Latin Trainer backup.',false);return;}
+  pendingBackup=clean;
+  const d=o.exported?new Date(o.exported).toLocaleDateString():'unknown date';
+  document.getElementById('importSummary').textContent='Backup from '+d+': '+Object.keys(clean.sr).length+' words tracked, '+clean.stats.sessions.length+' sessions, '+Object.keys(clean.badges).length+' badges, '+clean.custom.length+' custom words, '+Object.keys(clean.starred).length+' starred.';
+  document.getElementById('importChoice').style.display='block';backupMsg('');}
+const isObj=x=>x&&typeof x==='object'&&!Array.isArray(x);
+function cleanBackup(o){if(!o||o.app!=='latin-trainer'||typeof o.sr!=='object'||!o.stats||!Array.isArray(o.stats.sessions))return null;
   const clean={theme:typeof o.theme==='string'?o.theme:null,sr:{},stats:{sessions:o.stats.sessions.filter(s=>s&&typeof s.date==='number'),catStats:{}},custom:[],starred:{}};
   Object.entries(o.sr||{}).forEach(([k,v])=>{if(v&&typeof v==='object'&&isFinite(v.seen)&&isFinite(v.correct))clean.sr[k]={ef:+v.ef||2.5,interval:+v.interval||0,due:+v.due||0,seen:+v.seen,correct:+v.correct};});
   Object.entries(o.stats.catStats||{}).forEach(([k,v])=>{if(v&&isFinite(v.seen)&&isFinite(v.correct))clean.stats.catStats[k]={seen:+v.seen,correct:+v.correct};});
   (Array.isArray(o.custom)?o.custom:[]).forEach(w=>{if(w&&typeof w.lat==='string'&&Array.isArray(w.eng)&&DATA[w.catKey]&&DATA[w.catKey].sub[w.subKey])clean.custom.push(w);});
   Object.entries(o.starred||{}).forEach(([k,v])=>{if(v&&typeof v.lat==='string'&&DATA[v.catKey]&&DATA[v.catKey].sub[v.subKey])clean.starred[k]={catKey:v.catKey,subKey:v.subKey,lat:v.lat};});
-  pendingBackup=clean;
-  const d=o.exported?new Date(o.exported).toLocaleDateString():'unknown date';
-  document.getElementById('importSummary').textContent='Backup from '+d+': '+Object.keys(clean.sr).length+' words tracked, '+clean.stats.sessions.length+' sessions, '+clean.custom.length+' custom words, '+Object.keys(clean.starred).length+' starred.';
-  document.getElementById('importChoice').style.display='block';backupMsg('');}
+  // badges, badge stats, accuracy, shown badges, daily goal history, finished stories
+  clean.badges={};if(isObj(o.badges))Object.entries(o.badges).forEach(([k,v])=>{if(v&&isFinite(v.l)&&+v.l>0)clean.badges[k]={l:+v.l,t:+v.t||Date.now()};});
+  clean.badgeStats={};if(isObj(o.badgeStats))Object.entries(o.badgeStats).forEach(([k,v])=>{if(typeof v==='number'&&isFinite(v))clean.badgeStats[k]=v;else if(Array.isArray(v))clean.badgeStats[k]=v.filter(x=>typeof x==='string'||typeof x==='number').slice(0,500);});
+  clean.accuracy={};if(isObj(o.accuracy))Object.entries(o.accuracy).forEach(([k,v])=>{if(v&&isFinite(v.s)&&isFinite(v.c))clean.accuracy[k]={s:+v.s,c:Math.min(+v.c,+v.s),...(v.t?{t:+v.t}:{})};});
+  clean.pins=Array.isArray(o.pins)?o.pins.filter(x=>typeof x==='string').slice(0,MAX_PINS):null;
+  clean.daily={};if(isObj(o.daily))Object.entries(o.daily).forEach(([k,v])=>{if(/^\d{4}-\d\d-\d\d$/.test(k)&&isFinite(v))clean.daily[k]=+v;});
+  clean.stories={};if(isObj(o.stories))Object.entries(o.stories).forEach(([k,v])=>{clean.stories[k]=v;});
+  if(o.lb&&typeof o.lb.pid==='string'&&typeof o.lb.name==='string'&&typeof o.lb.rt==='string')clean.lb={pid:o.lb.pid,name:o.lb.name,rt:o.lb.rt};
+  return clean;}
 function cancelImport(){pendingBackup=null;document.getElementById('importChoice').style.display='none';}
-async function applyImport(modeSel){const b=pendingBackup;if(!b)return;
+async function applyImport(modeSel){const b=pendingBackup;if(!b)return;await applyBackup(b,modeSel);
+  pendingBackup=null;document.getElementById('importChoice').style.display='none';
+  backupMsg(modeSel==='replace'?'Progress replaced from backup.':'Backup merged into your progress.',true);cloudSoon();}
+async function applyBackup(b,modeSel,quiet){const nCustom=customWords.length;
   if(modeSel==='replace'){
     customWords.forEach(w=>{const sub=DATA[w.catKey]&&DATA[w.catKey].sub[w.subKey];if(sub)sub.words=sub.words.filter(x=>x.lat!==w.lat);});
     srData=b.sr;statsData=b.stats;customWords=b.custom.slice();starred=b.starred;
@@ -5631,14 +5649,68 @@ async function applyImport(modeSel){const b=pendingBackup;if(!b)return;
     b.custom.forEach(w=>{if(!customWords.some(x=>x.lat===w.lat&&x.catKey===w.catKey))customWords.push(w);});
     Object.assign(starred,b.starred);
   }
-  try{if(b.badges)localStorage.setItem(BADGE_KEY,JSON.stringify(b.badges));if(b.badgeStats){localStorage.setItem(BSTAT_KEY,JSON.stringify(b.badgeStats));_bstat=null;}if(b.accuracy)localStorage.setItem(ACC_KEY,JSON.stringify(b.accuracy));}catch(e){}
+  mergeExtras(b,modeSel==='replace');
   if(b.lb&&b.lb.pid&&b.lb.name&&b.lb.rt){playerAuth={uid:b.lb.pid,refreshToken:b.lb.rt};savePlayerAuth();lbMe={pid:b.lb.pid,name:b.lb.name};saveLbMe();renderLbProfile();}
   customWords.forEach(w=>addWordToData(w));
   if(b.theme&&THEMES.some(t=>t.id===b.theme))setTheme(b.theme);
   await saveSR();await saveStats();await saveCustomWords();await saveStarred();
-  pendingBackup=null;document.getElementById('importChoice').style.display='none';
-  try{buildUI();}catch(e){}updCount();renderStats();updStarUI();
-  backupMsg(modeSel==='replace'?'Progress replaced from backup.':'Backup merged into your progress.',true);}
+  if(!quiet||customWords.length!==nCustom){try{buildUI();}catch(e){}}updCount();renderStats();updStarUI();
+  try{renderDaily();renderBadges();renderBadgeSide();renderMistakes();badgeCheckSoon();}catch(e){}}
+// Badges and the rest: "merge" keeps the better of each (higher badge level, more answers, both lists).
+function mergeExtras(b,replace){const L=k=>{try{return JSON.parse(localStorage.getItem(k)||'null');}catch(e){return null;}},S=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}};
+  if(b.badges){const cur=replace?{}:(L(BADGE_KEY)||{});Object.entries(b.badges).forEach(([k,v])=>{const c=cur[k];if(!c||v.l>c.l)cur[k]={l:v.l,t:c?Math.min(c.t,v.t):v.t};});S(BADGE_KEY,cur);}
+  if(b.badgeStats){const cur=replace?{}:(L(BSTAT_KEY)||{});Object.entries(b.badgeStats).forEach(([k,v])=>{const c=cur[k];if(Array.isArray(v))cur[k]=[...new Set([...(Array.isArray(c)?c:[]),...v])];else if(typeof v==='number')cur[k]=typeof c==='number'?Math.max(c,v):v;});S(BSTAT_KEY,cur);_bstat=null;}
+  if(b.accuracy){const cur=replace?{}:(L(ACC_KEY)||{});Object.entries(b.accuracy).forEach(([k,v])=>{if(!cur[k]||v.s>cur[k].s)cur[k]=v;});S(ACC_KEY,cur);}
+  if(b.pins&&(replace||!badgePins().length))S(PIN_KEY,b.pins);
+  if(b.daily){const cur=replace?{}:dailyData();Object.entries(b.daily).forEach(([k,v])=>{cur[k]=Math.max(cur[k]||0,v);});S(DAILY_KEY,cur);}
+  if(b.stories){const cur=replace?{}:storyDone();Object.assign(cur,b.stories);S(STORY_DONE_KEY,cur);}}
+
+// ── CLOUD SAVE ───────────────────────────────────────────────────────────────
+// Progress (words, stats, badges, streak…) is copied to progress/{uid} a little after it changes, once you're on
+// the leaderboard or have a recovery code. The recovery code links your account to a hidden email + password,
+// so another device can open the same account and get everything back.
+const CLOUD_KEY='latin_cloud';
+let cloudLast='',cloudTimer=null,cloudPulled=false,cloudBusy=false,cloudShowCode=false;
+function cloudInfo(){try{return JSON.parse(localStorage.getItem(CLOUD_KEY)||'{}')||{};}catch(e){return {};}}
+function cloudSetInfo(o){try{localStorage.setItem(CLOUD_KEY,JSON.stringify({...cloudInfo(),...o}));}catch(e){}}
+function cloudOn(){return !!(playerAuth&&playerAuth.uid&&(lbMe||cloudInfo().code));}
+function cloudPayload(){const b=buildBackup();delete b.lb;delete b.exported;return JSON.stringify(b);}
+function cloudSoon(ms){if(!cloudOn())return;clearTimeout(cloudTimer);cloudTimer=setTimeout(cloudPush,ms==null?15000:ms);}
+const cloudErr=e=>/HTTP 40[13]/.test(e&&e.message)?'rules':'net';
+async function cloudPush(){if(!cloudOn()||cloudBusy)return;if(!cloudPulled)return cloudPull();const d=cloudPayload();if(d===cloudLast||d.length>950000)return;
+  cloudBusy=true;try{await fbReq('PUT','progress/'+playerAuth.uid,{t:{'.sv':'timestamp'},d});cloudLast=d;cloudSetInfo({saved:Date.now(),err:''});}catch(e){cloudSetInfo({err:cloudErr(e)});}finally{cloudBusy=false;renderCloud();}}
+async function cloudPull(){if(!cloudOn()||cloudBusy)return;cloudBusy=true;
+  try{const r=await fbReq('GET','progress/'+playerAuth.uid);if(r&&typeof r.d==='string'){let o=null;try{o=JSON.parse(r.d);}catch(e){}const c=o&&cleanBackup(o);if(c){const before=cloudPayload();await applyBackup(c,'merge',true);if(cloudPayload()!==before)toast('☁ Progress restored from your cloud save.');}}cloudPulled=true;}
+  catch(e){cloudSetInfo({err:cloudErr(e)});}finally{cloudBusy=false;}renderCloud();if(cloudPulled)cloudPush();}
+// recovery code: four Latin words and a number, e.g. "rosa-bellum-via-aqua-47"
+function normCode(c){return String(c||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');}
+async function codeEmail(code){const h=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('latin-trainer:'+code));return 'lt'+[...new Uint8Array(h)].slice(0,10).map(b=>b.toString(16).padStart(2,'0')).join('')+'@latin-trainer.app';}
+function newCode(){const pool=[...new Set(allWordsFlat().map(w=>String(w.lat).toLowerCase()).filter(x=>/^[a-z]{3,8}$/.test(x)))];const r=n=>{const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]%n;};
+  return [0,1,2,3].map(()=>pool[r(pool.length)]).join('-')+'-'+(10+r(90));}
+function cloudMsg(t,ok){const el=document.getElementById('cloudMsg');if(el){el.textContent=t||'';el.style.color=ok===false?'var(--red)':ok?'var(--green)':'var(--text3)';}}
+async function cloudMakeCode(){if(cloudInfo().code){cloudShowCode=true;renderCloud();return;}
+  cloudMsg('Making your code…');try{await playerToken();const code=newCode();
+    const d=await authPost('https://identitytoolkit.googleapis.com/v1/accounts:update',{idToken:playerAuth.idToken,email:await codeEmail(code),password:code,returnSecureToken:true});
+    if(d.idToken)playerAuth=authFrom({...d,localId:d.localId||playerAuth.uid});savePlayerAuth();cloudSetInfo({code});cloudShowCode=true;cloudMsg('');renderCloud();cloudPulled?cloudPush():cloudPull();}
+  catch(e){cloudMsg('Couldn’t make a code: '+(/EMAIL_EXISTS/.test(e.message)?'try again.':/OPERATION_NOT_ALLOWED/.test(e.message)?'cloud save isn’t switched on for this site yet (ask the admin).':'check your internet and try again.'),false);}}
+async function cloudRestore(){const code=normCode(prompt('Type your recovery code (e.g. rosa-bellum-via-aqua-47):'));if(!code)return;cloudMsg('Checking the code…');
+  let d;try{d=await authPost('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword',{email:await codeEmail(code),password:code,returnSecureToken:true});}
+  catch(e){cloudMsg(/INVALID|NOT_FOUND|PASSWORD|CREDENTIAL/.test(e.message)?'That code didn’t work. Check the spelling.':'Couldn’t reach the server. Check your internet.',false);return;}
+  if(playerAuth&&playerAuth.uid===d.localId){cloudSetInfo({code});cloudMsg('This device already uses that account.',true);renderCloud();return;}
+  if(!confirm('Switch this device to the account with that code? Its progress and badges will be merged with what’s on this device.'+(lbMe?' This device’s leaderboard name ('+lbMe.name+') will be swapped for that account’s.':''))){cloudMsg('');return;}
+  playerAuth=authFrom(d);savePlayerAuth();cloudSetInfo({code,err:''});lbMe=null;
+  try{const name=await fbReq('GET','players/'+playerAuth.uid+'/name');if(typeof name==='string')lbMe={pid:playerAuth.uid,name};}catch(e){}
+  saveLbMe();renderLbProfile();lbUpdatePoints();try{renderLb();renderChat();}catch(e){}
+  cloudPulled=false;cloudLast='';await cloudPull();cloudMsg('✓ Restored. Your progress is back.',true);}
+function cloudCopyCode(){const c=cloudInfo().code;if(!c)return;navigator.clipboard&&navigator.clipboard.writeText(c).then(()=>cloudMsg('Code copied.',true),()=>{});}
+function renderCloud(){const box=document.getElementById('cloudBox');if(!box)return;const I=cloudInfo(),on=cloudOn();
+  const when=I.saved?new Date(I.saved).toLocaleString([], {hour:'numeric',minute:'2-digit',day:'numeric',month:'short'}):null;
+  const st=!on?'Cloud save starts once you join the leaderboard or get a recovery code.':I.err==='rules'?'⚠ Not saved online: the database rules need updating (ask the admin).':I.err==='net'?'⚠ Not saved online yet (offline?). It will try again.':when?'☁ Saved online · last saved '+when:'☁ Saving online…';
+  box.innerHTML='<p class="cloud-st">'+esc(st)+'</p>'
+    +(I.code&&cloudShowCode?'<div class="cloud-code"><code>'+esc(I.code)+'</code><button class="btn-secondary" onclick="cloudCopyCode()">Copy</button></div><p class="cloud-note">Write this down somewhere safe. On a new device (or if this browser gets cleared), press <b>Restore with a code</b> and type it in to get everything back. Don’t share it: anyone with it can use your account.</p>':'')
+    +'<div class="backup-btns"><button class="btn-primary" onclick="cloudMakeCode()">'+(I.code?(cloudShowCode?'Code shown above':'Show my recovery code'):'Get a recovery code')+'</button><button class="btn-secondary" onclick="cloudRestore()">Restore with a code</button></div><div id="cloudMsg" class="backup-msg"></div>';}
+setInterval(()=>cloudPush(),60000);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')cloudPush();});
 
 /* ---------- keyboard guards ---------- */
 document.addEventListener('keydown',e=>{

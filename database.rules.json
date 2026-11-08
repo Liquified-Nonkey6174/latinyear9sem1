@@ -51,6 +51,22 @@
         }
       }
     },
+    "progress": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2')",
+        ".write": "auth != null && auth.uid === $uid",
+        ".validate": "newData.hasChildren(['t', 'd'])",
+        "t": {
+          ".validate": "newData.isNumber()"
+        },
+        "d": {
+          ".validate": "newData.isString() && newData.val().length <= 1000000"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
     "chat": {
       ".read": "auth != null",
       "$msg": {
