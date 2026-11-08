@@ -633,6 +633,9 @@ body.calm .nfx-type .tw-caret{display:none}
 @keyframes brPop{to{transform:scale(1);opacity:1}}@keyframes brFlip{from{transform:perspective(600px) rotateY(200deg)}to{transform:perspective(600px) rotateY(0)}}
 @keyframes brRays{from{transform:rotate(0)}to{transform:rotate(360deg)}}@keyframes brFade{to{opacity:1}}
 @media (prefers-reduced-motion:reduce){.show .br-card,.show .br-art,.show .br-rays,.show .br-tap{animation:none;opacity:1;transform:none}}
+.bf-dot{display:none;width:8px;height:8px;border-radius:50%;background:#ff5a5a;margin-left:5px;vertical-align:middle;box-shadow:0 0 6px rgba(255,90,90,.7)}.bf-dot.on{display:inline-block}
+.sf-list{display:flex;flex-direction:column;padding:2px 10px 10px;gap:2px}.sf-row{display:flex;align-items:center;gap:8px;padding:5px 6px;border-radius:8px;cursor:pointer;font-size:12.5px}.sf-row:hover{background:var(--surface2)}.sf-art{flex:0 0 26px;line-height:0;display:flex;justify-content:center}.sf-art svg{width:24px;height:auto}.sf-txt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sf-t{font-size:11px;color:var(--text3);white-space:nowrap}
+.side-feed{flex:none}
 .bfeed-tabs{justify-content:center;margin:0 auto 12px;max-width:340px}.bfeed-list{display:flex;flex-direction:column;gap:6px}.bfeed-row{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:10px;background:var(--surface2,rgba(255,255,255,.03));border:1px solid var(--border,rgba(255,255,255,.08))}.bfeed-row.me{border-color:var(--accent,#e6b422)}.bfeed-art{flex:0 0 auto;line-height:0;width:34px;display:flex;justify-content:center}.bfeed-txt{flex:1;font-size:13.5px;text-align:left}.bfeed-t{font-size:11.5px;color:var(--text3);white-space:nowrap}.bfeed-empty{text-align:center;color:var(--text3);font-style:italic}
 .dg-rev{display:block;width:100%;margin-top:8px;padding:6px 10px;border-radius:8px;border:1px solid var(--accent,#e6b422);background:transparent;color:var(--accent,#e6b422);font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;text-align:center}.dg-rev:hover{background:rgba(230,180,34,.1)}.dg-rev.done{cursor:default;border-color:var(--border,rgba(255,255,255,.12));color:var(--text3)}
 .cloud-st{margin:0 0 10px}.cloud-code{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0}.cloud-code code{font-size:17px;font-weight:700;letter-spacing:.5px;padding:6px 10px;border-radius:8px;background:var(--bg3,rgba(255,255,255,.06));border:1px solid var(--gold,#e6b422);color:var(--gold,#e6b422);user-select:all}.cloud-note{font-size:12.5px;color:var(--text3);margin:4px 0 10px}
@@ -668,6 +671,10 @@ body.calm .nfx-type .tw-caret{display:none}
     <div class="lb-search"><input id="lbSearch" type="search" placeholder="Search players…" autocomplete="off" oninput="renderLb()"></div>
     <div class="lb-list" id="lbList"><div class="lb-empty">Loading…</div></div>
   </section>
+  <section class="side-sec side-feed" id="sideFeed" style="display:none">
+    <div class="side-h"><span>📣 Latest badges</span><button class="lb-link" onclick="openBadges('feed')">See all →</button></div>
+    <div id="sideFeedList" class="sf-list"></div>
+  </section>
   <section class="side-sec side-chat">
     <div class="side-h"><span>Chat</span><span class="side-sub">everyone can read this, so be kind</span></div>
     <div class="chat-list" id="chatList"><div class="lb-empty">Loading…</div></div>
@@ -701,7 +708,7 @@ body.calm .nfx-type .tw-caret{display:none}
       </div>
     </div>
   </div>
-  <div class="settings-row"><button class="settings-btn" onclick="showSettings()">⚙ Settings</button> <button class="settings-btn" onclick="openBadges()">🏅 Badges <span id="badgeBtnCount" style="opacity:.7;font-size:12px"></span></button></div>
+  <div class="settings-row"><button class="settings-btn" onclick="showSettings()">⚙ Settings</button> <button class="settings-btn" onclick="openBadges()">🏅 Badges <span id="badgeBtnCount" style="opacity:.7;font-size:12px"></span><span class="bf-dot" id="badgeBtnDot" title="New in the badge feed"></span></button></div>
   <div class="nav-tabs">
     <button class="nav-tab active" onclick="showMainTab('practice')">Practice</button>
     <button class="nav-tab" onclick="showMainTab('read')">Reading</button>
@@ -2171,7 +2178,7 @@ body.calm .nfx-type .tw-caret{display:none}
 <div id="badgeOverlay" class="overlay" style="display:none" onclick="closeOverlay('badgeOverlay')">
   <div class="about-box badge-box" onclick="event.stopPropagation()"><button class="about-close" onclick="closeOverlay('badgeOverlay')">×</button>
     <div class="about-title">🏅 Badges</div>
-    <div class="mode-toggle bfeed-tabs"><button class="mode-btn active" id="bTabMine" onclick="setBadgeTab('mine')">My badges</button><button class="mode-btn" id="bTabFeed" onclick="setBadgeTab('feed')">📣 Badge feed</button></div>
+    <div class="mode-toggle bfeed-tabs"><button class="mode-btn active" id="bTabMine" onclick="setBadgeTab('mine')">My badges</button><button class="mode-btn" id="bTabFeed" onclick="setBadgeTab('feed')">📣 Badge feed<span class="bf-dot" id="feedTabDot"></span></button></div>
     <div id="badgeMine" class="bpane"><div id="badgeCount" style="text-align:center;font-size:12px;color:var(--text3);margin:-6px 0 12px"></div>
     <div class="badge-scroll"><div id="badgeGrid" class="badge-grid"></div></div></div>
     <div id="badgeFeed" class="bpane" style="display:none"><div class="badge-scroll"><div id="bfeedList" class="bfeed-list"></div></div><div style="text-align:center;margin-top:8px"><button class="btn-secondary" onclick="loadBadgeFeed(true)">↻ Refresh</button></div></div>
@@ -3946,7 +3953,7 @@ async function lbLeave(){if(!lbMe||!confirm('Leave the leaderboard and chat? You
 const LB_PERIOD_NAME={d:'today',w:'this week',m:'this month',all:'all time'};
 function lbScore(p,period,k){return period==='all'?(p.total||0):((p[period]||{})[k[period]]||0);}
 function setLbPeriod(p){lbPeriod=p;document.querySelectorAll('.lb-periods .mode-btn').forEach(b=>b.classList.toggle('active',b.dataset.period===p));renderLb();}
-function renderLb(){const list=document.getElementById('lbList');if(!list||!lbPlayersLoaded)return;const k=lbKeys();
+function renderLb(){const list=document.getElementById('lbList');if(!list||!lbPlayersLoaded)return;if(typeof bfeed!=='undefined'&&bfeed.length){clearTimeout(window._sfT);window._sfT=setTimeout(()=>{try{renderFeedBits();}catch(e){}},200);}const k=lbKeys();
   const rows=Object.entries(lbPlayers).filter(([pid,p])=>p&&p.name&&lbVisible(pid)).map(([pid,p])=>({pid,name:p.name,n:lbScore(p,lbPeriod,k)}));
   // Add points not yet confirmed by the server to your own row, so it moves the moment you answer.
   if(lbMe){const me=rows.find(r=>r.pid===lbMe.pid);if(me)me.n+=lbMyPoints()-((lbPlayers[lbMe.pid]||{}).total||0);}
@@ -4491,7 +4498,14 @@ function badgeFeedText(e){const name=(lbPlayers[e.pid]&&lbPlayers[e.pid].name)||
 async function loadBadgeFeed(force){if(!force&&Date.now()-bfeedAt<20000)return renderBadgeFeed();const box=document.getElementById('bfeedList');if(box&&!bfeed.length)box.innerHTML='<p class="bfeed-empty">Loading…</p>';
   try{const r=await fbReq('GET','bfeed',null,{query:'?orderBy=%22$key%22&limitToLast=80'});bfeed=Object.entries(r||{}).map(([id,v])=>({id,...v})).filter(v=>v&&v.pid&&v.b).sort((a,b)=>(b.t||0)-(a.t||0));bfeedAt=Date.now();}
   catch(e){if(box)box.innerHTML='<p class="bfeed-empty">Couldn’t load the badge feed'+(/40[13]/.test(e.message)?' (the database rules need updating).':'. Check your internet.')+'</p>';return;}renderBadgeFeed();}
-function renderBadgeFeed(){const box=document.getElementById('bfeedList');if(!box)return;
+const BF_SEEN='latin_bfeed_seen';
+function bfeedSeen(){try{return +localStorage.getItem(BF_SEEN)||0;}catch(e){return 0;}}
+function bfeedVisible(){return bfeed.filter(e=>lbVisible(e.pid)&&badgeFeedText(e));}
+function renderFeedBits(){const vis=bfeedVisible(),sec=document.getElementById('sideFeed'),list=document.getElementById('sideFeedList');
+  if(sec&&list){sec.style.display=vis.length?'':'none';list.innerHTML=vis.slice(0,3).map(e=>{const x=badgeFeedText(e);return '<div class="sf-row" onclick="openBadges(\'feed\')"><span class="sf-art">'+x.art+'</span><span class="sf-txt"><b>'+esc(x.name)+'</b> '+esc(x.what)+'</span><span class="sf-t">'+(e.t?timeAgo(e.t):'')+'</span></div>';}).join('');}
+  const seen=bfeedSeen(),fresh=vis.some(e=>(e.t||0)>seen&&!(lbMe&&e.pid===lbMe.pid));['badgeBtnDot','feedTabDot'].forEach(id=>{const d=document.getElementById(id);if(d)d.classList.toggle('on',fresh&&!(id==='feedTabDot'&&bfeedTab==='feed'&&document.getElementById('badgeOverlay').style.display==='flex'));});}
+function bfeedMarkSeen(){const t=Math.max(0,...bfeed.map(e=>e.t||0));try{localStorage.setItem(BF_SEEN,String(Math.max(t,bfeedSeen())));}catch(e){}renderFeedBits();}
+function renderBadgeFeed(){renderFeedBits();if(bfeedTab==='feed'&&document.getElementById('badgeOverlay').style.display==='flex')bfeedMarkSeen();const box=document.getElementById('bfeedList');if(!box)return;
   const rows=bfeed.filter(e=>lbVisible(e.pid)).map(e=>{const x=badgeFeedText(e);if(!x)return '';
     return '<div class="bfeed-row'+(lbMe&&e.pid===lbMe.pid?' me':'')+'"><span class="bfeed-art">'+x.art+'</span><span class="bfeed-txt"><b>'+esc(x.name)+'</b> '+esc(x.what)+'</span><span class="bfeed-t">'+(e.t?timeAgo(e.t):'')+'</span></div>';}).join('');
   box.innerHTML=rows||'<p class="bfeed-empty">No badges yet. When anyone on the leaderboard earns one, it shows up here.</p>';}
@@ -4505,6 +4519,7 @@ function revealNext(){const ov=document.getElementById('bReveal');if(!ov)return;
   const sub=bd.secret?'Secret badge found!':f.first?'Badge unlocked':'Level up!',kind=bd.secret?'secret':(GRAND[bd.id]>=4||bd.id==='omniamax')?'diamond':'gold';
   ov.className='br-'+kind;ov.innerHTML='<div class="br-rays"></div><div class="br-card"><div class="br-sub">'+sub+'</div><div class="br-art">'+art+'</div><div class="br-name">'+esc(name)+'</div>'+(bd.lat?'<div class="br-lat">'+esc(bd.lat)+'</div>':'')+'<div class="br-desc">'+esc(bd.desc||'')+'</div><div class="br-tap">Tap to continue'+(revealQ.length?' ('+revealQ.length+' more)':'')+'</div></div>';
   ov.style.display='flex';void ov.offsetWidth;ov.classList.add('show');}
+setTimeout(()=>loadBadgeFeed(true),2500);setInterval(()=>{if(document.visibilityState==='visible')loadBadgeFeed(true);},90000);
 function setBadgeTab(t){bfeedTab=t;document.getElementById('bTabMine').classList.toggle('active',t==='mine');document.getElementById('bTabFeed').classList.toggle('active',t==='feed');
   document.getElementById('badgeMine').style.display=t==='mine'?'':'none';document.getElementById('badgeFeed').style.display=t==='feed'?'':'none';if(t==='feed')loadBadgeFeed();}
 function bdArt(bd,l,size,extra){return badgeArt(bd.id,l,bd.lv?bd.lv.length:1,Object.assign({secret:!!bd.secret,meta:!!bd.meta,size},extra||{}));}
@@ -4576,7 +4591,7 @@ function renderBadgeSide(){const box=document.getElementById('badgeSide');const 
   box.innerHTML='<div class="side-h"><span>🏅 Next badges</span><span class="side-sub">'+earned+' / '+total+'</span></div><div class="bs-list">'
     +list.map(x=>'<div class="bs-row" title="'+esc(x.bd.desc)+'"><span class="bs-i">'+bdArt(x.bd,(bjson(BADGE_KEY)[x.bd.id]||{l:0}).l+1,30)+'</span><div class="bs-main"><div class="bs-top"><span class="bs-n">'+esc(x.name)+'</span><span class="bs-v">'+x.v.toLocaleString()+' / '+x.next.toLocaleString()+'</span></div><div class="bs-bar"><div style="width:'+Math.round(x.frac*100)+'%"></div></div></div></div>').join('')
     +'</div><button class="lb-link" style="margin:8px 0 2px;display:block;width:100%;text-align:center" onclick="openBadges()">See all badges</button>';}
-function openBadges(){badgeCheck();renderBadges();document.getElementById('badgeOverlay').style.display='flex';}
+function openBadges(tab){badgeCheck();renderBadges();document.getElementById('badgeOverlay').style.display='flex';setBadgeTab(tab==='feed'?'feed':'mine');if(typeof closeSide==='function'&&tab==='feed')closeSide();}
 (function(){const lay=document.querySelector('.layout');if(!lay)return;const a=document.createElement('aside');a.className='rside';a.innerHTML='<div class="side-sec" id="badgeSide"></div>';lay.appendChild(a);setTimeout(()=>{try{renderBadgeSide();}catch(e){}},300);})();
 
 // ── READING: stories + parse it ──────────────────────────────────────────────
