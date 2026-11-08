@@ -603,6 +603,10 @@ body.calm .nfx-type .tw-caret{display:none}
 .arc-inline{font-family:var(--serif,serif);font-weight:800;color:#d9b8ff;font-size:1.15em}
 .ba-rainbow{animation:baHue 3s linear infinite}@keyframes baHue{to{filter:hue-rotate(360deg)}}
 .badge-card.locked .bd-art{filter:none;opacity:1}
+.lb-name.has-chips{flex-direction:column;align-items:flex-start;gap:3px;padding:5px 0 7px;margin:-3px 0 -5px}
+.lb-name.has-chips .pname{max-width:100%}
+.lb-name.has-chips .bchips{margin:0;gap:4px!important;flex-wrap:wrap}
+.pc-name~div .bchips,#playerCard .bchips{flex-wrap:wrap;justify-content:center;row-gap:6px;max-width:100%}
 </style>
 </head>
 <body>
@@ -3874,7 +3878,7 @@ function renderLb(){const list=document.getElementById('lbList');if(!list||!lbPl
     const rank=r.rank;
     const it=document.createElement('div');it.className='lb-item'+(lbMe&&r.pid===lbMe.pid?' me':'')+(rank<=3&&r.n>0?' top':'');
     const rk=document.createElement('span');rk.className='lb-rank';rk.textContent=SET.ordinal?ordinal(rank):rank;
-    const nm=document.createElement('span');nm.className='lb-name';nm.appendChild(nameEl(r.pid,r.name));{const bc=badgeChipsEl(lbPlayers[r.pid]);if(bc)nm.appendChild(bc);}if(isAdmin&&lbHidden.has(r.pid)){it.style.opacity='.55';nm.title='Hidden from everyone else';nm.append(' 👻');}
+    const nm=document.createElement('span');nm.className='lb-name';nm.appendChild(nameEl(r.pid,r.name));{const bc=badgeChipsEl(lbPlayers[r.pid]);if(bc){nm.classList.add('has-chips');nm.appendChild(bc);}}if(isAdmin&&lbHidden.has(r.pid)){it.style.opacity='.55';nm.title='Hidden from everyone else';nm.append(' 👻');}
     const ct=document.createElement('span');ct.className='lb-count';ct.textContent=r.n.toLocaleString();
     it.append(rk,nm,ct);it.classList.add('click');it.title=lbMe&&r.pid===lbMe.pid?'Change your look':'View '+r.name;
     it.onclick=e=>{if(e.target.closest('.lb-act'))return;if(lbMe&&r.pid===lbMe.pid)openLook();else openPlayerCard(r.pid);};
