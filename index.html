@@ -597,7 +597,8 @@ body.calm .nfx-type .tw-caret{display:none}
 .badge-card.pinned{box-shadow:0 0 0 2px var(--accent) inset}
 .lb-name{display:flex;align-items:center;padding:4px 8px 5px 0;margin:-4px 0 -5px}.lb-name .pname{min-width:0;flex:0 1 auto}.lb-name .bchips{flex-shrink:0}
 .badge-box{max-width:920px;width:94%;max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px);display:flex;flex-direction:column}
-.badge-scroll{overflow-y:auto;overscroll-behavior:contain;margin:0 -6px;padding:2px 6px 6px}
+.bpane{display:flex;flex-direction:column;flex:1 1 auto;min-height:0}.bfeed-tabs{flex:0 0 auto}
+.badge-scroll{overflow-y:auto;min-height:0;flex:1 1 auto;overscroll-behavior:contain;margin:0 -6px;padding:2px 6px 6px}
 .rside{display:none;flex:0 0 250px;position:sticky;top:16px;margin-top:16px;min-width:0}
 .rside .side-sec{padding:0 0 8px}.rside .bs-list{padding:0 14px}
 @media(min-width:1400px){.rside{display:block}.layout{padding-right:44px}}
@@ -2171,9 +2172,9 @@ body.calm .nfx-type .tw-caret{display:none}
   <div class="about-box badge-box" onclick="event.stopPropagation()"><button class="about-close" onclick="closeOverlay('badgeOverlay')">×</button>
     <div class="about-title">🏅 Badges</div>
     <div class="mode-toggle bfeed-tabs"><button class="mode-btn active" id="bTabMine" onclick="setBadgeTab('mine')">My badges</button><button class="mode-btn" id="bTabFeed" onclick="setBadgeTab('feed')">📣 Badge feed</button></div>
-    <div id="badgeMine"><div id="badgeCount" style="text-align:center;font-size:12px;color:var(--text3);margin:-6px 0 12px"></div>
+    <div id="badgeMine" class="bpane"><div id="badgeCount" style="text-align:center;font-size:12px;color:var(--text3);margin:-6px 0 12px"></div>
     <div class="badge-scroll"><div id="badgeGrid" class="badge-grid"></div></div></div>
-    <div id="badgeFeed" style="display:none"><div class="badge-scroll"><div id="bfeedList" class="bfeed-list"></div></div><div style="text-align:center;margin-top:8px"><button class="btn-secondary" onclick="loadBadgeFeed(true)">↻ Refresh</button></div></div>
+    <div id="badgeFeed" class="bpane" style="display:none"><div class="badge-scroll"><div id="bfeedList" class="bfeed-list"></div></div><div style="text-align:center;margin-top:8px"><button class="btn-secondary" onclick="loadBadgeFeed(true)">↻ Refresh</button></div></div>
   </div>
 </div>
 
@@ -4517,7 +4518,7 @@ function badgeCheck(){const got=bjson(BADGE_KEY);let changed=false;const b=bstat
   syncShownBadges();
   if(document.getElementById('badgeOverlay')&&document.getElementById('badgeOverlay').style.display==='flex')renderBadges();renderBadgeSide();
   if(fresh.length){const nSecret=BADGES.filter(x=>x.secret&&got[x.id]).length;try{badgeFeedPost(fresh,nSecret);}catch(e){}try{badgeReveal(fresh);}catch(e){}}}
-function renderBadges(){const g=document.getElementById('badgeGrid');if(!g)return;const got=bjson(BADGE_KEY);let earned=0,total=0;g.innerHTML='';
+function renderBadges(){const g=document.getElementById('badgeGrid');if(!g)return;const sc=g.closest('.badge-scroll'),keep=sc?sc.scrollTop:0;if(sc)requestAnimationFrame(()=>{sc.scrollTop=keep;});const got=bjson(BADGE_KEY);let earned=0,total=0;g.innerHTML='';
   BADGES.forEach(bd=>{const e=got[bd.id],l=e?e.l:0;total+=bd.lv.length;earned+=l;if(bd.secret&&!l){const c=document.createElement('div');c.className='badge-card locked';c.innerHTML='<div class="bd-art">'+badgeArt('unknown',0,1,{secret:true,size:74})+'</div><div class="bd-name">Secret badge</div><div class="bd-desc">Keep exploring…</div>';g.appendChild(c);return;}
     let v=0;try{v=bd.stat();}catch(e){}const next=bd.lv[l];const c=document.createElement('div');c.className='badge-card'+(l?' earned':' locked')+(bd.tiers?(l?' m-'+METAL[l-1]:''):l?' lvl'+Math.min(l,7):'')+(GRAND[bd.id]?' grand'+GRAND[bd.id]:'');
     let prog='';if(next!=null){if(bd.id.startsWith('lex')||bd.id.startsWith('doct'))prog=lexProgress(bd.id==='lexicon'||bd.id==='doctus'?'main':'all',bd.id.startsWith('lex')?'seen':'correct');else if(bd.lv.length>1||next>1)prog=Math.min(v,next).toLocaleString()+' / '+next.toLocaleString()+(bd.unit?' '+bd.unit:'');}
