@@ -602,6 +602,24 @@ body.calm .nfx-type .tw-caret{display:none}
 .bchip.art{width:auto;height:auto;border:none!important;background:none!important;box-shadow:none!important;border-radius:0;line-height:0}.bchip.art svg{display:block;overflow:visible}
 .bchips{gap:5px!important}.bs-i{width:32px!important}.bs-i svg{display:block;margin:0 auto}
 .arc-inline{font-family:var(--serif,serif);font-weight:800;color:#d9b8ff;font-size:1.15em}
+#bReveal{position:fixed;inset:0;z-index:10000;align-items:center;justify-content:center;overflow:hidden;background:rgba(6,6,12,0);transition:background .3s;cursor:pointer;padding:16px}
+#bReveal.show{background:rgba(6,6,12,.82)}
+.br-rays{position:absolute;left:50%;top:50%;width:760px;height:760px;margin:-380px 0 0 -380px;border-radius:50%;opacity:0;background:repeating-conic-gradient(var(--br-c) 0 8deg,transparent 8deg 22.5deg);-webkit-mask:radial-gradient(circle,#000 12%,transparent 64%);mask:radial-gradient(circle,#000 12%,transparent 64%)}
+.br-gold{--br-c:rgba(255,213,74,.2);--br-g:rgba(255,213,74,.6)}.br-secret{--br-c:rgba(199,125,255,.22);--br-g:rgba(199,125,255,.7)}.br-diamond{--br-c:rgba(143,230,255,.22);--br-g:rgba(143,230,255,.7)}
+.show .br-rays{animation:brFade .6s .15s forwards,brRays 14s linear infinite}
+.br-card{position:relative;text-align:center;max-width:360px;transform:scale(.3);opacity:0}
+.show .br-card{animation:brPop .65s cubic-bezier(.2,1.5,.4,1) forwards}
+.br-art{line-height:0;margin:10px 0 6px}.br-art svg{display:block;margin:0 auto;filter:drop-shadow(0 0 26px var(--br-g))}
+.show .br-art{animation:brFlip .9s ease-out}
+.br-sub{font-size:12px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--br-g)}
+.br-name{font-family:var(--serif,Georgia,serif);font-size:30px;font-weight:700;color:#fff;margin-top:6px}
+.br-lat{font-style:italic;color:rgba(255,255,255,.6);font-size:14px}
+.br-desc{color:rgba(255,255,255,.8);font-size:14px;margin-top:8px;line-height:1.4}
+.br-tap{color:rgba(255,255,255,.45);font-size:12px;margin-top:18px;opacity:0}.show .br-tap{animation:brFade .5s 1.1s forwards}
+@keyframes brPop{to{transform:scale(1);opacity:1}}@keyframes brFlip{from{transform:perspective(600px) rotateY(200deg)}to{transform:perspective(600px) rotateY(0)}}
+@keyframes brRays{from{transform:rotate(0)}to{transform:rotate(360deg)}}@keyframes brFade{to{opacity:1}}
+@media (prefers-reduced-motion:reduce){.show .br-card,.show .br-art,.show .br-rays,.show .br-tap{animation:none;opacity:1;transform:none}}
+.bfeed-tabs{justify-content:center;margin:0 auto 12px;max-width:340px}.bfeed-list{display:flex;flex-direction:column;gap:6px}.bfeed-row{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:10px;background:var(--surface2,rgba(255,255,255,.03));border:1px solid var(--border,rgba(255,255,255,.08))}.bfeed-row.me{border-color:var(--accent,#e6b422)}.bfeed-art{flex:0 0 auto;line-height:0;width:34px;display:flex;justify-content:center}.bfeed-txt{flex:1;font-size:13.5px;text-align:left}.bfeed-t{font-size:11.5px;color:var(--text3);white-space:nowrap}.bfeed-empty{text-align:center;color:var(--text3);font-style:italic}
 .dg-rev{display:block;width:100%;margin-top:8px;padding:6px 10px;border-radius:8px;border:1px solid var(--accent,#e6b422);background:transparent;color:var(--accent,#e6b422);font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;text-align:center}.dg-rev:hover{background:rgba(230,180,34,.1)}.dg-rev.done{cursor:default;border-color:var(--border,rgba(255,255,255,.12));color:var(--text3)}
 .cloud-st{margin:0 0 10px}.cloud-code{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0}.cloud-code code{font-size:17px;font-weight:700;letter-spacing:.5px;padding:6px 10px;border-radius:8px;background:var(--bg3,rgba(255,255,255,.06));border:1px solid var(--gold,#e6b422);color:var(--gold,#e6b422);user-select:all}.cloud-note{font-size:12.5px;color:var(--text3);margin:4px 0 10px}
 .ba-rainbow{animation:baHue 3s linear infinite}.ba-pulse{animation:baPulse 2.6s ease-in-out infinite}@keyframes baPulse{50%{opacity:.55}}
@@ -2132,11 +2150,14 @@ body.calm .nfx-type .tw-caret{display:none}
 </div>
 
 <!-- BADGES -->
+<div id="bReveal" style="display:none" onclick="revealNext()"></div>
 <div id="badgeOverlay" class="overlay" style="display:none" onclick="closeOverlay('badgeOverlay')">
   <div class="about-box badge-box" onclick="event.stopPropagation()"><button class="about-close" onclick="closeOverlay('badgeOverlay')">×</button>
     <div class="about-title">🏅 Badges</div>
-    <div id="badgeCount" style="text-align:center;font-size:12px;color:var(--text3);margin:-6px 0 12px"></div>
-    <div class="badge-scroll"><div id="badgeGrid" class="badge-grid"></div></div>
+    <div class="mode-toggle bfeed-tabs"><button class="mode-btn active" id="bTabMine" onclick="setBadgeTab('mine')">My badges</button><button class="mode-btn" id="bTabFeed" onclick="setBadgeTab('feed')">📣 Badge feed</button></div>
+    <div id="badgeMine"><div id="badgeCount" style="text-align:center;font-size:12px;color:var(--text3);margin:-6px 0 12px"></div>
+    <div class="badge-scroll"><div id="badgeGrid" class="badge-grid"></div></div></div>
+    <div id="badgeFeed" style="display:none"><div class="badge-scroll"><div id="bfeedList" class="bfeed-list"></div></div><div style="text-align:center;margin-top:8px"><button class="btn-secondary" onclick="loadBadgeFeed(true)">↻ Refresh</button></div></div>
   </div>
 </div>
 
@@ -4427,23 +4448,51 @@ function duelStats(){const b=bstat();const res=b.duels||{};if(lbMe)Object.entrie
 function reactsReceived(){if(!lbMe)return 0;let n=0;Object.values(chatObj||{}).forEach(m=>{if(!m||m.pid!==lbMe.pid||!m.rx)return;Object.values(m.rx).forEach(u=>{n+=Object.keys(u||{}).filter(x=>x!==lbMe.pid).length;});});return n;}
 function badgeLevel(bd,v){let l=0;bd.lv.forEach((t,i)=>{if(v>=t)l=i+1;});return l;}
 function badgeTierName(bd,l){if(bd.tiers)return bd.tiers[Math.max(0,l-1)].name+' '+ROMAN[Math.max(0,l-1)];return bd.lv.length>1?bd.name+' '+ROMAN[l-1]:bd.name;}
+// ── BADGE FEED: everyone's new badges (secret ones only say "their nth secret badge") ──
+function badgeFeedPost(fresh,nSecret){if(!lbMe)return;let secretK=nSecret-fresh.filter(f=>f.bd.secret&&f.first).length;
+  fresh.slice(0,4).forEach(f=>{const e=f.bd.secret?(f.first?{pid:lbMe.pid,b:'?',k:++secretK}:null):{pid:lbMe.pid,b:f.bd.id,l:f.l};if(e)fbReq('POST','bfeed',{...e,t:{'.sv':'timestamp'}}).catch(()=>{});});}
+let bfeed=[],bfeedTab='mine',bfeedAt=0;
+function badgeFeedText(e){const name=(lbPlayers[e.pid]&&lbPlayers[e.pid].name)||'Someone';
+  if(e.b==='?')return {name,what:'found their '+ordinal(+e.k||1)+' secret badge',art:badgeArt('unknown',0,1,{secret:true,size:30})};
+  const bd=BADGES.find(x=>x.id===e.b)||META_BADGES.find(x=>x.id===e.b);if(!bd)return null;
+  const l=+e.l||1,nm=bd.meta?bd.name:badgeTierName(bd,l);return {name,what:(l>1&&!bd.meta?'reached ':'earned ')+nm,art:bd.meta?badgeArt(bd.id,1,1,{meta:true,size:30}):bdArt(bd,l,30)};}
+async function loadBadgeFeed(force){if(!force&&Date.now()-bfeedAt<20000)return renderBadgeFeed();const box=document.getElementById('bfeedList');if(box&&!bfeed.length)box.innerHTML='<p class="bfeed-empty">Loading…</p>';
+  try{const r=await fbReq('GET','bfeed',null,{query:'?orderBy=%22$key%22&limitToLast=80'});bfeed=Object.entries(r||{}).map(([id,v])=>({id,...v})).filter(v=>v&&v.pid&&v.b).sort((a,b)=>(b.t||0)-(a.t||0));bfeedAt=Date.now();}
+  catch(e){if(box)box.innerHTML='<p class="bfeed-empty">Couldn’t load the badge feed'+(/40[13]/.test(e.message)?' (the database rules need updating).':'. Check your internet.')+'</p>';return;}renderBadgeFeed();}
+function renderBadgeFeed(){const box=document.getElementById('bfeedList');if(!box)return;
+  const rows=bfeed.filter(e=>lbVisible(e.pid)).map(e=>{const x=badgeFeedText(e);if(!x)return '';
+    return '<div class="bfeed-row'+(lbMe&&e.pid===lbMe.pid?' me':'')+'"><span class="bfeed-art">'+x.art+'</span><span class="bfeed-txt"><b>'+esc(x.name)+'</b> '+esc(x.what)+'</span><span class="bfeed-t">'+(e.t?timeAgo(e.t):'')+'</span></div>';}).join('');
+  box.innerHTML=rows||'<p class="bfeed-empty">No badges yet. When anyone on the leaderboard earns one, it shows up here.</p>';}
+function timeAgo(t){const s=Math.max(0,(Date.now()-t)/1000);return s<60?'just now':s<3600?Math.floor(s/60)+'m ago':s<86400?Math.floor(s/3600)+'h ago':Math.floor(s/86400)+'d ago';}
+// ── BADGE UNLOCK: full-screen reveal of the new medal (tap to continue; several in a row queue up) ──
+let revealQ=[],revealOn=false;
+function badgeReveal(fresh){revealQ.push(...fresh.slice(0,4));if(!revealOn)revealNext();}
+function revealNext(){const ov=document.getElementById('bReveal');if(!ov)return;const f=revealQ.shift();
+  if(!f){revealOn=false;ov.classList.remove('show');setTimeout(()=>{if(!revealOn)ov.style.display='none';},280);return;}revealOn=true;
+  const bd=f.bd,meta=!!bd.meta,art=meta?badgeArt(bd.id,1,1,{meta:true,size:170}):bdArt(bd,f.l,170),name=meta?bd.name:badgeTierName(bd,f.l);
+  const sub=bd.secret?'Secret badge found!':f.first?'Badge unlocked':'Level up!',kind=bd.secret?'secret':(GRAND[bd.id]>=4||bd.id==='omniamax')?'diamond':'gold';
+  ov.className='br-'+kind;ov.innerHTML='<div class="br-rays"></div><div class="br-card"><div class="br-sub">'+sub+'</div><div class="br-art">'+art+'</div><div class="br-name">'+esc(name)+'</div>'+(bd.lat?'<div class="br-lat">'+esc(bd.lat)+'</div>':'')+'<div class="br-desc">'+esc(bd.desc||'')+'</div><div class="br-tap">Tap to continue'+(revealQ.length?' ('+revealQ.length+' more)':'')+'</div></div>';
+  ov.style.display='flex';void ov.offsetWidth;ov.classList.add('show');}
+function setBadgeTab(t){bfeedTab=t;document.getElementById('bTabMine').classList.toggle('active',t==='mine');document.getElementById('bTabFeed').classList.toggle('active',t==='feed');
+  document.getElementById('badgeMine').style.display=t==='mine'?'':'none';document.getElementById('badgeFeed').style.display=t==='feed'?'':'none';if(t==='feed')loadBadgeFeed();}
 function bdArt(bd,l,size,extra){return badgeArt(bd.id,l,bd.lv?bd.lv.length:1,Object.assign({secret:!!bd.secret,meta:!!bd.meta,size},extra||{}));}
 function bdIcon(bd,l){return bd.tiers?bd.tiers[Math.max(0,(l||1)-1)].icon:bd.icon;}
 // the old separate points badges (centurio, legatus, imperator, optimus) became levels of one badge
 const OLD_RANK={centurio:1,legatus:2,imperator:3,optimus:4};
 let _bTimer=null;function badgeCheckSoon(){if(_bTimer)return;_bTimer=setTimeout(()=>{_bTimer=null;badgeCheck();},700);}
-function badgeCheck(){const got=bjson(BADGE_KEY);let changed=false;const b=bstat();
+function badgeCheck(){const got=bjson(BADGE_KEY);let changed=false;const b=bstat();const fresh=[];
   {let lv=0;Object.keys(OLD_RANK).forEach(k=>{if(got[k]){lv=Math.max(lv,OLD_RANK[k]);delete got[k];changed=true;}});if(lv&&(!got.gradus||got.gradus.l<lv))got.gradus={l:lv,t:Date.now()};
    const pins=badgePins();if(pins.some(x=>OLD_RANK[x])){const np=[...new Set(pins.map(x=>OLD_RANK[x]?'gradus':x))];try{localStorage.setItem(PIN_KEY,JSON.stringify(np));}catch(e){}}}
   // remember personal bests that the live data might forget
   b.bestDay=Math.max(b.bestDay||0,lbTodayPts());b.bestStreak=Math.max(b.bestStreak||0,dailyStreak());b.reacts=Math.max(b.reacts||0,reactsReceived());
   if(lbMe&&classChal&&+classChal.target){const me=lbPlayers[lbMe.pid]||{};if(((me.w||{})[lbKeys().w]||0)>=500)b.civis=1;}rageCheck(b);bsave();
   BADGES.forEach(bd=>{let v=0;try{v=bd.stat();}catch(e){}const l=badgeLevel(bd,v);const old=got[bd.id]?got[bd.id].l:0;
-    if(l>old){got[bd.id]={l,t:Date.now()};changed=true;{const nm=badgeTierName(bd,l);toast('🏅 Badge unlocked: '+nm+(nm.endsWith('!')?'':'!'));}}});
-  META_BADGES.forEach(bd=>{const v=metaValue(bd,got),old=got[bd.id]?got[bd.id].l:0;if(v>old){got[bd.id]={l:v,t:Date.now()};changed=true;toast(bd.meta==='count'?'🗝️ Arcana: '+v+' secret badge'+(v===1?'':'s')+' found!':'🏅 Badge unlocked: '+bd.name+'!');}});
+    if(l>old){got[bd.id]={l,t:Date.now()};changed=true;fresh.push({bd,l,first:!old});}});
+  META_BADGES.forEach(bd=>{const v=metaValue(bd,got),old=got[bd.id]?got[bd.id].l:0;if(v>old){got[bd.id]={l:v,t:Date.now()};changed=true;if(bd.meta!=='count')fresh.push({bd,l:v,first:!old});else toast('🗝️ Arcana: '+v+' secret badge'+(v===1?'':'s')+' found!');}});
   if(changed){try{localStorage.setItem(BADGE_KEY,JSON.stringify(got));}catch(e){}}
   syncShownBadges();
-  if(document.getElementById('badgeOverlay')&&document.getElementById('badgeOverlay').style.display==='flex')renderBadges();renderBadgeSide();}
+  if(document.getElementById('badgeOverlay')&&document.getElementById('badgeOverlay').style.display==='flex')renderBadges();renderBadgeSide();
+  if(fresh.length){const nSecret=BADGES.filter(x=>x.secret&&got[x.id]).length;try{badgeFeedPost(fresh,nSecret);}catch(e){}try{badgeReveal(fresh);}catch(e){}}}
 function renderBadges(){const g=document.getElementById('badgeGrid');if(!g)return;const got=bjson(BADGE_KEY);let earned=0,total=0;g.innerHTML='';
   BADGES.forEach(bd=>{const e=got[bd.id],l=e?e.l:0;total+=bd.lv.length;earned+=l;if(bd.secret&&!l){const c=document.createElement('div');c.className='badge-card locked';c.innerHTML='<div class="bd-art">'+badgeArt('unknown',0,1,{secret:true,size:74})+'</div><div class="bd-name">Secret badge</div><div class="bd-desc">Keep exploring…</div>';g.appendChild(c);return;}
     let v=0;try{v=bd.stat();}catch(e){}const next=bd.lv[l];const c=document.createElement('div');c.className='badge-card'+(l?' earned':' locked')+(bd.tiers?(l?' m-'+METAL[l-1]:''):l?' lvl'+Math.min(l,7):'')+(GRAND[bd.id]?' grand'+GRAND[bd.id]:'');

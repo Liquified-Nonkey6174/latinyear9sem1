@@ -51,6 +51,31 @@
         }
       }
     },
+    "bfeed": {
+      ".read": "auth != null",
+      "$id": {
+        ".write": "auth != null && ((!data.exists() && newData.child('pid').val() === auth.uid && root.child('players').child(auth.uid).exists()) || (!newData.exists() && (data.child('pid').val() === auth.uid || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2')))",
+        ".validate": "newData.hasChildren(['pid', 'b', 't'])",
+        "pid": {
+          ".validate": "newData.isString()"
+        },
+        "b": {
+          ".validate": "newData.isString() && newData.val().length <= 24"
+        },
+        "l": {
+          ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 500"
+        },
+        "k": {
+          ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 100"
+        },
+        "t": {
+          ".validate": "newData.isNumber() && newData.val() <= now"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
     "progress": {
       "$uid": {
         ".read": "auth != null && (auth.uid === $uid || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2')",
