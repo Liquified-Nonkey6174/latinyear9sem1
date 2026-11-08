@@ -607,6 +607,7 @@ body.calm .nfx-type .tw-caret{display:none}
 .lb-name.has-chips .pname{max-width:100%}
 .lb-name.has-chips .bchips{margin:0;gap:4px!important;flex-wrap:wrap}
 .pc-name~div .bchips,#playerCard .bchips{flex-wrap:wrap;justify-content:center;row-gap:6px;max-width:100%}
+.lb-note{font-size:10.5px;color:var(--text3);font-style:italic;margin-left:6px;white-space:nowrap}.lb-name.has-chips .lb-note{margin-left:0}
 </style>
 </head>
 <body>
@@ -3835,7 +3836,10 @@ let chatMuted=false;
 let mutedSet=new Set(),lbHidden=new Set();
 const seesPid=pid=>isAdmin||(lbMe&&pid===lbMe.pid);
 const chatVisible=pid=>!mutedSet.has(pid)||seesPid(pid);
-const lbVisible=pid=>!lbHidden.has(pid)||seesPid(pid);
+// New players appear on other people's leaderboards once they have LB_MIN_PTS all-time points (they always see themselves).
+const LB_MIN_PTS=100;
+const lbEnough=pid=>((lbPlayers[pid]||{}).total||0)>=LB_MIN_PTS;
+const lbVisible=pid=>(!lbHidden.has(pid)&&lbEnough(pid))||seesPid(pid);
 // New accounts need CHAT_MIN_PTS points before they can chat (stops spam from throwaway accounts; the database rules check it too).
 const CHAT_MIN_PTS=50;
 function updChatInput(){const ci=document.getElementById('chatInput'),cs=document.getElementById('chatSend');if(!ci)return;const pts=lbMyPoints(),short=!!lbMe&&pts<CHAT_MIN_PTS;
@@ -3879,6 +3883,7 @@ function renderLb(){const list=document.getElementById('lbList');if(!list||!lbPl
     const it=document.createElement('div');it.className='lb-item'+(lbMe&&r.pid===lbMe.pid?' me':'')+(rank<=3&&r.n>0?' top':'');
     const rk=document.createElement('span');rk.className='lb-rank';rk.textContent=SET.ordinal?ordinal(rank):rank;
     const nm=document.createElement('span');nm.className='lb-name';nm.appendChild(nameEl(r.pid,r.name));{const bc=badgeChipsEl(lbPlayers[r.pid]);if(bc){nm.classList.add('has-chips');nm.appendChild(bc);}}if(isAdmin&&lbHidden.has(r.pid)){it.style.opacity='.55';nm.title='Hidden from everyone else';nm.append(' 👻');}
+    else if(!lbEnough(r.pid)&&(isAdmin||(lbMe&&r.pid===lbMe.pid))){const left=LB_MIN_PTS-((lbPlayers[r.pid]||{}).total||0);const note=document.createElement('span');note.className='lb-note';note.textContent=lbMe&&r.pid===lbMe.pid?'only you can see this · '+left+' ⭐ to go':'under '+LB_MIN_PTS+' ⭐';note.title='Players appear on the leaderboard for everyone once they have '+LB_MIN_PTS+' ⭐ in total.';nm.appendChild(note);if(isAdmin&&!(lbMe&&r.pid===lbMe.pid))it.style.opacity='.55';}
     const ct=document.createElement('span');ct.className='lb-count';ct.textContent=r.n.toLocaleString();
     it.append(rk,nm,ct);it.classList.add('click');it.title=lbMe&&r.pid===lbMe.pid?'Change your look':'View '+r.name;
     it.onclick=e=>{if(e.target.closest('.lb-act'))return;if(lbMe&&r.pid===lbMe.pid)openLook();else openPlayerCard(r.pid);};
@@ -4071,7 +4076,7 @@ function openPlayerCard(pid){const p=lbPlayers[pid];if(!p)return;const k=lbKeys(
 let classChal=null;
 function renderClassChallenge(){const box=document.getElementById('classChallenge');if(!box)return;box.innerHTML='';
   const target=classChal&&+classChal.target;if(!target){if(isAdmin){const b=document.createElement('button');b.className='lb-link';b.textContent='+ Set a class challenge';b.onclick=editClassChallenge;box.appendChild(b);}return;}
-  const wk=lbKeys().w;const total=Object.entries(lbPlayers).filter(([pid])=>lbVisible(pid)).reduce((a,[,p])=>a+((p&&p.w&&p.w[wk])||0),0);const pct=Math.min(100,Math.round(total/target*100));
+  const wk=lbKeys().w;const total=Object.entries(lbPlayers).filter(([pid])=>!lbHidden.has(pid)||seesPid(pid)).reduce((a,[,p])=>a+((p&&p.w&&p.w[wk])||0),0);const pct=Math.min(100,Math.round(total/target*100));
   box.className='cc-box'+(total>=target?' done':'');
   box.innerHTML='<div class="cc-top"><span>🏆 '+esc(classChal.title||'Class challenge')+'</span><span>'+total.toLocaleString()+' / '+target.toLocaleString()+'</span></div><div class="cc-bar"><div style="width:'+pct+'%"></div></div><div class="cc-sub">'+(total>=target?'Goal reached this week! 🎉':'Correct answers by everyone this week')+'</div>';
   if(isAdmin){const b=document.createElement('button');b.className='lb-act';b.textContent='✎';b.title='Edit challenge';b.onclick=editClassChallenge;box.querySelector('.cc-top').appendChild(b);}}
