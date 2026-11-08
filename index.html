@@ -3841,7 +3841,7 @@ const LB_MIN_PTS=100;
 const lbEnough=pid=>((lbPlayers[pid]||{}).total||0)>=LB_MIN_PTS;
 const lbVisible=pid=>(!lbHidden.has(pid)&&lbEnough(pid))||seesPid(pid);
 // New accounts need CHAT_MIN_PTS points before they can chat (stops spam from throwaway accounts; the database rules check it too).
-const CHAT_MIN_PTS=50;
+const CHAT_MIN_PTS=100;
 function updChatInput(){const ci=document.getElementById('chatInput'),cs=document.getElementById('chatSend');if(!ci)return;const pts=lbMyPoints(),short=!!lbMe&&pts<CHAT_MIN_PTS;
   ci.disabled=cs.disabled=!lbMe||chatMuted||short;
   ci.placeholder=!lbMe?'Join above to chat':chatMuted?'The admin has blocked you from sending messages':short?'Earn '+CHAT_MIN_PTS+' ⭐ to unlock chat ('+(CHAT_MIN_PTS-pts)+' to go)':'Message everyone…';}
