@@ -3846,7 +3846,7 @@ function updChatInput(){const ci=document.getElementById('chatInput'),cs=documen
   ci.disabled=cs.disabled=!lbMe||chatMuted||short;
   ci.placeholder=!lbMe?'Join above to chat':chatMuted?'The admin has blocked you from sending messages':short?'Earn '+CHAT_MIN_PTS+' ⭐ to unlock chat ('+(CHAT_MIN_PTS-pts)+' to go)':'Message everyone…';}
 function setChatMuted(m){chatMuted=false;}
-async function lbSaveName(raw){const name=lbCleanName(raw);if(/caesar/i.test(name)){try{bump('caesar');}catch(e){}renderLbProfile('Non sum Caesar! Nobody can be Caesar here. Pick another name.',true);return;}const err=lbNameError(name);if(err){renderLbProfile(err,true);return;}
+async function lbSaveName(raw){const name=lbCleanName(raw);if(lbMe&&name===lbMe.name){try{bump('samename');}catch(e){}}if(/caesar/i.test(name)){try{bump('caesar');}catch(e){}renderLbProfile('Non sum Caesar! Nobody can be Caesar here. Pick another name.',true);return;}const err=lbNameError(name);if(err){renderLbProfile(err,true);return;}
   let pid;const prev=lbMe?lbMe.name:null;   // remember it now: the live stream may update lbMe.name while we wait
   try{await playerToken();pid=playerAuth.uid;await fbReq('PATCH','players/'+pid,lbMe?{name}:{name,total:0});}catch(e){
     if(lbMe&&/HTTP 40[13]/.test(e.message)){lbEditing=false;renderLbProfile('The admin has turned off name changes for you.',true);return;}
@@ -4373,6 +4373,10 @@ const BADGES=[
  {id:'nihil',icon:'🕳️',name:'Nihil',lat:'nothing',desc:'Finish a quiz of 5 or more questions with 0%.',secret:true,stat:()=>bstat().zero||0,lv:[1]},
  {id:'chamaeleo',icon:'🦎',name:'Chamaeleo',lat:'chameleon',desc:'Try every theme.',secret:true,stat:()=>THEMES.every(t=>(bstat().themes||[]).includes(t.id))?1:0,lv:[1]},
  {id:'caesar',icon:'🏛️',name:'Non Sum Caesar',lat:'I am not Caesar',desc:'Try to name yourself Caesar.',secret:true,stat:()=>bstat().caesar||0,lv:[1]},
+ {id:'nescio',icon:'🤷',name:'Nescio',lat:'I don’t know',desc:'Answer a question with “idk”, “nescio” or “I don’t know”.',secret:true,stat:()=>bstat().idk||0,lv:[1]},
+ {id:'idemnomen',icon:'🪪',name:'Idem Nomen',lat:'the same name',desc:'Change your name to exactly what it already is.',secret:true,stat:()=>bstat().samename||0,lv:[1]},
+ {id:'contrarius',icon:'🙃',name:'Contrarius',lat:'the opposite',desc:'Get 10 questions wrong in a row.',secret:true,stat:()=>bstat().bestWrong>=10?1:0,lv:[1]},
+ {id:'fortuna',icon:'🎲',name:'Fortuna Caeca',lat:'blind luck',desc:'A 1-in-1,000 chance on any correct answer.',secret:true,stat:()=>bstat().luck||0,lv:[1]},
  {id:'iterum',icon:'🔁',name:'Iterum',lat:'again',desc:'Finish both the basic and the advanced tour twice.',secret:true,stat:()=>Math.min(bstat().toursBasic||0,bstat().toursAdv||0),lv:[2]}];
 function bjson(k){try{return JSON.parse(localStorage.getItem(k)||'{}')||{};}catch(e){return {};}}
 let _bstat=null;function bstat(){return _bstat||(_bstat=bjson(BSTAT_KEY));}
@@ -4385,7 +4389,7 @@ function chatBadgeChecks(text,when){const t=String(text).toLowerCase().replace(/
   if(t==='i want a badge')b.askBadge=1;if(t==='67'&&d&&d.getMinutes()===7&&(d.getHours()===6||d.getHours()===18))b.sixSeven=1;bsave();badgeCheckSoon();}
 const RAGE_MS=12*3600*1000;
 function rageCheck(b){const p=b.lastAns;if(p&&!p.ok&&Date.now()-p.t>=RAGE_MS)b.rage=1;}
-function badgeAnswer(ok){const b=bstat();rageCheck(b);b.lastAns={t:Date.now(),ok:!!ok};if(ok){b.correct=(b.correct||0)+1;b.run=(b.run||0)+1;if(b.run>(b.bestRun||0))b.bestRun=b.run;const h=new Date().getHours();if(h<8)b.early=1;if(h>=22)b.late=1;}else b.run=0;bsave();badgeCheckSoon();}
+function badgeAnswer(ok){const b=bstat();rageCheck(b);b.lastAns={t:Date.now(),ok:!!ok};if(ok){b.wrun=0;if(Math.random()<0.001)b.luck=1;}else{b.wrun=(b.wrun||0)+1;if(b.wrun>(b.bestWrong||0))b.bestWrong=b.wrun;}if(ok){b.correct=(b.correct||0)+1;b.run=(b.run||0)+1;if(b.run>(b.bestRun||0))b.bestRun=b.run;const h=new Date().getHours();if(h<8)b.early=1;if(h>=22)b.late=1;}else b.run=0;bsave();badgeCheckSoon();}
 function lexWords(scope){const main=[];Object.entries(DATA).forEach(([ck,c])=>{if(c.packOnly)return;Object.entries(c.sub).forEach(([sk,sub])=>sub.words.forEach(w=>{if(!(typeof customWords!=='undefined'&&customWords.some(x=>x.lat===w.lat&&x.catKey===ck)))main.push({...w,catKey:ck,subKey:sk});}));});
   if(scope==='main')return main;const seen=new Set(main.map(wKey)),all=[...main];WORD_PACKS.forEach(pk=>pk.words.forEach(w=>{if(!seen.has(wKey(w))){seen.add(wKey(w));all.push(w);}}));return all;}
 function lexStat(scope,what){const acc=accData();const ws=lexWords(scope);const ok=w=>{const k=wKey(w),a=acc[k],r=srData[k];return what==='seen'?((a&&a.s>0)||(r&&r.seen>0)):((a&&a.c>0)||(r&&r.correct>0));};
@@ -4451,6 +4455,9 @@ let bdSaveErr='';
 function toggleBadgePin(id){let pins=badgePins();if(pins.includes(id))pins=pins.filter(x=>x!==id);else{if(pins.length>=MAX_PINS){toast('You can show up to '+MAX_PINS+' badges. Unpin one first.');return;}pins.push(id);}
   try{localStorage.setItem(PIN_KEY,JSON.stringify(pins));}catch(e){}renderBadges();syncShownBadges();}
 
+function nescioCheck(v){const t=String(v||'').toLowerCase().replace(/[’']/g,'').replace(/[^a-z ]/g,' ').replace(/\s+/g,' ').trim();if(['idk','nescio','i dont know','i do not know','dunno','i dunno'].includes(t))bump('idk');}
+setTimeout(()=>{[['checkAnswer','answerInput'],['checkDrill','answerInput'],['checkSentence','sentInput'],['duelCheck','dpInput']].forEach(([fn,id])=>{const f=window[fn];if(typeof f!=='function')return;
+  window[fn]=function(){try{const el=document.getElementById(id);if(el&&!el.disabled)nescioCheck(el.value);}catch(e){}return f.apply(this,arguments);};});},0);
 // Progress towards each badge's next level (for the side panel)
 function badgeProgress(bd){const got=bjson(BADGE_KEY),l=got[bd.id]?got[bd.id].l:0;if(l>=bd.lv.length||bd.secret)return null;let v=0,next=bd.lv[l];try{v=bd.stat();}catch(e){}
   if(bd.id.startsWith('lex')||bd.id.startsWith('doct')){const [a,b]=lexProgress(bd.id==='lexicon'||bd.id==='doctus'?'main':'all',bd.id.startsWith('lex')?'seen':'correct').split(' / ').map(Number);v=a;next=b;}
