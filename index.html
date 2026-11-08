@@ -601,7 +601,11 @@ body.calm .nfx-type .tw-caret{display:none}
 .bchip.art{width:auto;height:auto;border:none!important;background:none!important;box-shadow:none!important;border-radius:0;line-height:0}.bchip.art svg{display:block;overflow:visible}
 .bchips{gap:5px!important}.bs-i{width:32px!important}.bs-i svg{display:block;margin:0 auto}
 .arc-inline{font-family:var(--serif,serif);font-weight:800;color:#d9b8ff;font-size:1.15em}
-.ba-rainbow{animation:baHue 3s linear infinite}@keyframes baHue{to{filter:hue-rotate(360deg)}}
+.ba-rainbow{animation:baHue 3s linear infinite}.ba-pulse{animation:baPulse 2.6s ease-in-out infinite}@keyframes baPulse{50%{opacity:.55}}
+.badge-card.earned.grand1,.badge-card.earned.grand2{border-color:rgba(230,180,34,.55)}
+.badge-card.earned.grand3{border-color:#e6b422;box-shadow:0 0 0 1px rgba(230,180,34,.35),0 0 18px rgba(255,213,74,.35);background:linear-gradient(180deg,rgba(255,213,74,.10),transparent 70%)}
+.badge-card.earned.grand4{border-color:#8fe6ff;box-shadow:0 0 0 1px rgba(143,230,255,.4),0 0 22px rgba(143,230,255,.4),0 0 40px rgba(168,107,255,.25);background:linear-gradient(180deg,rgba(143,230,255,.12),rgba(168,107,255,.08) 60%,transparent)}
+.badge-card.earned.grand3 .bd-name{color:#ffd54a}.badge-card.earned.grand4 .bd-name{background:linear-gradient(90deg,#bff3ff,#d6b8ff);-webkit-background-clip:text;background-clip:text;color:transparent}@keyframes baHue{to{filter:hue-rotate(360deg)}}
 .badge-card.locked .bd-art{filter:none;opacity:1}
 .lb-name.has-chips{flex-direction:column;align-items:flex-start;gap:3px;padding:5px 0 7px;margin:-3px 0 -5px}
 .lb-name.has-chips .pname{max-width:100%}
@@ -4275,8 +4279,8 @@ const METALS={bronze:['#ffd2a1','#c07a3a','#5e3110','#2a1406'],silver:['#ffffff'
 // enamel (face) colours per badge: [light, dark]
 const ENAMEL={salve:['#3f7a5a','#163a27'],primus:['#8a2d2d','#3c0f0f'],scriptor:['#2f5a8a','#0f2440'],gradus:['#7a1f2b','#2e0710'],
   diesmagnus:['#b5651d','#4a2306'],constans:['#a33a17','#3d1205'],matutinus:['#c27a3a','#4d2a0c'],nocturnus:['#28336e','#0b1030'],
-  sineerrore:['#1f6b6b','#072a2a'],perfectus:['#5c2a7a','#220b33'],lexicon:['#5a4a2a','#231b0b'],lexiconmagnus:['#4a5a2a','#1b230b'],
-  doctus:['#2a4a5a','#0b1b23'],doctissimus:['#3a3a6a','#12122b'],gladiator:['#6b1f1f','#2a0707'],victor:['#2a6b3a','#0b2a13'],
+  sineerrore:['#1f6b6b','#072a2a'],perfectus:['#5c2a7a','#220b33'],lexicon:['#9a6a24','#3a2408'],lexiconmagnus:['#5f8f2a','#1d3a08'],
+  doctus:['#1f7fc0','#05284a'],doctissimus:['#6a3ad0','#1a0750'],gladiator:['#6b1f1f','#2a0707'],victor:['#2a6b3a','#0b2a13'],
   invictus:['#2a3f6b','#0b152a'],rival:['#6b4a1f','#2a1a07'],popularis:['#8a2a55','#350a20'],civis:['#6b1f2a','#2a070d'],
   avarus:['#2fa35a','#0b3a1c'],petitor:['#7a5cf0','#231063'],sexseptem:['#e0569b','#4a0a2c'],iratus:['#e0402f','#4a0a06'],
   echo:['#2fa0e0','#0a2f4a'],speculum:['#5ad0e0','#0a3a44'],nihil:['#6a6a8a','#15151f'],chamaeleo:['#5ad05a','#0f3a0f'],
@@ -4285,7 +4289,7 @@ const ENAMEL={salve:['#3f7a5a','#163a27'],primus:['#8a2d2d','#3c0f0f'],scriptor:
 const SHAPE={gradus:'burst',diesmagnus:'hex',constans:'hex',matutinus:'hex',nocturnus:'hex',sineerrore:'oct',perfectus:'oct',
   lexicon:'shield',lexiconmagnus:'shield',doctus:'shield',doctissimus:'shield',gladiator:'shield',victor:'shield',invictus:'shield',rival:'shield',
   popularis:'rosette',civis:'rosette',salve:'rosette',scriptor:'rosette',primus:'circle'};
-function metalFor(level,max,o){if(o.locked)return 'locked';if(o.rainbow)return 'rainbow';if(o.meta)return 'royal';if(o.secret)return 'obsidian';
+function metalFor(level,max,o){if(o.locked)return 'locked';if(o.grand>=4)return 'diamond';if(o.rainbow)return 'rainbow';if(o.meta)return 'royal';if(o.secret)return 'obsidian';
   if(max<=1)return 'gold';const f=level/max;return f>=1?'diamond':f>=.6?'gold':f>=.3?'silver':'bronze';}
 const S=(root.BADGE_SYMBOLS||{});
 function poly(n,r,rot){let d='';for(let i=0;i<n;i++){const a=(rot+i*360/n)*Math.PI/180;d+=(i?'L':'M')+(50+r*Math.cos(a)).toFixed(2)+' '+(50+r*Math.sin(a)).toFixed(2);}return d+'Z';}
@@ -4302,18 +4306,19 @@ function laurel(c,dark){let s='';for(const side of [-1,1]){for(let i=0;i<7;i++){
   let rot=(108+i*19)+90-25;if(side>0)rot=180-rot;const rx=8.5-i*.3,ry=4-i*.15;
   s+='<ellipse cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" rx="'+rx.toFixed(1)+'" ry="'+ry.toFixed(1)+'" transform="rotate('+rot.toFixed(0)+' '+x.toFixed(1)+' '+y.toFixed(1)+')" fill="'+c+'" stroke="'+dark+'" stroke-width=".5"/>';}}return s;}
 let uid=0;
-function badgeArt(id,level,max,o){o=o||{};if(id==='omniamax'){id='omnia';o={...o,rainbow:true};}const mk=metalFor(level,max,o),m=METALS[mk];const k='ba'+(++uid);const size=o.size||96;
+function badgeArt(id,level,max,o){o=o||{};if(id==='omniamax'){id='omnia';o={...o,rainbow:true};}const gr=o.locked?0:(GRAND[id]||0);if(gr)o={...o,grand:gr};const mk=metalFor(level,max,o),m=METALS[mk];const k='ba'+(++uid);const size=o.size||96;
   const shape=o.secret?'diamond':o.meta?'rosette':(SHAPE[id]||'circle');
   let en=ENAMEL[id]||['#3a3a3a','#141414'];if(o.locked)en=['#3a3a3a','#1a1a1a'];
   const ink=o.locked?'#8d8d8d':m[0];
   const sym=(id==='gradus'&&level>=4)?S.gradus4:(S[id]||'<circle cx="50" cy="50" r="18"/>');
-  const wreath=!o.locked&&!o.secret&&(o.meta||(level>=max&&max>1));
+  const wreath=!o.locked&&!o.secret&&(o.meta||gr||(level>=max&&max>1));
   const ribbon=max>1&&level>0&&!o.meta&&!o.locked;
   const rb=mk==='rainbow';
   let svg='<svg viewBox="0 0 100 '+(ribbon?118:104)+'" width="'+size+'" height="'+Math.round(size*(ribbon?1.18:1.04))+'" overflow="visible" xmlns="http://www.w3.org/2000/svg" class="badge-art">'
    +'<defs><linearGradient id="'+k+'r" x1="0" y1="0" x2="1" y2="1">'+(rb?'<stop offset="0" stop-color="#ff6b6b"/><stop offset=".2" stop-color="#ffd93d"/><stop offset=".4" stop-color="#6bff95"/><stop offset=".6" stop-color="#4dd2ff"/><stop offset=".8" stop-color="#a86bff"/><stop offset="1" stop-color="#ff6bd6"/>':'<stop offset="0" stop-color="'+m[0]+'"/><stop offset=".5" stop-color="'+m[1]+'"/><stop offset="1" stop-color="'+m[2]+'"/>')+'</linearGradient>'
    +'<radialGradient id="'+k+'f" cx=".35" cy=".3" r=".85"><stop offset="0" stop-color="'+en[0]+'"/><stop offset="1" stop-color="'+en[1]+'"/></radialGradient>'
    +'<filter id="'+k+'s" x="-25%" y="-25%" width="150%" height="150%"><feDropShadow dx="0" dy="1.4" stdDeviation="1.3" flood-color="#000" flood-opacity=".6"/></filter><filter id="'+k+'g" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="3"/></filter></defs>';
+  if(gr>=3){const hc=gr>=4?'#8fe6ff':'#ffd54a';svg+='<g class="ba-pulse">'+(gr>=4?'<path d="'+starPath(16,56,40)+'" fill="'+hc+'" opacity=".35"/>':'')+'<path d="'+shapeD(shape,45)+'" fill="'+hc+'" opacity=".5" filter="url(#'+k+'g)"/></g>';}
   svg+=rb?'<g class="ba-rainbow">':'';if(wreath)svg+=laurel('url(#'+k+'r)',m[2]);
   if(o.secret&&!o.locked)svg+='<path d="'+shapeD(shape,41)+'" fill="#c77dff" opacity=".35" filter="url(#'+k+'g)"/>';
   svg+='<path d="'+shapeD(shape,38)+'" fill="url(#'+k+'r)" filter="url(#'+k+'s)"/>'+(rb?'</g>':'')
@@ -4323,6 +4328,9 @@ function badgeArt(id,level,max,o){o=o||{};if(id==='omniamax'){id='omnia';o={...o
    +'<ellipse cx="42" cy="35" rx="17" ry="7" fill="#fff" opacity=".08"/>';
   svg+='<g transform="translate(50 50) scale(.54) translate(-50 -50)" fill="none" stroke="'+ink+'" stroke-width="3.8" stroke-linecap="round" stroke-linejoin="round" filter="url(#'+k+'s)">'
    +sym.replace(/class="f"/g,'fill="'+ink+'" stroke="none"').replace(/class="t"/g,'fill="'+ink+'" stroke="none"')+'</g>';
+  if(gr>=2){const st=(cx,cy,r)=>{let d='';for(let i=0;i<10;i++){const rr=i%2?r*.45:r,a=(-90+i*36)*Math.PI/180;d+=(i?'L':'M')+(cx+rr*Math.cos(a)).toFixed(2)+' '+(cy+rr*Math.sin(a)).toFixed(2);}return '<path d="'+d+'Z" fill="url(#'+k+'r)" stroke="'+m[2]+'" stroke-width="1" stroke-linejoin="round" filter="url(#'+k+'s)"/>';};
+    svg+=gr>=4?st(31,9,6.5)+st(69,9,6.5)+st(50,3,9.5):st(50,4,gr>=3?9:7.5);}
+  if(gr>=3){const sp=(x,y,r)=>'<path d="M'+x+' '+(y-r)+' Q'+x+' '+y+' '+(x+r)+' '+y+' Q'+x+' '+y+' '+x+' '+(y+r)+' Q'+x+' '+y+' '+(x-r)+' '+y+' Q'+x+' '+y+' '+x+' '+(y-r)+'Z" fill="#fff" opacity=".95"/>';svg+=sp(86,30,4.5)+sp(14,62,3.5)+(gr>=4?sp(84,80,3.5)+sp(16,24,3):'');}
   if(o.secret&&!o.locked){const sp=(x,y,r)=>'<path d="M'+x+' '+(y-r)+' Q'+x+' '+y+' '+(x+r)+' '+y+' Q'+x+' '+y+' '+x+' '+(y+r)+' Q'+x+' '+y+' '+(x-r)+' '+y+' Q'+x+' '+y+' '+x+' '+(y-r)+'Z" fill="#fff" opacity=".9"/>';svg+=sp(80,16,5)+sp(17,30,3.5)+sp(84,72,3);}
   const small=size<=44;   // leaderboard size: make the numbers even bigger
   if(ribbon){const rn=ROMAN[level-1]||String(level);const fs=small?(rn.length>2?27:31):(rn.length>2?22:25);
@@ -4334,6 +4342,8 @@ function badgeArt(id,level,max,o){o=o||{};if(id==='omniamax'){id='omnia';o={...o
   return svg+'</svg>';}
 root.badgeArt=badgeArt;
 })(typeof window!=='undefined'?window:globalThis);
+// the four 'whole word list' badges are the big achievements: each one grander than the last
+const GRAND={lexicon:1,lexiconmagnus:2,doctus:3,doctissimus:4};
 
 // ── BADGES / ACHIEVEMENTS (stored in this browser) ───────────────────────────
 const BADGE_KEY='latin_badges',BSTAT_KEY='latin_badge_stats';
@@ -4425,7 +4435,7 @@ function badgeCheck(){const got=bjson(BADGE_KEY);let changed=false;const b=bstat
   if(document.getElementById('badgeOverlay')&&document.getElementById('badgeOverlay').style.display==='flex')renderBadges();renderBadgeSide();}
 function renderBadges(){const g=document.getElementById('badgeGrid');if(!g)return;const got=bjson(BADGE_KEY);let earned=0,total=0;g.innerHTML='';
   BADGES.forEach(bd=>{const e=got[bd.id],l=e?e.l:0;total+=bd.lv.length;earned+=l;if(bd.secret&&!l){const c=document.createElement('div');c.className='badge-card locked';c.innerHTML='<div class="bd-art">'+badgeArt('unknown',0,1,{secret:true,size:74})+'</div><div class="bd-name">Secret badge</div><div class="bd-desc">Keep exploring…</div>';g.appendChild(c);return;}
-    let v=0;try{v=bd.stat();}catch(e){}const next=bd.lv[l];const c=document.createElement('div');c.className='badge-card'+(l?' earned':' locked')+(bd.tiers?(l?' m-'+METAL[l-1]:''):l?' lvl'+Math.min(l,7):'');
+    let v=0;try{v=bd.stat();}catch(e){}const next=bd.lv[l];const c=document.createElement('div');c.className='badge-card'+(l?' earned':' locked')+(bd.tiers?(l?' m-'+METAL[l-1]:''):l?' lvl'+Math.min(l,7):'')+(GRAND[bd.id]?' grand'+GRAND[bd.id]:'');
     let prog='';if(next!=null){if(bd.id.startsWith('lex')||bd.id.startsWith('doct'))prog=lexProgress(bd.id==='lexicon'||bd.id==='doctus'?'main':'all',bd.id.startsWith('lex')?'seen':'correct');else if(bd.lv.length>1||next>1)prog=Math.min(v,next).toLocaleString()+' / '+next.toLocaleString()+(bd.unit?' '+bd.unit:'');}
     c.innerHTML='<div class="bd-art">'+bdArt(bd,l,74,{locked:!l})+'</div><div class="bd-name">'+esc(l?badgeTierName(bd,l):bd.name)+'</div>'+(bd.lat?'<div class="bd-lat">'+esc(bd.lat)+'</div>':'')
       +'<div class="bd-desc">'+esc(bd.desc)+(bd.lv.length>1&&!bd.tiers?' Levels: '+bd.lv.map(x=>x.toLocaleString()).join(' · ')+'.':'')+'</div>'+(prog?'<div class="bd-prog">'+(l?'Next: ':'')+prog+'</div>':'')+(e?'<div class="bd-date">'+new Date(e.t).toLocaleDateString()+'</div>':'');
