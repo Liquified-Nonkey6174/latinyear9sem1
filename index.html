@@ -591,6 +591,7 @@ body.calm .nfx-type .tw-caret{display:none}
 .bs-i{font-size:20px;width:26px;text-align:center;flex-shrink:0}.bs-main{flex:1;min-width:0}
 .bs-top{display:flex;justify-content:space-between;gap:6px;font-size:12.5px}.bs-n{color:var(--text);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bs-v{color:var(--text3);font-size:11px;white-space:nowrap}
 .bs-bar{height:6px;border-radius:999px;background:var(--surface2);margin-top:4px;overflow:hidden}.bs-bar>div{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--accent),#e6b422)}
+.badge-sec-h{grid-column:1/-1;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin:12px 0 2px;border-top:1px solid var(--border2);padding-top:12px}.badge-card.meta.earned{border-color:#c8a0ff;box-shadow:0 0 10px rgba(200,160,255,.25)}
 </style>
 </head>
 <body>
@@ -4152,6 +4153,12 @@ function practiseMistakes(){const ws=worstWords().map(m=>m.w);if(!ws.length)retu
 // ── BADGES / ACHIEVEMENTS (stored in this browser) ───────────────────────────
 const BADGE_KEY='latin_badges',BSTAT_KEY='latin_badge_stats';
 const ROMAN=['I','II','III','IV','V','VI','VII'];
+// Special section (not counted in the badge totals): Arcana counts your secret badges; Omnia / Omnia Maxima need every main badge.
+const META_BADGES=[
+ {id:'arcana',icon:'🗝️',name:'Arcana',lat:'secrets',desc:'Counts the secret badges you have found. No limit.',meta:'count',lv:[1]},
+ {id:'omnia',icon:'🌟',name:'Omnia',lat:'everything',desc:'Earn every badge in the main section (secret ones too).',meta:'all',lv:[1]},
+ {id:'omniamax',icon:'👑',name:'Omnia Maxima',lat:'everything, to the max',desc:'Get every badge in the main section to its top level.',meta:'max',lv:[1]}];
+function metaValue(bd,got){if(bd.meta==='count')return BADGES.filter(b=>b.secret&&got[b.id]).length;if(bd.meta==='all')return BADGES.every(b=>got[b.id])?1:0;return BADGES.every(b=>got[b.id]&&got[b.id].l>=b.lv.length)?1:0;}
 const METAL=['bronze','silver','gold','diamond'];
 // lv: thresholds for tiered badges; stat(): current value. secret: hidden until earned.
 const BADGES=[
@@ -4181,6 +4188,7 @@ const BADGES=[
  {id:'avarus',icon:'💸',name:'Avarus',lat:'greedy',desc:'Press “Buy now” on the premium paywall 10 times.',secret:true,stat:()=>bstat().buy||0,lv:[10]},
  {id:'petitor',icon:'🙋',name:'Petitor',lat:'one who asks',desc:'Say “I want a badge” in the chat.',secret:true,stat:()=>bstat().askBadge||0,lv:[1]},
  {id:'sexseptem',icon:'🕕',name:'Sex Septem',lat:'six seven',desc:'Say “67” in the chat when the chat time shows 6:07 (am or pm).',secret:true,stat:()=>bstat().sixSeven||0,lv:[1]},
+ {id:'iratus',icon:'😤',name:'Iratus Abiit',lat:'left in a rage',desc:'Get a question wrong, then don’t answer another for 12 hours.',secret:true,stat:()=>bstat().rage||0,lv:[1]},
  {id:'iterum',icon:'🔁',name:'Iterum',lat:'again',desc:'Finish both the basic and the advanced tour twice.',secret:true,stat:()=>Math.min(bstat().toursBasic||0,bstat().toursAdv||0),lv:[2]}];
 function bjson(k){try{return JSON.parse(localStorage.getItem(k)||'{}')||{};}catch(e){return {};}}
 let _bstat=null;function bstat(){return _bstat||(_bstat=bjson(BSTAT_KEY));}
@@ -4191,7 +4199,9 @@ function lbTodayPts(){if(!lbMe)return 0;const me=lbPlayers[lbMe.pid]||{},k=lbKey
 // secret chat badges
 function chatBadgeChecks(text,when){const t=String(text).toLowerCase().replace(/[^a-z0-9 ]/g,'').replace(/\s+/g,' ').trim();const b=bstat();const d=when;
   if(t==='i want a badge')b.askBadge=1;if(t==='67'&&d&&d.getMinutes()===7&&(d.getHours()===6||d.getHours()===18))b.sixSeven=1;bsave();badgeCheckSoon();}
-function badgeAnswer(ok){const b=bstat();if(ok){b.correct=(b.correct||0)+1;b.run=(b.run||0)+1;if(b.run>(b.bestRun||0))b.bestRun=b.run;const h=new Date().getHours();if(h<8)b.early=1;if(h>=22)b.late=1;}else b.run=0;bsave();badgeCheckSoon();}
+const RAGE_MS=12*3600*1000;
+function rageCheck(b){const p=b.lastAns;if(p&&!p.ok&&Date.now()-p.t>=RAGE_MS)b.rage=1;}
+function badgeAnswer(ok){const b=bstat();rageCheck(b);b.lastAns={t:Date.now(),ok:!!ok};if(ok){b.correct=(b.correct||0)+1;b.run=(b.run||0)+1;if(b.run>(b.bestRun||0))b.bestRun=b.run;const h=new Date().getHours();if(h<8)b.early=1;if(h>=22)b.late=1;}else b.run=0;bsave();badgeCheckSoon();}
 function lexWords(scope){const main=[];Object.entries(DATA).forEach(([ck,c])=>{if(c.packOnly)return;Object.entries(c.sub).forEach(([sk,sub])=>sub.words.forEach(w=>{if(!(typeof customWords!=='undefined'&&customWords.some(x=>x.lat===w.lat&&x.catKey===ck)))main.push({...w,catKey:ck,subKey:sk});}));});
   if(scope==='main')return main;const seen=new Set(main.map(wKey)),all=[...main];WORD_PACKS.forEach(pk=>pk.words.forEach(w=>{if(!seen.has(wKey(w))){seen.add(wKey(w));all.push(w);}}));return all;}
 function lexStat(scope,what){const acc=accData();const ws=lexWords(scope);const ok=w=>{const k=wKey(w),a=acc[k],r=srData[k];return what==='seen'?((a&&a.s>0)||(r&&r.seen>0)):((a&&a.c>0)||(r&&r.correct>0));};
@@ -4207,9 +4217,10 @@ let _bTimer=null;function badgeCheckSoon(){if(_bTimer)return;_bTimer=setTimeout(
 function badgeCheck(){const got=bjson(BADGE_KEY);let changed=false;const b=bstat();
   // remember personal bests that the live data might forget
   b.bestDay=Math.max(b.bestDay||0,lbTodayPts());b.bestStreak=Math.max(b.bestStreak||0,dailyStreak());b.reacts=Math.max(b.reacts||0,reactsReceived());
-  if(lbMe&&classChal&&+classChal.target){const me=lbPlayers[lbMe.pid]||{};if(((me.w||{})[lbKeys().w]||0)>=500)b.civis=1;}bsave();
+  if(lbMe&&classChal&&+classChal.target){const me=lbPlayers[lbMe.pid]||{};if(((me.w||{})[lbKeys().w]||0)>=500)b.civis=1;}rageCheck(b);bsave();
   BADGES.forEach(bd=>{let v=0;try{v=bd.stat();}catch(e){}const l=badgeLevel(bd,v);const old=got[bd.id]?got[bd.id].l:0;
     if(l>old){got[bd.id]={l,t:Date.now()};changed=true;{const nm=badgeTierName(bd,l)+(bd.metal!=null?' '+ROMAN[bd.metal]:'');toast('🏅 Badge unlocked: '+nm+(nm.endsWith('!')?'':'!'));}}});
+  META_BADGES.forEach(bd=>{const v=metaValue(bd,got),old=got[bd.id]?got[bd.id].l:0;if(v>old){got[bd.id]={l:v,t:Date.now()};changed=true;toast(bd.meta==='count'?'🗝️ Arcana: '+v+' secret badge'+(v===1?'':'s')+' found!':'🏅 Badge unlocked: '+bd.name+'!');}});
   if(changed){try{localStorage.setItem(BADGE_KEY,JSON.stringify(got));}catch(e){}}
   syncShownBadges();
   if(document.getElementById('badgeOverlay')&&document.getElementById('badgeOverlay').style.display==='flex')renderBadges();renderBadgeSide();}
@@ -4221,20 +4232,26 @@ function renderBadges(){const g=document.getElementById('badgeGrid');if(!g)retur
       +'<div class="bd-desc">'+esc(bd.desc)+(bd.lv.length>1?' Levels: '+bd.lv.map(x=>x.toLocaleString()).join(' · ')+'.':'')+'</div>'+(prog?'<div class="bd-prog">'+(l?'Next: ':'')+prog+'</div>':'')+(e?'<div class="bd-date">'+new Date(e.t).toLocaleDateString()+'</div>':'');
     if(l&&lbMe){const pinned=badgePins().includes(bd.id);const pb=document.createElement('button');pb.className='bd-pin'+(pinned?' on':'');pb.textContent=pinned?'📌 Shown':'📌 Show';pb.title=pinned?'Shown next to your name on the leaderboard. Click to hide.':'Show next to your name on the leaderboard (up to 6).';pb.onclick=()=>toggleBadgePin(bd.id);c.appendChild(pb);if(pinned)c.classList.add('pinned');}
     g.appendChild(c);});
+  const sh=document.createElement('div');sh.className='badge-sec-h';sh.textContent='Special (not counted)';g.appendChild(sh);
+  META_BADGES.forEach(bd=>{const e=got[bd.id],l=e?e.l:0,v=metaValue(bd,got);const c=document.createElement('div');const on=bd.meta==='count'?v>0:!!l;c.className='badge-card meta'+(on?' earned':' locked');
+    let prog='';if(bd.meta==='count')prog='';else{const need=BADGES.length,have=bd.meta==='all'?BADGES.filter(b=>got[b.id]).length:BADGES.filter(b=>got[b.id]&&got[b.id].l>=b.lv.length).length;prog=have+' / '+need+' badges'+(bd.meta==='max'?' maxed':'');}
+    c.innerHTML='<div class="bd-icon">'+bd.icon+(bd.meta==='count'?'<span class="bd-num">'+v+'</span>':'')+'</div><div class="bd-name">'+esc(bd.name)+(bd.meta==='count'?' · '+v:'')+'</div><div class="bd-lat">'+esc(bd.lat)+'</div><div class="bd-desc">'+esc(bd.desc)+'</div>'+(prog&&!l?'<div class="bd-prog">'+prog+'</div>':'')+(e&&bd.meta!=='count'?'<div class="bd-date">'+new Date(e.t).toLocaleDateString()+'</div>':'');
+    if(on&&lbMe){const pinned=badgePins().includes(bd.id);const pb=document.createElement('button');pb.className='bd-pin'+(pinned?' on':'');pb.textContent=pinned?'📌 Shown':'📌 Show';pb.onclick=()=>toggleBadgePin(bd.id);c.appendChild(pb);if(pinned)c.classList.add('pinned');}
+    g.appendChild(c);});
   const cnt=document.getElementById('badgeCount');if(cnt)cnt.textContent=earned+' / '+total+(lbMe?' · showing '+badgePins().filter(id=>got[id]).length+'/'+MAX_PINS+' on the leaderboard':' · join the leaderboard to show badges there')+(bdSaveErr==='rules'?' · ⚠ not saved: the database rules need updating':bdSaveErr?' · ⚠ not saved yet (offline?)':'');}
 
 // Badges shown on the leaderboard: players pick up to 6 (players/{uid}/bd = "id:level,id:level").
 const PIN_KEY='latin_badge_pins',MAX_PINS=6;
 function badgePins(){try{const a=JSON.parse(localStorage.getItem(PIN_KEY)||'[]');return Array.isArray(a)?a.slice(0,MAX_PINS):[];}catch(e){return [];}}
-function badgeById(id){return BADGES.find(b=>b.id===id);}
+function badgeById(id){return BADGES.find(b=>b.id===id)||META_BADGES.find(b=>b.id===id);}
 // a small badge chip: icon + level numeral (tiered) or metal ring (points badges)
 function badgeChip(id,l,big){const bd=badgeById(id);if(!bd||!l)return null;const c=document.createElement('span');
-  c.className='bchip'+(big?' big':'')+(bd.metal!=null?' m-'+METAL[bd.metal]:bd.lv.length>1?' lv'+Math.min(l,7):'');c.title=badgeTierName(bd,l)+(bd.metal!=null?' '+ROMAN[bd.metal]:'')+(bd.lat?' ('+bd.lat+')':'');
+  c.className='bchip'+(big?' big':'')+(bd.metal!=null?' m-'+METAL[bd.metal]:bd.lv.length>1?' lv'+Math.min(l,7):'');c.title=(bd.meta==='count'?bd.name+': '+l+' secret badge'+(l===1?'':'s'):badgeTierName(bd,l)+(bd.metal!=null?' '+ROMAN[bd.metal]:''))+(bd.lat?' ('+bd.lat+')':'');
   const i=document.createElement('span');i.className='bc-i';i.textContent=bd.icon;c.appendChild(i);
-  const num=bd.metal!=null?ROMAN[bd.metal]:bd.lv.length>1?ROMAN[l-1]:'';   // points badges: Centurio I, Legatus II, Imperator III, Optimus IV
+  const num=bd.meta==='count'?String(l):bd.metal!=null?ROMAN[bd.metal]:bd.lv.length>1?ROMAN[l-1]:'';   // points badges: Centurio I, Legatus II, Imperator III, Optimus IV
   if(num){const n=document.createElement('span');n.className='bc-n';n.textContent=num;c.appendChild(n);}
   return c;}
-function shownBadges(p){return String((p&&p.bd)||'').split(',').map(x=>x.split(':')).filter(([id,l])=>badgeById(id)&&+l>0).slice(0,MAX_PINS).map(([id,l])=>[id,Math.min(+l,badgeById(id).lv.length)]);}
+function shownBadges(p){return String((p&&p.bd)||'').split(',').map(x=>x.split(':')).filter(([id,l])=>badgeById(id)&&+l>0).slice(0,MAX_PINS).map(([id,l])=>[id,badgeById(id).meta==='count'?+l:Math.min(+l,badgeById(id).lv.length)]);}
 function badgeChipsEl(p,big){const w=document.createElement('span');w.className='bchips';shownBadges(p).forEach(([id,l])=>{const c=badgeChip(id,l,big);if(c)w.appendChild(c);});return w.childNodes.length?w:null;}
 let _bdSaving=false;
 async function syncShownBadges(){if(!lbMe||_bdSaving)return;const got=bjson(BADGE_KEY);const str=badgePins().filter(id=>got[id]).map(id=>id+':'+got[id].l).join(',');
