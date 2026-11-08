@@ -4176,10 +4176,8 @@ const BADGES=[
  {id:'salve',icon:'👋',name:'Salve!',desc:'Join the leaderboard.',stat:()=>lbMe?1:0,lv:[1]},
  {id:'primus',icon:'🥇',name:'Primus Gradus',lat:'first step',desc:'Get your first correct answer.',stat:()=>bstat().correct||0,lv:[1]},
  {id:'scriptor',icon:'✍️',name:'Scriptor',lat:'writer',desc:'Send your first chat message.',stat:()=>bstat().chat||0,lv:[1]},
- {id:'centurio',icon:'⭐',name:'Centurio',desc:'Earn 100 ⭐ in total.',stat:()=>lbMyPoints(),lv:[100],metal:0},
- {id:'legatus',icon:'⭐',name:'Legatus',desc:'Earn 1,000 ⭐ in total.',stat:()=>lbMyPoints(),lv:[1000],metal:1},
- {id:'imperator',icon:'⭐',name:'Imperator',desc:'Earn 10,000 ⭐ in total.',stat:()=>lbMyPoints(),lv:[10000],metal:2},
- {id:'optimus',icon:'💎',name:'Optimus',desc:'Earn 100,000 ⭐ in total.',stat:()=>lbMyPoints(),lv:[100000],metal:3},
+ {id:'gradus',icon:'⭐',name:'Centurio',desc:'Earn ⭐ in total: Centurio 100, Legatus 1,000, Imperator 10,000, Optimus 100,000.',unit:'⭐',stat:()=>lbMyPoints(),lv:[100,1000,10000,100000],
+  tiers:[{name:'Centurio',icon:'⭐'},{name:'Legatus',icon:'⭐'},{name:'Imperator',icon:'⭐'},{name:'Optimus',icon:'💎'}]},
  {id:'diesmagnus',icon:'☀️',name:'Dies Magnus',lat:'big day',desc:'Earn lots of ⭐ in a single day.',unit:'⭐ in a day',stat:()=>Math.max(bstat().bestDay||0,lbTodayPts()),lv:[100,200,300,500,1000,2000,5000]},
  {id:'constans',icon:'🔥',name:'Constans',lat:'steady',desc:'Reach your daily goal several days in a row.',unit:'day streak',stat:()=>Math.max(bstat().bestStreak||0,dailyStreak()),lv:[3,7,30,50,100,200,365]},
  {id:'matutinus',icon:'🌅',name:'Matutinus',lat:'early riser',desc:'Get a question right before 8 am.',stat:()=>bstat().early||0,lv:[1]},
@@ -4228,24 +4226,29 @@ function duelStats(){const b=bstat();const res=b.duels||{};if(lbMe)Object.entrie
   const list=Object.values(res).sort((a,c)=>a.t-c.t);let wins=0,run=0,best=0;list.forEach(x=>{if(x.r==='w'){wins++;run++;best=Math.max(best,run);}else run=0;});return {wins,bestRun:best};}
 function reactsReceived(){if(!lbMe)return 0;let n=0;Object.values(chatObj||{}).forEach(m=>{if(!m||m.pid!==lbMe.pid||!m.rx)return;Object.values(m.rx).forEach(u=>{n+=Object.keys(u||{}).filter(x=>x!==lbMe.pid).length;});});return n;}
 function badgeLevel(bd,v){let l=0;bd.lv.forEach((t,i)=>{if(v>=t)l=i+1;});return l;}
-function badgeTierName(bd,l){return bd.lv.length>1?bd.name+' '+ROMAN[l-1]:bd.name;}
+function badgeTierName(bd,l){if(bd.tiers)return bd.tiers[Math.max(0,l-1)].name+' '+ROMAN[Math.max(0,l-1)];return bd.lv.length>1?bd.name+' '+ROMAN[l-1]:bd.name;}
+function bdIcon(bd,l){return bd.tiers?bd.tiers[Math.max(0,(l||1)-1)].icon:bd.icon;}
+// the old separate points badges (centurio, legatus, imperator, optimus) became levels of one badge
+const OLD_RANK={centurio:1,legatus:2,imperator:3,optimus:4};
 let _bTimer=null;function badgeCheckSoon(){if(_bTimer)return;_bTimer=setTimeout(()=>{_bTimer=null;badgeCheck();},700);}
 function badgeCheck(){const got=bjson(BADGE_KEY);let changed=false;const b=bstat();
+  {let lv=0;Object.keys(OLD_RANK).forEach(k=>{if(got[k]){lv=Math.max(lv,OLD_RANK[k]);delete got[k];changed=true;}});if(lv&&(!got.gradus||got.gradus.l<lv))got.gradus={l:lv,t:Date.now()};
+   const pins=badgePins();if(pins.some(x=>OLD_RANK[x])){const np=[...new Set(pins.map(x=>OLD_RANK[x]?'gradus':x))];try{localStorage.setItem(PIN_KEY,JSON.stringify(np));}catch(e){}}}
   // remember personal bests that the live data might forget
   b.bestDay=Math.max(b.bestDay||0,lbTodayPts());b.bestStreak=Math.max(b.bestStreak||0,dailyStreak());b.reacts=Math.max(b.reacts||0,reactsReceived());
   if(lbMe&&classChal&&+classChal.target){const me=lbPlayers[lbMe.pid]||{};if(((me.w||{})[lbKeys().w]||0)>=500)b.civis=1;}rageCheck(b);bsave();
   BADGES.forEach(bd=>{let v=0;try{v=bd.stat();}catch(e){}const l=badgeLevel(bd,v);const old=got[bd.id]?got[bd.id].l:0;
-    if(l>old){got[bd.id]={l,t:Date.now()};changed=true;{const nm=badgeTierName(bd,l)+(bd.metal!=null?' '+ROMAN[bd.metal]:'');toast('🏅 Badge unlocked: '+nm+(nm.endsWith('!')?'':'!'));}}});
+    if(l>old){got[bd.id]={l,t:Date.now()};changed=true;{const nm=badgeTierName(bd,l);toast('🏅 Badge unlocked: '+nm+(nm.endsWith('!')?'':'!'));}}});
   META_BADGES.forEach(bd=>{const v=metaValue(bd,got),old=got[bd.id]?got[bd.id].l:0;if(v>old){got[bd.id]={l:v,t:Date.now()};changed=true;toast(bd.meta==='count'?'🗝️ Arcana: '+v+' secret badge'+(v===1?'':'s')+' found!':'🏅 Badge unlocked: '+bd.name+'!');}});
   if(changed){try{localStorage.setItem(BADGE_KEY,JSON.stringify(got));}catch(e){}}
   syncShownBadges();
   if(document.getElementById('badgeOverlay')&&document.getElementById('badgeOverlay').style.display==='flex')renderBadges();renderBadgeSide();}
 function renderBadges(){const g=document.getElementById('badgeGrid');if(!g)return;const got=bjson(BADGE_KEY);let earned=0,total=0;g.innerHTML='';
   BADGES.forEach(bd=>{const e=got[bd.id],l=e?e.l:0;total+=bd.lv.length;earned+=l;if(bd.secret&&!l){const c=document.createElement('div');c.className='badge-card locked';c.innerHTML='<div class="bd-icon">❔</div><div class="bd-name">Secret badge</div><div class="bd-desc">Keep exploring…</div>';g.appendChild(c);return;}
-    let v=0;try{v=bd.stat();}catch(e){}const next=bd.lv[l];const c=document.createElement('div');c.className='badge-card'+(l?' earned':' locked')+(bd.metal!=null?' m-'+METAL[bd.metal]:l?' lvl'+Math.min(l,7):'');
+    let v=0;try{v=bd.stat();}catch(e){}const next=bd.lv[l];const c=document.createElement('div');c.className='badge-card'+(l?' earned':' locked')+(bd.tiers?(l?' m-'+METAL[l-1]:''):l?' lvl'+Math.min(l,7):'');
     let prog='';if(next!=null){if(bd.id.startsWith('lex')||bd.id.startsWith('doct'))prog=lexProgress(bd.id==='lexicon'||bd.id==='doctus'?'main':'all',bd.id.startsWith('lex')?'seen':'correct');else if(bd.lv.length>1||next>1)prog=Math.min(v,next).toLocaleString()+' / '+next.toLocaleString()+(bd.unit?' '+bd.unit:'');}
-    c.innerHTML='<div class="bd-icon">'+bd.icon+(bd.metal!=null?'<span class="bd-num">'+ROMAN[bd.metal]+'</span>':l&&bd.lv.length>1?'<span class="bd-num">'+ROMAN[l-1]+'</span>':'')+'</div><div class="bd-name">'+esc(l?badgeTierName(bd,l):bd.name)+(bd.metal!=null?' '+ROMAN[bd.metal]:'')+'</div>'+(bd.lat?'<div class="bd-lat">'+esc(bd.lat)+'</div>':'')
-      +'<div class="bd-desc">'+esc(bd.desc)+(bd.lv.length>1?' Levels: '+bd.lv.map(x=>x.toLocaleString()).join(' · ')+'.':'')+'</div>'+(prog?'<div class="bd-prog">'+(l?'Next: ':'')+prog+'</div>':'')+(e?'<div class="bd-date">'+new Date(e.t).toLocaleDateString()+'</div>':'');
+    c.innerHTML='<div class="bd-icon">'+bdIcon(bd,l)+(l&&bd.lv.length>1?'<span class="bd-num">'+ROMAN[l-1]+'</span>':'')+'</div><div class="bd-name">'+esc(l?badgeTierName(bd,l):bd.name)+'</div>'+(bd.lat?'<div class="bd-lat">'+esc(bd.lat)+'</div>':'')
+      +'<div class="bd-desc">'+esc(bd.desc)+(bd.lv.length>1&&!bd.tiers?' Levels: '+bd.lv.map(x=>x.toLocaleString()).join(' · ')+'.':'')+'</div>'+(prog?'<div class="bd-prog">'+(l?'Next: ':'')+prog+'</div>':'')+(e?'<div class="bd-date">'+new Date(e.t).toLocaleDateString()+'</div>':'');
     if(l&&lbMe){const pinned=badgePins().includes(bd.id);const pb=document.createElement('button');pb.className='bd-pin'+(pinned?' on':'');pb.textContent=pinned?'📌 Shown':'📌 Show';pb.title=pinned?'Shown next to your name on the leaderboard. Click to hide.':'Show next to your name on the leaderboard (up to 6).';pb.onclick=()=>toggleBadgePin(bd.id);c.appendChild(pb);if(pinned)c.classList.add('pinned');}
     g.appendChild(c);});
   const sh=document.createElement('div');sh.className='badge-sec-h';sh.textContent='Special (not counted)';g.appendChild(sh);
@@ -4262,12 +4265,12 @@ function badgePins(){try{const a=JSON.parse(localStorage.getItem(PIN_KEY)||'[]')
 function badgeById(id){return BADGES.find(b=>b.id===id)||META_BADGES.find(b=>b.id===id);}
 // a small badge chip: icon + level numeral (tiered) or metal ring (points badges)
 function badgeChip(id,l,big){const bd=badgeById(id);if(!bd||!l)return null;const c=document.createElement('span');
-  c.className='bchip'+(big?' big':'')+(bd.meta==='count'?' arc':'')+(bd.metal!=null?' m-'+METAL[bd.metal]:bd.lv.length>1?' lv'+Math.min(l,7):'');c.title=(bd.meta==='count'?bd.name+': '+l+' secret badge'+(l===1?'':'s'):badgeTierName(bd,l)+(bd.metal!=null?' '+ROMAN[bd.metal]:''))+(bd.lat?' ('+bd.lat+')':'');
-  const i=document.createElement('span');i.className='bc-i';i.textContent=bd.icon;c.appendChild(i);
-  const num=bd.meta==='count'?String(l):bd.metal!=null?ROMAN[bd.metal]:bd.lv.length>1?ROMAN[l-1]:'';   // points badges: Centurio I, Legatus II, Imperator III, Optimus IV
+  c.className='bchip'+(big?' big':'')+(bd.meta==='count'?' arc':'')+(bd.tiers?' m-'+METAL[l-1]:bd.lv.length>1?' lv'+Math.min(l,7):'');c.title=(bd.meta==='count'?bd.name+': '+l+' secret badge'+(l===1?'':'s'):badgeTierName(bd,l))+(bd.lat?' ('+bd.lat+')':'');
+  const i=document.createElement('span');i.className='bc-i';i.textContent=bdIcon(bd,l);c.appendChild(i);
+  const num=bd.meta==='count'?String(l):bd.lv.length>1?ROMAN[l-1]:'';   // points badges: Centurio I, Legatus II, Imperator III, Optimus IV
   if(num){const n=document.createElement('span');n.className='bc-n';n.textContent=num;c.appendChild(n);}
   return c;}
-function shownBadges(p){return String((p&&p.bd)||'').split(',').map(x=>x.split(':')).filter(([id,l])=>badgeById(id)&&+l>0).slice(0,MAX_PINS).map(([id,l])=>[id,badgeById(id).meta==='count'?+l:Math.min(+l,badgeById(id).lv.length)]);}
+function shownBadges(p){const seen={};String((p&&p.bd)||'').split(',').map(x=>x.split(':')).map(([id,l])=>OLD_RANK[id]?['gradus',String(OLD_RANK[id])]:[id,l]).forEach(([id,l])=>{if(id&&(!seen[id]||+l>+seen[id]))seen[id]=l;});return Object.entries(seen).filter(([id,l])=>badgeById(id)&&+l>0).slice(0,MAX_PINS).map(([id,l])=>[id,badgeById(id).meta==='count'?+l:Math.min(+l,badgeById(id).lv.length)]);}
 function badgeChipsEl(p,big){const w=document.createElement('span');w.className='bchips';shownBadges(p).forEach(([id,l])=>{const c=badgeChip(id,l,big);if(c)w.appendChild(c);});return w.childNodes.length?w:null;}
 let _bdSaving=false;
 async function syncShownBadges(){if(!lbMe||_bdSaving)return;const got=bjson(BADGE_KEY);const str=badgePins().filter(id=>got[id]).map(id=>id+':'+got[id].l).join(',');
@@ -4282,13 +4285,13 @@ function toggleBadgePin(id){let pins=badgePins();if(pins.includes(id))pins=pins.
 // Progress towards each badge's next level (for the side panel)
 function badgeProgress(bd){const got=bjson(BADGE_KEY),l=got[bd.id]?got[bd.id].l:0;if(l>=bd.lv.length||bd.secret)return null;let v=0,next=bd.lv[l];try{v=bd.stat();}catch(e){}
   if(bd.id.startsWith('lex')||bd.id.startsWith('doct')){const [a,b]=lexProgress(bd.id==='lexicon'||bd.id==='doctus'?'main':'all',bd.id.startsWith('lex')?'seen':'correct').split(' / ').map(Number);v=a;next=b;}
-  const name=bd.metal!=null?bd.name+' '+ROMAN[bd.metal]:bd.lv.length>1?bd.name+' '+ROMAN[l]:bd.name;
+  const name=bd.tiers?bd.tiers[l].name+' '+ROMAN[l]:bd.lv.length>1?bd.name+' '+ROMAN[l]:bd.name;
   return {bd,v:Math.min(v,next),next,frac:next?Math.min(1,v/next):0,name};}
 function renderBadgeSide(){const box=document.getElementById('badgeSide');const got=bjson(BADGE_KEY);let earned=0,total=0;BADGES.forEach(bd=>{total+=bd.lv.length;earned+=got[bd.id]?got[bd.id].l:0;});
   const bc=document.getElementById('badgeBtnCount');if(bc)bc.textContent=earned+'/'+total;const sc=document.getElementById('badgeStatsCount');if(sc)sc.textContent='('+earned+' / '+total+')';
   if(!box)return;const list=BADGES.map(badgeProgress).filter(x=>x&&x.next>0).sort((a,b)=>b.frac-a.frac).slice(0,5);
   box.innerHTML='<div class="side-h"><span>🏅 Next badges</span><span class="side-sub">'+earned+' / '+total+'</span></div><div class="bs-list">'
-    +list.map(x=>'<div class="bs-row" title="'+esc(x.bd.desc)+'"><span class="bs-i">'+x.bd.icon+'</span><div class="bs-main"><div class="bs-top"><span class="bs-n">'+esc(x.name)+'</span><span class="bs-v">'+x.v.toLocaleString()+' / '+x.next.toLocaleString()+'</span></div><div class="bs-bar"><div style="width:'+Math.round(x.frac*100)+'%"></div></div></div></div>').join('')
+    +list.map(x=>'<div class="bs-row" title="'+esc(x.bd.desc)+'"><span class="bs-i">'+bdIcon(x.bd,(bjson(BADGE_KEY)[x.bd.id]||{l:0}).l+1)+'</span><div class="bs-main"><div class="bs-top"><span class="bs-n">'+esc(x.name)+'</span><span class="bs-v">'+x.v.toLocaleString()+' / '+x.next.toLocaleString()+'</span></div><div class="bs-bar"><div style="width:'+Math.round(x.frac*100)+'%"></div></div></div></div>').join('')
     +'</div><button class="lb-link" style="margin:8px 0 2px;display:block;width:100%;text-align:center" onclick="openBadges()">See all badges</button>';}
 function openBadges(){badgeCheck();renderBadges();document.getElementById('badgeOverlay').style.display='flex';}
 (function(){const lay=document.querySelector('.layout');if(!lay)return;const a=document.createElement('aside');a.className='rside';a.innerHTML='<div class="side-sec" id="badgeSide"></div>';lay.appendChild(a);setTimeout(()=>{try{renderBadgeSide();}catch(e){}},300);})();
