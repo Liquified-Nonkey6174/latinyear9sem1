@@ -2874,7 +2874,7 @@ function buildThemePicker(){
   });
 }
 function setTheme(id){
-  currentTheme=id;
+  currentTheme=id;try{const b=bstat();if(!(b.themes||[]).includes(id)){b.themes=[...(b.themes||[]),id];bsave();badgeCheckSoon();}}catch(e){}
   setBodyTheme(id==='dark'?'':id);
   THEMES.forEach(t=>{const sw=document.getElementById('ts_'+t.id);if(sw)sw.className='theme-swatch'+(t.id===id?' active':'');});
   try{window.storage.set(THEME_KEY,id);}catch(e){}
@@ -3238,7 +3238,7 @@ function skipSentence(){if(answered)return;answered=true;document.getElementById
 function nextSentence(){clearTimeout(autoNextTimer);renderSentence();}
 function recAns(w,ok){const ck=w.catKey;if(!statsData.catStats[ck])statsData.catStats[ck]={seen:0,correct:0};statsData.catStats[ck].seen++;if(ok)statsData.catStats[ck].correct++;saveStats();if(ok){lbCount(isDrill&&!isSent?2:1);dailyTick();}trackMistake(w,ok);badgeAnswer(ok);}   // declension/conjugation questions are worth 2 ⭐
 let sessionFinished=true;
-function finishSession(){sessionFinished=true;const total=isDrill?drillQs.length:isSent?sentTotal:quizWords.length;const pct=total>0?Math.round(score/total*100):0;if(window.resumeDate)statsData.sessions=statsData.sessions.filter(s=>s.date!==window.resumeDate);statsData.sessions.push({date:Date.now(),score,total,pct});if(total>=50&&score>=total)bump('perfect');window.resumeDate=null;if(statsData.sessions.length>20)statsData.sessions=statsData.sessions.slice(-20);saveStats();}
+function finishSession(){sessionFinished=true;const total=isDrill?drillQs.length:isSent?sentTotal:quizWords.length;const pct=total>0?Math.round(score/total*100):0;if(window.resumeDate)statsData.sessions=statsData.sessions.filter(s=>s.date!==window.resumeDate);statsData.sessions.push({date:Date.now(),score,total,pct});if(total>=50&&score>=total)bump('perfect');if(total>=5&&score===0)bump('zero');window.resumeDate=null;if(statsData.sessions.length>20)statsData.sessions=statsData.sessions.slice(-20);saveStats();}
 const PHRASES=[[100,'Optime! Perfectly done.'],[80,'Bene! Well done.'],[60,'Satis bene. Keep going.'],[0,'Persevera. Try again.']];
 function showResult(){finishSession();showView('resultView');const total=isDrill?drillQs.length:quizWords.length;const pct=total>0?Math.round(score/total*100):0;document.getElementById('resLabel').textContent='Result';document.getElementById('resScore').textContent=fmtScore(score)+' / '+total;document.getElementById('resTotal').textContent=pct+'%';document.getElementById('resPhrase').textContent=(PHRASES.find(([t])=>pct>=t)||PHRASES[PHRASES.length-1])[1];const banner=document.getElementById('reviewBanner');if(!isDrill&&wrongWords.length>0){banner.style.display='flex';document.getElementById('reviewBannerTitle').textContent=wrongWords.length+' word'+(wrongWords.length===1?' needs':' words need')+' more practice';document.getElementById('reviewBannerSub').textContent='Round '+(round+1)+' will drill just these words.';}else banner.style.display='none';}
 function continueReview(){round++;quizWords=shuffle([...wrongWords]);wrongWords=[];current=0;score=0;answered=false;showView('quizView');showQ();}
@@ -3829,7 +3829,7 @@ function updChatInput(){const ci=document.getElementById('chatInput'),cs=documen
   ci.disabled=cs.disabled=!lbMe||chatMuted||short;
   ci.placeholder=!lbMe?'Join above to chat':chatMuted?'The admin has blocked you from sending messages':short?'Earn '+CHAT_MIN_PTS+' ⭐ to unlock chat ('+(CHAT_MIN_PTS-pts)+' to go)':'Message everyone…';}
 function setChatMuted(m){chatMuted=false;}
-async function lbSaveName(raw){const name=lbCleanName(raw);const err=lbNameError(name);if(err){renderLbProfile(err,true);return;}
+async function lbSaveName(raw){const name=lbCleanName(raw);if(/caesar/i.test(name)){try{bump('caesar');}catch(e){}renderLbProfile('Non sum Caesar! Nobody can be Caesar here. Pick another name.',true);return;}const err=lbNameError(name);if(err){renderLbProfile(err,true);return;}
   let pid;const prev=lbMe?lbMe.name:null;   // remember it now: the live stream may update lbMe.name while we wait
   try{await playerToken();pid=playerAuth.uid;await fbReq('PATCH','players/'+pid,lbMe?{name}:{name,total:0});}catch(e){
     if(lbMe&&/HTTP 40[13]/.test(e.message)){lbEditing=false;renderLbProfile('The admin has turned off name changes for you.',true);return;}
@@ -4070,7 +4070,8 @@ async function editClassChallenge(){const t=prompt('Weekly target for the whole 
 // Chat reactions
 const REACTS=[['like','👍'],['laugh','😂'],['love','❤️'],['wow','😮']];
 async function toggleReact(id,k){if(!lbMe)return;const m=chatObj[id];const mine=m&&m.rx&&m.rx[k]&&m.rx[k][lbMe.pid];
-  try{if(mine)await fbReq('DELETE','chat/'+id+'/rx/'+k+'/'+lbMe.pid);else await fbReq('PUT','chat/'+id+'/rx/'+k+'/'+lbMe.pid,true);}
+  try{if(mine)await fbReq('DELETE','chat/'+id+'/rx/'+k+'/'+lbMe.pid);else{await fbReq('PUT','chat/'+id+'/rx/'+k+'/'+lbMe.pid,true);
+    if(m&&m.pid===lbMe.pid&&REACTS.every(([kk])=>kk===k||(m.rx&&m.rx[kk]&&m.rx[kk][lbMe.pid])))bump('mirror');}}
   catch(e){document.getElementById('chatErr').textContent='Couldn’t react. The database rules may need updating (ask the admin).';}}
 
 // Chat
@@ -4103,12 +4104,13 @@ async function sendChat(){const inp=document.getElementById('chatInput'),err=doc
   if(!lbMe||!text)return;if(Date.now()-chatLastSend<3000){err.textContent='Slow down a little!';return;}
   if(lbMyPoints()<CHAT_MIN_PTS){err.textContent='Earn '+CHAT_MIN_PTS+' ⭐ to unlock chat.';return;}
   if(((lbPlayers[lbMe.pid]||{}).total||0)<CHAT_MIN_PTS)await lbFlush();   // make sure the server has the points first
+  const prevMsg=chatMsgs.filter(m=>m&&typeof m.text==='string'&&chatVisible(m.pid)).slice(-1)[0];
   chatLastSend=Date.now();inp.value='';document.getElementById('chatList').dataset.first='';
   const msg={pid:lbMe.pid,text:text.slice(0,300),t:{'.sv':'timestamp'}};if(chatReplyTo&&chatObj[chatReplyTo])msg.re=chatReplyTo;
   const was=chatReplyTo;setChatReply(null);
   try{const pr=await fbReq('POST','chat',msg);bump('chat');
     // time-based badges use the message's own time (the server's, as shown in the chat), not the device clock
-    let when=null;try{const st=await fbReq('GET','chat/'+pr.name+'/t');if(typeof st==='number')when=new Date(st);}catch(e){}chatBadgeChecks(text,when);}
+    let when=null;try{const st=await fbReq('GET','chat/'+pr.name+'/t');if(typeof st==='number')when=new Date(st);}catch(e){}chatBadgeChecks(text,when);const nm=x=>String(x||'').toLowerCase().replace(/\s+/g,' ').trim();if(prevMsg&&prevMsg.pid!==lbMe.pid&&nm(prevMsg.text)===nm(text))bump('echo');}
   catch(e){// older database rules don't allow replies yet: send it as a normal message instead
     if(msg.re){delete msg.re;try{await fbReq('POST','chat',msg);err.textContent='Sent, but not as a reply: the database rules need updating (ask the admin).';return;}catch(e2){}}
     inp.value=text;setChatReply(was);
@@ -4161,9 +4163,10 @@ const ROMAN=['I','II','III','IV','V','VI','VII'];
 // Special section (not counted in the badge totals): Arcana counts your secret badges; Omnia / Omnia Maxima need every main badge.
 const META_BADGES=[
  {id:'arcana',icon:'🗝️',name:'Arcana',lat:'secrets',desc:'Counts the secret badges you have found. No limit.',meta:'count',lv:[1]},
+ {id:'fereomnia',icon:'✨',name:'Fere Omnia',lat:'almost everything',desc:'Earn every badge in the main section that isn’t secret.',meta:'public',lv:[1]},
  {id:'omnia',icon:'🌟',name:'Omnia',lat:'everything',desc:'Earn every badge in the main section (secret ones too).',meta:'all',lv:[1]},
  {id:'omniamax',icon:'👑',name:'Omnia Maxima',lat:'everything, to the max',desc:'Get every badge in the main section to its top level.',meta:'max',lv:[1]}];
-function metaValue(bd,got){if(bd.meta==='count')return BADGES.filter(b=>b.secret&&got[b.id]).length;if(bd.meta==='all')return BADGES.every(b=>got[b.id])?1:0;return BADGES.every(b=>got[b.id]&&got[b.id].l>=b.lv.length)?1:0;}
+function metaValue(bd,got){if(bd.meta==='count')return BADGES.filter(b=>b.secret&&got[b.id]).length;if(bd.meta==='public')return BADGES.filter(b=>!b.secret).every(b=>got[b.id])?1:0;if(bd.meta==='all')return BADGES.every(b=>got[b.id])?1:0;return BADGES.every(b=>got[b.id]&&got[b.id].l>=b.lv.length)?1:0;}
 const METAL=['bronze','silver','gold','diamond'];
 // lv: thresholds for tiered badges; stat(): current value. secret: hidden until earned.
 const BADGES=[
@@ -4194,6 +4197,11 @@ const BADGES=[
  {id:'petitor',icon:'🙋',name:'Petitor',lat:'one who asks',desc:'Say “I want a badge” in the chat.',secret:true,stat:()=>bstat().askBadge||0,lv:[1]},
  {id:'sexseptem',icon:'🕕',name:'Sex Septem',lat:'six seven',desc:'Say “67” in the chat when the chat time shows 6:07 (am or pm).',secret:true,stat:()=>bstat().sixSeven||0,lv:[1]},
  {id:'iratus',icon:'😤',name:'Iratus Abiit',lat:'left in a rage',desc:'Get a question wrong, then don’t answer another for 12 hours.',secret:true,stat:()=>bstat().rage||0,lv:[1]},
+ {id:'echo',icon:'🔊',name:'Echo',lat:'echo',desc:'Send exactly the same chat message as the one just before yours.',secret:true,stat:()=>bstat().echo||0,lv:[1]},
+ {id:'speculum',icon:'🪞',name:'Speculum',lat:'mirror',desc:'React to your own chat message with every reaction.',secret:true,stat:()=>bstat().mirror||0,lv:[1]},
+ {id:'nihil',icon:'🕳️',name:'Nihil',lat:'nothing',desc:'Finish a quiz of 5 or more questions with 0%.',secret:true,stat:()=>bstat().zero||0,lv:[1]},
+ {id:'chamaeleo',icon:'🦎',name:'Chamaeleo',lat:'chameleon',desc:'Try every theme.',secret:true,stat:()=>THEMES.every(t=>(bstat().themes||[]).includes(t.id))?1:0,lv:[1]},
+ {id:'caesar',icon:'🏛️',name:'Non Sum Caesar',lat:'I am not Caesar',desc:'Try to name yourself Caesar.',secret:true,stat:()=>bstat().caesar||0,lv:[1]},
  {id:'iterum',icon:'🔁',name:'Iterum',lat:'again',desc:'Finish both the basic and the advanced tour twice.',secret:true,stat:()=>Math.min(bstat().toursBasic||0,bstat().toursAdv||0),lv:[2]}];
 function bjson(k){try{return JSON.parse(localStorage.getItem(k)||'{}')||{};}catch(e){return {};}}
 let _bstat=null;function bstat(){return _bstat||(_bstat=bjson(BSTAT_KEY));}
@@ -4239,7 +4247,7 @@ function renderBadges(){const g=document.getElementById('badgeGrid');if(!g)retur
     g.appendChild(c);});
   const sh=document.createElement('div');sh.className='badge-sec-h';sh.textContent='Special (not counted)';g.appendChild(sh);
   META_BADGES.forEach(bd=>{const e=got[bd.id],l=e?e.l:0,v=metaValue(bd,got);const c=document.createElement('div');const on=bd.meta==='count'?v>0:!!l;c.className='badge-card meta'+(on?' earned':' locked');
-    let prog='';if(bd.meta==='count')prog='';else{const need=BADGES.length,have=bd.meta==='all'?BADGES.filter(b=>got[b.id]).length:BADGES.filter(b=>got[b.id]&&got[b.id].l>=b.lv.length).length;prog=have+' / '+need+' badges'+(bd.meta==='max'?' maxed':'');}
+    let prog='';if(bd.meta==='count')prog='';else{const pool=bd.meta==='public'?BADGES.filter(b=>!b.secret):BADGES,need=pool.length,have=bd.meta==='max'?pool.filter(b=>got[b.id]&&got[b.id].l>=b.lv.length).length:pool.filter(b=>got[b.id]).length;prog=have+' / '+need+' badges'+(bd.meta==='max'?' maxed':'');}
     c.innerHTML=(bd.meta==='count'?'<div class="arc-num">'+v+'</div>':'')+'<div class="bd-icon">'+bd.icon+'</div><div class="bd-name">'+esc(bd.name)+'</div><div class="bd-lat">'+esc(bd.lat)+'</div><div class="bd-desc">'+esc(bd.desc)+'</div>'+(prog&&!l?'<div class="bd-prog">'+prog+'</div>':'')+(e&&bd.meta!=='count'?'<div class="bd-date">'+new Date(e.t).toLocaleDateString()+'</div>':'');
     if(on&&lbMe){const pinned=badgePins().includes(bd.id);const pb=document.createElement('button');pb.className='bd-pin'+(pinned?' on':'');pb.textContent=pinned?'📌 Shown':'📌 Show';pb.onclick=()=>toggleBadgePin(bd.id);c.appendChild(pb);if(pinned)c.classList.add('pinned');}
     g.appendChild(c);});
