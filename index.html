@@ -4487,7 +4487,13 @@ function bdIcon(bd,l){return bd.tiers?bd.tiers[Math.max(0,(l||1)-1)].icon:bd.ico
 // the old separate points badges (centurio, legatus, imperator, optimus) became levels of one badge
 const OLD_RANK={centurio:1,legatus:2,imperator:3,optimus:4};
 let _bTimer=null;function badgeCheckSoon(){if(_bTimer)return;_bTimer=setTimeout(()=>{_bTimer=null;badgeCheck();},700);}
-function badgeCheck(){_q(0);const got=bjson(BADGE_KEY);let changed=false;const b=bstat();const fresh=[];
+// One-off clean-up (8 Nov 2026): anyone holding all the secret badges from before this date loses them
+// (and the badges built on them). Runs on every check, so a cloud save or backup can't bring them back.
+const SECRET_CUTOFF=1794181744005;
+function secretWipe(){try{const g=bjson(BADGE_KEY),sec=BADGES.filter(b=>b.secret);if(!sec.length||!sec.every(b=>g[b.id]&&(+g[b.id].t||0)<SECRET_CUTOFF))return;
+  sec.forEach(b=>delete g[b.id]);['arcana','omnia','omniamax'].forEach(k=>delete g[k]);localStorage.setItem(BADGE_KEY,JSON.stringify(g));
+  const st=bstat();st.z={};bsave();try{localStorage.setItem(PIN_KEY,JSON.stringify(badgePins().filter(id=>g[id])));}catch(e){}}catch(e){}}
+function badgeCheck(){_q(0);secretWipe();const got=bjson(BADGE_KEY);let changed=false;const b=bstat();const fresh=[];
   {let lv=0;Object.keys(OLD_RANK).forEach(k=>{if(got[k]){lv=Math.max(lv,OLD_RANK[k]);delete got[k];changed=true;}});if(lv&&(!got.gradus||got.gradus.l<lv))got.gradus={l:lv,t:Date.now()};
    const pins=badgePins();if(pins.some(x=>OLD_RANK[x])){const np=[...new Set(pins.map(x=>OLD_RANK[x]?'gradus':x))];try{localStorage.setItem(PIN_KEY,JSON.stringify(np));}catch(e){}}}
   // remember personal bests that the live data might forget
