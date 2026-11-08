@@ -3030,7 +3030,7 @@ const TOUR_ADV=[
 let tourSteps=null,tourIdx=0;
 function startTour(type){showMainTab('practice');setQuizType('vocab');tourSteps=type==='advanced'?TOUR_ADV:TOUR_BASIC;tourIdx=0;showTourStep();}
 function showTourStep(){if(!tourSteps||tourIdx>=tourSteps.length){endTour();return;}const step=tourSteps[tourIdx];if(step.pre)step.pre();document.getElementById('spotOverlay').style.display='';const hole=document.getElementById('spotHole'),card=document.getElementById('spotCard'),bd=document.getElementById('spotBackdrop');document.getElementById('spotStep').textContent='Step '+(tourIdx+1)+' of '+tourSteps.length;document.getElementById('spotTitle').textContent=step.title;document.getElementById('spotBody').innerHTML=step.body;document.getElementById('spotBackBtn').style.display=tourIdx>0?'':'none';document.getElementById('spotNextBtn').textContent=tourIdx===tourSteps.length-1?'Finish':'Next →';card.style.transform='none';card.style.top='';card.style.left='';card.style.bottom='';card.style.right='';if(step.el){const target=document.querySelector(step.el);if(target){bd.style.display='none';target.scrollIntoView({behavior:'smooth',block:'nearest'});setTimeout(()=>{const r=target.getBoundingClientRect(),pad=8;hole.style.display='';hole.style.position='fixed';hole.style.left=(r.left-pad)+'px';hole.style.top=(r.top-pad)+'px';hole.style.width=(r.width+pad*2)+'px';hole.style.height=(r.height+pad*2)+'px';const cw=Math.min(340,window.innerWidth-24);const spaceBelow=window.innerHeight-r.bottom;const spaceAbove=r.top;const spaceRight=window.innerWidth-r.right;const spaceLeft=r.left;let ct,cl;if(spaceBelow>=240){ct=r.bottom+14;cl=Math.max(12,Math.min(r.left,window.innerWidth-cw-12));}else if(spaceAbove>=240){ct=r.top-240;cl=Math.max(12,Math.min(r.left,window.innerWidth-cw-12));}else if(spaceRight>=cw+20){ct=Math.max(12,r.top);cl=r.right+14;}else if(spaceLeft>=cw+20){ct=Math.max(12,r.top);cl=r.left-cw-14;}else{ct=window.innerHeight/2-120;cl=(window.innerWidth-cw)/2;}card.style.position='fixed';card.style.top=Math.max(8,ct)+'px';card.style.left=Math.max(8,cl)+'px';card.style.maxWidth=cw+'px';},250);}else{showCentered();};}else{showCentered();}function showCentered(){bd.style.display='';hole.style.display='none';card.style.position='fixed';card.style.top='50%';card.style.left='50%';card.style.transform='translate(-50%,-50%)';card.style.maxWidth='340px';}}
-function tourNext(){tourIdx++;if(tourIdx>=tourSteps.length){try{bump(tourSteps===TOUR_ADV?'toursAdv':'toursBasic');}catch(e){}endTour();}else showTourStep();}
+function tourNext(){tourIdx++;if(tourIdx>=tourSteps.length){try{bump(tourSteps===TOUR_ADV?'k13':'k12');}catch(e){}endTour();}else showTourStep();}
 function tourBack(){if(tourIdx>0){tourIdx--;showTourStep();}}
 function endTour(){document.getElementById('spotOverlay').style.display='none';tourSteps=null;}
 window.addEventListener('scroll',()=>{if(tourSteps)showTourStep();},{passive:true});
@@ -3039,7 +3039,7 @@ function showAbout(){document.getElementById('aboutOverlay').style.display='flex
 function hideAbout(){document.getElementById('aboutOverlay').style.display='none';}
 function showShortcuts(){document.getElementById('shortcutsOverlay').style.display='flex';}
 function hideShortcuts(){document.getElementById('shortcutsOverlay').style.display='none';}
-function showInfoTab(t){
+function showInfoTab(t){setTimeout(()=>{try{curiousCheck();}catch(e){}},300);
   ['infoTabSpecial','infoTabDecl','infoTabConj','infoTabAdj','infoTabPron'].forEach(id=>{const el=document.getElementById(id);if(el)el.className='mode-btn';});
   const btn=document.getElementById('infoTab'+cap(t==='special'?'special':t==='declension'?'decl':t==='conjugation'?'conj':t==='adjectives'?'adj':'pron'));if(btn)btn.className='mode-btn active';
   ['infoSpecialPanel','infoDeclPanel','infoConjPanel','infoAdjPanel','infoPronPanel'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
@@ -3328,7 +3328,7 @@ function skipSentence(){if(answered)return;answered=true;document.getElementById
 function nextSentence(){clearTimeout(autoNextTimer);renderSentence();}
 function recAns(w,ok){reviseAnswer(w,ok);const ck=w.catKey;if(!statsData.catStats[ck])statsData.catStats[ck]={seen:0,correct:0};statsData.catStats[ck].seen++;if(ok)statsData.catStats[ck].correct++;saveStats();if(ok){lbCount(isDrill&&!isSent?2:1);dailyTick();}trackMistake(w,ok);badgeAnswer(ok);}   // declension/conjugation questions are worth 2 ⭐
 let sessionFinished=true;
-function finishSession(){sessionFinished=true;const total=isDrill?drillQs.length:isSent?sentTotal:quizWords.length;const pct=total>0?Math.round(score/total*100):0;if(window.resumeDate)statsData.sessions=statsData.sessions.filter(s=>s.date!==window.resumeDate);statsData.sessions.push({date:Date.now(),score,total,pct});if(total>=50&&score>=total)bump('perfect');if(total>=5&&score===0)bump('zero');window.resumeDate=null;if(statsData.sessions.length>20)statsData.sessions=statsData.sessions.slice(-20);saveStats();}
+function finishSession(){sessionFinished=true;const total=isDrill?drillQs.length:isSent?sentTotal:quizWords.length;const pct=total>0?Math.round(score/total*100):0;if(window.resumeDate)statsData.sessions=statsData.sessions.filter(s=>s.date!==window.resumeDate);statsData.sessions.push({date:Date.now(),score,total,pct});if(total>=50&&score>=total)bump('perfect');if(total>=5&&score===0)bump('k9');window.resumeDate=null;if(statsData.sessions.length>20)statsData.sessions=statsData.sessions.slice(-20);saveStats();}
 const PHRASES=[[100,'Optime! Perfectly done.'],[80,'Bene! Well done.'],[60,'Satis bene. Keep going.'],[0,'Persevera. Try again.']];
 function showResult(){finishSession();reviseFinish();showView('resultView');const total=isDrill?drillQs.length:quizWords.length;const pct=total>0?Math.round(score/total*100):0;document.getElementById('resLabel').textContent='Result';document.getElementById('resScore').textContent=fmtScore(score)+' / '+total;document.getElementById('resTotal').textContent=pct+'%';document.getElementById('resPhrase').textContent=(PHRASES.find(([t])=>pct>=t)||PHRASES[PHRASES.length-1])[1];const banner=document.getElementById('reviewBanner');if(!isDrill&&wrongWords.length>0){banner.style.display='flex';document.getElementById('reviewBannerTitle').textContent=wrongWords.length+' word'+(wrongWords.length===1?' needs':' words need')+' more practice';document.getElementById('reviewBannerSub').textContent='Round '+(round+1)+' will drill just these words.';}else banner.style.display='none';}
 function continueReview(){round++;quizWords=shuffle([...wrongWords]);wrongWords=[];current=0;score=0;answered=false;showView('quizView');showQ();}
@@ -3930,7 +3930,7 @@ function updChatInput(){const ci=document.getElementById('chatInput'),cs=documen
   ci.disabled=cs.disabled=!lbMe||chatMuted||short;
   ci.placeholder=!lbMe?'Join above to chat':chatMuted?'The admin has blocked you from sending messages':short?'Earn '+CHAT_MIN_PTS+' ⭐ to unlock chat ('+(CHAT_MIN_PTS-pts)+' to go)':'Message everyone…';}
 function setChatMuted(m){chatMuted=false;}
-async function lbSaveName(raw){const name=lbCleanName(raw);if(lbMe&&name===lbMe.name){try{bump('samename');}catch(e){}}if(/caesar/i.test(name)){try{bump('caesar');}catch(e){}renderLbProfile('Non sum Caesar! Nobody can be Caesar here. Pick another name.',true);return;}const err=lbNameError(name);if(err){renderLbProfile(err,true);return;}
+async function lbSaveName(raw){const name=lbCleanName(raw);if(lbMe&&name===lbMe.name){try{bump('k5');}catch(e){}}{const sq=name.toLowerCase().replace(/[^a-z]+/g,'');if([...Array(Math.max(0,sq.length-5)).keys()].some(i=>_hx(sq.slice(i,i+6))==='88fe7e2a')){try{bump('k3');}catch(e){}renderLbProfile(_d('OCocdR5fI0UwAgwcQkQWVgsdNwJON0UQAgdPQVMXNSQXJgxYbg0WEQxBA2ZeFS5SNANFOg0WEUkBQltSWA=='),true);return;}}const err=lbNameError(name);if(err){renderLbProfile(err,true);return;}
   let pid;const prev=lbMe?lbMe.name:null;   // remember it now: the live stream may update lbMe.name while we wait
   try{await playerToken();pid=playerAuth.uid;await fbReq('PATCH','players/'+pid,lbMe?{name}:{name,total:0});}catch(e){
     if(lbMe&&/HTTP 40[13]/.test(e.message)){lbEditing=false;renderLbProfile('The admin has turned off name changes for you.',true);return;}
@@ -4053,7 +4053,7 @@ function openPaywall(){let o=document.getElementById('paywallOverlay');
     +'<div id="pwBtns" style="display:flex;gap:8px;justify-content:center"><button class="btn-primary" id="pwBuy">Buy now: $67</button><button class="btn-secondary" onclick="closeOverlay(\'paywallOverlay\')">Maybe later</button></div></div>';
   // "Buy now" never buys anything: every press, the price goes up by $1.
   let price=67;const buy=o.querySelector('#pwBuy'),pr=o.querySelector('.pw-price');
-  buy.onclick=()=>{price++;bump('buy');pr.innerHTML='<span class="pw-ask">Actually, what about…</span><b>$'+price+'</b><span>one-time payment</span>';buy.textContent='Buy now: $'+price;
+  buy.onclick=()=>{price++;bump('k6');pr.innerHTML='<span class="pw-ask">Actually, what about…</span><b>$'+price+'</b><span>one-time payment</span>';buy.textContent='Buy now: $'+price;
     pr.classList.remove('bump');void pr.offsetWidth;pr.classList.add('bump');};
   const box=o.querySelector('.pw-box'),code=document.createElement('div');code.className='pw-code';box.appendChild(code);
   if(premMe||isAdmin){code.innerHTML='<p class="pw-have">✓ You have Latin Trainer Premium'+(isAdmin&&!premMe?' (admin)':'')+'.</p>';}
@@ -4173,7 +4173,7 @@ async function editClassChallenge(){const t=prompt('Weekly target for the whole 
 const REACTS=[['like','👍'],['laugh','😂'],['love','❤️'],['wow','😮']];
 async function toggleReact(id,k){if(!lbMe)return;const m=chatObj[id];const mine=m&&m.rx&&m.rx[k]&&m.rx[k][lbMe.pid];
   try{if(mine)await fbReq('DELETE','chat/'+id+'/rx/'+k+'/'+lbMe.pid);else{await fbReq('PUT','chat/'+id+'/rx/'+k+'/'+lbMe.pid,true);
-    if(m&&m.pid===lbMe.pid&&REACTS.every(([kk])=>kk===k||(m.rx&&m.rx[kk]&&m.rx[kk][lbMe.pid])))bump('mirror');}}
+    if(m&&m.pid===lbMe.pid&&REACTS.every(([kk])=>kk===k||(m.rx&&m.rx[kk]&&m.rx[kk][lbMe.pid])))bump('k7');}}
   catch(e){document.getElementById('chatErr').textContent='Couldn’t react. The database rules may need updating (ask the admin).';}}
 
 // Chat
@@ -4212,7 +4212,7 @@ async function sendChat(){const inp=document.getElementById('chatInput'),err=doc
   const was=chatReplyTo;setChatReply(null);
   try{const pr=await fbReq('POST','chat',msg);bump('chat');
     // time-based badges use the message's own time (the server's, as shown in the chat), not the device clock
-    let when=null;try{const st=await fbReq('GET','chat/'+pr.name+'/t');if(typeof st==='number')when=new Date(st);}catch(e){}chatBadgeChecks(text,when);const nm=x=>String(x||'').toLowerCase().replace(/\s+/g,' ').trim();if(prevMsg&&prevMsg.pid!==lbMe.pid&&nm(prevMsg.text)===nm(text))bump('echo');}
+    let when=null;try{const st=await fbReq('GET','chat/'+pr.name+'/t');if(typeof st==='number')when=new Date(st);}catch(e){}chatBadgeChecks(text,when);const nm=x=>String(x||'').toLowerCase().replace(/\s+/g,' ').trim();if(prevMsg&&prevMsg.pid!==lbMe.pid&&nm(prevMsg.text)===nm(text))bump('k8');}
   catch(e){// older database rules don't allow replies yet: send it as a normal message instead
     if(msg.re){delete msg.re;try{await fbReq('POST','chat',msg);err.textContent='Sent, but not as a reply: the database rules need updating (ask the admin).';return;}catch(e2){}}
     inp.value=text;setChatReply(was);
@@ -4320,6 +4320,8 @@ const S={
  idemnomen:'<path d="M24 32 H76 a4 4 0 0 1 4 4 V68 a4 4 0 0 1 -4 4 H24 a4 4 0 0 1 -4 -4 V36 a4 4 0 0 1 4 -4 Z"/><circle cx="36" cy="48" r="6"/><path d="M27 64 C28 58 32 56 36 56 C40 56 44 58 45 64"/><path d="M54 46 H70 M54 56 H70"/>',
  contrarius:'<circle cx="50" cy="50" r="24"/><path d="M38 40 C42 34 58 34 62 40"/><circle cx="41" cy="58" r="3" class="f"/><circle cx="59" cy="58" r="3" class="f"/><path d="M70 22 L78 30 L70 38 M78 30 H64"/>',
  fortuna:'<path d="M24 38 L46 30 L54 52 L32 60 Z"/><path d="M50 44 L74 42 L76 68 L52 70 Z"/><circle cx="35" cy="45" r="2.6" class="f"/><circle cx="43" cy="51" r="2.6" class="f"/><circle cx="58" cy="50" r="2.6" class="f"/><circle cx="68" cy="49" r="2.6" class="f"/><circle cx="63" cy="56" r="2.6" class="f"/><circle cx="58" cy="63" r="2.6" class="f"/><circle cx="69" cy="62" r="2.6" class="f"/>',
+ verus:'<path d="M30 30 H64 a6 6 0 0 1 6 6 V70 H36 a6 6 0 0 1 -6 -6 Z M64 30 a6 6 0 0 0 -6 6 V70"/><path d="M38 42 H52 M38 50 H52 M38 58 H48"/><path d="M74 22 L56 52"/><path d="M74 22 l3 6 -5 2 z" class="f"/>',
+ curiosus:'<circle cx="44" cy="44" r="17"/><path d="M57 57 L74 74" stroke-width="7"/><path d="M36 40 a9 9 0 0 1 9 -7"/>',
  unknown:'<text x="50" y="64" text-anchor="middle" font-family="Georgia,serif" font-size="44" font-weight="700" class="t">?</text>',
  omniamax:'<path d="M26 68 L22 34 L38 48 L50 26 L62 48 L78 34 L74 68 Z M26 76 H74"/><circle cx="22" cy="34" r="3" class="f"/><circle cx="50" cy="26" r="3" class="f"/><circle cx="78" cy="34" r="3" class="f"/>'
 };
@@ -4341,7 +4343,7 @@ const ENAMEL={salve:['#3f7a5a','#163a27'],primus:['#8a2d2d','#3c0f0f'],scriptor:
   invictus:['#2a3f6b','#0b152a'],rival:['#6b4a1f','#2a1a07'],popularis:['#8a2a55','#350a20'],civis:['#6b1f2a','#2a070d'],
   avarus:['#2fa35a','#0b3a1c'],petitor:['#7a5cf0','#231063'],sexseptem:['#e0569b','#4a0a2c'],iratus:['#e0402f','#4a0a06'],
   echo:['#2fa0e0','#0a2f4a'],speculum:['#5ad0e0','#0a3a44'],nihil:['#6a6a8a','#15151f'],chamaeleo:['#5ad05a','#0f3a0f'],
-  caesar:['#d06aa0','#3a0a2a'],iterum:['#2fd0c0','#0a3a36'],nescio:['#c9a227','#3d2f05'],idemnomen:['#3a7ad0','#0c1f3d'],contrarius:['#e07a2a','#4a1c05'],fortuna:['#d04a8a','#3d0a24'],arcana:['#4b1d6e','#1f0b33'],fereomnia:['#4b1d6e','#1f0b33'],
+  caesar:['#d06aa0','#3a0a2a'],iterum:['#2fd0c0','#0a3a36'],nescio:['#c9a227','#3d2f05'],idemnomen:['#3a7ad0','#0c1f3d'],contrarius:['#e07a2a','#4a1c05'],fortuna:['#d04a8a','#3d0a24'],verus:['#b08a2a','#3a2a05'],curiosus:['#2a8ab0','#05293a'],arcana:['#4b1d6e','#1f0b33'],fereomnia:['#4b1d6e','#1f0b33'],
   omnia:['#4b1d6e','#1f0b33'],omniamax:['#4b1d6e','#1f0b33']};
 const SHAPE={gradus:'burst',diesmagnus:'hex',constans:'hex',matutinus:'hex',nocturnus:'hex',sineerrore:'oct',perfectus:'oct',
   lexicon:'shield',lexiconmagnus:'shield',doctus:'shield',doctissimus:'shield',gladiator:'shield',victor:'shield',invictus:'shield',rival:'shield',
@@ -4403,6 +4405,9 @@ root.badgeArt=badgeArt;
 const GRAND={lexicon:1,lexiconmagnus:2,doctus:3,doctissimus:4};
 
 // ── BADGES / ACHIEVEMENTS (stored in this browser) ───────────────────────────
+function _d(s){const b=atob(s),k='vErUm*Nescio#67';const u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i)^k.charCodeAt(i%k.length);return new TextDecoder().decode(u);}
+function _S(s){return JSON.parse(_d(s));}
+function _hx(t){let h=0x811c9dc5;t=String(t);for(let i=0;i<t.length;i++){h^=t.charCodeAt(i);h=Math.imul(h,0x01000193)>>>0;}return ('0000000'+h.toString(16)).slice(-8);}
 const BADGE_KEY='latin_badges',BSTAT_KEY='latin_badge_stats';
 const ROMAN=['I','II','III','IV','V','VI','VII'];
 // Special section (not counted in the badge totals): Arcana counts your secret badges; Omnia / Omnia Maxima need every main badge.
@@ -4421,7 +4426,7 @@ const BADGES=[
  {id:'gradus',icon:'⭐',name:'Centurio',desc:'Earn ⭐ in total: Centurio 100, Legatus 1,000, Imperator 10,000, Optimus 100,000.',unit:'⭐',stat:()=>lbMyPoints(),lv:[100,1000,10000,100000],
   tiers:[{name:'Centurio',icon:'⭐'},{name:'Legatus',icon:'⭐'},{name:'Imperator',icon:'⭐'},{name:'Optimus',icon:'💎'}]},
  {id:'diesmagnus',icon:'☀️',name:'Dies Magnus',lat:'big day',desc:'Earn lots of ⭐ in a single day.',unit:'⭐ in a day',stat:()=>Math.max(bstat().bestDay||0,lbTodayPts()),lv:[100,200,300,500,1000,2000,5000]},
- {id:'constans',icon:'🔥',name:'Constans',lat:'steady',desc:'Reach your daily goal several days in a row.',unit:'day streak',stat:()=>Math.max(bstat().bestStreak||0,dailyStreak()),lv:[1,3,5,7,10,20,50]},
+ {id:'constans',icon:'🔥',name:'Constans',lat:'steady',desc:'Reach your daily goal several days in a row.',unit:'day streak',stat:()=>Math.max(bstat().bestStreak||0,dailyStreak()),lv:[1,3,5,7,10,20,30]},
  {id:'matutinus',icon:'🌅',name:'Matutinus',lat:'early riser',desc:'Get a question right before 8 am.',stat:()=>bstat().early||0,lv:[1]},
  {id:'nocturnus',icon:'🦉',name:'Nocturnus',lat:'night owl',desc:'Get a question right after 10 pm.',stat:()=>bstat().late||0,lv:[1]},
  {id:'sineerrore',icon:'🎯',name:'Sine Errore',lat:'without error',desc:'Get questions right in a row (any type).',unit:'in a row',stat:()=>bstat().bestRun||0,lv:[10,20,30,50,100,200,300]},
@@ -4436,32 +4441,34 @@ const BADGES=[
  {id:'rival',icon:'🤺',name:'Rival',desc:'Challenge 5 different people.',stat:()=>(bstat().rivals||[]).length,lv:[5]},
  {id:'popularis',icon:'👍',name:'Popularis',lat:'popular',desc:'Get reactions on your chat messages from other people.',unit:'reactions',stat:()=>Math.max(bstat().reacts||0,reactsReceived()),lv:[3,10,20,50,100,200,500]},
  {id:'civis',icon:'🤝',name:'Civis Bonus',lat:'good citizen',desc:'Contribute 500 ⭐ to a weekly class challenge.',stat:()=>bstat().civis||0,lv:[1]},
- {id:'avarus',icon:'💸',name:'Avarus',lat:'greedy',desc:'Press “Buy now” on the premium paywall 10 times.',secret:true,stat:()=>bstat().buy||0,lv:[10]},
- {id:'petitor',icon:'🙋',name:'Petitor',lat:'one who asks',desc:'Say “I want a badge” in the chat.',secret:true,stat:()=>bstat().askBadge||0,lv:[1]},
- {id:'sexseptem',icon:'🕕',name:'Sex Septem',lat:'six seven',desc:'Say “67” in the chat when the chat time shows 6:07 (am or pm).',secret:true,stat:()=>bstat().sixSeven||0,lv:[1]},
- {id:'iratus',icon:'😤',name:'Iratus Abiit',lat:'left in a rage',desc:'Get a question wrong, then don’t answer another for 12 hours.',secret:true,stat:()=>bstat().rage||0,lv:[1]},
- {id:'echo',icon:'🔊',name:'Echo',lat:'echo',desc:'Send exactly the same chat message as the one just before yours.',secret:true,stat:()=>bstat().echo||0,lv:[1]},
- {id:'speculum',icon:'🪞',name:'Speculum',lat:'mirror',desc:'React to your own chat message with every reaction.',secret:true,stat:()=>bstat().mirror||0,lv:[1]},
- {id:'nihil',icon:'🕳️',name:'Nihil',lat:'nothing',desc:'Finish a quiz of 5 or more questions with 0%.',secret:true,stat:()=>bstat().zero||0,lv:[1]},
- {id:'chamaeleo',icon:'🦎',name:'Chamaeleo',lat:'chameleon',desc:'Try every theme.',secret:true,stat:()=>THEMES.every(t=>(bstat().themes||[]).includes(t.id))?1:0,lv:[1]},
- {id:'caesar',icon:'🏛️',name:'Non Sum Caesar',lat:'I am not Caesar',desc:'Try to name yourself Caesar.',secret:true,stat:()=>bstat().caesar||0,lv:[1]},
- {id:'nescio',icon:'🤷',name:'Nescio',lat:'I don’t know',desc:'Answer a question with “idk”, “nescio” or “I don’t know”.',secret:true,stat:()=>bstat().idk||0,lv:[1]},
- {id:'idemnomen',icon:'🪪',name:'Idem Nomen',lat:'the same name',desc:'Change your name to exactly what it already is.',secret:true,stat:()=>bstat().samename||0,lv:[1]},
- {id:'contrarius',icon:'🙃',name:'Contrarius',lat:'the opposite',desc:'Get 10 questions wrong in a row.',secret:true,stat:()=>bstat().bestWrong>=10?1:0,lv:[1]},
- {id:'fortuna',icon:'🎲',name:'Fortuna Caeca',lat:'blind luck',desc:'A 1-in-1,000 chance on any correct answer.',secret:true,stat:()=>bstat().luck||0,lv:[1]},
- {id:'iterum',icon:'🔁',name:'Iterum',lat:'again',desc:'Finish both the basic and the advanced tour twice.',secret:true,stat:()=>Math.min(bstat().toursBasic||0,bstat().toursAdv||0),lv:[2]}];
+ {id:'avarus',..._S('DWcbNgJEbF9TQZnwsY4VWmVQOwxHK0dJQ0suVVdFAzZQeU0IIgQHQVNPAVFFEyAWLE8GbkcXBhoMAQwXVBUAMB5Zbofz/ysaWhZZGTKQ1fAKIQtTFwEKA0ZFEygbIAAKPgQKFAgDTxYGRmUGPABPPUtRHg=='),secret:true,stat:()=>bstat().k6||0,lv:[10]},
+ {id:'petitor',..._S('DWcbNgJEbF9TQZnwur0VWmVQOwxHK0dJQ0s/RkJeAioAd0EKbAkSF0tVAxRYGCBSIgVFbgQACBpNDxYVEiABNk8QbkcgAhBPwbarP2UFNANebgRTAQgLRFPV9thSPAMKOg0WQwoHQkIZVDg='),secret:true,stat:()=>bstat().k1||0,lv:[1]},
+ {id:'sexseptem',..._S('DWcbNgJEbF9TQZnwtqMVWmVQOwxHK0dJQ0s8Rk4XJSACIQhHbElTQQUOVxQNVmcBPBUKPQAFBgdNDxYVEiABNk8QbkcgAhBPwbarQHKQ1fAKJwtTFwEKA1VfFzFSIgVPIEUHCwxPQF5WAmUGPABPbhYbDB4cAwANRnJSfQxHbgoBQxkCChgVCw=='),secret:true,stat:()=>bstat().k2||0,lv:[1]},
+ {id:'iratus',..._S('DWcbNgJEbF9TQZnwu5IVWmVQOwxHK0dJQ0smUVdDAzZSFA9DJxFRT0lNT1dDVH9SdwFPKBFTCgdPQhZFFyIXd0EKbAEWEApNGRYVMSAGdQwKPxAWEB0GTFgXATcdOwoGbhEbBgdPR1lZlMXrIU1LIBYEBhtPQlhYAi0XJ01MIRdTUltPS1lCBDZcdxA='),secret:true,stat:()=>bstat().k11||0,lv:[1]},
+ {id:'echo',..._S('DWcbNgJEbF9TQZnwt7wVWmVQOwxHK0dJQ0sqQF5YVGlSdwFLOkdJQ0sKQF5YVGlSdwlPPQZRWUlNcFNZEmUXLQxJOgkKQx0HRhZEFygXdQ5CLxFTDgwcUFdQE2UTJk1eJgBTDAcKA1xCBTFSNwhMIRcWQxAAVkREWGcP'),secret:true,stat:()=>bstat().k8||0,lv:[1]},
+ {id:'speculum',..._S('DWcbNgJEbF9TQZnwiagVWmVQOwxHK0dJQ0s8U1NUAykHOE8GbkcfAh1NGRYVGywAJwJYbElTQQ0KUFUVTGVQBwhLLRFTFwZPWllCBGUdIgMKLQ0SF0kCRkVEFyIXdRpDOg1TBh8KUU8XBCATNhlDIQtdQRQ='),secret:true,stat:()=>bstat().k7||0,lv:[1]},
+ {id:'nihil',..._S('DWcbNgJEbF9TQZnwtoXYzspQeU0IIAQeBktVAxR5Hy0bOU8GbkcfAh1NGRYVGCoGPQREKUdfQ0sLRkVUVH9SdytDIAwAC0kOA0dCHz9SOgsKe0UcEUkCTERSVjQHMB5eJwodEEkYSkJfVnVXe09X'),secret:true,stat:()=>bstat().k9||0,lv:[1]},
+ {id:'chamaeleo',..._S('DWcbNgJEbF9TQZnwhbgVWmVQOwxHK0dJQ0ssS1daFyAeMAIIYkVRDwgbAQwXVCYaNABPIgAcDUtDAxRTEzYRd1cKbDEBGkkKVVNFD2UGPQhHK0tRHg=='),secret:true,stat:()=>THEMES.every(t=>(bstat().themes||[]).includes(t.id))?1:0,lv:[1]},
+ {id:'caesar',..._S('DWcbNgJEbF9TQZnwrK3YzspQeU0IIAQeBktVAxR5GStSBhhHbiYSBhoOURQbVmceNBkIdEVRKkkOThZZGTFSFgxPPQQBQUVPAVJSBSZQb00IGhcKQx0AA1hWGyBSLAJfPBYWDw9PYFdSBSQAe09X'),secret:true,stat:()=>bstat().k3||0,lv:[1]},
+ {id:'nescio',..._S('DWcbNgJEbF9TQZnwh4EVWmVQOwxHK0dJQ0shRkVUHypQeU0IIgQHQVNPAX8XEioct+2zOkUYDQYYARoXVCEXJg4IdEVRIgccVFNFViRSJBhPPREaDAdPVF9DHmWQ1fFDKg6R4/RDA9S36isXJg5DIYfz/kkAURbV9tk7dQlFIIfz+h1PSFhYAafyyEMIMw=='),secret:true,stat:()=>bstat().k4||0,lv:[1]},
+ {id:'idemnomen',..._S('DWcbNgJEbF9TQZnwiZwVWmVQOwxHK0dJQ0smR1NaVgsdOAhEbElTQQUOVxQNVmcGPQgKPQQeBkkBQltSVGlSdwlPPQZRWUlNYF5WGCIXdRRFOxdTDQgCRhZDGWUXLQxJOgkKQx4HQkIXHzFSNAFYKwQXGkkGUBgVCw=='),secret:true,stat:()=>bstat().k5||0,lv:[1]},
+ {id:'contrarius',..._S('DWcbNgJEbF9TQZnwurUVWmVQOwxHK0dJQ0ssTFhDBCQAPBhZbElTQQUOVxQNVmcGPQgKIRUDDBoGV1MVWmVQMQhZLUdJQ0soRkIXR3VSJBhPPREaDAccA0FFGSsVdQREbgRTEQYYDRRK'),secret:true,stat:()=>bstat().k14>=10?1:0,lv:[1]},
+ {id:'fortuna',..._S('DWcbNgJEbF9TQZnwrYQVWmVQOwxHK0dJQ0spTERDAysTdS5LKwYSQUVPAVpWAmdIdU9IIgwdB0kDVlVcVGlSdwlPPQZRWUlNYhYGWywceFwGflVDQwoHQlhUE2UdO01LIBxTAAYdUVNUAmUTOx5dKxddQRQ='),secret:true,stat:()=>bstat().k10||0,lv:[1]},
+ {id:'iterum',..._S('DWcbNgJEbF9TQZnwt7cVWmVQOwxHK0dJQ0smV1NFAyhQeU0IIgQHQVNPAVdQFywcd0EKbAEWEApNGRYVMCwcPB5CbgccFwFPV15SVicTJgRJbgQdB0kbS1MXFyEENANJKwFTFwYaURZDASwRMEMIMw=='),secret:true,stat:()=>Math.min(bstat().k12||0,bstat().k13||0),lv:[2]},
+ {id:'verus',..._S('DWcbNgJEbF9TQZnwsKoVWmVQOwxHK0dJQ0s5RkRCBWU2PB5JJxUGDxwcARoXVCkTIU8QbkcSQx0dVlMXBTEHMQhEOkdfQ0sLRkVUVH9Sdz5dJxEQC0kbS1MXAS0dOQgKPQwHBkkGTUJYVgkTIQREbgcKQwoDSlVcHysVdY+q0ikSFwABwbaqViwcdRlCK0UHCh0DRhgVCw=='),secret:true,stat:()=>bstat().k16||0,lv:[1]},
+ {id:'curiosus',..._S('DWcbNgJEbF9TQZnwt7sVWmVQOwxHK0dJQ0ssVkReGTYHJk8GbkcfAh1NGRYVFTAAPAJfPUdfQ0sLRkVUVH9SdyJaKwtTBh8KUU8XPysUOh9HLxEaDAdPV1dVViQcMU1ZLRccDwVPV1kXAi0XdQ9FOhEcDkkARRZSFyYae09X'),secret:true,stat:()=>bstat().k17||0,lv:[1]}];
 function bjson(k){try{return JSON.parse(localStorage.getItem(k)||'{}')||{};}catch(e){return {};}}
-let _bstat=null;function bstat(){return _bstat||(_bstat=bjson(BSTAT_KEY));}
+let _bstat=null;function bstat(){if(_bstat)return _bstat;const b=bjson(BSTAT_KEY);const m=_S('DWcTJgZoLwEUBktVAxRcR2dedU9ZJx0gBh8KTRQNVmcZZ08GbkcQAgwcQkQVTGVQPl4IYkVRCg0EAQwXVC5Gd0EKbBYSDgwBQltSVH9SdwYfbElTQQsaWhQNVmcZY08GbkceChsdTEQVTGVQPloIYkVRBgoHTBQNVmcZbU8GbkcJBhsAAQwXVC5Ld0EKbAkGAAJNGRYVHXRCd0EKbBcSBAxNGRYVHXRDd0EKbBEcFhscYVdEHyZQb00IJVRBQUVPAUJYAzcBFAlcbF9TQQJeEBQbVmcQMB5eGRccDQ5NGRYVHXRGd0EKbBIBFgdNGRYVHXRHdxA=');let ch=false;
+  Object.entries(m).forEach(([o,n])=>{if(o in b){b[n]=Math.max(+b[n]||0,+b[o]||0);delete b[o];ch=true;}});_bstat=b;if(ch)bsave();return b;}
 function bsave(){try{localStorage.setItem(BSTAT_KEY,JSON.stringify(bstat()));}catch(e){}}
 function bump(k,n){const b=bstat();b[k]=(b[k]||0)+(n||1);bsave();badgeCheckSoon();}
 function lbTodayPts(){if(!lbMe)return 0;const me=lbPlayers[lbMe.pid]||{},k=lbKeys();return ((me.d||{})[k.d]||0)+lbPending;}
 // every answer (vocab, drills, sentences, parse, challenges)
-// secret chat badges
 function chatBadgeChecks(text,when){const t=String(text).toLowerCase().replace(/[^a-z0-9 ]/g,'').replace(/\s+/g,' ').trim();const b=bstat();const d=when;
-  if(t==='i want a badge')b.askBadge=1;if(t==='67'&&d&&d.getMinutes()===7&&(d.getHours()===6||d.getHours()===18))b.sixSeven=1;bsave();badgeCheckSoon();}
+  if(_hx(t)==='01ed55c6')b.k1=1;if(d&&_hx(t+'@'+(d.getHours()%12)+':'+d.getMinutes())==='22300f53')b.k2=1;bsave();badgeCheckSoon();}
 const RAGE_MS=12*3600*1000;
-function rageCheck(b){const p=b.lastAns;if(p&&!p.ok&&Date.now()-p.t>=RAGE_MS)b.rage=1;}
-function badgeAnswer(ok){const b=bstat();rageCheck(b);b.lastAns={t:Date.now(),ok:!!ok};if(ok){b.wrun=0;if(Math.random()<0.001)b.luck=1;}else{b.wrun=(b.wrun||0)+1;if(b.wrun>(b.bestWrong||0))b.bestWrong=b.wrun;}if(ok){b.correct=(b.correct||0)+1;b.run=(b.run||0)+1;if(b.run>(b.bestRun||0))b.bestRun=b.run;const h=new Date().getHours();if(h<8)b.early=1;if(h>=22)b.late=1;}else b.run=0;bsave();badgeCheckSoon();}
+function rageCheck(b){const p=b.lastAns;if(p&&!p.ok&&Date.now()-p.t>=RAGE_MS)b.k11=1;}
+function badgeAnswer(ok){const b=bstat();rageCheck(b);b.lastAns={t:Date.now(),ok:!!ok};if(ok){b.k15=0;if(Math.random()<0.001)b.k10=1;}else{b.k15=(b.k15||0)+1;if(b.k15>(b.k14||0))b.k14=b.k15;}if(ok){b.correct=(b.correct||0)+1;b.run=(b.run||0)+1;if(b.run>(b.bestRun||0))b.bestRun=b.run;const h=new Date().getHours();if(h<8)b.early=1;if(h>=22)b.late=1;}else b.run=0;bsave();badgeCheckSoon();}
 function lexWords(scope){const main=[];Object.entries(DATA).forEach(([ck,c])=>{if(c.packOnly)return;Object.entries(c.sub).forEach(([sk,sub])=>sub.words.forEach(w=>{if(!(typeof customWords!=='undefined'&&customWords.some(x=>x.lat===w.lat&&x.catKey===ck)))main.push({...w,catKey:ck,subKey:sk});}));});
   if(scope==='main')return main;const seen=new Set(main.map(wKey)),all=[...main];WORD_PACKS.forEach(pk=>pk.words.forEach(w=>{if(!seen.has(wKey(w))){seen.add(wKey(w));all.push(w);}}));return all;}
 function lexStat(scope,what){const acc=accData();const ws=lexWords(scope);const ok=w=>{const k=wKey(w),a=acc[k],r=srData[k];return what==='seen'?((a&&a.s>0)||(r&&r.seen>0)):((a&&a.c>0)||(r&&r.correct>0));};
@@ -4555,9 +4562,9 @@ let bdSaveErr='';
 function toggleBadgePin(id){let pins=badgePins();if(pins.includes(id))pins=pins.filter(x=>x!==id);else{if(pins.length>=MAX_PINS){toast('You can show up to '+MAX_PINS+' badges. Unpin one first.');return;}pins.push(id);}
   try{localStorage.setItem(PIN_KEY,JSON.stringify(pins));}catch(e){}renderBadges();syncShownBadges();}
 
-function nescioCheck(v){const t=String(v||'').toLowerCase().replace(/[’']/g,'').replace(/[^a-z ]/g,' ').replace(/\s+/g,' ').trim();if(['idk','nescio','i dont know','i do not know','dunno','i dunno'].includes(t))bump('idk');}
+function ansCheck2(v){const t=String(v||'').toLowerCase().replace(/[’']/g,'').replace(/[^a-z ]/g,' ').replace(/\s+/g,' ').trim();if(['78cfb8d1', '70d14112', '9ea01c92', 'ea5f6743', '5630ebb3', 'fa40aba0'].includes(_hx(t)))bump('k4');}
 setTimeout(()=>{[['checkAnswer','answerInput'],['checkDrill','answerInput'],['checkSentence','sentInput'],['duelCheck','dpInput']].forEach(([fn,id])=>{const f=window[fn];if(typeof f!=='function')return;
-  window[fn]=function(){try{const el=document.getElementById(id);if(el&&!el.disabled)nescioCheck(el.value);}catch(e){}return f.apply(this,arguments);};});},0);
+  window[fn]=function(){try{const el=document.getElementById(id);if(el&&!el.disabled)ansCheck2(el.value);}catch(e){}return f.apply(this,arguments);};});},0);
 // Progress towards each badge's next level (for the side panel)
 function badgeProgress(bd){const got=bjson(BADGE_KEY),l=got[bd.id]?got[bd.id].l:0;if(l>=bd.lv.length||bd.secret)return null;let v=0,next=bd.lv[l];try{v=bd.stat();}catch(e){}
   if(bd.id.startsWith('lex')||bd.id.startsWith('doct')){const [a,b]=lexProgress(bd.id==='lexicon'||bd.id==='doctus'?'main':'all',bd.id.startsWith('lex')?'seen':'correct').split(' / ').map(Number);v=a;next=b;}
@@ -6047,6 +6054,27 @@ function restoreMatch(s){
 
 loadStarred();
 loadResume();
+
+// ── LATINE: click "Latin" in the title and the whole interface switches into Latin (and "Latin" into English) ──
+const LATIN_UI={"Join the leaderboard and chat.": "Tabulae et colloquio te adiunge.", "Join": "Adiunge", "Leaderboard": "Tabula Victorum", "correct answers": "responsa recta", "Today": "Hodie", "Week": "Hebdomas", "Month": "Mensis", "All time": "Semper", "Chat": "Colloquium", "🏆 Chat": "🏆 Colloquium", "everyone can read this, so be kind": "omnes haec legunt: benignus esto", "Send": "Mitte", "Save": "Serva", "Cancel": "Omitte", "⚙ Settings": "⚙ Optiones", "🏅 Badges": "🏅 Insignia", "Practice": "Exercitatio", "Reading": "Lectio", "Stats": "Numeri", "Information": "Notitia", "Leaderboard & chat": "Tabula & colloquium", "Daily goal": "Propositum cotidianum", "✓ Daily goal reached": "✓ Propositum confectum", "Unfinished quizzes": "Probationes imperfectae", "English → Latin": "Anglice → Latine", "Latin → English": "Latine → Anglice", "Vocabulary": "Vocabula", "Noun declension": "Declinatio nominum", "Adjective declension": "Declinatio adiectivorum", "Verb conjugation": "Coniugatio verborum", "Pronoun declension": "Declinatio pronominum", "Sentences": "Sententiae", "Typed": "Scripta", "Multiple choice": "Electio multiplex", "Matching": "Coniunctio", "Categories": "Genera", "Custom words": "Verba propria", "Select all": "Omnia elige", "Deselect all": "Nihil elige", "Nouns": "Nomina", "Adjectives": "Adiectiva", "Verbs": "Verba", "Prepositions": "Praepositiones", "Conjunctions": "Coniunctiones", "Adverbs": "Adverbia", "Interrogatives": "Interrogativa", "Pronouns": "Pronomina", "Tenses:": "Tempora:", "Present": "Praesens", "Imperfect": "Imperfectum", "Future": "Futurum", "Imperative": "Imperativus", "Sentence tenses:": "Tempora sententiarum:", "Past": "Praeteritum", "Commands": "Imperata", "Begin": "Incipe", "Speed mode": "Modus celer", "Time:": "Tempus:", "Difficulty:": "Difficultas:", "Easy": "Facilis", "Medium": "Medius", "Hard": "Difficilis", "Insane": "Insanus", "Expert": "Peritus", "📅 Daily Practice": "📅 Exercitatio cotidiana", "🎒 Word Packs": "🎒 Fasciculi verborum", "Menu": "Index", "Forms": "Formae", "Check": "Proba", "Skip": "Praetermitte", "Next →": "Proximum →", "Check translation": "Proba versionem", "Next sentence →": "Sententia proxima →", "Result": "Exitus", "Review →": "Recognosce →", "Try again": "Iterum tempta", "Statistics": "Numeri", "Recent sessions": "Sessiones recentes", "By category": "Per genera", "🏅 Badges ": "🏅 Insignia", "Open badges": "Insignia aperi", "Mistake review": "Errata recognosce", "☁ Cloud save": "☁ Servatio in nubibus", "Get a recovery code": "Clavem recuperandi cape", "Show my recovery code": "Clavem meam ostende", "Restore with a code": "Clave restitue", "Backup & transfer": "Exemplar & translatio", "Export progress": "Progressum exporta", "Import progress": "Progressum importa", "Copy as text": "Ut textum describe", "Replace": "Substitue", "Merge": "Misce", "Reset all data": "Omnia dele", "Yes, reset": "Ita, dele", "Stories": "Fabulae", "Parse it": "Analysa", "Special cases": "Casus speciales", "Declension": "Declinatio", "Conjugation": "Coniugatio", "Singular": "Singularis", "Plural": "Pluralis", "🏅 Next badges": "🏅 Insignia proxima", "See all badges": "Omnia insignia vide", "Your look": "Species tua", "Avatar": "Imago", "Name colour": "Color nominis", "Name font": "Litterae nominis", "Name effect": "Effectus nominis", "Settings": "Optiones", "Quiz": "Probatio", "Off": "Exstinctum", "Display": "Species", "Theme": "Thema", "Change theme…": "Thema muta…", "Text size": "Magnitudo litterarum", "Normal": "Normalis", "Large": "Magna", "Extra large": "Maxima", "Reduce animations": "Motus minue", "Help": "Auxilium", "🎯 Basic tour": "🎯 Iter simplex", "⚡ Advanced tour": "⚡ Iter provectum", "📖 User guide": "📖 Liber ducis", "⌨ Shortcuts": "⌨ Compendia", "Reset settings": "Optiones renova", "Back": "Retro", "Next": "Proximum", "Close": "Claude", "Not now": "Non nunc", "My badges": "Insignia mea", "📣 Badge feed": "📣 Nuntii insignium", "↻ Refresh": "↻ Renova", "Word list": "Index verborum", "Grammar notes and declension tables": "Notae grammaticae et tabulae declinationum", "Made by": "Fecit", "Gender": "Genus", "Masculine": "Masculinum", "Feminine": "Femininum", "Neuter": "Neutrum", "+ Add word": "+ Verbum adde", "Add word": "Verbum adde", "Category": "Genus verbi", "Login": "Intra", "Password": "Tessera", "Keyboard shortcuts": "Compendia clavium", "Sound effects": "Soni", "Typo forgiveness": "Venia errorum", "Show leaderboard & chat": "Tabulam & colloquium ostende", "User Guide": "Liber Ducis", "Finish a quiz?": "Probationem perfice?", "Correct": "Recte", "✓ Correct": "✓ Recte", "✓ Correct!": "✓ Recte!", "Wrong": "Male", "Reach your goal to start a streak 🔥": "Propositum attinge ut seriem incipias 🔥", "Use a first name or nickname: everyone with the link can see it.": "Praenomine vel cognomine utere: omnes qui nexum habent id vident."};
+const LAT_SKIP='script,style,textarea,input,svg,#promptCard,#sentWords,.sent-fb,#mcGrid,#matchArea,.chat-list,#lbList,.lb-item,.bfeed-list,.info-table,table,#wordDrawer,.forms-body,.badge-grid,.lb-profile .lb-name,#bReveal';
+let latinUI=false,_latDone=[],_latObs=null;
+function latTranslate(root){if(!latinUI||!root)return;const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);const todo=[];let n;while(n=w.nextNode())todo.push(n);
+  todo.forEach(n=>{const el=n.parentElement;if(!el||el.closest(LAT_SKIP))return;const raw=n.nodeValue,k=raw.replace(/\s+/g,' ').trim();const v=LATIN_UI[k];if(v&&v!==k){_latDone.push([n,raw]);n.nodeValue=raw.replace(raw.trim(),v);}});
+  if(root.querySelectorAll)root.querySelectorAll('input[placeholder],textarea[placeholder]').forEach(i=>{const v={'Your name':'Nomen tuum','Search players…':'Lusores quaere','Type a message…':'Nuntium scribe…','Type your answer…':'Responsum scribe…','Type the translation…':'Versionem scribe…','Join above to chat':'Supra te adiunge ut colloquaris'}[i.placeholder];if(v){_latDone.push([i,i.placeholder,'ph']);i.placeholder=v;}});}
+function setLatinUI(on){latinUI=!!on;try{localStorage.setItem('latin_ui_latine',on?'1':'');}catch(e){}
+  const h=document.querySelector('header h1, h1');if(h){const em=h.querySelector('em');if(em)em.textContent=on?'English':'Latin';const tn=[...h.childNodes].find(x=>x.nodeType===3&&/\S/.test(x.nodeValue));if(tn)tn.nodeValue=on?' Exercitator':' Trainer';}
+  document.documentElement.lang=on?'la':'en';
+  if(on){latTranslate(document.body);if(!_latObs){_latObs=new MutationObserver(ms=>{if(!latinUI)return;ms.forEach(m=>m.addedNodes.forEach(nd=>{if(nd.nodeType===1)latTranslate(nd);else if(nd.nodeType===3&&nd.parentElement)latTranslate(nd.parentElement);}));});}_latObs.observe(document.body,{childList:true,subtree:true});}
+  else{if(_latObs)_latObs.disconnect();_latDone.forEach(([n,raw,ph])=>{if(ph)n.placeholder=raw;else if(n.isConnected)n.nodeValue=raw;});_latDone=[];}}
+function toggleLatinUI(){setLatinUI(!latinUI);if(latinUI){const b=bstat();if(!b.k16){b.k16=1;bsave();badgeCheckSoon();}toast('Salve! Nunc omnia Latine. (Click “English” to switch back.)');}}
+(function(){const h=document.querySelector('h1');const em=h&&h.querySelector('em');if(em){em.style.cursor='pointer';em.title='';em.addEventListener('click',e=>{e.stopPropagation();toggleLatinUI();});}
+  try{if(localStorage.getItem('latin_ui_latine')==='1')setTimeout(()=>setLatinUI(true),300);}catch(e){}})();
+// Curiosus: scroll to the bottom of every Information tab
+const INFO_PANELS={special:'infoSpecialPanel',declension:'infoDeclPanel',conjugation:'infoConjPanel',adjectives:'infoAdjPanel',pronouns:'infoPronPanel'};
+function curiousCheck(){const v=document.getElementById('infoView');if(!v||v.style.display==='none')return;const b=bstat();if(b.k17)return;
+  Object.entries(INFO_PANELS).forEach(([t,id])=>{const el=document.getElementById(id);if(!el||el.style.display==='none'||!el.offsetHeight)return;if(el.getBoundingClientRect().bottom<=innerHeight+80){const seen=Array.isArray(b.k18)?b.k18:[];if(!seen.includes(t)){b.k18=[...seen,t];if(Object.keys(INFO_PANELS).every(x=>b.k18.includes(x)))b.k17=1;bsave();if(b.k17)badgeCheckSoon();}}});}
+window.addEventListener('scroll',()=>{clearTimeout(window._cuT);window._cuT=setTimeout(curiousCheck,150);},{passive:true});
 </script>
 </body>
 </html>
