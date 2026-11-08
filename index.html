@@ -426,6 +426,19 @@ input[type=range]{flex:1;accent-color:var(--accent)}
   .side-chat{flex:none}.chat-list{flex:none;height:380px}
   .nav-side{display:inline-block}
 }
+/* phones: leaderboard & chat slide out from the left instead of sitting below everything */
+.side-fab,.side-close,.side-scrim{display:none}
+@media(max-width:760px){
+  .side{position:fixed;top:0;left:0;bottom:0;z-index:900;width:min(92vw,420px);max-width:none;height:100vh;height:100dvh;margin:0;padding:44px 12px 20px;background:var(--bg);border-right:1px solid var(--border2);box-shadow:8px 0 40px rgba(0,0,0,.45);overflow-y:auto;transform:translateX(-105%);transition:transform .28s ease,visibility 0s .28s;visibility:hidden}
+  body.side-open .side{transform:none;visibility:visible;transition:transform .28s ease}
+  body.side-open{overflow:hidden}
+  .side-scrim{position:fixed;inset:0;z-index:899;background:rgba(0,0,0,.5)}body.side-open .side-scrim{display:block}
+  .side-close{display:block;position:absolute;top:8px;right:10px;width:32px;height:32px;border-radius:50%;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:20px;line-height:1;cursor:pointer}
+  .side-fab{display:flex;align-items:center;gap:6px;position:fixed;left:14px;bottom:18px;z-index:850;padding:7px 12px;border-radius:999px;border:1px solid var(--gold-bdr,#e6b42266);background:var(--surface2);color:var(--gold,#e6b422);font:inherit;font-size:12px;font-weight:600;box-shadow:0 4px 18px rgba(0,0,0,.35);cursor:pointer}
+  body.side-open .side-fab{display:none}
+  .side-dot{display:none;width:8px;height:8px;border-radius:50%;background:#ff5a5a}.side-fab.unread .side-dot{display:inline-block}
+  .nav-side{display:inline-block}
+}
 @media(max-width:560px){.nav-tab{padding:7px 10px;font-size:12px}.nav-tabs{flex-wrap:wrap;justify-content:center}}
 .settings-row{display:flex;justify-content:center;margin:-.5rem 0 1rem}
 .settings-btn{font-family:var(--sans);font-size:14px;font-weight:500;color:var(--text2);background:var(--surface2);border:1px solid var(--border2);border-radius:999px;padding:8px 22px;cursor:pointer;transition:all var(--t)}
@@ -636,8 +649,11 @@ body.calm .nfx-type .tw-caret{display:none}
 </style>
 </head>
 <body>
+<button class="side-fab" id="sideFab" onclick="openSide()" aria-label="Open leaderboard and chat">🏆 Chat<span class="side-dot" id="sideDot"></span></button>
+<div class="side-scrim" onclick="closeSide()"></div>
 <div class="layout">
 <aside class="side" id="sidePanel">
+  <button class="side-close" onclick="closeSide()" aria-label="Close">×</button>
   <div class="lb-profile"></div>
   <section class="side-sec side-lb">
     <div class="side-h"><span>Leaderboard</span><span class="side-sub">correct answers</span></div>
@@ -690,7 +706,7 @@ body.calm .nfx-type .tw-caret{display:none}
     <button class="nav-tab" onclick="showMainTab('read')">Reading</button>
     <button class="nav-tab" onclick="showMainTab('stats')">Stats</button>
     <button class="nav-tab" onclick="showMainTab('info')">Information</button>
-    <button class="nav-tab nav-side" onclick="document.getElementById('sidePanel').scrollIntoView({behavior:'smooth'})">Leaderboard &amp; chat</button>
+    <button class="nav-tab nav-side" onclick="openSide()">Leaderboard &amp; chat</button>
   </div>
   <div id="practicePanel">
     <div id="dailyGoal" class="dg" style="display:none"></div>
@@ -3788,6 +3804,14 @@ loadDescription();
 // check every write. Chat stores the player id, not the name, so renaming updates old messages.
 const FB_ROOT=FB_DB;
 const LB_KEY='latin_lb_v1',LB_PENDING_KEY='latin_lb_pending';
+// phone drawer for the leaderboard & chat (on wider screens these just scroll to it)
+const isPhone=()=>window.matchMedia('(max-width:760px)').matches;let sideSeen=0;
+function openSide(){if(!isPhone()){document.getElementById('sidePanel').scrollIntoView({behavior:'smooth'});return;}document.body.classList.add('side-open');sideSeen=(chatMsgs||[]).length;const f=document.getElementById('sideFab');if(f)f.classList.remove('unread');}
+function closeSide(){document.body.classList.remove('side-open');sideSeen=(chatMsgs||[]).length;}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.body.classList.contains('side-open'))closeSide();});
+(()=>{let x0=null,y0=0;document.addEventListener('touchstart',e=>{if(!document.body.classList.contains('side-open'))return;x0=e.touches[0].clientX;y0=e.touches[0].clientY;},{passive:true});
+  document.addEventListener('touchend',e=>{if(x0==null)return;const t=e.changedTouches[0],dx=t.clientX-x0,dy=t.clientY-y0;x0=null;if(dx<-70&&Math.abs(dy)<60)closeSide();},{passive:true});})();
+setInterval(()=>{const f=document.getElementById('sideFab');if(!f||!isPhone()||document.body.classList.contains('side-open'))return;const n=(chatMsgs||[]).length;if(!sideSeen)sideSeen=n;f.classList.toggle('unread',n>sideSeen);},3000);
 let lbPage=0,lbLastQ='',lbLimit=10,lbMe=null,lbPending=0,lbInFlight=0,lbInFlightBase=0,lbFlushTimer=null,lbPlayers={},lbPlayersLoaded=false,lbPeriod='d',chatObj={},chatMsgs=[],chatLastSend=0,lbEditing=false;
 const fbUrl=path=>FB_ROOT+'/'+path+'.json';
 async function fbReq(method,path,body,opts){opts=opts||{};const tok=opts.admin?await adminToken():await playerToken();
