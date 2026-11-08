@@ -2823,11 +2823,11 @@ function buildSentenceRaw(){
     easy:[sSVO,sAdjPred,sImp,sAdvIntrans,sDativeVO,sIntrans,sIntransLoc,sAdjSVO,sEstLoc,sSVOPast,sIntransPast,sAdjPredPast,sEstLocPast,sAdvIntransPast,sIntransLocPast,sSuus,sEius,sHicSVO,sIlleSVO,
       sSVOFut,sIntransFut,sAdjPredFut,sEstLocFut,sAdvIntransFut,sIntransLocFut,sImpIntrans],
     medium:[sSVOPrep,sTwoSVO,sSVOAdv,sSVIODO,sDativeVOAdv,sAdjObjSVO,sIntransPrep,sImpPrep,sTwoIntrans,sSVOPrepPast,sSVOAdvPast,sSVIODOPast,sIntransPrepPast,sAdjSVOPast,sTimeDuration,sTimeWhen,sRelSubj,sSuusPast,sEius,sIpseSVO,sHicSVOPast,sIlleSVOPast,
-      sAdjSVOFut,sSVOPrepFut,sSVOAdvFut,sSVIODOFut,sIntransPrepFut,sTimeDurationFut,sTimeWhenFut,sImpAdv,sImpDat],
-    hard:[sThreePart,sSVOQuod,sSVOSed,sSVOTamenAdj,sAdvSVOPrep,sIntransSedSVO,sAdjSVOPrep,sSVIODOQuod,sSVOQuodPast,sTimeWithin,sRelObj,sRelSubjPast,sIpseSVOPast,sRelObjSVO,sRelSubjPrep,sIlleRelSubj,sHicRelObj,
+      sAdjSVOFut,sSVOPrepFut,sSVOAdvFut,sSVIODOFut,sIntransPrepFut,sTimeDurationFut,sTimeWhenFut,sImpAdv,sImpDat,sTimeWithin,sExtTimeSuus],
+    hard:[sThreePart,sSVOQuod,sSVOSed,sSVOTamenAdj,sAdvSVOPrep,sIntransSedSVO,sAdjSVOPrep,sSVIODOQuod,sSVOQuodPast,sRelObj,sRelSubjPast,sIpseSVOPast,sRelObjSVO,sRelSubjPrep,sIlleRelSubj,sHicRelObj,
       sSVOQuodFut,sFutSed,sImpAdvO,sImpPl],
     insane:[sInsane,sTriple,sInsanePrep,sInsaneAdjConj,sInsaneDatPrep,sExtRelSVO,sExtIpseRel,sInsaneFut,sTripleFut,sImpTwo],
-    expert:[sExtRelSVO,sExtIpseRel,sExtTimeSuus,sExtQuadClause,sQuadFut,sImpThree]
+    expert:[sExtRelSVO,sExtIpseRel,sExtQuadClause,sQuadFut,sImpThree]
   };
   const d=pools[difficulty]?difficulty:'expert';
   const vp=sentFilter(VAR_POOLS[d]).filter(fn=>sentTenses[sentTenseOf(fn)]);
