@@ -273,7 +273,7 @@ input[type=range]{flex:1;accent-color:var(--accent)}
 @media(max-width:520px){.stat-cards{grid-template-columns:1fr 1fr}.info-row{flex-wrap:wrap;gap:2px 12px}.info-lat{min-width:0}.info-eng{overflow-wrap:anywhere}}
 @media(max-width:980px){.word-drawer-tab{top:auto;bottom:18px;transform:none;right:18px;border:1px solid var(--border2);border-radius:999px}}
 @keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
-.prompt-card{animation:fadeIn .22s ease}
+.prompt-card{animation:fadeIn .12s ease}
 .tgrid>*{min-width:0}
 .tgrid .decl-table{min-width:0}
 .tbl-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}
@@ -1931,7 +1931,7 @@ body.calm .nfx-type .tw-caret{display:none}
     <div class="set-scroll">
       <div class="set-h">Quiz</div>
       <label class="set-row"><span>After a correct answer<small>How long before the next question</small></span>
-        <select data-set="nextRight"><option value="500">0.5 seconds</option><option value="1000">1 second</option><option value="2000">2 seconds</option><option value="3000">3 seconds</option><option value="-1">Wait for me</option></select></label>
+        <select data-set="nextRight"><option value="0">Instant</option><option value="250">0.25 seconds</option><option value="500">0.5 seconds</option><option value="1000">1 second</option><option value="2000">2 seconds</option><option value="3000">3 seconds</option><option value="-1">Wait for me</option></select></label>
       <label class="set-row"><span>After a wrong answer<small>Time to read the correct answer</small></span>
         <select data-set="nextWrong"><option value="-1">Wait for me</option><option value="2000">2 seconds</option><option value="3000">3 seconds</option><option value="5000">5 seconds</option></select></label>
       <label class="set-row"><span>Typo forgiveness<small>One free retry when you’re a letter off</small></span><input type="checkbox" class="set-tog" data-set="typo"></label>
@@ -2959,14 +2959,14 @@ function stopTimer(){clearInterval(timerInterval);document.getElementById('timer
 function timeUp(){if(answered)return;if(isSent){const val=document.getElementById('sentInput').value.trim();if(val){checkSentence();}else{skipSentence();}}else if(isDrill){if(inputMode==='typed'){const val=document.getElementById('answerInput').value.trim();if(val){checkDrill();}else{skipDrill();}}else{skipDrill();}}else{if(inputMode==='typed'){const val=document.getElementById('answerInput').value.trim();if(val){dispatchCheck();}else{skipQ();}}else{skipQ();}}}
 function setDiff(d){difficulty=d;[{i:'dEasy',v:'easy'},{i:'dMed',v:'medium'},{i:'dHard',v:'hard'},{i:'dInsane',v:'insane'},{i:'dExpert',v:'expert'}].forEach(({i,v})=>{const b=document.getElementById(i);if(b)b.className='diff-btn'+(v==='insane'?' ins':'')+(d===v?' active':'');});}
 // ── SETTINGS (saved in this browser) ──────────────────────────────────────────
-const SETTINGS_KEY='latin_settings',SET_DEFAULT={persons:'words',goal:20,nextRight:500,nextWrong:-1,typo:true,sound:false,zoom:1,calm:false,side:true,ordinal:false};
+const SETTINGS_KEY='latin_settings',SET_DEFAULT={persons:'words',goal:20,nextRight:250,nextWrong:-1,typo:true,sound:false,zoom:1,calm:false,side:true,ordinal:false};
 let SET={...SET_DEFAULT};
 function applySettings(){document.body.classList.toggle('no-side',!SET.side);document.body.classList.toggle('terms',SET.persons==='terms');document.body.classList.toggle('calm',!!SET.calm);
   document.querySelector('.layout').style.zoom=SET.zoom==1?'':SET.zoom;
   document.querySelectorAll('[data-set]').forEach(el=>{const k=el.dataset.set;if(el.type==='checkbox')el.checked=!!SET[k];else el.value=String(SET[k]);});
   try{renderLb();}catch(e){}try{renderDaily();}catch(e){}}
 function saveSettings(){try{window.storage.set(SETTINGS_KEY,JSON.stringify(SET));}catch(e){}}
-async function loadSettings(){try{const r=await window.storage.get(SETTINGS_KEY);if(r&&r.value)SET={...SET_DEFAULT,...JSON.parse(r.value)};}catch(e){}applySettings();}
+async function loadSettings(){try{const r=await window.storage.get(SETTINGS_KEY);if(r&&r.value){SET={...SET_DEFAULT,...JSON.parse(r.value)};if(SET.nextRight===500&&!SET.fastNext){SET.nextRight=250;SET.fastNext=1;try{saveSettings();}catch(e){}}}}catch(e){}applySettings();}
 function resetSettings(){SET={...SET_DEFAULT};saveSettings();applySettings();}
 function showSettings(){applySettings();document.getElementById('settingsOverlay').style.display='flex';}
 function hideSettings(){document.getElementById('settingsOverlay').style.display='none';}
