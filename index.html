@@ -347,7 +347,7 @@ input[type=range]{flex:1;accent-color:var(--accent)}
 .match-btn.sel{border-color:var(--accent);background:var(--surface3);transform:scale(1.02)}
 .match-btn.ok{border-color:var(--green);color:var(--green);background:var(--surface2);opacity:.6;transform:scale(.96)}
 .match-btn.bad{border-color:var(--red);color:var(--red);background:var(--red-bg);animation:mshake .3s}
-.match-btn.fresh{animation:mfade .3s ease}
+.match-btn.fresh{animation:mfade .15s ease}
 @keyframes mfade{from{opacity:0}to{opacity:1}}
 .match-btn.m-empty{visibility:hidden;pointer-events:none}
 @keyframes mshake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
@@ -5988,17 +5988,18 @@ function matchPick(side,w,idx){
     if(eb)eb.classList.add('ok');if(lb)lb.classList.add('ok');
     if(!mMissed.has(mKey(we))){score++;updateSR(we,true);recAns(we,true);}
     current++;
-    setTimeout(()=>{
-      mE[ei]=null;mL[li]=null;mSel={e:null,l:null};mFirst=null;
-      mRefill(ei,li);
-      mLock=false;
-      if(!mVis().length){updMatchHeader();showResult();return;}
-      updMatchHeader();renderMatch();saveMatch();
-    },320);
+    // no waiting: the pair goes and new cards come in straight away
+    mE[ei]=null;mL[li]=null;mSel={e:null,l:null};mFirst=null;
+    mRefill(ei,li);
+    mLock=false;
+    if(!mVis().length){updMatchHeader();showResult();return;}
+    updMatchHeader();renderMatch();saveMatch();
   }else{
-    if(eb)eb.classList.add('bad');if(lb)lb.classList.add('bad');
+    // wrong pair: flash red, but you can keep clicking right away
     mMiss(mFirst||we);saveMatch();
-    setTimeout(()=>{mSel={e:null,l:null};mFirst=null;mLock=false;renderMatch();updPct();},450);
+    mSel={e:null,l:null};mFirst=null;mLock=false;renderMatch();updPct();
+    const e2=document.querySelectorAll('#matchEng .match-btn')[ei],l2=document.querySelectorAll('#matchLat .match-btn')[li];
+    [e2,l2].forEach(x=>{if(x){x.classList.add('bad');setTimeout(()=>x.classList.remove('bad'),350);}});
   }
 }
 function saveMatch(){
