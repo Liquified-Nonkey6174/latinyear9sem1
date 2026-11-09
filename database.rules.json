@@ -51,6 +51,38 @@
         }
       }
     },
+    "sx": {
+      "key": {
+        ".read": false,
+        "$h": {
+          ".write": "auth != null && auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2'",
+          ".validate": "newData.isString() && newData.val().length <= 12"
+        }
+      },
+      "cfg": {
+        "$h": {
+          ".read": "auth != null && (root.child('sx').child('got').child(auth.uid).child($h).exists() || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2')",
+          ".write": "auth != null && auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2'",
+          ".validate": "newData.isString() && newData.val().length <= 4000"
+        }
+      },
+      "got": {
+        "$uid": {
+          ".read": "auth != null && (auth.uid === $uid || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2')",
+          "$h": {
+            ".write": "auth != null && auth.uid === $uid && !data.exists() && (($h !== 'c409b3e4bcac1ee8203d86fc13fd6e37' && root.child('sx').child('key').child($h).exists()) || ($h === 'c409b3e4bcac1ee8203d86fc13fd6e37' && root.child('sx').child('roll').child($uid).exists() && root.child('sx').child('roll').child($uid).val() % 1000 === 777 && now - root.child('sx').child('roll').child($uid).val() < 60000))",
+            ".validate": "newData.isNumber() && newData.val() === now"
+          }
+        }
+      },
+      "roll": {
+        "$uid": {
+          ".read": "auth != null && auth.uid === $uid",
+          ".write": "auth != null && auth.uid === $uid",
+          ".validate": "newData.isNumber() && newData.val() === now && (!data.exists() || now - data.val() >= 3000)"
+        }
+      }
+    },
     "bfeed": {
       ".read": "auth != null",
       "$id": {
