@@ -3336,7 +3336,12 @@ function sentAlternatives(ca){const alts=[ca];if(!sentData)return alts;
 function checkSentence(){if(answered)return;const ua=document.getElementById('sentInput').value.trim();if(!ua)return;answered=true;document.getElementById('sentCheckBtn').disabled=true;document.getElementById('sentInput').disabled=true;const ca=mode==='el'?sentData.latin:sentData.english;const alts=sentAlternatives(ca);const exact=alts.some(a=>checkWithSynonyms(ua,a));const ok=exact||nearMiss(ua,alts,mode==='el');const fb=document.getElementById('sentFb');badgeAnswer(ok);if(ok){const pts=sentPoints();sentScore++;score++;quizNoPoints=false;lbCount(pts);dailyTick();fb.className='sent-fb ok';fb.textContent='✓ Correct!'+(exact?'':' (check the spelling: '+ca+')')+(lbMe?'  +'+pts+' ⭐':'');}else{fb.className='sent-fb no';fb.textContent='✗ '+ca;}sentTotal++;updScorePill(sentScore);updPct();saveSessionSnapshot();document.getElementById('sentNext').style.display='block';afterAnswer(ok);}
 function skipSentence(){if(answered)return;answered=true;document.getElementById('sentCheckBtn').disabled=true;document.getElementById('sentInput').disabled=true;const ca=mode==='el'?sentData.latin:sentData.english;const fb=document.getElementById('sentFb');fb.className='sent-fb no';fb.textContent='→ '+ca;sentTotal++;updPct();saveSessionSnapshot();document.getElementById('sentNext').style.display='block';}
 function nextSentence(){clearTimeout(autoNextTimer);renderSentence();}
-function recAns(w,ok){reviseAnswer(w,ok);const ck=w.catKey;if(!statsData.catStats[ck])statsData.catStats[ck]={seen:0,correct:0};statsData.catStats[ck].seen++;if(ok)statsData.catStats[ck].correct++;saveStats();if(ok){lbCount(isDrill&&!isSent?2:1);dailyTick();}trackMistake(w,ok);badgeAnswer(ok);}   // declension/conjugation questions are worth 2 ⭐
+// If record-keeping after an answer ever fails, the quiz must still move on: these steps can't throw, and the error is shown.
+function reportErr(e,where){try{console.error(where||'',e);const m=(where?where+': ':'')+(e&&e.message||e);try{localStorage.setItem('latin_last_error',new Date().toISOString()+' '+m+' | '+String(e&&e.stack||'').split('\n').slice(0,3).join(' | '));}catch(x){}
+  if(!reportErr.seen)reportErr.seen=new Set();if(!reportErr.seen.has(m)){reportErr.seen.add(m);toast('⚠ Something went wrong ('+m.slice(0,90)+'). The quiz will carry on; a screenshot of this helps fix it.');}}catch(x){}}
+window.addEventListener('error',ev=>{if(ev&&ev.error)reportErr(ev.error);});
+function recAns(w,ok){try{recAns0(w,ok);}catch(e){reportErr(e,'recording the answer');}}
+function recAns0(w,ok){reviseAnswer(w,ok);const ck=w.catKey;if(!statsData.catStats[ck])statsData.catStats[ck]={seen:0,correct:0};statsData.catStats[ck].seen++;if(ok)statsData.catStats[ck].correct++;saveStats();if(ok){lbCount(isDrill&&!isSent?2:1);dailyTick();}trackMistake(w,ok);badgeAnswer(ok);}   // declension/conjugation questions are worth 2 ⭐
 let sessionFinished=true;
 function finishSession(){sessionFinished=true;const total=isDrill?drillQs.length:isSent?sentTotal:quizWords.length;const pct=total>0?Math.round(score/total*100):0;if(window.resumeDate)statsData.sessions=statsData.sessions.filter(s=>s.date!==window.resumeDate);statsData.sessions.push({date:Date.now(),score,total,pct});if(total>=50&&score>=total)bump('perfect');if(total>0&&score===0)sxTry('s|zero|'+Math.min(total,9));window.resumeDate=null;if(statsData.sessions.length>20)statsData.sessions=statsData.sessions.slice(-20);saveStats();}
 const PHRASES=[[100,'Optime! Perfectly done.'],[80,'Bene! Well done.'],[60,'Satis bene. Keep going.'],[0,'Persevera. Try again.']];
@@ -6163,6 +6168,9 @@ function toggleLatinUI(){setLatinUI(!latinUI);if(latinUI){sxTry('s|latin|1');toa
 (function(){const h=document.querySelector('h1');const em=h&&h.querySelector('em');if(em){em.style.cursor='pointer';em.title='';em.addEventListener('click',e=>{e.stopPropagation();toggleLatinUI();});}
   try{if(localStorage.getItem('latin_ui_latine')==='1')setTimeout(()=>setLatinUI(true),300);}catch(e){}})();
 window.addEventListener('scroll',()=>{clearTimeout(window._cuT);window._cuT=setTimeout(sxInfo,150);},{passive:true});
+
+// quiz side effects must never block moving to the next question
+['updateSR','updScorePill','updPct','playTone','saveResumeSoon','saveResume','dailyTick'].forEach(n=>{const f=window[n];if(typeof f!=='function')return;window[n]=function(){try{return f.apply(this,arguments);}catch(e){reportErr(e,n);}};});
 </script>
 </body>
 </html>
