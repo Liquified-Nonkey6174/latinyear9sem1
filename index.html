@@ -4526,7 +4526,7 @@ const BADGES=[
  {id:'diesmagnus',icon:'☀️',name:'Dies Magnus',lat:'big day',desc:'Earn lots of ⭐ in a single day.',unit:'⭐ in a day',stat:()=>Math.max(bstat().bestDay||0,lbTodayPts()),lv:[100,200,300,500,1000,2000,5000]},
  {id:'constans',icon:'🔥',name:'Constans',lat:'steady',desc:'Reach your daily goal several days in a row.',unit:'day streak',stat:()=>Math.max(bstat().bestStreak||0,dailyStreak()),lv:[1,3,5,7,10,20,30]},
  {id:'matutinus',icon:'🌅',name:'Matutinus',lat:'early riser',desc:'Get a question right before 8 am.',stat:()=>bstat().early||0,lv:[1]},
- {id:'nocturnus',icon:'🦉',name:'Nocturnus',lat:'night owl',desc:'Get a question right after 10 pm.',stat:()=>bstat().late||0,lv:[1]},
+ {id:'nocturnus',icon:'🦉',name:'Nocturnus',lat:'night owl',desc:'Get a question right after 8 pm.',stat:()=>bstat().late||0,lv:[1]},
  {id:'sineerrore',icon:'🎯',name:'Sine Errore',lat:'without error',desc:'Get questions right in a row (any type).',unit:'in a row',stat:()=>bstat().bestRun||0,lv:[10,20,30,50,100,200,300]},
  {id:'perfectus',icon:'💯',name:'Perfectus',desc:'Score 100% on a quiz of 50 or more questions.',stat:()=>bstat().perfect||0,lv:[1]},
  {id:'lexicon',icon:'📖',name:'Lexicon',desc:'See every word in the main list (word packs not included). New words make it harder, but once earned it stays.',stat:()=>lexStat('main','seen'),lv:[1]},
@@ -4546,7 +4546,7 @@ function bsave(){try{localStorage.setItem(BSTAT_KEY,JSON.stringify(bstat()));}ca
 function bump(k,n){const b=bstat();b[k]=(b[k]||0)+(n||1);bsave();badgeCheckSoon();}
 function lbTodayPts(){if(!lbMe)return 0;const me=lbPlayers[lbMe.pid]||{},k=lbKeys();return ((me.d||{})[k.d]||0)+lbPending;}
 // every answer (vocab, drills, sentences, parse, challenges)
-function badgeAnswer(ok){const b=bstat();sxAnswer(ok);b.lastAns={t:Date.now(),ok:!!ok};if(ok){b.correct=(b.correct||0)+1;b.run=(b.run||0)+1;if(b.run>(b.bestRun||0))b.bestRun=b.run;const h=new Date().getHours();if(h<8)b.early=1;if(h>=22)b.late=1;}else b.run=0;bsave();badgeCheckSoon();}
+function badgeAnswer(ok){const b=bstat();sxAnswer(ok);b.lastAns={t:Date.now(),ok:!!ok};if(ok){b.correct=(b.correct||0)+1;b.run=(b.run||0)+1;if(b.run>(b.bestRun||0))b.bestRun=b.run;const h=new Date().getHours();if(h<8)b.early=1;if(h>=20)b.late=1;}else b.run=0;bsave();badgeCheckSoon();}
 function lexWords(scope){const main=[];Object.entries(DATA).forEach(([ck,c])=>{if(c.packOnly)return;Object.entries(c.sub).forEach(([sk,sub])=>sub.words.forEach(w=>{if(!(typeof customWords!=='undefined'&&customWords.some(x=>x.lat===w.lat&&x.catKey===ck)))main.push({...w,catKey:ck,subKey:sk});}));});
   if(scope==='main')return main;const seen=new Set(main.map(wKey)),all=[...main];WORD_PACKS.forEach(pk=>pk.words.forEach(w=>{if(!seen.has(wKey(w))){seen.add(wKey(w));all.push(w);}}));return all;}
 function lexStat(scope,what){const acc=accData();const ws=lexWords(scope);const ok=w=>{const k=wKey(w),a=acc[k],r=srData[k];return what==='seen'?((a&&a.s>0)||(r&&r.seen>0)):((a&&a.c>0)||(r&&r.correct>0));};
@@ -4580,7 +4580,7 @@ function bfeedSeen(){try{return +localStorage.getItem(BF_SEEN)||0;}catch(e){retu
 function bfeedVisible(){return bfeed.filter(e=>lbVisible(e.pid)&&badgeFeedText(e)&&sxFeedOk(e));}
 function sxFeedOk(e){const n=sxCountOf(e.pid);if(n==null)return true;if(e.b==='?')return n>=(+e.k||1);if(e.b==='omnia'||e.b==='omniamax')return n>=SX_IDS.length;return true;}
 function renderFeedBits(){const vis=bfeedVisible(),sec=document.getElementById('sideFeed'),list=document.getElementById('sideFeedList');
-  if(sec&&list){sec.style.display=vis.length?'':'none';list.innerHTML=vis.slice(0,6).map(e=>{const x=badgeFeedText(e);if(EPIC[e.b])return '<div class="sf-row epic '+EPIC[e.b].cls+'" onclick="openBadges(\'feed\')"><span class="ep-shine"></span><span class="sf-art">'+x.art+'</span><span class="sf-txt"><b>'+esc(x.name)+'</b> '+EPIC[e.b].line+'! 🎉</span><span class="sf-t">'+(e.t?timeAgo(e.t):'')+'</span></div>';return '<div class="sf-row" onclick="openBadges(\'feed\')"><span class="sf-art">'+x.art+'</span><span class="sf-txt"><b>'+esc(x.name)+'</b> '+esc(x.what)+'</span><span class="sf-t">'+(e.t?timeAgo(e.t):'')+'</span></div>';}).join('');}
+  if(sec&&list){sec.style.display=vis.length?'':'none';list.innerHTML=vis.slice(0,6).map(e=>{const x=badgeFeedText(e);if(EPIC[e.b])return '<div class="sf-row epic '+EPIC[e.b].cls+'" onclick="openBadges(\'feed\')"><span class="ep-shine"></span><span class="sf-art">'+x.art+'</span><span class="sf-txt"><b>'+esc(x.name)+'</b> earned <b>'+EPIC[e.b].name+'</b>! 🎉</span><span class="sf-t">'+(e.t?timeAgo(e.t):'')+'</span></div>';return '<div class="sf-row" onclick="openBadges(\'feed\')"><span class="sf-art">'+x.art+'</span><span class="sf-txt"><b>'+esc(x.name)+'</b> '+esc(x.what)+'</span><span class="sf-t">'+(e.t?timeAgo(e.t):'')+'</span></div>';}).join('');}
   const seen=bfeedSeen(),fresh=vis.some(e=>(e.t||0)>seen&&!(lbMe&&e.pid===lbMe.pid));['badgeBtnDot','feedTabDot'].forEach(id=>{const d=document.getElementById(id);if(d)d.classList.toggle('on',fresh&&!(id==='feedTabDot'&&bfeedTab==='feed'&&document.getElementById('badgeOverlay').style.display==='flex'));});}
 function bfeedMarkSeen(){const t=Math.max(0,...bfeed.map(e=>e.t||0));try{localStorage.setItem(BF_SEEN,String(Math.max(t,bfeedSeen())));}catch(e){}renderFeedBits();}
 function renderBadgeFeed(){renderFeedBits();if(bfeedTab==='feed'&&document.getElementById('badgeOverlay').style.display==='flex')bfeedMarkSeen();const box=document.getElementById('bfeedList');if(!box)return;
@@ -4591,10 +4591,10 @@ function renderBadgeFeed(){renderFeedBits();if(bfeedTab==='feed'&&document.getEl
     return '<div class="bfeed-row'+(lbMe&&e.pid===lbMe.pid?' me':'')+'"><span class="bfeed-art">'+x.art+'</span><span class="bfeed-txt"><b>'+esc(x.name)+'</b> '+esc(x.what)+'</span><span class="bfeed-t">'+(e.t?timeAgo(e.t):'')+'</span></div>';}).join('');
   box.innerHTML=(px?epicRow(pin,px,true):'')+rows||'<p class="bfeed-empty">No badges yet. When anyone on the leaderboard earns one, it shows up here.</p>';}
 // Fere Omnia, Omnia and Omnia Maxima get a big shining celebration in the feed
-const EPIC={fereomnia:{cls:'ep-gold',title:'FERE OMNIA',line:'earned almost every badge'},omnia:{cls:'ep-royal',title:'OMNIA',line:'earned EVERY badge'},omniamax:{cls:'ep-rainbow',title:'OMNIA MAXIMA',line:'maxed out EVERY badge'}};
+const EPIC={fereomnia:{cls:'ep-gold',title:'FERE OMNIA',name:'Fere Omnia',line:'They earned almost every badge!'},omnia:{cls:'ep-royal',title:'OMNIA',name:'Omnia',line:'They earned EVERY badge!'},omniamax:{cls:'ep-rainbow',title:'OMNIA MAXIMA',name:'Omnia Maxima',line:'They maxed out EVERY badge!'}};
 function epicRow(e,x,pinned){const E=EPIC[e.b],bd=META_BADGES.find(b=>b.id===e.b);const art=badgeArt(e.b,1,1,{meta:true,size:pinned?72:56});
   return '<div class="bfeed-row epic '+E.cls+(pinned?' pinned':'')+'"><span class="ep-shine"></span><span class="ep-spark s1">✦</span><span class="ep-spark s2">✧</span><span class="ep-spark s3">✦</span><span class="ep-spark s4">✧</span>'
-    +'<span class="bfeed-art ep-art">'+art+'</span><span class="bfeed-txt"><span class="ep-title">'+(pinned?'🎉 ':'')+E.title+(pinned?' 🎉':'')+'</span><b>'+esc(x.name)+'</b> '+E.line+'!</span><span class="bfeed-t">'+(e.t?timeAgo(e.t):'')+'</span></div>';}
+    +'<span class="bfeed-art ep-art">'+art+'</span><span class="bfeed-txt"><span class="ep-title">'+(pinned?'🎉 ':'')+E.title+(pinned?' 🎉':'')+'</span><b>'+esc(x.name)+'</b> earned <b>'+E.name+'</b>! '+E.line+'</span><span class="bfeed-t">'+(e.t?timeAgo(e.t):'')+'</span></div>';}
 function timeAgo(t){const s=Math.max(0,(Date.now()-t)/1000);return s<60?'just now':s<3600?Math.floor(s/60)+'m ago':s<86400?Math.floor(s/3600)+'h ago':Math.floor(s/86400)+'d ago';}
 // ── BADGE UNLOCK: full-screen reveal of the new medal (tap to continue; several in a row queue up) ──
 let revealQ=[],revealOn=false;
