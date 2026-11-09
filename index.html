@@ -657,6 +657,7 @@ body.calm .nfx-type .tw-caret{display:none}
 .ann-box{max-width:520px;width:94%;text-align:left}.ann-head{font-family:var(--serif,Georgia,serif);font-size:24px;font-weight:700;margin:0 30px 10px 0;color:var(--accent,#e6b422)}
 .ann-body{font-size:15px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere;max-height:55vh;overflow-y:auto}.ann-date{font-size:12px;color:var(--text3);margin-top:10px}
 .ann-btns{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px}
+.bsort{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin:0 0 12px}.bsort button{font:inherit;font-size:12.5px;padding:5px 12px;border-radius:999px;border:1px solid var(--border2);background:transparent;color:var(--text2,#bbb);cursor:pointer}.bsort button.on{background:var(--accent,#c9955a);color:#1c1a17;border-color:var(--accent,#c9955a);font-weight:600}.bsort button.bs-sub{font-size:12px}
 .bf-dot{display:none;width:8px;height:8px;border-radius:50%;background:#ff5a5a;margin-left:5px;vertical-align:middle;box-shadow:0 0 6px rgba(255,90,90,.7)}.bf-dot.on{display:inline-block}
 .sf-list{display:flex;flex-direction:column;padding:2px 10px 10px;gap:0}.sf-row{display:flex;align-items:center;gap:8px;padding:3px 6px;border-radius:8px;cursor:pointer;font-size:12.5px}.sf-row:hover{background:var(--surface2)}.sf-art{flex:0 0 26px;line-height:0;display:flex;justify-content:center}.sf-art svg{width:24px;height:auto}.sf-txt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sf-t{font-size:11px;color:var(--text3);white-space:nowrap}
 .side-feed{flex:none}
@@ -2224,7 +2225,8 @@ body.calm .nfx-type .tw-caret{display:none}
   <div class="about-box badge-box" onclick="event.stopPropagation()"><button class="about-close" onclick="closeOverlay('badgeOverlay')">×</button>
     <div class="about-title">🏅 Badges</div>
     <div class="mode-toggle bfeed-tabs"><button class="mode-btn active" id="bTabMine" onclick="setBadgeTab('mine')">My badges</button><button class="mode-btn" id="bTabFeed" onclick="setBadgeTab('feed')">📣 Badge feed<span class="bf-dot" id="feedTabDot"></span></button></div>
-    <div id="badgeMine" class="bpane"><div id="badgeCount" style="text-align:center;font-size:12px;color:var(--text3);margin:-6px 0 12px"></div>
+    <div id="badgeMine" class="bpane"><div id="badgeCount" style="text-align:center;font-size:12px;color:var(--text3);margin:-6px 0 8px"></div>
+    <div class="bsort" id="badgeSort"><button data-f="all" class="on" onclick="setBadgeFilter('all')">All</button><button data-f="none" onclick="setBadgeFilter('none')">Unawarded</button><button data-f="got" onclick="setBadgeFilter('got')">Awarded</button><button data-f="unmax" class="bs-sub" onclick="setBadgeFilter('unmax')">↳ Not maxed</button></div>
     <div class="badge-scroll"><div id="badgeGrid" class="badge-grid"></div></div></div>
     <div id="badgeFeed" class="bpane" style="display:none"><div class="badge-scroll"><div id="bfeedList" class="bfeed-list"></div></div><div style="text-align:center;margin-top:8px"><button class="btn-secondary" onclick="loadBadgeFeed(true)">↻ Refresh</button></div></div>
   </div>
@@ -3955,7 +3957,7 @@ function startAttempt(){quizNoPoints=false;const n=isDrill?drillQs.length:quizWo
   const d=lbKeys().d;let st;try{st=JSON.parse(localStorage.getItem(ATTEMPTS_KEY)||'null');}catch(e){}if(!st||st.d!==d)st={d,c:{}};
   const sig=quizSig();st.c[sig]=(st.c[sig]||0)+1;try{localStorage.setItem(ATTEMPTS_KEY,JSON.stringify(st));}catch(e){}
   if(st.c[sig]>=3){quizNoPoints=true;if(lbMe)toast('You’ve done this short quiz 3 times today, so it won’t earn leaderboard points now.');}}
-function lbCount(n){n=n||1;if(!lbMe)return;
+function lbCount(n){try{badgeCheckSoon();}catch(e){}n=n||1;if(!lbMe)return;
   if(quizNoPoints){const pill=document.getElementById('pointsPill');if(pill){pill.textContent='⭐ no points: quiz repeated';pill.classList.add('dim');clearTimeout(ptsNoteTimer);ptsNoteTimer=setTimeout(()=>{pill.classList.remove('dim');lbUpdatePoints();},1400);}return;}
   lbPending+=n;lbUpdatePoints(true);renderLb();if(!lbFlushTimer)lbFlushTimer=setTimeout(()=>lbFlush(),8000);}
 async function lbFlush(keepalive){clearTimeout(lbFlushTimer);lbFlushTimer=null;if(!lbMe||!lbPending||lbInFlight)return;
@@ -4418,6 +4420,7 @@ const S={
  arcana:'<circle cx="38" cy="38" r="12"/><circle cx="38" cy="38" r="4"/><path d="M46 46 L72 72 M62 62 L68 56 M68 68 L74 62"/>',
  fereomnia:'<path d="M50 24 C52 40 56 46 72 50 C56 54 52 60 50 76 C48 60 44 54 28 50 C44 46 48 40 50 24 Z"/><path d="M70 26 C71 32 72 33 78 34 C72 35 71 36 70 42 C69 36 68 35 62 34 C68 33 69 32 70 26 Z" class="f"/>',
  omnia:'<path d="M50 20 L56 40 L76 36 L62 50 L76 64 L56 60 L50 80 L44 60 L24 64 L38 50 L24 36 L44 40 Z"/><circle cx="50" cy="50" r="6" class="f"/>',
+ chester:'<path d="M34 66 V34 C34 28 66 28 66 34 V66"/><path d="M22 66 C22 74 78 74 78 66 C78 62 22 62 22 66 Z"/><path d="M34 56 H66" stroke-width="6"/><text x="50" y="49" text-anchor="middle" font-family="Georgia,serif" font-size="16" font-weight="700" class="t">C</text>',
  unknown:'<text x="50" y="64" text-anchor="middle" font-family="Georgia,serif" font-size="44" font-weight="700" class="t">?</text>',
  omniamax:'<path d="M26 68 L22 34 L38 48 L50 26 L62 48 L78 34 L74 68 Z M26 76 H74"/><circle cx="22" cy="34" r="3" class="f"/><circle cx="50" cy="26" r="3" class="f"/><circle cx="78" cy="34" r="3" class="f"/>'
 };
@@ -4561,8 +4564,9 @@ const META_BADGES=[
  {id:'arcana',icon:'🗝️',name:'Arcana',lat:'secrets',desc:'Counts the secret badges you have found. No limit.',meta:'count',lv:[1]},
  {id:'fereomnia',icon:'✨',name:'Fere Omnia',lat:'almost everything',desc:'Earn every badge in the main section that isn’t secret.',meta:'public',lv:[1]},
  {id:'omnia',icon:'🌟',name:'Omnia',lat:'everything',desc:'Earn every badge in the main section (secret ones too).',meta:'all',lv:[1]},
- {id:'omniamax',icon:'👑',name:'Omnia Maxima',lat:'everything, to the max',desc:'Get every badge in the main section to its top level.',meta:'max',lv:[1]}];
-function metaValue(bd,got){if(bd.meta==='count')return BADGES.filter(b=>b.secret&&got[b.id]).length;if(bd.meta==='public')return BADGES.filter(b=>!b.secret).every(b=>got[b.id])?1:0;if(bd.meta==='all')return BADGES.every(b=>got[b.id])?1:0;return BADGES.every(b=>got[b.id]&&got[b.id].l>=b.lv.length)?1:0;}
+ {id:'omniamax',icon:'👑',name:'Omnia Maxima',lat:'everything, to the max',desc:'Get every badge in the main section to its top level.',meta:'max',lv:[1]},
+ {id:'chester',icon:'🎩',name:'Be Chester',lat:'esto Chester',desc:'Only for the one and only -Chester-.',meta:'name',lv:[1]}];
+function metaValue(bd,got){if(bd.meta==='name')return lbMe&&lbMe.name==='-Chester-'?1:0;if(bd.meta==='count')return BADGES.filter(b=>b.secret&&got[b.id]).length;if(bd.meta==='public')return BADGES.filter(b=>!b.secret).every(b=>got[b.id])?1:0;if(bd.meta==='all')return BADGES.every(b=>got[b.id])?1:0;return BADGES.every(b=>got[b.id]&&got[b.id].l>=b.lv.length)?1:0;}
 const METAL=['bronze','silver','gold','diamond'];
 // lv: thresholds for tiered badges; stat(): current value. secret: hidden until earned.
 const BADGES=[
@@ -4626,7 +4630,7 @@ async function loadBadgeFeed(force){if(!force&&Date.now()-bfeedAt<20000)return r
 const BF_SEEN='latin_bfeed_seen';
 function bfeedSeen(){try{return +localStorage.getItem(BF_SEEN)||0;}catch(e){return 0;}}
 function bfeedVisible(){return bfeed.filter(e=>lbVisible(e.pid)&&badgeFeedText(e)&&sxFeedOk(e));}
-function sxFeedOk(e){const n=sxCountOf(e.pid);if(n==null)return true;if(e.b==='?')return n>=(+e.k||1);if(e.b==='omnia'||e.b==='omniamax')return n>=SX_IDS.length;return true;}
+function sxFeedOk(e){const n=sxCountOf(e.pid);if(n==null)return true;if(e.b==='?')return n>=(+e.k||1);if(e.b==='omnia'||e.b==='omniamax')return n>=SX_IDS.length;if(e.b==='chester')return ((lbPlayers[e.pid]||{}).name)==='-Chester-';return true;}
 function renderFeedBits(){const vis=bfeedVisible(),sec=document.getElementById('sideFeed'),list=document.getElementById('sideFeedList');
   if(sec&&list){sec.style.display=vis.length?'':'none';list.innerHTML=vis.slice(0,6).map(e=>{const x=badgeFeedText(e);if(EPIC[e.b])return '<div class="sf-row epic '+EPIC[e.b].cls+(bfHid(e)?' bf-hid':'')+'" onclick="openBadges(\'feed\')"><span class="ep-shine"></span><span class="sf-art">'+x.art+'</span><span class="sf-txt"><b>'+esc(x.name)+'</b> earned <b>'+EPIC[e.b].name+'</b>! 🎉</span><span class="sf-t">'+(e.t?timeAgo(e.t):'')+'</span></div>';return '<div class="sf-row'+(bfHid(e)?' bf-hid':'')+'" onclick="openBadges(\'feed\')"><span class="sf-art">'+x.art+'</span><span class="sf-txt"><b>'+esc(x.name)+'</b> '+esc(x.what)+'</span><span class="sf-t">'+(e.t?timeAgo(e.t):'')+'</span></div>';}).join('');}
   const seen=bfeedSeen(),fresh=vis.some(e=>(e.t||0)>seen&&!(lbMe&&e.pid===lbMe.pid));['badgeBtnDot','feedTabDot'].forEach(id=>{const d=document.getElementById(id);if(d)d.classList.toggle('on',fresh&&!(id==='feedTabDot'&&bfeedTab==='feed'&&document.getElementById('badgeOverlay').style.display==='flex'));});}
@@ -4662,7 +4666,9 @@ function bdArt(bd,l,size,extra){return badgeArt(bd.id,l,bd.lv?bd.lv.length:1,Obj
 function bdIcon(bd,l){return bd.tiers?bd.tiers[Math.max(0,(l||1)-1)].icon:bd.icon;}
 // the old separate points badges (centurio, legatus, imperator, optimus) became levels of one badge
 const OLD_RANK={centurio:1,legatus:2,imperator:3,optimus:4};
-let _bTimer=null;function badgeCheckSoon(){if(_bTimer)return;_bTimer=setTimeout(()=>{_bTimer=null;badgeCheck();},700);}
+let _bTimer=null;function badgeCheckSoon(){if(_bTimer)return;_bTimer=setTimeout(()=>{_bTimer=null;badgeCheck();},200);}
+// keep badges up to date without waiting for the next answer (points arriving, reactions on your messages, streaks…)
+setInterval(()=>{if(document.visibilityState==='visible')try{badgeCheck();}catch(e){}},8000);
 // Converts secret badges saved under their old names to the current ids. (The one-off all-16 clean-up has been removed.)
 function secretWipe(){try{const g=bjson(BADGE_KEY);let ch=false;
   Object.keys(g).forEach(k=>{const n=SX_OLDNAMES[_fnv(k)];if(n){if(!g[n]||g[k].l>g[n].l)g[n]=g[k];delete g[k];ch=true;}});
@@ -4680,20 +4686,25 @@ function badgeCheck(){secretWipe();const got=bjson(BADGE_KEY);let changed=false;
   syncShownBadges();
   if(document.getElementById('badgeOverlay')&&document.getElementById('badgeOverlay').style.display==='flex')renderBadges();renderBadgeSide();
   if(fresh.length){const nSecret=BADGES.filter(x=>x.secret&&got[x.id]).length;try{badgeFeedPost(fresh,nSecret);}catch(e){}try{badgeReveal(fresh);}catch(e){}}}
-function renderBadges(){const g=document.getElementById('badgeGrid');if(!g)return;const sc=g.closest('.badge-scroll'),keep=sc?sc.scrollTop:0;if(sc)requestAnimationFrame(()=>{sc.scrollTop=keep;});const got=bjson(BADGE_KEY);let earned=0,total=0;g.innerHTML='';
-  BADGES.forEach(bd=>{const e=got[bd.id],l=e?e.l:0;total+=bd.lv.length;earned+=l;if(bd.secret&&!l){const c=document.createElement('div');c.className='badge-card locked';c.innerHTML='<div class="bd-art">'+badgeArt('unknown',0,1,{secret:true,size:74})+'</div><div class="bd-name">Secret badge</div><div class="bd-desc">Keep exploring…</div>';g.appendChild(c);return;}
+// sorter: all / unawarded / awarded / awarded but not maxed
+let badgeFilter='all';try{badgeFilter=localStorage.getItem('latin_bfilter')||'all';}catch(e){}
+function setBadgeFilter(f){badgeFilter=f;try{localStorage.setItem('latin_bfilter',f);}catch(e){}renderBadges();}
+function badgeShown(l,max){return badgeFilter==='all'||(badgeFilter==='none'&&!l)||(badgeFilter==='got'&&l>0)||(badgeFilter==='unmax'&&l>0&&l<max);}
+function renderBadges(){document.querySelectorAll('#badgeSort button').forEach(b=>b.classList.toggle('on',b.dataset.f===badgeFilter));const g=document.getElementById('badgeGrid');if(!g)return;const sc=g.closest('.badge-scroll'),keep=sc?sc.scrollTop:0;if(sc)requestAnimationFrame(()=>{sc.scrollTop=keep;});const got=bjson(BADGE_KEY);let earned=0,total=0;g.innerHTML='';
+  BADGES.forEach(bd=>{const e=got[bd.id],l=e?e.l:0;total+=bd.lv.length;earned+=l;if(!badgeShown(l,bd.lv.length))return;if(bd.secret&&!l){const c=document.createElement('div');c.className='badge-card locked';c.innerHTML='<div class="bd-art">'+badgeArt('unknown',0,1,{secret:true,size:74})+'</div><div class="bd-name">Secret badge</div><div class="bd-desc">Keep exploring…</div>';g.appendChild(c);return;}
     let v=0;try{v=bd.stat();}catch(e){}const next=bd.lv[l];const c=document.createElement('div');c.className='badge-card'+(l?' earned':' locked')+(bd.tiers?(l?' m-'+METAL[l-1]:''):l?' lvl'+Math.min(l,7):'')+(GRAND[bd.id]?' grand'+GRAND[bd.id]:'');
     let prog='';if(next!=null){if(bd.id.startsWith('lex')||bd.id.startsWith('doct'))prog=lexProgress(bd.id==='lexicon'||bd.id==='doctus'?'main':'all',bd.id.startsWith('lex')?'seen':'correct');else if(bd.lv.length>1||next>1)prog=Math.min(v,next).toLocaleString()+' / '+next.toLocaleString()+(bd.unit?' '+bd.unit:'');}
     c.innerHTML='<div class="bd-art">'+bdArt(bd,l,74,{locked:!l})+'</div><div class="bd-name">'+esc(l?badgeTierName(bd,l):bd.name)+'</div>'+(bd.lat?'<div class="bd-lat">'+esc(bd.lat)+'</div>':'')
       +'<div class="bd-desc">'+esc(bd.desc)+(bd.lv.length>1&&!bd.tiers?' Levels: '+bd.lv.map(x=>x.toLocaleString()).join(' · ')+'.':'')+'</div>'+(prog?'<div class="bd-prog">'+(l?'Next: ':'')+prog+'</div>':'')+(e?'<div class="bd-date">'+new Date(e.t).toLocaleDateString()+'</div>':'');
     if(l&&lbMe){const pinned=badgePins().includes(bd.id);const pb=document.createElement('button');pb.className='bd-pin'+(pinned?' on':'');pb.textContent=pinned?'📌 Shown':'📌 Show';pb.title=pinned?'Shown next to your name on the leaderboard. Click to hide.':'Show next to your name on the leaderboard (up to 6).';pb.onclick=()=>toggleBadgePin(bd.id);c.appendChild(pb);if(pinned)c.classList.add('pinned');}
     g.appendChild(c);});
-  const sh=document.createElement('div');sh.className='badge-sec-h';sh.textContent='Special (not counted)';g.appendChild(sh);
-  META_BADGES.forEach(bd=>{const e=got[bd.id],l=e?e.l:0,v=metaValue(bd,got);const c=document.createElement('div');const on=bd.meta==='count'?v>0:!!l;c.className='badge-card meta'+(on?' earned':' locked');
-    let prog='';if(bd.meta==='count')prog='';else{const pool=bd.meta==='public'?BADGES.filter(b=>!b.secret):BADGES,need=pool.length,have=bd.meta==='max'?pool.filter(b=>got[b.id]&&got[b.id].l>=b.lv.length).length:pool.filter(b=>got[b.id]).length;prog=have+' / '+need+' badges'+(bd.meta==='max'?' maxed':'');}
+  const sh=document.createElement('div');sh.className='badge-sec-h';sh.textContent='Special (not counted)';g.appendChild(sh);let metaN=0;
+  META_BADGES.forEach(bd=>{const e=got[bd.id],l=e?e.l:0,v=metaValue(bd,got);const c=document.createElement('div');const on=bd.meta==='count'?v>0:!!l;if(!badgeShown(on?1:0,1))return;metaN++;c.className='badge-card meta'+(on?' earned':' locked');
+    let prog='';if(bd.meta==='count'||bd.meta==='name')prog='';else{const pool=bd.meta==='public'?BADGES.filter(b=>!b.secret):BADGES,need=pool.length,have=bd.meta==='max'?pool.filter(b=>got[b.id]&&got[b.id].l>=b.lv.length).length:pool.filter(b=>got[b.id]).length;prog=have+' / '+need+' badges'+(bd.meta==='max'?' maxed':'');}
     c.innerHTML='<div class="bd-art">'+badgeArt(bd.id,1,1,{meta:true,size:74,locked:!on,count:bd.meta==='count'?v:null})+'</div><div class="bd-name">'+esc(bd.name)+'</div><div class="bd-lat">'+esc(bd.lat)+'</div><div class="bd-desc">'+esc(bd.desc)+'</div>'+(prog&&!l?'<div class="bd-prog">'+prog+'</div>':'')+(e&&bd.meta!=='count'?'<div class="bd-date">'+new Date(e.t).toLocaleDateString()+'</div>':'');
     if(on&&lbMe){const pinned=badgePins().includes(bd.id);const pb=document.createElement('button');pb.className='bd-pin'+(pinned?' on':'');pb.textContent=pinned?'📌 Shown':'📌 Show';pb.onclick=()=>toggleBadgePin(bd.id);c.appendChild(pb);if(pinned)c.classList.add('pinned');}
     g.appendChild(c);});
+  if(!metaN)sh.remove();if(!g.querySelector('.badge-card')){const em=document.createElement('p');em.className='bfeed-empty';em.style.gridColumn='1/-1';em.textContent=badgeFilter==='none'?'You’ve earned every badge!':badgeFilter==='unmax'?'Every badge you have is maxed out.':'No badges here yet.';g.appendChild(em);}
   const cnt=document.getElementById('badgeCount');if(cnt)cnt.textContent=earned+' / '+total+(lbMe?' · showing '+badgePins().filter(id=>got[id]).length+'/'+MAX_PINS+' on the leaderboard':' · join the leaderboard to show badges there')+(bdSaveErr==='rules'?' · ⚠ not saved: the database rules need updating':bdSaveErr?' · ⚠ not saved yet (offline?)':'');}
 
 // Badges shown on the leaderboard: players pick up to 6 (players/{uid}/bd = "id:level,id:level").
@@ -4713,7 +4724,7 @@ function sxCountOf(pid){if(!pid||(lbMe&&pid===lbMe.pid))return null;const c=sxCo
     try{const o=await fbReq('GET','sx/old/'+pid);if(typeof o==='string')o.split(',').forEach(x=>{if(SX_IDS.includes(x))old.add(x);});}catch(e){}
     sxCounts[pid]={g,old,t:Date.now()};sxPending.delete(pid);try{renderLb();renderFeedBits();renderBadgeFeed();}catch(e){}})();}return c?c.g+c.old.size:0;}
 function sxVerify(list,pid){const n=sxCountOf(pid);if(n==null)return list;const c=sxCounts[pid]||{g:0,old:new Set()};let left=c.g;
-  return list.filter(([id,l])=>{const b=badgeById(id);if(!b)return false;if(b.secret){if(c.old.has(id))return true;if(left<=0)return false;left--;return true;}if(b.meta==='all'||b.meta==='max')return n>=SX_IDS.length;return true;})
+  return list.filter(([id,l])=>{const b=badgeById(id);if(!b)return false;if(b.secret){if(c.old.has(id))return true;if(left<=0)return false;left--;return true;}if(b.meta==='all'||b.meta==='max')return n>=SX_IDS.length;if(b.meta==='name')return ((lbPlayers[pid]||{}).name)==='-Chester-';return true;})
     .map(([id,l])=>badgeById(id).meta==='count'?[id,Math.min(l,n)]:[id,l]).filter(([id,l])=>l>0);}
 function shownBadges(p,pid){if(pid)return sxVerify(shownBadges(p),pid);const seen={};String((p&&p.bd)||'').split(',').map(x=>x.split(':')).map(([id,l])=>OLD_RANK[id]?['gradus',String(OLD_RANK[id])]:[id,l]).forEach(([id,l])=>{if(id&&(!seen[id]||+l>+seen[id]))seen[id]=l;});return Object.entries(seen).filter(([id,l])=>badgeById(id)&&+l>0).slice(0,MAX_PINS).map(([id,l])=>[id,badgeById(id).meta==='count'?+l:Math.min(+l,badgeById(id).lv.length)]);}
 function badgeChipsEl(p,big,pid){const w=document.createElement('span');w.className='bchips';shownBadges(p,pid).forEach(([id,l])=>{const c=badgeChip(id,l,big);if(c)w.appendChild(c);});return w.childNodes.length?w:null;}
