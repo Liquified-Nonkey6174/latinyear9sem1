@@ -3362,8 +3362,11 @@ function nextSentence(){clearTimeout(autoNextTimer);renderSentence();}
 function reportErr(e,where){try{console.error(where||'',e);const m=(where?where+': ':'')+(e&&e.message||e);try{localStorage.setItem('latin_last_error',new Date().toISOString()+' '+m+' | '+String(e&&e.stack||'').split('\n').slice(0,3).join(' | '));}catch(x){}
   if(!reportErr.seen)reportErr.seen=new Set();if(!reportErr.seen.has(m)){reportErr.seen.add(m);toast('⚠ Something went wrong ('+m.slice(0,90)+'). The quiz will carry on; a screenshot of this helps fix it.');}}catch(x){}}
 window.addEventListener('error',ev=>{if(ev&&ev.error)reportErr(ev.error);});
+// two little stats about wrong answers (after a hint / after a 'very close' warning); the server decides what they mean
+function ansFlags(){const b=bstat(),inp=document.getElementById('answerInput'),v=String(inp&&inp.value||'').trim().toLowerCase();let ch=false;
+  if(hintUsed&&!b.hw){b.hw=1;ch=true;}if(typoUsed&&window._typoVal&&v&&v!==window._typoVal&&!b.tw){b.tw=1;ch=true;}if(ch){bsave();sxTry('s|m|'+(b.hw?1:0)+(b.tw?1:0));}}
 function recAns(w,ok){try{recAns0(w,ok);}catch(e){reportErr(e,'recording the answer');}}
-function recAns0(w,ok){reviseAnswer(w,ok);const ck=w.catKey;if(!statsData.catStats[ck])statsData.catStats[ck]={seen:0,correct:0};statsData.catStats[ck].seen++;if(ok)statsData.catStats[ck].correct++;saveStats();if(ok){lbCount(isDrill&&!isSent?2:1);dailyTick();}trackMistake(w,ok);badgeAnswer(ok);}   // declension/conjugation questions are worth 2 ⭐
+function recAns0(w,ok){reviseAnswer(w,ok);if(!ok)try{ansFlags();}catch(e){}const ck=w.catKey;if(!statsData.catStats[ck])statsData.catStats[ck]={seen:0,correct:0};statsData.catStats[ck].seen++;if(ok)statsData.catStats[ck].correct++;saveStats();if(ok){lbCount(isDrill&&!isSent?2:1);dailyTick();}trackMistake(w,ok);badgeAnswer(ok);}   // declension/conjugation questions are worth 2 ⭐
 let sessionFinished=true;
 function finishSession(){sessionFinished=true;const total=isDrill?drillQs.length:isSent?sentTotal:quizWords.length;const pct=total>0?Math.round(score/total*100):0;if(window.resumeDate)statsData.sessions=statsData.sessions.filter(s=>s.date!==window.resumeDate);statsData.sessions.push({date:Date.now(),score,total,pct});if(total>=50&&score>=total)bump('perfect');if(total>0&&score===0)sxTry('s|zero|'+Math.min(total,9));window.resumeDate=null;if(statsData.sessions.length>20)statsData.sessions=statsData.sessions.slice(-20);saveStats();}
 const PHRASES=[[100,'Optime! Perfectly done.'],[80,'Bene! Well done.'],[60,'Satis bene. Keep going.'],[0,'Persevera. Try again.']];
@@ -4458,8 +4461,9 @@ const ROMAN=['I','II','III','IV','V','VI','VII'];
 // The site never contains what the secret badges are or how to get them. It only reports ordinary events
 // (a chat message, a typed answer, a counter going up) as one-way hashes; Firebase accepts the ones that match a
 // hidden answer, and only then lets that player read the badge's name, description and art.
+const SX_LEGACY_N=16;   // the first 16 ids existed before secret badges moved online
 const SX_PREM='1f552369e71116f84f55522c4dd56b8b';
-const SX_IDS=["ssvnj", "s49gm", "s4xmr", "s5szq", "sc5fe", "sdcuc", "szhg2", "s6zrc", "scqbh", "sgady", "sc784", "swt4g", "sr66c", "s6xum", "sp6ju", "suzqc"],SX_LUCK='c409b3e4bcac1ee8203d86fc13fd6e37',SX_CACHE='latin_sx',SX_OLDNAMES={"a68feff1": "ssvnj", "9b8a8f72": "s49gm", "b6c52459": "s4xmr", "1f86cf2f": "s5szq", "d49dd484": "sc5fe", "dd920cc1": "sdcuc", "6d83c105": "szhg2", "f1c1e166": "s6zrc", "88fe7e2a": "scqbh", "70d14112": "sgady", "8d8fc94b": "sc784", "eb31a16d": "swt4g", "eaa5f88a": "sr66c", "8b16fee1": "s6xum", "c4ce7952": "sp6ju", "e5094ede": "suzqc"};
+const SX_IDS=["ssvnj", "s49gm", "s4xmr", "s5szq", "sc5fe", "sdcuc", "szhg2", "s6zrc", "scqbh", "sgady", "sc784", "swt4g", "sr66c", "s6xum", "sp6ju", "suzqc", "sk7wq"],SX_LUCK='c409b3e4bcac1ee8203d86fc13fd6e37',SX_CACHE='latin_sx',SX_OLDNAMES={"a68feff1": "ssvnj", "9b8a8f72": "s49gm", "b6c52459": "s4xmr", "1f86cf2f": "s5szq", "d49dd484": "sc5fe", "dd920cc1": "sdcuc", "6d83c105": "szhg2", "f1c1e166": "s6zrc", "88fe7e2a": "scqbh", "70d14112": "sgady", "8d8fc94b": "sc784", "eb31a16d": "swt4g", "eaa5f88a": "sr66c", "8b16fee1": "s6xum", "c4ce7952": "sp6ju", "e5094ede": "suzqc"};
 function _fnv(t){let h=0x811c9dc5;t=String(t);for(let i=0;i<t.length;i++){h^=t.charCodeAt(i);h=Math.imul(h,0x01000193)>>>0;}return ('0000000'+h.toString(16)).slice(-8);}
 let sxCfg=(()=>{try{return JSON.parse(localStorage.getItem(SX_CACHE)||'{}')||{};}catch(e){return {};}})();
 const sxTried=new Set();let sxLastRoll=0;
@@ -4476,7 +4480,7 @@ async function sxTry(c){try{if(!c)return null;const h=await sxHash(c);const know
 async function sxSync(){try{await playerToken();const got=await fbReq('GET','sx/got/'+playerAuth.uid);if(got)for(const h of Object.keys(got)){if(!Object.values(sxCfg).some(x=>x.h===h))sxLearn(h,await fbReq('GET','sx/cfg/'+h));}}catch(e){}
   // secret badges earned before they moved online: register them once (max 15), then load their details
   try{badgeCheck();const uid=playerAuth.uid,g=bjson(BADGE_KEY);let old=await fbReq('GET','sx/old/'+uid);
-    if(typeof old!=='string'){const mine=SX_IDS.filter(id=>g[id]&&!(sxCfg[id]&&sxCfg[id].h));if(mine.length&&mine.length<SX_IDS.length){try{await fbReq('PUT','sx/old/'+uid,mine.join(','));old=mine.join(',');}catch(e){}}}
+    if(typeof old!=='string'){const mine=SX_IDS.slice(0,SX_LEGACY_N).filter(id=>g[id]&&!(sxCfg[id]&&sxCfg[id].h));if(mine.length&&mine.length<SX_LEGACY_N){try{await fbReq('PUT','sx/old/'+uid,mine.join(','));old=mine.join(',');}catch(e){}}}
     if(typeof old==='string')for(const id of old.split(',')){if(SX_IDS.includes(id)&&!sxCfg[id]){try{const raw=await fbReq('GET','sx/legacy/'+id);if(typeof raw==='string')sxLearn(null,raw);}catch(e){}}}}catch(e){}}
 function sxChat(text,when,prev){const t=sxNorm(text);if(!t)return;sxTry('c|'+t);if(when)sxTry('t|'+t+'@'+(when.getHours()%12)+':'+when.getMinutes());if(prev&&lbMe&&prev.pid!==lbMe.pid&&sxNorm(prev.text)===t)sxTry('e|same');}
 async function sxName(name,cur){const n=sxNorm(name),c=[...new Set([n.replace(/ /g,''),...n.split(' ')])].filter(Boolean).map(x=>'n|'+x);if(cur&&name===cur)c.push('n|=');
@@ -4613,10 +4617,9 @@ function bdIcon(bd,l){return bd.tiers?bd.tiers[Math.max(0,(l||1)-1)].icon:bd.ico
 // the old separate points badges (centurio, legatus, imperator, optimus) became levels of one badge
 const OLD_RANK={centurio:1,legatus:2,imperator:3,optimus:4};
 let _bTimer=null;function badgeCheckSoon(){if(_bTimer)return;_bTimer=setTimeout(()=>{_bTimer=null;badgeCheck();},700);}
-// Clean-up: anyone holding all 16 secret badges from before they moved online keeps only Avarus.
+// Converts secret badges saved under their old names to the current ids. (The one-off all-16 clean-up has been removed.)
 function secretWipe(){try{const g=bjson(BADGE_KEY);let ch=false;
   Object.keys(g).forEach(k=>{const n=SX_OLDNAMES[_fnv(k)];if(n){if(!g[n]||g[k].l>g[n].l)g[n]=g[k];delete g[k];ch=true;}});
-  if(SX_IDS.every(id=>g[id]&&!sxCfg[id])){SX_IDS.forEach(id=>{if(id!=='ssvnj')delete g[id];});['arcana','omnia','omniamax'].forEach(k=>delete g[k]);ch=true;}
   if(ch){localStorage.setItem(BADGE_KEY,JSON.stringify(g));const pins=badgePins().map(x=>SX_OLDNAMES[_fnv(x)]||x).filter(id=>g[id]);localStorage.setItem(PIN_KEY,JSON.stringify(pins));}}catch(e){}}
 function badgeCheck(){secretWipe();const got=bjson(BADGE_KEY);let changed=false;const b=bstat();const fresh=[];
   {let lv=0;Object.keys(OLD_RANK).forEach(k=>{if(got[k]){lv=Math.max(lv,OLD_RANK[k]);delete got[k];changed=true;}});if(lv&&(!got.gradus||got.gradus.l<lv))got.gradus={l:lv,t:Date.now()};
@@ -5981,7 +5984,7 @@ function nearMiss(typed,cands,latin){const na=x=>latin?nrmT(x):nrmT(x).replace(/
     if(!extra.length||extra.length>2)continue;
     if(extra.length===1?close(extra[0],left[0]):(close(extra[0],left[0])&&close(extra[1],left[1]))||(close(extra[0],left[1])&&close(extra[1],left[0])))return true;}
   return false;}
-function showTypo(fbId,inp,cls){const fb=document.getElementById(fbId);fb.className=cls;fb.textContent='≈ Very close — check your spelling and try again (no penalty).';inp.focus();try{inp.select();}catch(e){}}
+function showTypo(fbId,inp,cls){window._typoVal=String(inp&&inp.value||'').trim().toLowerCase();const fb=document.getElementById(fbId);fb.className=cls;fb.textContent='≈ Very close — check your spelling and try again (no penalty).';inp.focus();try{inp.select();}catch(e){}}
 (function(){
   const rs=s=>{const f=window[s];window[s]=function(){typoUsed=false;return f.apply(this,arguments);};};
   const _sq=showQ,_sd=showDrill,_rs=renderSentence;
