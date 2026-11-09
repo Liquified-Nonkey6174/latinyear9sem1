@@ -4435,11 +4435,17 @@ function sxMigStats(b){if(!b.z&&!Object.keys(b).some(k=>/^k\d+$/.test(k)))return
   b.toursA=Math.max(b.toursA||0,z.ta||0,b.k13||0);b.toursB=Math.max(b.toursB||0,z.tb||0,b.k12||0);b.wrongBest=Math.max(b.wrongBest||0,z.w||0,b.k14||0);b.buy=Math.max(b.buy||0,b.k6||0);
   if(Array.isArray(z.cs))b.infoRead=z.cs;if(Array.isArray(z.th))b.themes=[...new Set([...(b.themes||[]),...z.th])];delete b.z;Object.keys(b).forEach(k=>{if(/^k\d+$/.test(k))delete b[k];});return true;}
 // admin: upload the private answers file (never stored in the site)
-async function sxUpload(file){try{const cfg=JSON.parse(await file.text());let n=0;for(const b of cfg){const pub=JSON.stringify({id:b.id,icon:b.icon,name:b.name,lat:b.lat,desc:b.desc,sym:b.sym,en:b.en,...(b.block?{block:b.block}:{})});
-    await fbReq('PUT','sx/legacy/'+b.id,pub,{admin:true});
-    if(b.luck){await fbReq('PUT','sx/cfg/'+SX_LUCK,pub,{admin:true});n++;continue;}
-    for(const k of b.keys){const h=await sxHash(k);await fbReq('PUT','sx/key/'+h,b.id,{admin:true});await fbReq('PUT','sx/cfg/'+h,pub,{admin:true});n++;}}
-  alert('Uploaded '+cfg.length+' secret badges ('+n+' answers).');}catch(e){alert('Upload failed: '+e.message);}}
+async function sxUpload(file){let cfg;try{cfg=JSON.parse(await file.text());if(!Array.isArray(cfg))throw new Error('not a list');}catch(e){alert('That isn’t the secret badge answers file ('+e.message+').');return;}
+  // each step is retried, and one failure doesn't stop the rest
+  const put=async(path,val)=>{let err;for(let a=0;a<3;a++){try{return await fbReq('PUT',path,val,{admin:true});}catch(e){err=e;if(/40[13]/.test(e.message)&&a===1)break;await new Promise(r=>setTimeout(r,800*(a+1)));}}throw err;};
+  const ok=[],bad=[];
+  for(let i=0;i<cfg.length;i++){const b=cfg[i];toast('Uploading secret badges… '+(i+1)+' / '+cfg.length);
+    try{const pub=JSON.stringify({id:b.id,icon:b.icon,name:b.name,lat:b.lat,desc:b.desc,sym:b.sym,en:b.en,...(b.block?{block:b.block}:{})});
+      await put('sx/legacy/'+b.id,pub);
+      if(b.luck)await put('sx/cfg/'+SX_LUCK,pub);
+      else for(const k of b.keys){const h=await sxHash(k);await put('sx/key/'+h,b.id);await put('sx/cfg/'+h,pub);}
+      ok.push(b.name);}catch(e){bad.push(b.name+' ('+e.message+')');}}
+  alert(bad.length?'Uploaded '+ok.length+' of '+cfg.length+' secret badges.\n\nThese failed — press Upload again to retry them:\n'+bad.join('\n'):'All '+cfg.length+' secret badges uploaded.');}
 setTimeout(()=>{sxArt();sxSync();},1500);
 // Special section (not counted in the badge totals): Arcana counts your secret badges; Omnia / Omnia Maxima need every main badge.
 const META_BADGES=[
