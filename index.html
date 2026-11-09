@@ -3311,7 +3311,7 @@ function enMeaningAlts(sd,eng){const clean=x=>String(x).replace(/\s*\([^)]*\)/g,
   // "female teacher" can just be "teacher" (the Latin ending already shows it's female)
   vals.forEach(v=>{const m=v.match(/^(female|male) (.+)$/);if(m){pairs.push([v,m[2]]);try{pairs.push([ePl({lat:'',eng:[v]}),ePl({lat:'',eng:[m[2]]})]);}catch(e){}}});
   // Latin "in" + ablative is both "in" and "on"
-  if(/(^|[^a-z])in([^a-z]|$)/i.test(sd.latin||''))pairs.push(['on the','in the'],['in the','on the']);
+  if(/(^|[^a-z])in([^a-z]|$)/i.test(sd.latin||''))pairs.push(['on the','in the'],['in the','on the'],['into','onto'],['onto','into'],['into','in'],['onto','on'],['into','on'],['onto','in']);
   let out=[eng.toLowerCase()];const esc2=x=>x.replace(/[.*+?^\${}()|[\]\\]/g,'\\$&');
   pairs.forEach(([a,b])=>{if(!a||!b||a===b)return;const re=new RegExp('\\b'+esc2(a)+'\\b','g');const add=[];out.forEach(v=>{if(re.test(v)){re.lastIndex=0;add.push(v.replace(re,b));}re.lastIndex=0;});out=out.concat(add).slice(0,400);});
   return out.slice(1);}
