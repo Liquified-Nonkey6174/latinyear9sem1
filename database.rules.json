@@ -75,6 +75,20 @@
           }
         }
       },
+      "old": {
+        "$uid": {
+          ".read": "auth != null",
+          ".write": "auth != null && auth.uid === $uid && !data.exists() && now < 1796083200000",
+          ".validate": "newData.isString() && newData.val().length <= 89 && newData.val().matches(/^s[a-z0-9]{4}(,s[a-z0-9]{4})*$/)"
+        }
+      },
+      "legacy": {
+        "$id": {
+          ".read": "auth != null && root.child('sx').child('old').child(auth.uid).exists() && root.child('sx').child('old').child(auth.uid).val().contains($id)",
+          ".write": "auth != null && auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2'",
+          ".validate": "newData.isString() && newData.val().length <= 4000"
+        }
+      },
       "roll": {
         "$uid": {
           ".read": "auth != null && auth.uid === $uid",

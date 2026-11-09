@@ -4415,7 +4415,11 @@ function sxLearn(h,raw){let c=raw;try{if(typeof raw==='string')c=JSON.parse(raw)
   sxCfg[c.id]={...c,h};try{localStorage.setItem(SX_CACHE,JSON.stringify(sxCfg));}catch(e){}sxArt();setTimeout(()=>{try{badgeCheck();}catch(e){}},0);return sxCfg[c.id];}
 async function sxTry(c){try{if(!c)return null;const h=await sxHash(c);const known=Object.values(sxCfg).find(x=>x.h===h);if(known)return known;if(sxTried.has(h))return null;sxTried.add(h);
   await playerToken();await fbReq('PUT','sx/got/'+playerAuth.uid+'/'+h,{'.sv':'timestamp'});return sxLearn(h,await fbReq('GET','sx/cfg/'+h));}catch(e){return null;}}
-async function sxSync(){try{await playerToken();const got=await fbReq('GET','sx/got/'+playerAuth.uid);if(!got)return;for(const h of Object.keys(got)){if(!Object.values(sxCfg).some(x=>x.h===h))sxLearn(h,await fbReq('GET','sx/cfg/'+h));}}catch(e){}}
+async function sxSync(){try{await playerToken();const got=await fbReq('GET','sx/got/'+playerAuth.uid);if(got)for(const h of Object.keys(got)){if(!Object.values(sxCfg).some(x=>x.h===h))sxLearn(h,await fbReq('GET','sx/cfg/'+h));}}catch(e){}
+  // secret badges earned before they moved online: register them once (max 15), then load their details
+  try{badgeCheck();const uid=playerAuth.uid,g=bjson(BADGE_KEY);let old=await fbReq('GET','sx/old/'+uid);
+    if(typeof old!=='string'){const mine=SX_IDS.filter(id=>g[id]&&!(sxCfg[id]&&sxCfg[id].h));if(mine.length&&mine.length<SX_IDS.length){try{await fbReq('PUT','sx/old/'+uid,mine.join(','));old=mine.join(',');}catch(e){}}}
+    if(typeof old==='string')for(const id of old.split(',')){if(SX_IDS.includes(id)&&!sxCfg[id]){try{const raw=await fbReq('GET','sx/legacy/'+id);if(typeof raw==='string')sxLearn(null,raw);}catch(e){}}}}catch(e){}}
 function sxChat(text,when,prev){const t=sxNorm(text);if(!t)return;sxTry('c|'+t);if(when)sxTry('t|'+t+'@'+(when.getHours()%12)+':'+when.getMinutes());if(prev&&lbMe&&prev.pid!==lbMe.pid&&sxNorm(prev.text)===t)sxTry('e|same');}
 async function sxName(name,cur){const n=sxNorm(name),c=[...new Set([n.replace(/ /g,''),...n.split(' ')])].filter(Boolean).map(x=>'n|'+x);if(cur&&name===cur)c.push('n|=');
   for(const x of c){const r=await sxTry(x);if(r&&r.block)return r.block;}return null;}
@@ -4432,6 +4436,7 @@ function sxMigStats(b){if(!b.z&&!Object.keys(b).some(k=>/^k\d+$/.test(k)))return
   if(Array.isArray(z.cs))b.infoRead=z.cs;if(Array.isArray(z.th))b.themes=[...new Set([...(b.themes||[]),...z.th])];delete b.z;Object.keys(b).forEach(k=>{if(/^k\d+$/.test(k))delete b[k];});return true;}
 // admin: upload the private answers file (never stored in the site)
 async function sxUpload(file){try{const cfg=JSON.parse(await file.text());let n=0;for(const b of cfg){const pub=JSON.stringify({id:b.id,icon:b.icon,name:b.name,lat:b.lat,desc:b.desc,sym:b.sym,en:b.en,...(b.block?{block:b.block}:{})});
+    await fbReq('PUT','sx/legacy/'+b.id,pub,{admin:true});
     if(b.luck){await fbReq('PUT','sx/cfg/'+SX_LUCK,pub,{admin:true});n++;continue;}
     for(const k of b.keys){const h=await sxHash(k);await fbReq('PUT','sx/key/'+h,b.id,{admin:true});await fbReq('PUT','sx/cfg/'+h,pub,{admin:true});n++;}}
   alert('Uploaded '+cfg.length+' secret badges ('+n+' answers).');}catch(e){alert('Upload failed: '+e.message);}}
@@ -4572,11 +4577,13 @@ function badgeChip(id,l,big){const bd=badgeById(id);if(!bd||!l)return null;const
   return c;}
 // Other players' secret badges only count if the server has a record of them earning them.
 const sxCounts={},sxPending=new Set();
-function sxCountOf(pid){if(!pid||(lbMe&&pid===lbMe.pid))return null;const c=sxCounts[pid];if(c&&Date.now()-c.t<300000)return c.n;
-  if(!sxPending.has(pid)){sxPending.add(pid);(async()=>{try{const r=await fbReq('GET','sx/got/'+pid);sxCounts[pid]={n:r?Object.keys(r).length:0,t:Date.now()};}catch(e){sxCounts[pid]={n:0,t:Date.now()};}
-    sxPending.delete(pid);try{renderLb();renderFeedBits();renderBadgeFeed();}catch(e){}})();}return c?c.n:0;}
-function sxVerify(list,pid){const n=sxCountOf(pid);if(n==null)return list;let left=n;
-  return list.filter(([id,l])=>{const b=badgeById(id);if(!b)return false;if(b.secret){if(left<=0)return false;left--;return true;}if(b.meta==='all'||b.meta==='max')return n>=SX_IDS.length;return true;})
+// a player's server records: secret badges earned online (sx/got) + old ones registered from before (sx/old, max 15)
+function sxCountOf(pid){if(!pid||(lbMe&&pid===lbMe.pid))return null;const c=sxCounts[pid];if(c&&Date.now()-c.t<300000)return c.g+c.old.size;
+  if(!sxPending.has(pid)){sxPending.add(pid);(async()=>{let g=0,old=new Set();try{const r=await fbReq('GET','sx/got/'+pid);g=r?Object.keys(r).length:0;}catch(e){}
+    try{const o=await fbReq('GET','sx/old/'+pid);if(typeof o==='string')o.split(',').forEach(x=>{if(SX_IDS.includes(x))old.add(x);});}catch(e){}
+    sxCounts[pid]={g,old,t:Date.now()};sxPending.delete(pid);try{renderLb();renderFeedBits();renderBadgeFeed();}catch(e){}})();}return c?c.g+c.old.size:0;}
+function sxVerify(list,pid){const n=sxCountOf(pid);if(n==null)return list;const c=sxCounts[pid]||{g:0,old:new Set()};let left=c.g;
+  return list.filter(([id,l])=>{const b=badgeById(id);if(!b)return false;if(b.secret){if(c.old.has(id))return true;if(left<=0)return false;left--;return true;}if(b.meta==='all'||b.meta==='max')return n>=SX_IDS.length;return true;})
     .map(([id,l])=>badgeById(id).meta==='count'?[id,Math.min(l,n)]:[id,l]).filter(([id,l])=>l>0);}
 function shownBadges(p,pid){if(pid)return sxVerify(shownBadges(p),pid);const seen={};String((p&&p.bd)||'').split(',').map(x=>x.split(':')).map(([id,l])=>OLD_RANK[id]?['gradus',String(OLD_RANK[id])]:[id,l]).forEach(([id,l])=>{if(id&&(!seen[id]||+l>+seen[id]))seen[id]=l;});return Object.entries(seen).filter(([id,l])=>badgeById(id)&&+l>0).slice(0,MAX_PINS).map(([id,l])=>[id,badgeById(id).meta==='count'?+l:Math.min(+l,badgeById(id).lv.length)]);}
 function badgeChipsEl(p,big,pid){const w=document.createElement('span');w.className='bchips';shownBadges(p,pid).forEach(([id,l])=>{const c=badgeChip(id,l,big);if(c)w.appendChild(c);});return w.childNodes.length?w:null;}
