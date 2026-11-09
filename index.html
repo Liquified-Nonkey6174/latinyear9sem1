@@ -4103,7 +4103,13 @@ function lbStreamFail(){if(!lbPlayersLoaded)document.getElementById('lbList').in
 // Looks: avatar + name colour, shown on the leaderboard and in chat
 const PREMIUM_AV='👑';   // joke $67 paywall: admin-only (enforced by the database rules)
 const AVATARS=['👑','🦉','🦅','🐺','🦁','🐎','🐍','🦊','🐉','🐬','🐝','🏛️','⚔️','🛡️','📜','🌿','🔥','⭐','🌙','🍇','⚓'];
-const NAME_COLORS={gold:'#d4a84a',red:'#e07a6a',green:'#6dbf8a',blue:'#6aa2e0',purple:'#b08ae0',pink:'#e08ab8',teal:'#4fbcbc',orange:'#e8964a'};
+const NAME_COLORS={gold:'#d4a84a',red:'#e07a6a',green:'#6dbf8a',blue:'#6aa2e0',purple:'#b08ae0',pink:'#e08ab8',teal:'#4fbcbc',orange:'#e8964a',
+  crimson:'#e0455a',coral:'#ff8a70',amber:'#f2b84b',lemon:'#f0e06a',lime:'#a8e05a',mint:'#7fe0b8',sky:'#7ac8ff',navy:'#7a8ff0',
+  indigo:'#9a7aff',violet:'#cf7aff',magenta:'#ff6ad0',rose:'#ff9ab8',bronze:'#c8925a',silver:'#c9d1db'};
+// premium: two- and three-colour gradients (saved as g1…g16; the database only lets premium players use them)
+const NAME_GRADS={g1:['Sunset','#ff7a59','#ffcc4d'],g2:['Ocean','#3fa9f5','#38e8c6'],g3:['Royal','#8a5cff','#ffcf4d'],g4:['Candy','#ff6ad0','#7ac8ff'],g5:['Forest','#5ad07a','#d7e86a'],g6:['Ember','#ff4d4d','#ffa64d'],g7:['Ice','#bff3ff','#7a8ff0'],g8:['Rose gold','#ffb3c7','#e0b46a'],
+  g9:['Aurora','#5af0b0','#5ab4ff','#c77dff'],g10:['Fire','#ffe14d','#ff8a33','#ff3b3b'],g11:['Imperial','#d4a84a','#e0455a','#8a5cff'],g12:['Tropical','#ff6ad0','#ffcc4d','#5ad0a0'],g13:['Galaxy','#5a7aff','#c77dff','#ff6ad0'],g14:['Dawn','#ffcc4d','#ff8aa0','#9a7aff'],g15:['Lagoon','#38e8c6','#3fa9f5','#7a5cff'],g16:['Roma','#e0455a','#f2b84b','#e0455a']};
+function applyNameColor(el,c){if(NAME_COLORS[c]){el.style.color=NAME_COLORS[c];return;}const g=NAME_GRADS[c];if(g){el.style.backgroundImage='linear-gradient(90deg,'+g.slice(1).join(',')+')';el.style.webkitBackgroundClip='text';el.style.backgroundClip='text';el.style.color='transparent';el.style.webkitTextFillColor='transparent';}}
 // Name fonts (Google Fonts, loaded only once someone uses one). key -> [label, CSS font-family, size tweak, group]
 const NAME_FONTS={roman:['Roman','"Cinzel",serif',.95,'Classic'],old:['Old book','"IM Fell English",serif',1.05,'Classic'],hand:['Handwriting','"Caveat",cursive',1.25,'Classic'],script:['Fancy','"Pacifico",cursive',1,'Classic'],
   marker:['Marker','"Permanent Marker",cursive',1,'Classic'],comic:['Comic','"Bangers",cursive',1.15,'Classic'],tech:['Tech','"Orbitron",sans-serif',.9,'Classic'],pixel:['Pixel','"Press Start 2P",monospace',.7,'Classic'],mono:['Typewriter','"Courier New",Courier,monospace',1,'Classic'],
@@ -4176,7 +4182,7 @@ async function adminCodes(box){const w=document.createElement('div');w.className
 function applyNameFont(el,f){const nf=NAME_FONTS[f];if(!nf)return;loadNameFonts();el.style.fontFamily=nf[1];if(nf[2]!==1)el.style.fontSize=nf[2]+'em';}
 function nameEl(pid,name){const p=lbPlayers[pid]||{};const s=document.createElement('span');s.className='pname';
   if(p.av&&AVATARS.includes(p.av)){const a=document.createElement('span');a.className='pav';a.textContent=p.av;s.appendChild(a);}
-  const n=document.createElement('span');n.textContent=name;if(NAME_COLORS[p.color])n.style.color=NAME_COLORS[p.color];applyNameFont(n,p.font);applyNameFx(n,p.fx,name);if(NAME_FX[p.fx])s.classList.add('has-fx');s.appendChild(n);return s;}
+  const n=document.createElement('span');n.textContent=name;applyNameColor(n,p.color);applyNameFont(n,p.font);applyNameFx(n,p.fx,name);if(NAME_FX[p.fx])s.classList.add('has-fx');s.appendChild(n);return s;}
 // ── ANNOUNCEMENT: written by the admin, pops up each time the site is opened ──
 const ANN_HIDE='latin_ann_hidden';let annCur=null;
 function annFormat(t){return esc(t).replace(/\*\*([^*\n]+)\*\*/g,'<b>$1</b>');}
@@ -4214,11 +4220,14 @@ function renderLook(){const av=document.getElementById('lookAvatars'),co=documen
     if(locked){const t=document.createElement('span');t.className='av-lock';t.textContent='🔒';b.appendChild(t);}
     b.onclick=()=>{if(locked){openPaywall();return;}lookSel.av=a;renderLook();};av.appendChild(b);});
   [['', 'var(--text)']].concat(Object.entries(NAME_COLORS)).forEach(([k,c])=>{const b=document.createElement('button');b.className='look-opt sw'+(lookSel.color===k?' on':'');b.style.background=c;b.title=k||'Default';b.onclick=()=>{lookSel.color=k;renderLook();};co.appendChild(b);});
+  {const h=document.createElement('div');h.className='fnt-h';h.style.width='100%';h.textContent='Gradients 👑'+(hasPremium()?'':' (premium)');co.appendChild(h);}
+  Object.entries(NAME_GRADS).forEach(([k,g])=>{const locked=!hasPremium();const b=document.createElement('button');b.className='look-opt sw prem'+(lookSel.color===k?' on':'');b.style.background='linear-gradient(135deg,'+g.slice(1).join(',')+')';b.title=g[0]+(locked?' (premium, $67)':'');
+    if(locked){const t=document.createElement('span');t.className='av-lock';t.textContent='🔒';b.appendChild(t);}b.onclick=()=>{if(locked){openPaywall();return;}lookSel.color=k;renderLook();};co.appendChild(b);});
   let pc=document.getElementById('lookCodes');if(isAdmin&&!pc){pc=document.createElement('button');pc.id='lookCodes';pc.className='lb-link';pc.textContent='👑 Premium codes (admin)';pc.onclick=openPaywall;document.querySelector('.look-actions').after(pc);}
   if(pc)pc.style.display=isAdmin?'':'none';
   const lt=document.querySelector('#lookOverlay .about-title');if(lt)lt.innerHTML='Your look'+(premMe?' <span class="prem-badge">✨ Premium</span>':'');
   const pv=document.getElementById('lookPreview');pv.innerHTML='';const s=document.createElement('span');s.className='pname';if(lookSel.av){const a=document.createElement('span');a.className='pav';a.textContent=lookSel.av;s.appendChild(a);}
-  const n=document.createElement('b');n.textContent=lbMe.name;if(NAME_COLORS[lookSel.color])n.style.color=NAME_COLORS[lookSel.color];applyNameFont(n,lookSel.font);applyNameFx(n,lookSel.fx,lbMe.name);if(NAME_FX[lookSel.fx])s.classList.add('has-fx');s.appendChild(n);pv.appendChild(s);}
+  const n=document.createElement('b');n.textContent=lbMe.name;applyNameColor(n,lookSel.color);applyNameFont(n,lookSel.font);applyNameFx(n,lookSel.fx,lbMe.name);if(NAME_FX[lookSel.fx])s.classList.add('has-fx');s.appendChild(n);pv.appendChild(s);}
 async function saveLook(){const me=lbPlayers[lbMe.pid]||{},fontChanged=lookSel.font!==(me.font||''),avChanged=lookSel.av!==(me.av||''),fxChanged=lookSel.fx!==(me.fx||'');
   const needAdmin=(fontChanged&&PREMIUM_FONTS.includes(lookSel.font))||(avChanged&&lookSel.av===PREMIUM_AV)||(fxChanged&&PREMIUM_FX.includes(lookSel.fx));
   if(needAdmin&&!hasPremium()){openPaywall();return;}
