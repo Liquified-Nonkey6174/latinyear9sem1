@@ -4464,7 +4464,7 @@ function sxAnswer(ok){const b=bstat(),p=b.lastAns;if(p&&!p.ok){const hrs=Math.fl
 function sxRoll(){if(Date.now()-sxLastRoll<3100||Object.values(sxCfg).some(x=>x.h===SX_LUCK))return;sxLastRoll=Date.now();(async()=>{try{await playerToken();const v=await fbReq('PUT','sx/roll/'+playerAuth.uid,{'.sv':'timestamp'});
   if(typeof v==='number'&&v%1000===777){await fbReq('PUT','sx/got/'+playerAuth.uid+'/'+SX_LUCK,{'.sv':'timestamp'});sxLearn(SX_LUCK,await fbReq('GET','sx/cfg/'+SX_LUCK));}}catch(e){}})();}
 function sxInfo(){const v=document.getElementById('infoView');if(!v||v.style.display==='none')return;const b=bstat(),read=Array.isArray(b.infoRead)?b.infoRead:[];let n=read.slice();
-  [['special','infoSpecialPanel'],['declension','infoDeclPanel'],['conjugation','infoConjPanel'],['adjectives','infoAdjPanel'],['pronouns','infoPronPanel']].forEach(([k,id])=>{const el=document.getElementById(id);if(el&&el.style.display!=='none'&&el.offsetHeight&&el.getBoundingClientRect().bottom<=innerHeight+80&&!n.includes(k))n.push(k);});
+  [['special','infoSpecialPanel'],['declension','infoDeclPanel'],['conjugation','infoConjPanel'],['adjectives','infoAdjPanel'],['pronouns','infoPronPanel']].forEach(([k,id])=>{const el=document.getElementById(id);if(el&&el.style.display!=='none'&&el.offsetHeight&&!n.includes(k)){const vh=Math.max(innerHeight,(window.visualViewport&&visualViewport.height)||0),atEnd=innerHeight+scrollY>=document.documentElement.scrollHeight-150;if(atEnd||el.getBoundingClientRect().bottom<=vh+Math.max(200,vh*0.3))n.push(k);}});
   if(n.length!==read.length){b.infoRead=n;bsave();sxTry('s|info|'+n.length);}}
 function sxMigStats(b){if(!b.z&&!Object.keys(b).some(k=>/^k\d+$/.test(k)))return false;const z=b.z||{};
   b.toursA=Math.max(b.toursA||0,z.ta||0,b.k13||0);b.toursB=Math.max(b.toursB||0,z.tb||0,b.k12||0);b.wrongBest=Math.max(b.wrongBest||0,z.w||0,b.k14||0);b.buy=Math.max(b.buy||0,b.k6||0);
@@ -6167,7 +6167,7 @@ function setLatinUI(on){latinUI=!!on;try{localStorage.setItem('latin_ui_latine',
 function toggleLatinUI(){setLatinUI(!latinUI);if(latinUI){sxTry('s|latin|1');toast('Salve! Nunc omnia Latine. (Click “English” to switch back.)');}}
 (function(){const h=document.querySelector('h1');const em=h&&h.querySelector('em');if(em){em.style.cursor='pointer';em.title='';em.addEventListener('click',e=>{e.stopPropagation();toggleLatinUI();});}
   try{if(localStorage.getItem('latin_ui_latine')==='1')setTimeout(()=>setLatinUI(true),300);}catch(e){}})();
-window.addEventListener('scroll',()=>{clearTimeout(window._cuT);window._cuT=setTimeout(sxInfo,150);},{passive:true});
+{const go=()=>{clearTimeout(window._cuT);window._cuT=setTimeout(sxInfo,150);};window.addEventListener('scroll',go,{passive:true});window.addEventListener('touchend',()=>setTimeout(sxInfo,400),{passive:true});window.addEventListener('resize',go);if(window.visualViewport)visualViewport.addEventListener('resize',go);setInterval(()=>{const v=document.getElementById('infoView');if(v&&v.style.display!=='none')sxInfo();},1500);}
 
 // quiz side effects must never block moving to the next question
 ['updateSR','updScorePill','updPct','playTone','saveResumeSoon','saveResume','dailyTick'].forEach(n=>{const f=window[n];if(typeof f!=='function')return;window[n]=function(){try{return f.apply(this,arguments);}catch(e){reportErr(e,n);}};});
