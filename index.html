@@ -657,6 +657,16 @@ body.calm .nfx-type .tw-caret{display:none}
 .ann-box{max-width:520px;width:94%;text-align:left}.ann-head{font-family:var(--serif,Georgia,serif);font-size:24px;font-weight:700;margin:0 30px 10px 0;color:var(--accent,#e6b422)}
 .ann-body{font-size:15px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere;max-height:55vh;overflow-y:auto}.ann-date{font-size:12px;color:var(--text3);margin-top:10px}
 .ann-btns{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px}
+/* phones: the whole badges window scrolls (header included), two smaller cards per row */
+@media(max-width:600px){
+  #badgeOverlay .badge-box{display:block;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;max-height:calc(100vh - 24px);max-height:calc(100dvh - 24px);padding-bottom:16px}
+  #badgeOverlay .bpane{display:block}#badgeOverlay .badge-scroll{overflow:visible;max-height:none;margin:0}
+  .badge-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+  .badge-card{padding:9px 6px;gap:2px}.badge-card .bd-art svg{width:56px;height:auto}.bd-name{font-size:12.5px}.bd-lat{font-size:11px}.bd-desc{font-size:10.5px}.bd-prog,.bd-date{font-size:10.5px}.bd-pin{font-size:11px;padding:3px 8px}
+  .bsort button{padding:4px 10px;font-size:12px}
+}
+/* the floating Chat button never sits on top of an open window */
+body:has(.overlay[style*="display: flex"]) .side-fab,body:has(#bReveal[style*="display: flex"]) .side-fab{display:none!important}
 .bsort{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin:0 0 12px}.bsort button{font:inherit;font-size:12.5px;padding:5px 12px;border-radius:999px;border:1px solid var(--border2);background:transparent;color:var(--text2,#bbb);cursor:pointer}.bsort button.on{background:var(--accent,#c9955a);color:#1c1a17;border-color:var(--accent,#c9955a);font-weight:600}.bsort button.bs-sub{font-size:12px}
 .bf-dot{display:none;width:8px;height:8px;border-radius:50%;background:#ff5a5a;margin-left:5px;vertical-align:middle;box-shadow:0 0 6px rgba(255,90,90,.7)}.bf-dot.on{display:inline-block}
 .sf-list{display:flex;flex-direction:column;padding:2px 10px 10px;gap:0}.sf-row{display:flex;align-items:center;gap:8px;padding:3px 6px;border-radius:8px;cursor:pointer;font-size:12.5px}.sf-row:hover{background:var(--surface2)}.sf-art{flex:0 0 26px;line-height:0;display:flex;justify-content:center}.sf-art svg{width:24px;height:auto}.sf-txt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sf-t{font-size:11px;color:var(--text3);white-space:nowrap}
@@ -4700,7 +4710,7 @@ function badgeCheck(){secretWipe();const got=bjson(BADGE_KEY);let changed=false;
 let badgeFilter='all';try{badgeFilter=localStorage.getItem('latin_bfilter')||'all';}catch(e){}
 function setBadgeFilter(f){badgeFilter=f;try{localStorage.setItem('latin_bfilter',f);}catch(e){}renderBadges();}
 function badgeShown(l,max){return badgeFilter==='all'||(badgeFilter==='none'&&!l)||(badgeFilter==='got'&&l>0)||(badgeFilter==='unmax'&&l>0&&l<max);}
-function renderBadges(){document.querySelectorAll('#badgeSort button').forEach(b=>b.classList.toggle('on',b.dataset.f===badgeFilter));const g=document.getElementById('badgeGrid');if(!g)return;const sc=g.closest('.badge-scroll'),keep=sc?sc.scrollTop:0;if(sc)requestAnimationFrame(()=>{sc.scrollTop=keep;});const got=bjson(BADGE_KEY);let earned=0,total=0;g.innerHTML='';
+function renderBadges(){document.querySelectorAll('#badgeSort button').forEach(b=>b.classList.toggle('on',b.dataset.f===badgeFilter));const g=document.getElementById('badgeGrid');if(!g)return;const sc=g.closest('.badge-scroll'),keep=sc?sc.scrollTop:0,bx=g.closest('.badge-box'),keepB=bx?bx.scrollTop:0;requestAnimationFrame(()=>{if(sc)sc.scrollTop=keep;if(bx)bx.scrollTop=keepB;});const got=bjson(BADGE_KEY);let earned=0,total=0;g.innerHTML='';
   BADGES.forEach(bd=>{const e=got[bd.id],l=e?e.l:0;total+=bd.lv.length;earned+=l;if(!badgeShown(l,bd.lv.length))return;if(bd.secret&&!l){const c=document.createElement('div');c.className='badge-card locked';c.innerHTML='<div class="bd-art">'+badgeArt('unknown',0,1,{secret:true,size:74})+'</div><div class="bd-name">Secret badge</div><div class="bd-desc">Keep exploring…</div>';g.appendChild(c);return;}
     let v=0;try{v=bd.stat();}catch(e){}const next=bd.lv[l];const c=document.createElement('div');c.className='badge-card'+(l?' earned':' locked')+(bd.tiers?(l?' m-'+METAL[l-1]:''):l?' lvl'+Math.min(l,7):'')+(GRAND[bd.id]?' grand'+GRAND[bd.id]:'');
     let prog='';if(next!=null){if(bd.id.startsWith('lex')||bd.id.startsWith('doct'))prog=lexProgress(bd.id==='lexicon'||bd.id==='doctus'?'main':'all',bd.id.startsWith('lex')?'seen':'correct');else if(bd.lv.length>1||next>1)prog=Math.min(v,next).toLocaleString()+' / '+next.toLocaleString()+(bd.unit?' '+bd.unit:'');}
