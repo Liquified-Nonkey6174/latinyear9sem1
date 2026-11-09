@@ -1,5 +1,22 @@
 {
   "rules": {
+    "announce": {
+      ".read": true,
+      ".write": "auth != null && auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2'",
+      ".validate": "newData.hasChildren(['text', 't'])",
+      "title": {
+        ".validate": "newData.isString() && newData.val().length <= 80"
+      },
+      "text": {
+        ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 3000"
+      },
+      "t": {
+        ".validate": "newData.isNumber() && newData.val() === now"
+      },
+      "$other": {
+        ".validate": false
+      }
+    },
     "description": {
       ".read": true,
       ".write": "auth != null && auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2'",
