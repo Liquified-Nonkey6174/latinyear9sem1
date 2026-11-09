@@ -3908,10 +3908,12 @@ async function lbFlush(keepalive){clearTimeout(lbFlushTimer);lbFlushTimer=null;i
   // Leaving the page with an expired sign-in: keep the count for next time instead of losing it.
   if(keepalive&&!authFresh(playerAuth)){try{window.storage.set(LB_PENDING_KEY,String(lbPending));}catch(e){}lbPending=0;return;}
   const n=lbPending,k=lbKeys(),inc={'.sv':{increment:n}},mine=lbPlayers[lbMe.pid];
-  const body={total:inc,lt:{'.sv':'timestamp'}};   // the server checks points can't go up faster than people can earn them['d','w','m'].forEach(x=>{body[x+'/'+k[x]]=inc;if(mine&&mine[x])Object.keys(mine[x]).forEach(old=>{if(old!==k[x])body[x+'/'+old]=null;});});
+  const lk=Date.now().toString(36)+Math.random().toString(36).slice(2,7),P='players/'+lbMe.pid+'/';
+  // the server checks points can't go up faster than people can earn them, and that every save is logged (plog) for the admin
+  const body={[P+'total']:inc,[P+'lt']:{'.sv':'timestamp'},[P+'lk']:lk,['plog/'+lbMe.pid+'/'+lk]:{n,t:{'.sv':'timestamp'}}};['d','w','m'].forEach(x=>{body[P+x+'/'+k[x]]=inc;if(mine&&mine[x])Object.keys(mine[x]).forEach(old=>{if(old!==k[x])body[P+x+'/'+old]=null;});});
   lbInFlightBase=(mine&&mine.total)||0;lbInFlight=n;lbPending=0;
   try{if(!keepalive&&(await fbReq('GET','players/'+lbMe.pid+'/name'))==null){lbInFlight=0;lbRemoved();return;}
-    await fbReq('PATCH','players/'+lbMe.pid,body,{keepalive});lbInFlight=0;}
+    await fbReq('PATCH','',body,{keepalive});lbInFlight=0;}
   catch(e){lbInFlight=0;lbPending+=n;if(!lbFlushTimer)lbFlushTimer=setTimeout(()=>lbFlush(),30000);}
   lbUpdatePoints();}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')lbFlush(true);});
@@ -4034,9 +4036,9 @@ async function showNameHistory(pid,box){box.textContent='Loading…';let h;
 // same amount, and the smaller ones are capped so none is ever more than the period that contains it.
 async function lbAdminEdit(pid,name,cur){const per=lbPeriod,label=LB_PERIOD_NAME[per],p=lbPlayers[pid]||{},k=lbKeys();
   const v=prompt('Set '+name+'’s score for '+label+' to:'+(per==='all'?'':'\n(Week, month and all-time totals move up or down by the same amount.)'),cur);
-  if(v===null)return;const n=Math.floor(Number(v));if(!Number.isFinite(n)||n<0){alert('Enter a whole number, 0 or more.');return;}
+  if(v===null)return;const n=Math.floor(Number(v));if(!Number.isFinite(n)){alert('Enter a whole number (it can be negative).');return;}
   const val={d:lbScore(p,'d',k),w:lbScore(p,'w',k),m:lbScore(p,'m',k),all:lbScore(p,'all',k)},order=['d','w','m','all'],i=order.indexOf(per),delta=n-val[per];
-  order.forEach((x,j)=>{if(j===i)val[x]=n;else if(j>i)val[x]=Math.max(0,val[x]+delta);});
+  order.forEach((x,j)=>{if(j===i)val[x]=n;else if(j>i)val[x]=val[x]+delta;});
   for(let j=order.length-2;j>=0;j--)val[order[j]]=Math.min(val[order[j]],val[order[j+1]]);   // smaller periods never exceed bigger ones
   const body={total:val.all,['d/'+k.d]:val.d,['w/'+k.w]:val.w,['m/'+k.m]:val.m};
   try{await fbReq('PATCH','players/'+pid,body,{admin:true});}catch(e){alert('Couldn’t save: '+e.message);}}
@@ -4148,6 +4150,15 @@ async function saveLook(){const me=lbPlayers[lbMe.pid]||{},fontChanged=lookSel.f
   try{await fbReq('PATCH','players/'+lbMe.pid,body,{admin:needAdmin&&!premMe});   // premium players save with their own account
     lbPlayers[lbMe.pid]={...(lbPlayers[lbMe.pid]||{}),av:lookSel.av||undefined,color:lookSel.color||undefined,font:lookSel.font||undefined,fx:lookSel.fx||undefined};closeOverlay('lookOverlay');renderLb();renderChat();renderLbProfile();}
   catch(e){document.getElementById('lookErr').textContent='Couldn’t save. If this keeps happening, the database rules need updating (ask the admin).';}}
+// Admin: every points save is logged (plog/{uid}: points added + server time). Fast saves are highlighted.
+async function showPointsHistory(pid,box){box.innerHTML='<p class="muted">Loading…</p>';let r;
+  try{r=await fbReq('GET','plog/'+pid,null,{admin:true,query:'?orderBy=%22$key%22&limitToLast=300'});}catch(e){box.innerHTML='<p class="muted">Couldn’t load the history ('+esc(e.message)+'). The database rules may need updating.</p>';return;}
+  const rows=Object.values(r||{}).filter(x=>x&&x.t).sort((a,b)=>a.t-b.t);if(!rows.length){box.innerHTML='<p class="muted">No points saved since the history started.</p>';return;}
+  const tot=rows.reduce((a,x)=>a+(+x.n||0),0),days={};rows.forEach(x=>{const d=new Date(x.t).toLocaleDateString();days[d]=(days[d]||0)+(+x.n||0);});
+  let h='<p style="margin:6px 0"><b>'+rows.length+'</b> saves, <b>'+tot.toLocaleString()+'</b> points since the history started. '+Object.entries(days).slice(-7).map(([d,n])=>esc(d)+': '+n.toLocaleString()).join(' · ')+'</p><div style="max-height:260px;overflow-y:auto"><table class="nh-table"><tr><th>When</th><th>Points</th><th>Speed</th></tr>';
+  rows.slice().reverse().forEach((x,i,arr)=>{const prev=arr[i+1],gap=prev?(x.t-prev.t)/1000:null,rate=gap?x.n/gap:null,fast=rate!=null&&rate>2.5;
+    h+='<tr'+(fast?' style="color:var(--red,#e07a6a)"':'')+'><td class="muted">'+new Date(x.t).toLocaleString([], {day:'numeric',month:'short',hour:'numeric',minute:'2-digit',second:'2-digit'})+'</td><td><b>+'+x.n+'</b></td><td class="muted">'+(gap==null?'':(gap<120?Math.round(gap)+' s after the last':Math.round(gap/60)+' min after the last')+(rate!=null&&gap<120?' · '+rate.toFixed(1)+'/s':''))+(fast?' ⚠':'')+'</td></tr>';});
+  box.innerHTML=h+'</table></div><p class="muted" style="font-size:11.5px">⚠ = faster than 2.5 points a second (a short burst can be normal; a long run of them isn’t).</p>';}
 function openPlayerCard(pid){const p=lbPlayers[pid];if(!p)return;const k=lbKeys();const box=document.getElementById('playerCard');box.innerHTML='';
   const h=document.createElement('div');h.className='pc-name';const big=nameEl(pid,p.name);h.appendChild(big);box.appendChild(h);{const bc=badgeChipsEl(p,true,pid);if(bc){const r=document.createElement('div');r.style.cssText='text-align:center;margin:-4px 0 10px';r.appendChild(bc);box.appendChild(r);}}
   const g=document.createElement('div');g.className='pc-grid';[['Today','d'],['Week','w'],['Month','m'],['All time','all']].forEach(([l,per])=>{const c=document.createElement('div');c.innerHTML='<b>'+lbScore(p,per,k).toLocaleString()+'</b><span>'+l+'</span>';g.appendChild(c);});box.appendChild(g);
@@ -4155,6 +4166,7 @@ function openPlayerCard(pid){const p=lbPlayers[pid];if(!p)return;const k=lbKeys(
     const hb=document.createElement('button');hb.className='btn-secondary';hb.style.margin='0 0 8px 6px';hb.textContent='Name history';const hist=document.createElement('div');hist.className='nh-box';
     hb.onclick=()=>{hb.disabled=true;showNameHistory(pid,hist);};box.appendChild(hb);
     const lk=document.createElement('button');lk.className='btn-secondary';lk.style.margin='0 0 8px 6px';lk.textContent='…';lk.disabled=true;box.appendChild(lk);box.appendChild(hist);
+    const ph=document.createElement('button');ph.className='btn-secondary';ph.style.margin='0 0 8px 6px';ph.textContent='📈 Points history';ph.onclick=()=>{ph.disabled=true;showPointsHistory(pid,hist);};box.insertBefore(ph,hist);
     let locked=false;const setLk=()=>{lk.textContent=locked?'🔒 Name locked (unlock)':'Lock name';lk.title=locked?'They can’t change their own name. Click to allow it again.':'Stop them changing their own name (you can still rename them).';lk.disabled=false;};
     fbReq('GET','nlock/'+pid,null,{admin:true}).then(v=>{locked=v===true;setLk();}).catch(()=>{lk.textContent='Lock name (unavailable)';});
     lk.onclick=async()=>{lk.disabled=true;try{await fbReq(locked?'DELETE':'PUT','nlock/'+pid,locked?null:true,{admin:true});locked=!locked;}catch(e){alert('Couldn’t save: '+e.message);}setLk();};

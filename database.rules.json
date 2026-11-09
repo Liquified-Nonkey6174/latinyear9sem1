@@ -14,24 +14,27 @@
           ".validate": "newData.isString() && newData.val().length >= 2 && newData.val().length <= 30 && (data.val() === newData.val() || root.child('nlock').child($uid).val() !== true || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2')"
         },
         "total": {
-          ".validate": "newData.isNumber() && newData.val() >= 0 && (auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2' || newData.val() <= (data.exists() ? data.val() : 0) || (newData.parent().child('lt').val() === now && newData.val() - (data.exists() ? data.val() : 0) <= 300 && (!data.parent().child('lt').exists() || newData.val() - (data.exists() ? data.val() : 0) <= 5 + (now - data.parent().child('lt').val()) / 333)))"
+          ".validate": "newData.isNumber() && (auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2' || ((newData.val() >= 0 && newData.val() <= (data.exists() ? data.val() : 0)) || (newData.parent().child('lt').val() === now && newData.parent().parent().parent().child('plog').child($uid).child(newData.parent().child('lk').val() + '').child('n').val() === newData.val() - (data.exists() ? data.val() : 0) && newData.val() - (data.exists() ? data.val() : 0) <= 300 && (!data.parent().child('lt').exists() || newData.val() - (data.exists() ? data.val() : 0) <= 5 + (now - data.parent().child('lt').val()) / 333))))"
+        },
+        "lk": {
+          ".validate": "newData.isString() && newData.val().length <= 24"
         },
         "lt": {
           ".validate": "newData.isNumber() && (newData.val() === now || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2')"
         },
         "d": {
           "$day": {
-            ".validate": "newData.isNumber() && newData.val() >= 0 && (auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2' || newData.val() <= (data.exists() ? data.val() : 0) || (newData.parent().parent().child('lt').val() === now && newData.val() - (data.exists() ? data.val() : 0) <= 300 && (!data.parent().parent().child('lt').exists() || newData.val() - (data.exists() ? data.val() : 0) <= 5 + (now - data.parent().parent().child('lt').val()) / 333)))"
+            ".validate": "newData.isNumber() && (auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2' || ((newData.val() >= 0 && newData.val() <= (data.exists() ? data.val() : 0)) || (newData.parent().parent().child('lt').val() === now && newData.val() - (data.exists() ? data.val() : 0) <= 300 && (!data.parent().parent().child('lt').exists() || newData.val() - (data.exists() ? data.val() : 0) <= 5 + (now - data.parent().parent().child('lt').val()) / 333))))"
           }
         },
         "w": {
           "$week": {
-            ".validate": "newData.isNumber() && newData.val() >= 0 && (auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2' || newData.val() <= (data.exists() ? data.val() : 0) || (newData.parent().parent().child('lt').val() === now && newData.val() - (data.exists() ? data.val() : 0) <= 300 && (!data.parent().parent().child('lt').exists() || newData.val() - (data.exists() ? data.val() : 0) <= 5 + (now - data.parent().parent().child('lt').val()) / 333)))"
+            ".validate": "newData.isNumber() && (auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2' || ((newData.val() >= 0 && newData.val() <= (data.exists() ? data.val() : 0)) || (newData.parent().parent().child('lt').val() === now && newData.val() - (data.exists() ? data.val() : 0) <= 300 && (!data.parent().parent().child('lt').exists() || newData.val() - (data.exists() ? data.val() : 0) <= 5 + (now - data.parent().parent().child('lt').val()) / 333))))"
           }
         },
         "m": {
           "$month": {
-            ".validate": "newData.isNumber() && newData.val() >= 0 && (auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2' || newData.val() <= (data.exists() ? data.val() : 0) || (newData.parent().parent().child('lt').val() === now && newData.val() - (data.exists() ? data.val() : 0) <= 300 && (!data.parent().parent().child('lt').exists() || newData.val() - (data.exists() ? data.val() : 0) <= 5 + (now - data.parent().parent().child('lt').val()) / 333)))"
+            ".validate": "newData.isNumber() && (auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2' || ((newData.val() >= 0 && newData.val() <= (data.exists() ? data.val() : 0)) || (newData.parent().parent().child('lt').val() === now && newData.val() - (data.exists() ? data.val() : 0) <= 300 && (!data.parent().parent().child('lt').exists() || newData.val() - (data.exists() ? data.val() : 0) <= 5 + (now - data.parent().parent().child('lt').val()) / 333))))"
           }
         },
         "av": {
@@ -122,6 +125,15 @@
         },
         "$other": {
           ".validate": false
+        }
+      }
+    },
+    "plog": {
+      ".read": "auth != null && auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2'",
+      "$uid": {
+        "$k": {
+          ".write": "auth != null && auth.uid === $uid && !data.exists()",
+          ".validate": "$k.matches(/^[a-z0-9]{6,24}$/) && newData.hasChildren(['n', 't']) && newData.child('n').isNumber() && newData.child('n').val() >= 1 && newData.child('n').val() <= 300 && newData.child('t').val() === now"
         }
       }
     },
