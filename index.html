@@ -3908,7 +3908,7 @@ async function lbFlush(keepalive){clearTimeout(lbFlushTimer);lbFlushTimer=null;i
   // Leaving the page with an expired sign-in: keep the count for next time instead of losing it.
   if(keepalive&&!authFresh(playerAuth)){try{window.storage.set(LB_PENDING_KEY,String(lbPending));}catch(e){}lbPending=0;return;}
   const n=lbPending,k=lbKeys(),inc={'.sv':{increment:n}},mine=lbPlayers[lbMe.pid];
-  const body={total:inc};['d','w','m'].forEach(x=>{body[x+'/'+k[x]]=inc;if(mine&&mine[x])Object.keys(mine[x]).forEach(old=>{if(old!==k[x])body[x+'/'+old]=null;});});
+  const body={total:inc,lt:{'.sv':'timestamp'}};   // the server checks points can't go up faster than people can earn them['d','w','m'].forEach(x=>{body[x+'/'+k[x]]=inc;if(mine&&mine[x])Object.keys(mine[x]).forEach(old=>{if(old!==k[x])body[x+'/'+old]=null;});});
   lbInFlightBase=(mine&&mine.total)||0;lbInFlight=n;lbPending=0;
   try{if(!keepalive&&(await fbReq('GET','players/'+lbMe.pid+'/name'))==null){lbInFlight=0;lbRemoved();return;}
     await fbReq('PATCH','players/'+lbMe.pid,body,{keepalive});lbInFlight=0;}
