@@ -76,7 +76,7 @@
         "$uid": {
           ".read": "auth != null",
           "$h": {
-            ".write": "auth != null && auth.uid === $uid && !data.exists() && (($h !== 'c409b3e4bcac1ee8203d86fc13fd6e37' && root.child('sx').child('key').child($h).exists()) || ($h === 'c409b3e4bcac1ee8203d86fc13fd6e37' && root.child('sx').child('roll').child($uid).exists() && root.child('sx').child('roll').child($uid).val() % 1000 === 777 && now - root.child('sx').child('roll').child($uid).val() < 60000))",
+            ".write": "auth != null && auth.uid === $uid && !data.exists() && (($h !== 'c409b3e4bcac1ee8203d86fc13fd6e37' && $h !== '1f552369e71116f84f55522c4dd56b8b' && root.child('sx').child('key').child($h).exists()) || ($h === '1f552369e71116f84f55522c4dd56b8b' && root.child('prem').child($uid).exists()) || ($h === 'c409b3e4bcac1ee8203d86fc13fd6e37' && root.child('sx').child('roll').child($uid).exists() && root.child('sx').child('roll').child($uid).val() % 1000 === 777 && now - root.child('sx').child('roll').child($uid).val() < 60000))",
             ".validate": "newData.isNumber() && newData.val() === now"
           }
         }
