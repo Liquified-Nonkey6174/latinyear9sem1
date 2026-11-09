@@ -4746,7 +4746,8 @@ async function duelCheck(){const g=duelGame;if(!g||g.fb)return;const inp=documen
   const dd=duelsObj[g.id],earn=ok&&lbMe&&!(dd&&dd.res&&dd.res[lbMe.pid]);
   badgeAnswer(ok);if(ok){g.score++;dailyTick();if(earn)lbCount();}playTone(ok);
   g.fb={cls:ok?'ok':'no',text:ok?'✓ Correct'+(earn?'  +1 ⭐':''):'✗ '+(q.d==='el'?fullLat(q.w):displayEng(q.w))};renderDuelPlay();
-  setTimeout(async()=>{g.fb=null;g.typo=false;g.i++;if(g.i>=g.qs.length){g.ms=Date.now()-g.t0;try{await fbReq('PUT','duels/'+g.id+'/res/'+lbMe.pid,{s:g.score,ms:g.ms});const d=duelsObj[g.id];d.res=d.res||{};d.res[lbMe.pid]={s:g.score,ms:g.ms};pollShared();}catch(e){}updDuelBtn();}renderDuelPlay();},ok?600:1400);}
+  const pause=ok?150:600;g.paused=(g.paused||0)+pause;   // short pause to see the result; not counted in your time
+  setTimeout(async()=>{g.fb=null;g.typo=false;g.i++;if(g.i>=g.qs.length){g.ms=Math.max(0,Date.now()-g.t0-(g.paused||0));try{await fbReq('PUT','duels/'+g.id+'/res/'+lbMe.pid,{s:g.score,ms:g.ms});const d=duelsObj[g.id];d.res=d.res||{};d.res[lbMe.pid]={s:g.score,ms:g.ms};pollShared();}catch(e){}updDuelBtn();}renderDuelPlay();},pause);}
 
 loadLbMe().then(()=>{
   setTimeout(()=>{renderCloud();cloudPull();},1500);   // cloud save code is in a later <script>
