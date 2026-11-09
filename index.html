@@ -653,6 +653,7 @@ body.calm .nfx-type .tw-caret{display:none}
 @keyframes epFlow{to{background-position:300% 0}}
 .sf-row.epic{border:1px solid;margin:2px 0}.sf-row.epic .sf-txt b{color:#fff}
 @media (prefers-reduced-motion:reduce){.ep-shine,.ep-spark,.ep-rainbow,.ep-rainbow .ep-title,.ep-rainbow .ep-art svg{animation:none}}
+.bf-hid{opacity:.45}.bf-hid .bfeed-txt::after,.sf-row.bf-hid .sf-txt::after{content:' (hidden)';font-style:italic;font-size:12px;color:var(--text3)}
 .bf-dot{display:none;width:8px;height:8px;border-radius:50%;background:#ff5a5a;margin-left:5px;vertical-align:middle;box-shadow:0 0 6px rgba(255,90,90,.7)}.bf-dot.on{display:inline-block}
 .sf-list{display:flex;flex-direction:column;padding:2px 10px 10px;gap:0}.sf-row{display:flex;align-items:center;gap:8px;padding:3px 6px;border-radius:8px;cursor:pointer;font-size:12.5px}.sf-row:hover{background:var(--surface2)}.sf-art{flex:0 0 26px;line-height:0;display:flex;justify-content:center}.sf-art svg{width:24px;height:auto}.sf-txt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sf-t{font-size:11px;color:var(--text3);white-space:nowrap}
 .side-feed{flex:none}
@@ -4584,7 +4585,7 @@ function bfeedSeen(){try{return +localStorage.getItem(BF_SEEN)||0;}catch(e){retu
 function bfeedVisible(){return bfeed.filter(e=>lbVisible(e.pid)&&badgeFeedText(e)&&sxFeedOk(e));}
 function sxFeedOk(e){const n=sxCountOf(e.pid);if(n==null)return true;if(e.b==='?')return n>=(+e.k||1);if(e.b==='omnia'||e.b==='omniamax')return n>=SX_IDS.length;return true;}
 function renderFeedBits(){const vis=bfeedVisible(),sec=document.getElementById('sideFeed'),list=document.getElementById('sideFeedList');
-  if(sec&&list){sec.style.display=vis.length?'':'none';list.innerHTML=vis.slice(0,6).map(e=>{const x=badgeFeedText(e);if(EPIC[e.b])return '<div class="sf-row epic '+EPIC[e.b].cls+'" onclick="openBadges(\'feed\')"><span class="ep-shine"></span><span class="sf-art">'+x.art+'</span><span class="sf-txt"><b>'+esc(x.name)+'</b> earned <b>'+EPIC[e.b].name+'</b>! 🎉</span><span class="sf-t">'+(e.t?timeAgo(e.t):'')+'</span></div>';return '<div class="sf-row" onclick="openBadges(\'feed\')"><span class="sf-art">'+x.art+'</span><span class="sf-txt"><b>'+esc(x.name)+'</b> '+esc(x.what)+'</span><span class="sf-t">'+(e.t?timeAgo(e.t):'')+'</span></div>';}).join('');}
+  if(sec&&list){sec.style.display=vis.length?'':'none';list.innerHTML=vis.slice(0,6).map(e=>{const x=badgeFeedText(e);if(EPIC[e.b])return '<div class="sf-row epic '+EPIC[e.b].cls+(bfHid(e)?' bf-hid':'')+'" onclick="openBadges(\'feed\')"><span class="ep-shine"></span><span class="sf-art">'+x.art+'</span><span class="sf-txt"><b>'+esc(x.name)+'</b> earned <b>'+EPIC[e.b].name+'</b>! 🎉</span><span class="sf-t">'+(e.t?timeAgo(e.t):'')+'</span></div>';return '<div class="sf-row'+(bfHid(e)?' bf-hid':'')+'" onclick="openBadges(\'feed\')"><span class="sf-art">'+x.art+'</span><span class="sf-txt"><b>'+esc(x.name)+'</b> '+esc(x.what)+'</span><span class="sf-t">'+(e.t?timeAgo(e.t):'')+'</span></div>';}).join('');}
   const seen=bfeedSeen(),fresh=vis.some(e=>(e.t||0)>seen&&!(lbMe&&e.pid===lbMe.pid));['badgeBtnDot','feedTabDot'].forEach(id=>{const d=document.getElementById(id);if(d)d.classList.toggle('on',fresh&&!(id==='feedTabDot'&&bfeedTab==='feed'&&document.getElementById('badgeOverlay').style.display==='flex'));});}
 function bfeedMarkSeen(){const t=Math.max(0,...bfeed.map(e=>e.t||0));try{localStorage.setItem(BF_SEEN,String(Math.max(t,bfeedSeen())));}catch(e){}renderFeedBits();}
 function renderBadgeFeed(){renderFeedBits();if(bfeedTab==='feed'&&document.getElementById('badgeOverlay').style.display==='flex')bfeedMarkSeen();const box=document.getElementById('bfeedList');if(!box)return;
@@ -4592,12 +4593,14 @@ function renderBadgeFeed(){renderFeedBits();if(bfeedTab==='feed'&&document.getEl
   // the newest Fere Omnia / Omnia / Omnia Maxima stays pinned at the top for 3 days (shown once, as the banner)
   const pin=vis.find(e=>EPIC[e.b]&&e.t&&Date.now()-e.t<3*86400e3),px=pin&&badgeFeedText(pin);
   const rows=vis.filter(e=>e!==pin).map(e=>{const x=badgeFeedText(e);if(!x)return '';if(EPIC[e.b])return epicRow(e,x,false);
-    return '<div class="bfeed-row'+(lbMe&&e.pid===lbMe.pid?' me':'')+'"><span class="bfeed-art">'+x.art+'</span><span class="bfeed-txt"><b>'+esc(x.name)+'</b> '+esc(x.what)+'</span><span class="bfeed-t">'+(e.t?timeAgo(e.t):'')+'</span></div>';}).join('');
+    return '<div class="bfeed-row'+(lbMe&&e.pid===lbMe.pid?' me':'')+(bfHid(e)?' bf-hid" title="Hidden from everyone else (you can see it as admin)':'')+'"><span class="bfeed-art">'+x.art+'</span><span class="bfeed-txt"><b>'+esc(x.name)+'</b> '+esc(x.what)+'</span><span class="bfeed-t">'+(e.t?timeAgo(e.t):'')+'</span></div>';}).join('');
   box.innerHTML=(px?epicRow(pin,px,true):'')+rows||'<p class="bfeed-empty">No badges yet. When anyone on the leaderboard earns one, it shows up here.</p>';}
 // Fere Omnia, Omnia and Omnia Maxima get a big shining celebration in the feed
+// the admin still sees posts by hidden players, greyed out like on the leaderboard
+const bfHid=e=>isAdmin&&!(lbMe&&e.pid===lbMe.pid)&&(lbHidden.has(e.pid)||!lbEnough(e.pid));
 const EPIC={fereomnia:{cls:'ep-gold',title:'FERE OMNIA',name:'Fere Omnia',line:'They earned almost every badge!'},omnia:{cls:'ep-royal',title:'OMNIA',name:'Omnia',line:'They earned EVERY badge!'},omniamax:{cls:'ep-rainbow',title:'OMNIA MAXIMA',name:'Omnia Maxima',line:'They maxed out EVERY badge!'}};
 function epicRow(e,x,pinned){const E=EPIC[e.b],bd=META_BADGES.find(b=>b.id===e.b);const art=badgeArt(e.b,1,1,{meta:true,size:pinned?72:56});
-  return '<div class="bfeed-row epic '+E.cls+(pinned?' pinned':'')+'"><span class="ep-shine"></span><span class="ep-spark s1">✦</span><span class="ep-spark s2">✧</span><span class="ep-spark s3">✦</span><span class="ep-spark s4">✧</span>'
+  return '<div class="bfeed-row epic '+E.cls+(pinned?' pinned':'')+(bfHid(e)?' bf-hid':'')+'"><span class="ep-shine"></span><span class="ep-spark s1">✦</span><span class="ep-spark s2">✧</span><span class="ep-spark s3">✦</span><span class="ep-spark s4">✧</span>'
     +'<span class="bfeed-art ep-art">'+art+'</span><span class="bfeed-txt"><span class="ep-title">'+(pinned?'🎉 ':'')+E.title+(pinned?' 🎉':'')+'</span><b>'+esc(x.name)+'</b> earned <b>'+E.name+'</b>! '+E.line+'</span><span class="bfeed-t">'+(e.t?timeAgo(e.t):'')+'</span></div>';}
 function timeAgo(t){const s=Math.max(0,(Date.now()-t)/1000);return s<60?'just now':s<3600?Math.floor(s/60)+'m ago':s<86400?Math.floor(s/3600)+'h ago':Math.floor(s/86400)+'d ago';}
 // ── BADGE UNLOCK: full-screen reveal of the new medal (tap to continue; several in a row queue up) ──
