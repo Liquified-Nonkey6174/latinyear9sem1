@@ -3950,7 +3950,7 @@ const seesPid=pid=>isAdmin||(lbMe&&pid===lbMe.pid);
 const chatVisible=pid=>!mutedSet.has(pid)||seesPid(pid);
 // New players appear on other people's leaderboards once they have LB_MIN_PTS all-time points (they always see themselves).
 const LB_MIN_PTS=100;
-const lbEnough=pid=>((lbPlayers[pid]||{}).total||0)>=LB_MIN_PTS;
+const lbEnough=pid=>{const t=(lbPlayers[pid]||{}).total||0;return t>=LB_MIN_PTS||t<0;};   // 0–99 hidden; penalty (negative) scores are shown
 const lbVisible=pid=>(!lbHidden.has(pid)&&lbEnough(pid))||seesPid(pid);
 // New accounts need CHAT_MIN_PTS points before they can chat (stops spam from throwaway accounts; the database rules check it too).
 const CHAT_MIN_PTS=100;
