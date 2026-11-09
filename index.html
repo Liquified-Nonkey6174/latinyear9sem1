@@ -4198,7 +4198,7 @@ function openPlayerCard(pid){const p=lbPlayers[pid];if(!p)return;const k=lbKeys(
 let classChal=null;
 function renderClassChallenge(){const box=document.getElementById('classChallenge');if(!box)return;box.innerHTML='';
   const target=classChal&&+classChal.target;if(!target){if(isAdmin){const b=document.createElement('button');b.className='lb-link';b.textContent='+ Set a class challenge';b.onclick=editClassChallenge;box.appendChild(b);}return;}
-  const wk=lbKeys().w;const total=Object.entries(lbPlayers).filter(([pid])=>!lbHidden.has(pid)||seesPid(pid)).reduce((a,[,p])=>a+((p&&p.w&&p.w[wk])||0),0);const pct=Math.min(100,Math.round(total/target*100));
+  const wk=lbKeys().w;const total=Object.entries(lbPlayers).filter(([pid])=>!lbHidden.has(pid)||seesPid(pid)).reduce((a,[,p])=>a+Math.max(0,(p&&p.w&&p.w[wk])||0),0);   // a negative (penalty) score counts as 0 hereconst pct=Math.min(100,Math.round(total/target*100));
   box.className='cc-box'+(total>=target?' done':'');
   box.innerHTML='<div class="cc-top"><span>🏆 '+esc(classChal.title||'Class challenge')+'</span><span>'+total.toLocaleString()+' / '+target.toLocaleString()+'</span></div><div class="cc-bar"><div style="width:'+pct+'%"></div></div><div class="cc-sub">'+(total>=target?'Goal reached this week! 🎉':'Correct answers by everyone this week')+'</div>';
   if(isAdmin){const b=document.createElement('button');b.className='lb-act';b.textContent='✎';b.title='Edit challenge';b.onclick=editClassChallenge;box.querySelector('.cc-top').appendChild(b);}}
