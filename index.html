@@ -3974,7 +3974,7 @@ function renderLb(){const list=document.getElementById('lbList');if(!list||!lbPl
     const rank=r.rank;
     const it=document.createElement('div');it.className='lb-item'+(lbMe&&r.pid===lbMe.pid?' me':'')+(rank<=3&&r.n>0?' top':'');
     const rk=document.createElement('span');rk.className='lb-rank';rk.textContent=SET.ordinal?ordinal(rank):rank;
-    const nm=document.createElement('span');nm.className='lb-name';nm.appendChild(nameEl(r.pid,r.name));{const bc=badgeChipsEl(lbPlayers[r.pid]);if(bc){nm.classList.add('has-chips');nm.appendChild(bc);}}if(isAdmin&&lbHidden.has(r.pid)){it.style.opacity='.55';nm.title='Hidden from everyone else';nm.append(' 👻');}
+    const nm=document.createElement('span');nm.className='lb-name';nm.appendChild(nameEl(r.pid,r.name));{const bc=badgeChipsEl(lbPlayers[r.pid],false,r.pid);if(bc){nm.classList.add('has-chips');nm.appendChild(bc);}}if(isAdmin&&lbHidden.has(r.pid)){it.style.opacity='.55';nm.title='Hidden from everyone else';nm.append(' 👻');}
     else if(!lbEnough(r.pid)&&(isAdmin||(lbMe&&r.pid===lbMe.pid))){const left=LB_MIN_PTS-((lbPlayers[r.pid]||{}).total||0);const note=document.createElement('span');note.className='lb-note';note.textContent=lbMe&&r.pid===lbMe.pid?'only you can see this · '+left+' ⭐ to go':'under '+LB_MIN_PTS+' ⭐';note.title='Players appear on the leaderboard for everyone once they have '+LB_MIN_PTS+' ⭐ in total.';nm.appendChild(note);if(isAdmin&&!(lbMe&&r.pid===lbMe.pid))it.style.opacity='.55';}
     const ct=document.createElement('span');ct.className='lb-count';ct.textContent=r.n.toLocaleString();
     it.append(rk,nm,ct);it.classList.add('click');it.title=lbMe&&r.pid===lbMe.pid?'Change your look':'View '+r.name;
@@ -4131,7 +4131,7 @@ async function saveLook(){const me=lbPlayers[lbMe.pid]||{},fontChanged=lookSel.f
     lbPlayers[lbMe.pid]={...(lbPlayers[lbMe.pid]||{}),av:lookSel.av||undefined,color:lookSel.color||undefined,font:lookSel.font||undefined,fx:lookSel.fx||undefined};closeOverlay('lookOverlay');renderLb();renderChat();renderLbProfile();}
   catch(e){document.getElementById('lookErr').textContent='Couldn’t save. If this keeps happening, the database rules need updating (ask the admin).';}}
 function openPlayerCard(pid){const p=lbPlayers[pid];if(!p)return;const k=lbKeys();const box=document.getElementById('playerCard');box.innerHTML='';
-  const h=document.createElement('div');h.className='pc-name';const big=nameEl(pid,p.name);h.appendChild(big);box.appendChild(h);{const bc=badgeChipsEl(p,true);if(bc){const r=document.createElement('div');r.style.cssText='text-align:center;margin:-4px 0 10px';r.appendChild(bc);box.appendChild(r);}}
+  const h=document.createElement('div');h.className='pc-name';const big=nameEl(pid,p.name);h.appendChild(big);box.appendChild(h);{const bc=badgeChipsEl(p,true,pid);if(bc){const r=document.createElement('div');r.style.cssText='text-align:center;margin:-4px 0 10px';r.appendChild(bc);box.appendChild(r);}}
   const g=document.createElement('div');g.className='pc-grid';[['Today','d'],['Week','w'],['Month','m'],['All time','all']].forEach(([l,per])=>{const c=document.createElement('div');c.innerHTML='<b>'+lbScore(p,per,k).toLocaleString()+'</b><span>'+l+'</span>';g.appendChild(c);});box.appendChild(g);
   if(isAdmin){const rb=document.createElement('button');rb.className='btn-secondary';rb.style.marginBottom='8px';rb.textContent='Rename (admin)';rb.onclick=()=>{closeOverlay('playerOverlay');adminRename(pid);};box.appendChild(rb);
     const hb=document.createElement('button');hb.className='btn-secondary';hb.style.margin='0 0 8px 6px';hb.textContent='Name history';const hist=document.createElement('div');hist.className='nh-box';
@@ -4499,13 +4499,14 @@ async function loadBadgeFeed(force){if(!force&&Date.now()-bfeedAt<20000)return r
   catch(e){if(box)box.innerHTML='<p class="bfeed-empty">Couldn’t load the badge feed'+(/40[13]/.test(e.message)?' (the database rules need updating).':'. Check your internet.')+'</p>';return;}renderBadgeFeed();}
 const BF_SEEN='latin_bfeed_seen';
 function bfeedSeen(){try{return +localStorage.getItem(BF_SEEN)||0;}catch(e){return 0;}}
-function bfeedVisible(){return bfeed.filter(e=>lbVisible(e.pid)&&badgeFeedText(e));}
+function bfeedVisible(){return bfeed.filter(e=>lbVisible(e.pid)&&badgeFeedText(e)&&sxFeedOk(e));}
+function sxFeedOk(e){const n=sxCountOf(e.pid);if(n==null)return true;if(e.b==='?')return n>=(+e.k||1);if(e.b==='omnia'||e.b==='omniamax')return n>=SX_IDS.length;return true;}
 function renderFeedBits(){const vis=bfeedVisible(),sec=document.getElementById('sideFeed'),list=document.getElementById('sideFeedList');
   if(sec&&list){sec.style.display=vis.length?'':'none';list.innerHTML=vis.slice(0,6).map(e=>{const x=badgeFeedText(e);return '<div class="sf-row" onclick="openBadges(\'feed\')"><span class="sf-art">'+x.art+'</span><span class="sf-txt"><b>'+esc(x.name)+'</b> '+esc(x.what)+'</span><span class="sf-t">'+(e.t?timeAgo(e.t):'')+'</span></div>';}).join('');}
   const seen=bfeedSeen(),fresh=vis.some(e=>(e.t||0)>seen&&!(lbMe&&e.pid===lbMe.pid));['badgeBtnDot','feedTabDot'].forEach(id=>{const d=document.getElementById(id);if(d)d.classList.toggle('on',fresh&&!(id==='feedTabDot'&&bfeedTab==='feed'&&document.getElementById('badgeOverlay').style.display==='flex'));});}
 function bfeedMarkSeen(){const t=Math.max(0,...bfeed.map(e=>e.t||0));try{localStorage.setItem(BF_SEEN,String(Math.max(t,bfeedSeen())));}catch(e){}renderFeedBits();}
 function renderBadgeFeed(){renderFeedBits();if(bfeedTab==='feed'&&document.getElementById('badgeOverlay').style.display==='flex')bfeedMarkSeen();const box=document.getElementById('bfeedList');if(!box)return;
-  const rows=bfeed.filter(e=>lbVisible(e.pid)).map(e=>{const x=badgeFeedText(e);if(!x)return '';
+  const rows=bfeed.filter(e=>lbVisible(e.pid)&&sxFeedOk(e)).map(e=>{const x=badgeFeedText(e);if(!x)return '';
     return '<div class="bfeed-row'+(lbMe&&e.pid===lbMe.pid?' me':'')+'"><span class="bfeed-art">'+x.art+'</span><span class="bfeed-txt"><b>'+esc(x.name)+'</b> '+esc(x.what)+'</span><span class="bfeed-t">'+(e.t?timeAgo(e.t):'')+'</span></div>';}).join('');
   box.innerHTML=rows||'<p class="bfeed-empty">No badges yet. When anyone on the leaderboard earns one, it shows up here.</p>';}
 function timeAgo(t){const s=Math.max(0,(Date.now()-t)/1000);return s<60?'just now':s<3600?Math.floor(s/60)+'m ago':s<86400?Math.floor(s/3600)+'h ago':Math.floor(s/86400)+'d ago';}
@@ -4569,8 +4570,16 @@ function badgeChip(id,l,big){const bd=badgeById(id);if(!bd||!l)return null;const
   c.className='bchip'+(big?' big':'')+(bd.meta==='count'?' arc':'')+(bd.tiers?' m-'+METAL[l-1]:bd.lv.length>1?' lv'+Math.min(l,7):'');c.title=(bd.meta==='count'?bd.name+': '+l+' secret badge'+(l===1?'':'s'):badgeTierName(bd,l))+(bd.lat?' ('+bd.lat+')':'');
   c.classList.add('art');c.innerHTML=bd.meta?badgeArt(bd.id,1,1,{meta:true,size:big?46:30,count:bd.meta==='count'?l:null}):bdArt(bd,l,big?46:30);
   return c;}
-function shownBadges(p){const seen={};String((p&&p.bd)||'').split(',').map(x=>x.split(':')).map(([id,l])=>OLD_RANK[id]?['gradus',String(OLD_RANK[id])]:[id,l]).forEach(([id,l])=>{if(id&&(!seen[id]||+l>+seen[id]))seen[id]=l;});return Object.entries(seen).filter(([id,l])=>badgeById(id)&&+l>0).slice(0,MAX_PINS).map(([id,l])=>[id,badgeById(id).meta==='count'?+l:Math.min(+l,badgeById(id).lv.length)]);}
-function badgeChipsEl(p,big){const w=document.createElement('span');w.className='bchips';shownBadges(p).forEach(([id,l])=>{const c=badgeChip(id,l,big);if(c)w.appendChild(c);});return w.childNodes.length?w:null;}
+// Other players' secret badges only count if the server has a record of them earning them.
+const sxCounts={},sxPending=new Set();
+function sxCountOf(pid){if(!pid||(lbMe&&pid===lbMe.pid))return null;const c=sxCounts[pid];if(c&&Date.now()-c.t<300000)return c.n;
+  if(!sxPending.has(pid)){sxPending.add(pid);(async()=>{try{const r=await fbReq('GET','sx/got/'+pid);sxCounts[pid]={n:r?Object.keys(r).length:0,t:Date.now()};}catch(e){sxCounts[pid]={n:0,t:Date.now()};}
+    sxPending.delete(pid);try{renderLb();renderFeedBits();renderBadgeFeed();}catch(e){}})();}return c?c.n:0;}
+function sxVerify(list,pid){const n=sxCountOf(pid);if(n==null)return list;let left=n;
+  return list.filter(([id,l])=>{const b=badgeById(id);if(!b)return false;if(b.secret){if(left<=0)return false;left--;return true;}if(b.meta==='all'||b.meta==='max')return n>=SX_IDS.length;return true;})
+    .map(([id,l])=>badgeById(id).meta==='count'?[id,Math.min(l,n)]:[id,l]).filter(([id,l])=>l>0);}
+function shownBadges(p,pid){if(pid)return sxVerify(shownBadges(p),pid);const seen={};String((p&&p.bd)||'').split(',').map(x=>x.split(':')).map(([id,l])=>OLD_RANK[id]?['gradus',String(OLD_RANK[id])]:[id,l]).forEach(([id,l])=>{if(id&&(!seen[id]||+l>+seen[id]))seen[id]=l;});return Object.entries(seen).filter(([id,l])=>badgeById(id)&&+l>0).slice(0,MAX_PINS).map(([id,l])=>[id,badgeById(id).meta==='count'?+l:Math.min(+l,badgeById(id).lv.length)]);}
+function badgeChipsEl(p,big,pid){const w=document.createElement('span');w.className='bchips';shownBadges(p,pid).forEach(([id,l])=>{const c=badgeChip(id,l,big);if(c)w.appendChild(c);});return w.childNodes.length?w:null;}
 let _bdSaving=false;
 async function syncShownBadges(){if(!lbMe||_bdSaving)return;const got=bjson(BADGE_KEY);const str=badgePins().filter(id=>got[id]).map(id=>id+':'+got[id].l).join(',');
   const cur=(lbPlayers[lbMe.pid]||{}).bd||'';if(str===cur){bdSaveErr='';return;}_bdSaving=true;

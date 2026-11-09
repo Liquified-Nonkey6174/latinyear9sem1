@@ -68,7 +68,7 @@
       },
       "got": {
         "$uid": {
-          ".read": "auth != null && (auth.uid === $uid || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2')",
+          ".read": "auth != null",
           "$h": {
             ".write": "auth != null && auth.uid === $uid && !data.exists() && (($h !== 'c409b3e4bcac1ee8203d86fc13fd6e37' && root.child('sx').child('key').child($h).exists()) || ($h === 'c409b3e4bcac1ee8203d86fc13fd6e37' && root.child('sx').child('roll').child($uid).exists() && root.child('sx').child('roll').child($uid).val() % 1000 === 777 && now - root.child('sx').child('roll').child($uid).val() < 60000))",
             ".validate": "newData.isNumber() && newData.val() === now"
