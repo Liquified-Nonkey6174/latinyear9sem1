@@ -6112,11 +6112,21 @@ async function codeEmail(code){const h=await crypto.subtle.digest('SHA-256',new 
 function newCode(){const pool=[...new Set(allWordsFlat().map(w=>String(w.lat).toLowerCase()).filter(x=>/^[a-z]{3,8}$/.test(x)))];const r=n=>{const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]%n;};
   return [0,1,2,3].map(()=>pool[r(pool.length)]).join('-')+'-'+(10+r(90));}
 function cloudMsg(t,ok){const el=document.getElementById('cloudMsg');if(el){el.textContent=t||'';el.style.color=ok===false?'var(--red)':ok?'var(--green)':'var(--text3)';}}
+// Give this device's account an email + password. Normally the email is just added to it (same id). If Firebase refuses
+// (its "email enumeration protection" wants the email verified first), make a new account with that email instead and
+// merge this device's account into it, so points, badges and progress all come along.
+async function acctAttach(email,pw){await playerToken();
+  try{const d=await authPost('https://identitytoolkit.googleapis.com/v1/accounts:update',{idToken:playerAuth.idToken,email,password:pw,returnSecureToken:true});
+    playerAuth=authFrom({...d,localId:d.localId||playerAuth.uid});savePlayerAuth();return;}
+  catch(e){if(!/OPERATION_NOT_ALLOWED.*verify|verify the new email/i.test(e.message))throw e;}
+  const nd=await authPost('https://identitytoolkit.googleapis.com/v1/accounts:signUp',{email,password:pw,returnSecureToken:true}),tgt=authFrom(nd);
+  try{try{await lbFlush();}catch(e){}await playerToken();await mergeAccounts(tgt,{...playerAuth});}
+  catch(e){try{await authPost('https://identitytoolkit.googleapis.com/v1/accounts:delete',{idToken:tgt.idToken});}catch(x){}e.mergeFail=true;throw e;}
+  await acctSwitch(nd);}
 async function cloudMakeCode(){if(cloudInfo().code){cloudShowCode=true;renderCloud();return;}
-  cloudMsg('Making your code…');try{await playerToken();const code=newCode();
-    const d=await authPost('https://identitytoolkit.googleapis.com/v1/accounts:update',{idToken:playerAuth.idToken,email:await codeEmail(code),password:code,returnSecureToken:true});
-    if(d.idToken)playerAuth=authFrom({...d,localId:d.localId||playerAuth.uid});savePlayerAuth();cloudSetInfo({code});cloudShowCode=true;cloudMsg('');renderCloud();cloudPulled?cloudPush():cloudPull();}
-  catch(e){cloudMsg('Couldn’t make a code: '+(/EMAIL_EXISTS/.test(e.message)?'try again.':/OPERATION_NOT_ALLOWED/.test(e.message)?'cloud save isn’t switched on for this site yet (ask the admin).':'check your internet and try again.'),false);}}
+  cloudMsg('Making your code…');try{const code=newCode();
+    await acctAttach(await codeEmail(code),code);cloudSetInfo({code});cloudShowCode=true;cloudMsg('');renderCloud();cloudPulled?cloudPush():cloudPull();}
+  catch(e){cloudMsg('Couldn’t make a code: '+(e.mergeFail?mergeErr(e):/EMAIL_EXISTS/.test(e.message)?'try again.':/OPERATION_NOT_ALLOWED/.test(e.message)?'cloud save isn’t switched on for this site yet (ask the admin).':'check your internet and try again.'),false);}}
 async function cloudRestore(){const code=normCode(prompt('Type your recovery code (e.g. rosa-bellum-via-aqua-47):'));if(!code)return;cloudMsg('Checking the code…');
   let d;try{d=await authPost('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword',{email:await codeEmail(code),password:code,returnSecureToken:true});}
   catch(e){cloudMsg(/INVALID|NOT_FOUND|PASSWORD|CREDENTIAL/.test(e.message)?'That code didn’t work. Check the spelling.':'Couldn’t reach the server. Check your internet.',false);return;}
@@ -6150,8 +6160,7 @@ async function acctSubmit(){const email=document.getElementById('acctEmail').val
   if(acctMode==='merge'){acctMsg('Signing in to the other account…');let d;try{d=await authPost('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword',{email,password:pw,returnSecureToken:true});}catch(e){acctMsg(acctErr(e),false);return;}
     return acctMergeIn(authFrom(d),email);}
   if(acctMode==='create'){if(pw.length<6){acctMsg('Use a password of at least 6 characters.',false);return;}acctMsg('Saving…');
-    try{await playerToken();const d=await authPost('https://identitytoolkit.googleapis.com/v1/accounts:update',{idToken:playerAuth.idToken,email,password:pw,returnSecureToken:true});
-      playerAuth=authFrom({...d,localId:d.localId||playerAuth.uid});savePlayerAuth();}catch(e){acctMsg(acctErr(e),false);return;}
+    try{await acctAttach(email,pw);}catch(e){acctMsg(e.mergeFail?'Couldn’t move your progress into the new account: '+mergeErr(e):acctErr(e),false);return;}
     cloudSetInfo({email,code:null,err:''});closeOverlay('acctOverlay');toast('✓ Saved. Sign in with '+email+' on any device to get everything there.');renderCloud();renderLbProfile();cloudPulled?cloudPush():cloudPull();return;}
   acctMsg('Signing in…');let d;try{d=await authPost('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword',{email,password:pw,returnSecureToken:true});}catch(e){acctMsg(acctErr(e),false);return;}
   if(playerAuth&&playerAuth.uid===d.localId){playerAuth=authFrom(d);savePlayerAuth();cloudSetInfo({email,code:null});closeOverlay('acctOverlay');toast('You’re already signed in to that account here.');renderCloud();renderLbProfile();return;}
