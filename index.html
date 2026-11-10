@@ -764,7 +764,7 @@ body:has(.overlay[style*="display: flex"]) .side-fab,body:has(#bReveal[style*="d
       <div style="margin-top:8px"><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="annEdit()">📢 Edit announcement</button><label class="btn-secondary" style="font-size:12px;padding:6px 14px;cursor:pointer;display:inline-block">🔒 Upload secret badge answers<input type="file" accept=".json" style="display:none" onchange="if(this.files[0])sxUpload(this.files[0]);this.value=''"></label></div>
     </div>
   </div>
-  <div class="settings-row"><button class="settings-btn" onclick="showSettings()">⚙ Settings</button> <button class="settings-btn" onclick="openBadges()">🏅 Badges <span id="badgeBtnCount" style="opacity:.7;font-size:12px"></span><span class="bf-dot" id="badgeBtnDot" title="New in the badge feed"></span></button></div>
+  <div class="settings-row"><button class="settings-btn" onclick="showSettings()">⚙ Settings</button> <button class="settings-btn" id="acctBtn" onclick="acctHub()" title="Sign in, or use your account on other devices">👤 Account</button> <button class="settings-btn" onclick="openBadges()">🏅 Badges <span id="badgeBtnCount" style="opacity:.7;font-size:12px"></span><span class="bf-dot" id="badgeBtnDot" title="New in the badge feed"></span></button></div>
   <div class="nav-tabs">
     <button class="nav-tab active" onclick="showMainTab('practice')">Practice</button>
     <button class="nav-tab" onclick="showMainTab('read')">Reading</button>
@@ -2020,6 +2020,13 @@ body:has(.overlay[style*="display: flex"]) .side-fab,body:has(#bReveal[style*="d
   </div>
 </div>
 
+<div id="acctHubOverlay" class="overlay" style="display:none;z-index:125" onclick="closeOverlay('acctHubOverlay')">
+  <div class="about-box ann-box" onclick="event.stopPropagation()">
+    <button class="about-close" onclick="closeOverlay('acctHubOverlay')">×</button>
+    <div class="ann-head">👤 Account</div>
+    <div id="acctHubBody"></div>
+  </div>
+</div>
 <div id="acctOverlay" class="overlay" style="display:none;z-index:130" onclick="closeOverlay('acctOverlay')">
   <div class="about-box ann-box" onclick="event.stopPropagation()">
     <button class="about-close" onclick="closeOverlay('acctOverlay')">×</button>
@@ -2029,7 +2036,7 @@ body:has(.overlay[style*="display: flex"]) .side-fab,body:has(#bReveal[style*="d
       <input class="acct-in" id="acctEmail" type="email" autocomplete="email" placeholder="Email" spellcheck="false">
       <input class="acct-in" id="acctPass" type="password" autocomplete="current-password" placeholder="Password">
       <div id="acctMsg" class="backup-msg"></div>
-      <div class="ann-btns"><button class="btn-primary" id="acctGo" type="submit">Sign in</button><button type="button" class="lb-link" id="acctSwapBtn" onclick="acctSwap()"></button><button type="button" class="lb-link muted" id="acctForgotBtn" onclick="acctForgot()">Forgot password?</button></div>
+      <div class="ann-btns"><button class="btn-primary" id="acctGo" type="submit">Sign in</button><button type="button" class="lb-link" id="acctSwapBtn" onclick="acctSwap()"></button><button type="button" class="lb-link muted" id="acctForgotBtn" onclick="acctForgot()">Forgot password?</button><button type="button" class="lb-link muted" id="acctCodeBtn" onclick="acctMergeCode()">Use a recovery code instead</button></div>
     </form>
   </div>
 </div>
@@ -3967,8 +3974,8 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.body.class
 setInterval(()=>{const f=document.getElementById('sideFab');if(!f||!isPhone()||document.body.classList.contains('side-open'))return;const n=(chatMsgs||[]).length;if(!sideSeen)sideSeen=n;f.classList.toggle('unread',n>sideSeen);},3000);
 let lbPage=0,lbLastQ='',lbLimit=10,lbMe=null,lbPending=0,lbInFlight=0,lbInFlightBase=0,lbFlushTimer=null,lbPlayers={},lbPlayersLoaded=false,lbPeriod='d',chatObj={},chatMsgs=[],chatLastSend=0,lbEditing=false;
 const fbUrl=path=>FB_ROOT+'/'+path+'.json';
-async function fbReq(method,path,body,opts){opts=opts||{};const tok=opts.admin?await adminToken():await playerToken();
-  if(!opts.admin&&lbMe&&lbMe.pid!==playerAuth.uid){lbMe=null;saveLbMe();renderLbProfile();}
+async function fbReq(method,path,body,opts){opts=opts||{};const tok=opts.tok||(opts.admin?await adminToken():await playerToken());
+  if(!opts.admin&&!opts.tok&&lbMe&&lbMe.pid!==playerAuth.uid){lbMe=null;saveLbMe();renderLbProfile();}
   const q=opts.query||'';const r=await acFetch(fbUrl(path)+q+(q?'&':'?')+'auth='+encodeURIComponent(tok),{method,headers:body?{'Content-Type':'application/json'}:undefined,body:body?JSON.stringify(body):undefined,keepalive:!!opts.keepalive});if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}
 
 // Live updates: Firebase pushes only what changed (put/patch events), instead of the page re-downloading.
@@ -4324,7 +4331,8 @@ async function saveLook(){const me=lbPlayers[lbMe.pid]||{},fontChanged=lookSel.f
 // Admin: every points save is logged (plog/{uid}: points added + server time). Fast saves are highlighted.
 async function showPointsHistory(pid,box){box.innerHTML='<p class="muted">Loading…</p>';let r;
   try{r=await fbReq('GET','plog/'+pid,null,{admin:true,query:'?orderBy=%22$key%22&limitToLast=300'});}catch(e){box.innerHTML='<p class="muted">Couldn’t load the history ('+esc(e.message)+'). The database rules may need updating.</p>';return;}
-  const rows=Object.values(r||{}).filter(x=>x&&x.t).sort((a,b)=>a.t-b.t);if(!rows.length){box.innerHTML='<p class="muted">No points saved since the history started.</p>';return;}
+  let ml=null;try{ml=await fbReq('GET','mlog/'+pid,null,{admin:true});}catch(e){}
+  const rows=Object.values(r||{}).filter(x=>x&&x.t).concat(Object.values(ml||{}).filter(x=>x&&x.t).map(x=>({t:x.t,n:x.n,mg:x.name}))).sort((a,b)=>a.t-b.t);if(!rows.length){box.innerHTML='<p class="muted">No points saved since the history started.</p>';return;}
   const MD={mc:'multiple choice',ty:'typed',dr:'declension/conj.',ma:'matching'};let exT=0;rows.forEach(x=>{if(x.ex)exT+=x.ex;});
   const tot=rows.reduce((a,x)=>a+(+x.n||0),0),days={},byMode={};rows.forEach(x=>{const d=new Date(x.t).toLocaleDateString();days[d]=(days[d]||0)+(+x.n||0);
     if(x.a){const m=byMode[x.md]=byMode[x.md]||{a:0,w:0,ps:0,pn:0};m.a+=x.a;m.w+=x.w||0;if(x.pc){m.ps+=x.pc*x.a;m.pn+=x.a;}}});
@@ -4333,10 +4341,10 @@ async function showPointsHistory(pid,box){box.innerHTML='<p class="muted">Loadin
   let h='<p style="margin:6px 0"><b>'+rows.length+'</b> saves, <b>'+tot.toLocaleString()+'</b> points since the history started'+(exT?' (<b>'+exT.toLocaleString()+'</b> from exams)':'')+'. '+Object.entries(days).slice(-7).map(([d,n])=>esc(d)+': '+n.toLocaleString()).join(' · ')+'</p>';
   const modes=Object.entries(byMode).filter(([k])=>MD[k]);if(modes.length)h+='<p style="margin:4px 0 8px;font-size:13px">'+modes.map(([k,m])=>'<b>'+MD[k]+'</b>: '+m.a+' answers, '+Math.round((m.a-m.w)/m.a*100)+'% right'+(m.pn?', '+(m.ps/m.pn/10).toFixed(1)+' s each':'')).join(' · ')+'</p>';
   h+='<div style="max-height:280px;overflow-y:auto"><table class="nh-table"><tr><th>When</th><th>Points</th><th>Answers</th><th>Mode</th><th>Pace</th></tr>';
-  rows.slice().reverse().forEach((x,i,arr)=>{const prev=arr[i+1],gap=prev?(x.t-prev.t)/1000:null,rate=gap?(x.n-(x.ex||0))/gap:null,fast=(rate!=null&&rate>2.5)||sus(x);
+  rows.slice().reverse().forEach((x,i,arr)=>{const prev=arr[i+1],gap=prev?(x.t-prev.t)/1000:null,rate=gap&&!x.mg?(x.n-(x.ex||0))/gap:null,fast=(rate!=null&&rate>2.5)||sus(x);
     h+='<tr'+(fast?' style="color:var(--red,#e07a6a)"':'')+'><td class="muted">'+new Date(x.t).toLocaleString([], {day:'numeric',month:'short',hour:'numeric',minute:'2-digit',second:'2-digit'})+'</td><td><b>+'+x.n+'</b></td>'
-      +'<td>'+(x.a?(x.a-(x.w||0))+'/'+x.a+' right':x.ex?'':'<span class="muted">–</span>')+(x.ex?(x.a?'<br>':'')+'📝 exam '+(x.es!=null?x.es+'/100':'')+(x.ex<x.n?' <span class="muted">(+'+x.ex+')</span>':''):'')+'</td><td class="muted">'+(x.md?MD[x.md]||'':'')+(x.ex?(x.md?' + ':'')+'exam':'')+'</td><td class="muted">'+(x.pc!=null?(x.pc/10).toFixed(1)+' s each':'')+(x.ex&&x.ed?(x.pc!=null?'<br>':'')+'took '+Math.max(1,Math.round(x.ed/60))+' min':'')+(fast?' ⚠':'')+'</td></tr>';});
-  box.innerHTML=h+'</table></div><p class="muted" style="font-size:11.5px">⚠ = 5+ answers at under 1 second each (what an autoclicker looks like), or points coming in faster than 2.5 a second. Answer details are recorded from now on; older saves show “–”. 📝 exam = ⭐ from an exam (5 per mark, never more than one per second spent on the paper); a big award arrives over several saves.</p>';}
+      +'<td>'+(x.mg!=null?'🔀 merged in '+esc(x.mg):x.a?(x.a-(x.w||0))+'/'+x.a+' right':x.ex?'':'<span class="muted">–</span>')+(x.ex?(x.a?'<br>':'')+'📝 exam '+(x.es!=null?x.es+'/100':'')+(x.ex<x.n?' <span class="muted">(+'+x.ex+')</span>':''):'')+'</td><td class="muted">'+(x.md?MD[x.md]||'':'')+(x.ex?(x.md?' + ':'')+'exam':'')+'</td><td class="muted">'+(x.pc!=null?(x.pc/10).toFixed(1)+' s each':'')+(x.ex&&x.ed?(x.pc!=null?'<br>':'')+'took '+Math.max(1,Math.round(x.ed/60))+' min':'')+(fast?' ⚠':'')+'</td></tr>';});
+  box.innerHTML=h+'</table></div><p class="muted" style="font-size:11.5px">⚠ = 5+ answers at under 1 second each (what an autoclicker looks like), or points coming in faster than 2.5 a second. Answer details are recorded from now on; older saves show “–”. 📝 exam = ⭐ from an exam (5 per mark, never more than one per second spent on the paper); a big award arrives over several saves. 🔀 = another account was merged into this one (its points were added).</p>';}
 function openPlayerCard(pid){const p=lbPlayers[pid];if(!p)return;const k=lbKeys();const box=document.getElementById('playerCard');box.innerHTML='';
   const h=document.createElement('div');h.className='pc-name';const big=nameEl(pid,p.name);h.appendChild(big);box.appendChild(h);{const bc=badgeChipsEl(p,true,pid);if(bc){const r=document.createElement('div');r.style.cssText='text-align:center;margin:-4px 0 10px';r.appendChild(bc);box.appendChild(r);}}
   const g=document.createElement('div');g.className='pc-grid';[['Today','d'],['Week','w'],['Month','m'],['All time','all']].forEach(([l,per])=>{const c=document.createElement('div');c.innerHTML='<b>'+lbScore(p,per,k).toLocaleString()+'</b><span>'+l+'</span>';g.appendChild(c);});box.appendChild(g);
@@ -6050,6 +6058,12 @@ async function applyBackup(b,modeSel,quiet){const nCustom=customWords.length;
   if(modeSel==='replace'){
     customWords.forEach(w=>{const sub=DATA[w.catKey]&&DATA[w.catKey].sub[w.subKey];if(sub)sub.words=sub.words.filter(x=>x.lat!==w.lat);});
     srData=b.sr;statsData=b.stats;customWords=b.custom.slice();starred=b.starred;
+  }else if(modeSel==='sum'){   // two different accounts being merged: their answers add up
+    Object.entries(b.sr).forEach(([k,v])=>{const c=srData[k];if(!c){srData[k]=v;return;}const best=(v.seen||0)>(c.seen||0)?{...v}:{...c};best.seen=(c.seen||0)+(v.seen||0);best.correct=(c.correct||0)+(v.correct||0);srData[k]=best;});
+    const have=new Set((statsData.sessions||[]).map(s=>s.date));b.stats.sessions.forEach(s=>{if(!have.has(s.date))statsData.sessions.push(s);});statsData.sessions.sort((a,c)=>a.date-c.date);if(statsData.sessions.length>200)statsData.sessions=statsData.sessions.slice(-200);
+    Object.entries(b.stats.catStats).forEach(([k,v])=>{const c=statsData.catStats[k];statsData.catStats[k]=c?{...c,seen:(c.seen||0)+(v.seen||0),correct:(c.correct||0)+(v.correct||0)}:v;});
+    b.custom.forEach(w=>{if(!customWords.some(x=>x.lat===w.lat&&x.catKey===w.catKey))customWords.push(w);});
+    Object.assign(starred,b.starred);
   }else{
     Object.entries(b.sr).forEach(([k,v])=>{if(!srData[k]||v.seen>srData[k].seen)srData[k]=v;});
     const have=new Set((statsData.sessions||[]).map(s=>s.date));b.stats.sessions.forEach(s=>{if(!have.has(s.date))statsData.sessions.push(s);});statsData.sessions.sort((a,c)=>a.date-c.date);if(statsData.sessions.length>200)statsData.sessions=statsData.sessions.slice(-200);
@@ -6057,7 +6071,7 @@ async function applyBackup(b,modeSel,quiet){const nCustom=customWords.length;
     b.custom.forEach(w=>{if(!customWords.some(x=>x.lat===w.lat&&x.catKey===w.catKey))customWords.push(w);});
     Object.assign(starred,b.starred);
   }
-  mergeExtras(b,modeSel==='replace');
+  mergeExtras(b,modeSel==='replace',modeSel==='sum');
   if(b.lb&&b.lb.pid&&b.lb.name&&b.lb.rt){playerAuth={uid:b.lb.pid,refreshToken:b.lb.rt};savePlayerAuth();lbMe={pid:b.lb.pid,name:b.lb.name};saveLbMe();renderLbProfile();}
   customWords.forEach(w=>addWordToData(w));
   if(b.theme&&THEMES.some(t=>t.id===b.theme))setTheme(b.theme);
@@ -6065,12 +6079,14 @@ async function applyBackup(b,modeSel,quiet){const nCustom=customWords.length;
   if(!quiet||customWords.length!==nCustom){try{buildUI();}catch(e){}}updCount();renderStats();updStarUI();
   try{renderDaily();renderBadges();renderBadgeSide();renderMistakes();badgeCheckSoon();}catch(e){}}
 // Badges and the rest: "merge" keeps the better of each (higher badge level, more answers, both lists).
-function mergeExtras(b,replace){const L=k=>{try{return JSON.parse(localStorage.getItem(k)||'null');}catch(e){return null;}},S=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}};
+// badge counters that add up when two accounts are merged (the rest, like best streaks, keep the higher one)
+const MERGE_SUM_STATS=new Set(['correct','buy','reacts','chat','perfect']);
+function mergeExtras(b,replace,sum){const L=k=>{try{return JSON.parse(localStorage.getItem(k)||'null');}catch(e){return null;}},S=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}};
   if(b.badges){const cur=replace?{}:(L(BADGE_KEY)||{});Object.entries(b.badges).forEach(([k,v])=>{const c=cur[k];if(!c||v.l>c.l)cur[k]={l:v.l,t:c?Math.min(c.t,v.t):v.t};});S(BADGE_KEY,cur);}
-  if(b.badgeStats){const cur=replace?{}:(L(BSTAT_KEY)||{});Object.entries(b.badgeStats).forEach(([k,v])=>{const c=cur[k];if(Array.isArray(v))cur[k]=[...new Set([...(Array.isArray(c)?c:[]),...v])];else if(typeof v==='number')cur[k]=typeof c==='number'?Math.max(c,v):v;});S(BSTAT_KEY,cur);_bstat=null;}
-  if(b.accuracy){const cur=replace?{}:(L(ACC_KEY)||{});Object.entries(b.accuracy).forEach(([k,v])=>{if(!cur[k]||v.s>cur[k].s)cur[k]=v;});S(ACC_KEY,cur);}
+  if(b.badgeStats){const cur=replace?{}:(L(BSTAT_KEY)||{});Object.entries(b.badgeStats).forEach(([k,v])=>{const c=cur[k];if(Array.isArray(v))cur[k]=[...new Set([...(Array.isArray(c)?c:[]),...v])];else if(typeof v==='number')cur[k]=typeof c==='number'?(sum&&MERGE_SUM_STATS.has(k)?c+v:Math.max(c,v)):v;});S(BSTAT_KEY,cur);_bstat=null;}
+  if(b.accuracy){const cur=replace?{}:(L(ACC_KEY)||{});Object.entries(b.accuracy).forEach(([k,v])=>{const c=cur[k];if(sum&&c)cur[k]={...c,...v,s:(c.s||0)+(v.s||0),c:(c.c||0)+(v.c||0),t:Math.max(c.t||0,v.t||0)};else if(!c||v.s>c.s)cur[k]=v;});S(ACC_KEY,cur);}
   if(b.pins&&(replace||!badgePins().length))S(PIN_KEY,b.pins);
-  if(b.daily){const cur=replace?{}:dailyData();Object.entries(b.daily).forEach(([k,v])=>{cur[k]=Math.max(cur[k]||0,v);});S(DAILY_KEY,cur);}
+  if(b.daily){const cur=replace?{}:dailyData();Object.entries(b.daily).forEach(([k,v])=>{cur[k]=sum&&typeof v==='number'?(cur[k]||0)+v:Math.max(cur[k]||0,v);});S(DAILY_KEY,cur);}
   if(b.stories){const cur=replace?{}:storyDone();Object.assign(cur,b.stories);S(STORY_DONE_KEY,cur);}}
 
 // ── CLOUD SAVE ───────────────────────────────────────────────────────────────
@@ -6087,8 +6103,8 @@ function cloudSoon(ms){if(!cloudOn())return;clearTimeout(cloudTimer);cloudTimer=
 const cloudErr=e=>/HTTP 40[13]/.test(e&&e.message)?'rules':'net';
 async function cloudPush(){if(!cloudOn()||cloudBusy)return;if(!cloudPulled)return cloudPull();const d=cloudPayload();if(d===cloudLast||d.length>950000)return;
   cloudBusy=true;try{await fbReq('PUT','progress/'+playerAuth.uid,{t:{'.sv':'timestamp'},d});cloudLast=d;cloudSetInfo({saved:Date.now(),err:''});}catch(e){cloudSetInfo({err:cloudErr(e)});}finally{cloudBusy=false;renderCloud();}}
-async function cloudPull(){if(!cloudOn()||cloudBusy)return;cloudBusy=true;
-  try{const r=await fbReq('GET','progress/'+playerAuth.uid);if(r&&typeof r.d==='string'){let o=null;try{o=JSON.parse(r.d);}catch(e){}const c=o&&cleanBackup(o);if(c){const before=cloudPayload();await applyBackup(c,'merge',true);if(cloudPayload()!==before)toast('☁ Progress restored from your cloud save.');}}cloudPulled=true;}
+async function cloudPull(how){if(!cloudOn()||cloudBusy)return;cloudBusy=true;
+  try{const r=await fbReq('GET','progress/'+playerAuth.uid);if(r&&typeof r.d==='string'){let o=null;try{o=JSON.parse(r.d);}catch(e){}const c=o&&cleanBackup(o);if(c){const before=cloudPayload();await applyBackup(c,how==='sum'?'sum':'merge',true);if(cloudPayload()!==before)toast('☁ Progress restored from your cloud save.');}}cloudPulled=true;}
   catch(e){cloudSetInfo({err:cloudErr(e)});}finally{cloudBusy=false;}renderCloud();if(cloudPulled)cloudPush();}
 // recovery code: four Latin words and a number, e.g. "rosa-bellum-via-aqua-47"
 function normCode(c){return String(c||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');}
@@ -6108,16 +6124,19 @@ async function cloudRestore(){const code=normCode(prompt('Type your recovery cod
   if(!confirm('Switch this device to the account with that code? Its progress and badges will be merged with what’s on this device.'+(lbMe?' This device’s leaderboard name ('+lbMe.name+') will be swapped for that account’s.':''))){cloudMsg('');return;}
   cloudSetInfo({code,err:''});await acctSwitch(d);cloudMsg('✓ Restored. Your progress is back.',true);}
 // move this device onto another account (recovery code or email sign-in): its progress is merged in
-async function acctSwitch(d){playerAuth=authFrom(d);savePlayerAuth();lbMe=null;
+async function acctSwitch(d,how){playerAuth=authFrom(d);savePlayerAuth();lbMe=null;
   try{const name=await fbReq('GET','players/'+playerAuth.uid+'/name');if(typeof name==='string')lbMe={pid:playerAuth.uid,name};}catch(e){}
   saveLbMe();renderLbProfile();lbUpdatePoints();try{renderLb();renderChat();}catch(e){}
-  cloudPulled=false;cloudLast='';await cloudPull();}
+  cloudPulled=false;cloudLast='';await cloudPull(how);}
 
 // ── EMAIL + PASSWORD ACCOUNTS ────────────────────────────────────────────────
 // "Save with email" adds an email + password to the account this device already has (same id, so points, badges and
 // progress stay). "Sign in" on another device opens that account there and merges in what the device had.
 let acctMode='signin';
-function acctOpen(m){acctMode=m==='create'?'create':'signin';const c=acctMode==='create',I=cloudInfo(),$=id=>document.getElementById(id);
+function acctOpen(m){acctMode=['create','merge'].includes(m)?m:'signin';const c=acctMode==='create',I=cloudInfo(),$=id=>document.getElementById(id);
+  closeOverlay('acctHubOverlay');$('acctCodeBtn').style.display=acctMode==='merge'?'':'none';
+  if(acctMode==='merge'){$('acctTitle').textContent='Merge another account in';$('acctNote').textContent='Sign in to your OTHER account here. Its points, badges, secret badges, stats and progress are added to this one'+(lbMe?' ('+lbMe.name+')':'')+', and then the other account is deleted.';
+    $('acctGo').textContent='Merge';$('acctSwapBtn').textContent='';$('acctForgotBtn').style.display='none';$('acctPass').placeholder='Password';$('acctPass').autocomplete='off';$('acctPass').value='';$('acctEmail').value='';acctMsg('');$('acctOverlay').style.display='flex';setTimeout(()=>$('acctEmail').focus(),50);return;}
   $('acctTitle').textContent=c?'Save with email':'Sign in';
   $('acctNote').textContent=c?'Add an email and password to your account. Then sign in on any other device to get the same points, badges, stats and progress.'+(I.code?' Your recovery code will stop working: use your email instead.':''):'Sign in to use your account on this device. Anything you’ve done on this device gets added to it.';
   $('acctGo').textContent=c?'Save':'Sign in';$('acctSwapBtn').textContent=c?'I already have an account':'No account yet? Save this one with email';
@@ -6128,15 +6147,63 @@ function acctMsg(t,ok){const el=document.getElementById('acctMsg');if(el){el.tex
 function acctErr(e){const m=String(e&&e.message||'');return /EMAIL_EXISTS/.test(m)?'That email already has an account. Press “I already have an account” to sign in.':/INVALID_EMAIL|MISSING_EMAIL/.test(m)?'That email address doesn’t look right.':/WEAK_PASSWORD/.test(m)?'Use a password of at least 6 characters.':/INVALID_LOGIN|INVALID_PASSWORD|EMAIL_NOT_FOUND|CREDENTIAL|USER_DISABLED/.test(m)?'Wrong email or password.':/TOO_MANY/.test(m)?'Too many tries. Wait a few minutes and try again.':/OPERATION_NOT_ALLOWED/.test(m)?'Email sign-in isn’t switched on for this site yet (ask the admin).':'Couldn’t reach the server. Check your internet.';}
 async function acctSubmit(){const email=document.getElementById('acctEmail').value.trim().toLowerCase(),pw=document.getElementById('acctPass').value;
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){acctMsg('Type your email address.',false);return;}if(!pw){acctMsg('Type your password.',false);return;}
+  if(acctMode==='merge'){acctMsg('Signing in to the other account…');let d;try{d=await authPost('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword',{email,password:pw,returnSecureToken:true});}catch(e){acctMsg(acctErr(e),false);return;}
+    return acctMergeIn(authFrom(d),email);}
   if(acctMode==='create'){if(pw.length<6){acctMsg('Use a password of at least 6 characters.',false);return;}acctMsg('Saving…');
     try{await playerToken();const d=await authPost('https://identitytoolkit.googleapis.com/v1/accounts:update',{idToken:playerAuth.idToken,email,password:pw,returnSecureToken:true});
       playerAuth=authFrom({...d,localId:d.localId||playerAuth.uid});savePlayerAuth();}catch(e){acctMsg(acctErr(e),false);return;}
     cloudSetInfo({email,code:null,err:''});closeOverlay('acctOverlay');toast('✓ Saved. Sign in with '+email+' on any device to get everything there.');renderCloud();renderLbProfile();cloudPulled?cloudPush():cloudPull();return;}
   acctMsg('Signing in…');let d;try{d=await authPost('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword',{email,password:pw,returnSecureToken:true});}catch(e){acctMsg(acctErr(e),false);return;}
   if(playerAuth&&playerAuth.uid===d.localId){playerAuth=authFrom(d);savePlayerAuth();cloudSetInfo({email,code:null});closeOverlay('acctOverlay');toast('You’re already signed in to that account here.');renderCloud();renderLbProfile();return;}
-  if(lbMe&&!confirm('Sign in as '+email+' on this device? This device’s leaderboard name ('+lbMe.name+') will be swapped for that account’s. Its progress, stats and badges are added to the account.')){acctMsg('');return;}
+  // this device already has its own leaderboard account: offer to merge it into the one being signed in to
+  if(lbMe){const mine=lbMe.name,pts=lbMyPoints();
+    if(confirm('This device has its own account: '+mine+' (⭐ '+pts.toLocaleString()+').\n\nMerge it into '+email+'? Points, badges, secret badges, stats and progress are added together, and '+mine+' is removed.\n\nOK = merge · Cancel = don’t merge')){
+      acctMsg('Merging…');try{await lbFlush();await playerToken();const src={...playerAuth},tgt=authFrom(d);await mergeAccounts(tgt,src);}catch(e){acctMsg('The merge didn’t work: '+mergeErr(e),false);return;}
+      cloudSetInfo({email,code:null,err:''});await acctSwitch(d,'sum');closeOverlay('acctOverlay');toast('✓ Merged. '+mine+'’s points and badges are now part of '+(lbMe?lbMe.name:email)+'.');renderCloud();return;}
+    if(!confirm('Sign in without merging? '+mine+' stays a separate account and this device switches to '+email+'.')){acctMsg('');return;}}
   try{await lbFlush();}catch(e){}
   cloudSetInfo({email,code:null,err:''});await acctSwitch(d);closeOverlay('acctOverlay');toast('✓ Signed in as '+email+'. Your points, badges and progress are here.');renderCloud();}
+// ── MERGING TWO ACCOUNTS ─────────────────────────────────────────────────────
+// src's points (total + today/week/month), secret badges, premium, stats and progress are added to tgt, then src is deleted.
+// The server only allows it because src itself first says "merge me into tgt" (mto/src), and tgt adds exactly src's
+// points in the same save that deletes src, so nothing can be counted twice.
+function mergeErr(e){const m=String(e&&e.message||'');return /HTTP 40[13]/.test(m)?'the database rules need updating (ask the admin).':/same/.test(m)?'that’s the account you’re already using.':'check your internet and try again.';}
+async function mergeAccounts(tgt,src){const T=tgt.uid,S=src.uid;if(!T||!S||T===S)throw new Error('same account');const as=a=>({tok:a.idToken});
+  await fbReq('PUT','mto/'+S,T,as(src));
+  const [pS,gotS,oldS,premS,progS]=await Promise.all([fbReq('GET','players/'+S,null,as(src)),fbReq('GET','sx/got/'+S,null,as(src)).catch(()=>null),fbReq('GET','sx/old/'+S,null,as(src)).catch(()=>null),fbReq('GET','prem/'+S,null,as(src)).catch(()=>null),fbReq('GET','progress/'+S,null,as(src)).catch(()=>null)]);
+  await fbReq('PUT','mfrom/'+T,S,as(tgt));
+  const gotT=(await fbReq('GET','sx/got/'+T,null,as(tgt)).catch(()=>null))||{};
+  for(const h of Object.keys(gotS||{}))if(!gotT[h]){try{await fbReq('PUT','sx/got/'+T+'/'+h,{'.sv':'timestamp'},as(tgt));}catch(e){}}
+  if(oldS){try{if(!(await fbReq('GET','sx/old/'+T,null,as(tgt))))await fbReq('PUT','sx/old/'+T,oldS,as(tgt));}catch(e){}}
+  if(premS){try{if(!(await fbReq('GET','prem/'+T,null,as(tgt))))await fbReq('PUT','prem/'+T,{c:'merge',t:{'.sv':'timestamp'}},as(tgt));}catch(e){}}
+  if(pS&&typeof pS.total==='number'){const pT=await fbReq('GET','players/'+T,null,as(tgt)),P='players/'+T+'/',body={};
+    if(!pT){body[P+'name']=pS.name;['av','color','font','fx','bd'].forEach(k=>{if(pS[k]!=null)body[P+k]=pS[k];});}
+    body[P+'total']=((pT&&pT.total)||0)+pS.total;
+    ['d','w','m'].forEach(x=>Object.entries(pS[x]||{}).forEach(([k,v])=>{if(typeof v==='number')body[P+x+'/'+k]=((pT&&pT[x]&&pT[x][k])||0)+v;}));
+    body['players/'+S]=null;body['mlog/'+T+'/'+S]={name:pS.name,n:pS.total,t:{'.sv':'timestamp'}};
+    await fbReq('PATCH','',body,as(tgt));}
+  try{await fbReq('DELETE','progress/'+S,null,as(src));}catch(e){}
+  try{await authPost('https://identitytoolkit.googleapis.com/v1/accounts:delete',{idToken:src.idToken});}catch(e){}
+  return progS;}
+// this device stays on its account; the other one (signed in with its email or recovery code) is merged into it
+async function acctMergeIn(src,label){
+  try{await playerToken();}catch(e){acctMsg('Couldn’t reach the server. Check your internet.',false);return;}
+  if(src.uid===playerAuth.uid){acctMsg('That’s the account you’re already using.',false);return;}
+  if(!confirm('Merge '+label+' into this account'+(lbMe?' ('+lbMe.name+')':'')+'? Its points and badges are added here and '+label+' is deleted. This can’t be undone.')){acctMsg('');return;}
+  acctMsg('Merging…');let prog;try{try{await lbFlush();}catch(e){}prog=await mergeAccounts({...playerAuth},src);}catch(e){acctMsg('The merge didn’t work: '+mergeErr(e),false);return;}
+  if(prog&&typeof prog.d==='string'){try{const c=cleanBackup(JSON.parse(prog.d));if(c)await applyBackup(c,'sum',true);}catch(e){}}
+  if(!lbMe){try{const name=await fbReq('GET','players/'+playerAuth.uid+'/name');if(typeof name==='string'){lbMe={pid:playerAuth.uid,name};saveLbMe();}}catch(e){}}
+  renderLbProfile();lbUpdatePoints();try{renderLb();}catch(e){}try{badgeCheck();}catch(e){}
+  cloudLast='';cloudPulled=true;cloudPush();closeOverlay('acctOverlay');toast('✓ Merged. Everything from '+label+' is now part of this account.');renderCloud();}
+async function acctMergeCode(){const code=normCode(prompt('Type the OTHER account’s recovery code (e.g. rosa-bellum-via-aqua-47):'));if(!code)return;acctMsg('Checking the code…');
+  let d;try{d=await authPost('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword',{email:await codeEmail(code),password:code,returnSecureToken:true});}catch(e){acctMsg(/INVALID|NOT_FOUND|PASSWORD|CREDENTIAL/.test(e.message)?'That code didn’t work. Check the spelling.':'Couldn’t reach the server. Check your internet.',false);return;}
+  return acctMergeIn(authFrom(d),'the account with that code');}
+function acctHub(){const I=cloudInfo(),b=document.getElementById('acctHubBody');
+  b.innerHTML=(I.email?'<p class="acct-note">Signed in as <b>'+esc(I.email)+'</b>'+(lbMe?' ('+esc(lbMe.name)+')':'')+'. Sign in with this email on any device to get your points, badges and progress there.</p><div class="backup-btns"><button class="btn-secondary" onclick="closeOverlay(\'acctHubOverlay\');acctSignOut()">Sign out</button></div>'
+    :'<p class="acct-note">Use one account on all your devices: save it with an email and password, then sign in anywhere.</p><div class="backup-btns"><button class="btn-primary" onclick="acctOpen(\'create\')">Save with email</button><button class="btn-secondary" onclick="acctOpen(\'signin\')">Sign in</button></div>')
+    +'<p class="acct-note" style="margin-top:16px"><b>Two accounts?</b> Merge one into the other: points, badges, secret badges, stats and progress are put together.</p><div class="backup-btns"><button class="btn-secondary" onclick="acctOpen(\'merge\')">Merge another account in</button></div>';
+  document.getElementById('acctHubOverlay').style.display='flex';}
+function acctBtnUpd(){const b=document.getElementById('acctBtn');if(!b)return;const I=cloudInfo();b.textContent=I.email?'👤 '+I.email.split('@')[0]:'👤 Sign in';}
 async function acctForgot(){const email=document.getElementById('acctEmail').value.trim().toLowerCase();if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){acctMsg('Type your email above first, then press “Forgot password?”.',false);return;}
   acctMsg('Sending…');try{await authPost('https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode',{requestType:'PASSWORD_RESET',email});acctMsg('If that email has an account, a link to reset your password is on its way. Check your junk folder too.',true);}
   catch(e){acctMsg(/TOO_MANY/.test(e.message)?'Too many tries. Wait a few minutes.':/EMAIL_NOT_FOUND/.test(e.message)?'There’s no account with that email.':'Couldn’t send the email. Check your internet.',false);}}
@@ -6147,11 +6214,11 @@ async function acctSignOut(){const I=cloudInfo();if(!confirm('Sign out of '+(I.e
   try{Object.keys(localStorage).filter(k=>/^(latin|lt:|lt_)/.test(k)).forEach(k=>localStorage.removeItem(k));sessionStorage.clear();}catch(e){}
   location.reload();}
 function cloudCopyCode(){const c=cloudInfo().code;if(!c)return;navigator.clipboard&&navigator.clipboard.writeText(c).then(()=>cloudMsg('Code copied.',true),()=>{});}
-function renderCloud(){const box=document.getElementById('cloudBox');if(!box)return;const I=cloudInfo(),on=cloudOn();
+function renderCloud(){try{acctBtnUpd();}catch(e){}const box=document.getElementById('cloudBox');if(!box)return;const I=cloudInfo(),on=cloudOn();
   const when=I.saved?new Date(I.saved).toLocaleString([], {hour:'numeric',minute:'2-digit',day:'numeric',month:'short'}):null;
   const st=!on?'Cloud save starts once you join the leaderboard, sign in, or get a recovery code.':I.err==='rules'?'⚠ Not saved online: the database rules need updating (ask the admin).':I.err==='net'?'⚠ Not saved online yet (offline?). It will try again.':when?'☁ Saved online · last saved '+when:'☁ Saving online…';
-  const acct=I.email?'<p class="cloud-st">👤 Signed in as <b>'+esc(I.email)+'</b>. Sign in with this email on any device to get your points, badges and progress there.</p><div class="backup-btns" style="margin-bottom:12px"><button class="btn-secondary" onclick="acctSignOut()">Sign out</button></div>'
-    :'<p class="cloud-st">👤 Use the same account on several devices: save it with an email and password, then sign in anywhere.</p><div class="backup-btns" style="margin-bottom:12px"><button class="btn-primary" onclick="acctOpen(\'create\')">Save with email</button><button class="btn-secondary" onclick="acctOpen(\'signin\')">Sign in</button></div>';
+  const acct=I.email?'<p class="cloud-st">👤 Signed in as <b>'+esc(I.email)+'</b>. Sign in with this email on any device to get your points, badges and progress there.</p><div class="backup-btns" style="margin-bottom:12px"><button class="btn-secondary" onclick="acctSignOut()">Sign out</button><button class="btn-secondary" onclick="acctOpen(\'merge\')">Merge another account in</button></div>'
+    :'<p class="cloud-st">👤 Use the same account on several devices: save it with an email and password, then sign in anywhere.</p><div class="backup-btns" style="margin-bottom:12px"><button class="btn-primary" onclick="acctOpen(\'create\')">Save with email</button><button class="btn-secondary" onclick="acctOpen(\'signin\')">Sign in</button><button class="btn-secondary" onclick="acctOpen(\'merge\')">Merge another account in</button></div>';
   box.innerHTML=acct+'<p class="cloud-st">'+esc(st)+'</p>'+(I.email?'<div id="cloudMsg" class="backup-msg"></div>':'')
     +(I.email?'':(I.code&&cloudShowCode?'<div class="cloud-code"><code>'+esc(I.code)+'</code><button class="btn-secondary" onclick="cloudCopyCode()">Copy</button></div><p class="cloud-note">Write this down somewhere safe. On a new device (or if this browser gets cleared), press <b>Restore with a code</b> and type it in to get everything back. Don’t share it: anyone with it can use your account.</p>':'')
     +'<div class="backup-btns"><button class="btn-primary" onclick="cloudMakeCode()">'+(I.code?(cloudShowCode?'Code shown above':'Show my recovery code'):'Get a recovery code')+'</button><button class="btn-secondary" onclick="cloudRestore()">Restore with a code</button></div><div id="cloudMsg" class="backup-msg"></div>');}
@@ -6469,9 +6536,9 @@ function exAP(){const adjs=exMain().filter(w=>w.catKey==='adjectives'&&!EX_ADJ_S
   return out;}
 function exBuild(){const qs=[];const seen=new Set();
   exVocab().slice(0,20).forEach(w=>qs.push({sec:'voc',prompt:fullLat(w),lat:w.lat,show:w.eng.join(', ')}));
-  for(let i=0;i<13;i++){const sd=exSentence('le',i<7?'insane':'expert',seen);if(sd)qs.push({sec:'le',prompt:sd.latin,sd,show:sd.english});}
+  for(let i=0;i<13;i++){const sd=exSentence('le',i<7?'hard':'insane',seen);if(sd)qs.push({sec:'le',prompt:sd.latin,sd,show:sd.english});}
   qs.push(...exNGC());qs.push(...exVP());qs.push(...exAP());
-  for(let i=0;i<10;i++){const sd=exSentence('el',i<5?'insane':'expert',seen);if(sd)qs.push({sec:'el',prompt:sd.english,sd,show:sd.latin});}
+  for(let i=0;i<10;i++){const sd=exSentence('el',i<5?'hard':'insane',seen);if(sd)qs.push({sec:'el',prompt:sd.english,sd,show:sd.latin});}
   return qs;}
 
 /* marking: each mistake (wrong ending, spelling slip, missing or extra word, words in the wrong order) costs ½ mark */

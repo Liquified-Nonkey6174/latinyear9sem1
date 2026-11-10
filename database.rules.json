@@ -25,13 +25,13 @@
     "players": {
       ".read": "auth != null",
       "$uid": {
-        ".write": "auth != null && (auth.uid === $uid || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2')",
+        ".write": "auth != null && (auth.uid === $uid || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2' || (!newData.exists() && root.child('mto').child($uid).val() === auth.uid))",
         ".validate": "newData.hasChildren(['name', 'total'])",
         "name": {
           ".validate": "newData.isString() && newData.val().length >= 2 && newData.val().length <= 30 && (data.val() === newData.val() || root.child('nlock').child($uid).val() !== true || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2')"
         },
         "total": {
-          ".validate": "newData.isNumber() && (auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2' || ((newData.val() >= 0 && newData.val() <= (data.exists() ? data.val() : 0)) || (newData.parent().child('lt').val() === now && newData.parent().parent().parent().child('plog').child($uid).child(newData.parent().child('lk').val() + '').child('n').val() === newData.val() - (data.exists() ? data.val() : 0) && newData.val() - (data.exists() ? data.val() : 0) <= 300 && (!data.parent().child('lt').exists() || newData.val() - (data.exists() ? data.val() : 0) <= 5 + (now - data.parent().child('lt').val()) / 333))))"
+          ".validate": "newData.isNumber() && (auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2' || ((newData.val() >= 0 && newData.val() <= (data.exists() ? data.val() : 0)) || (newData.parent().child('lt').val() === now && newData.parent().parent().parent().child('plog').child($uid).child(newData.parent().child('lk').val() + '').child('n').val() === newData.val() - (data.exists() ? data.val() : 0) && newData.val() - (data.exists() ? data.val() : 0) <= 300 && (!data.parent().child('lt').exists() || newData.val() - (data.exists() ? data.val() : 0) <= 5 + (now - data.parent().child('lt').val()) / 333)) || ((root.child('mfrom').child($uid).isString() && root.child('mto').child(root.child('mfrom').child($uid).val()).val() === $uid) && root.child('players').child(root.child('mfrom').child($uid).val()).child('total').isNumber() && !newData.parent().parent().child(root.child('mfrom').child($uid).val()).exists() && newData.val() === (data.exists() ? data.val() : 0) + root.child('players').child(root.child('mfrom').child($uid).val()).child('total').val())))"
         },
         "lk": {
           ".validate": "newData.isString() && newData.val().length <= 24"
@@ -41,17 +41,17 @@
         },
         "d": {
           "$day": {
-            ".validate": "newData.isNumber() && (auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2' || ((newData.val() >= 0 && newData.val() <= (data.exists() ? data.val() : 0)) || (newData.parent().parent().child('lt').val() === now && newData.val() - (data.exists() ? data.val() : 0) <= 300 && (!data.parent().parent().child('lt').exists() || newData.val() - (data.exists() ? data.val() : 0) <= 5 + (now - data.parent().parent().child('lt').val()) / 333))))"
+            ".validate": "newData.isNumber() && (auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2' || ((newData.val() >= 0 && newData.val() <= (data.exists() ? data.val() : 0)) || (newData.parent().parent().child('lt').val() === now && newData.val() - (data.exists() ? data.val() : 0) <= 300 && (!data.parent().parent().child('lt').exists() || newData.val() - (data.exists() ? data.val() : 0) <= 5 + (now - data.parent().parent().child('lt').val()) / 333)) || ((root.child('mfrom').child($uid).isString() && root.child('mto').child(root.child('mfrom').child($uid).val()).val() === $uid) && !newData.parent().parent().parent().child(root.child('mfrom').child($uid).val()).exists() && newData.val() === (data.exists() ? data.val() : 0) + (root.child('players').child(root.child('mfrom').child($uid).val()).child('d').child($day).isNumber() ? root.child('players').child(root.child('mfrom').child($uid).val()).child('d').child($day).val() : 0))))"
           }
         },
         "w": {
           "$week": {
-            ".validate": "newData.isNumber() && (auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2' || ((newData.val() >= 0 && newData.val() <= (data.exists() ? data.val() : 0)) || (newData.parent().parent().child('lt').val() === now && newData.val() - (data.exists() ? data.val() : 0) <= 300 && (!data.parent().parent().child('lt').exists() || newData.val() - (data.exists() ? data.val() : 0) <= 5 + (now - data.parent().parent().child('lt').val()) / 333))))"
+            ".validate": "newData.isNumber() && (auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2' || ((newData.val() >= 0 && newData.val() <= (data.exists() ? data.val() : 0)) || (newData.parent().parent().child('lt').val() === now && newData.val() - (data.exists() ? data.val() : 0) <= 300 && (!data.parent().parent().child('lt').exists() || newData.val() - (data.exists() ? data.val() : 0) <= 5 + (now - data.parent().parent().child('lt').val()) / 333)) || ((root.child('mfrom').child($uid).isString() && root.child('mto').child(root.child('mfrom').child($uid).val()).val() === $uid) && !newData.parent().parent().parent().child(root.child('mfrom').child($uid).val()).exists() && newData.val() === (data.exists() ? data.val() : 0) + (root.child('players').child(root.child('mfrom').child($uid).val()).child('w').child($week).isNumber() ? root.child('players').child(root.child('mfrom').child($uid).val()).child('w').child($week).val() : 0))))"
           }
         },
         "m": {
           "$month": {
-            ".validate": "newData.isNumber() && (auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2' || ((newData.val() >= 0 && newData.val() <= (data.exists() ? data.val() : 0)) || (newData.parent().parent().child('lt').val() === now && newData.val() - (data.exists() ? data.val() : 0) <= 300 && (!data.parent().parent().child('lt').exists() || newData.val() - (data.exists() ? data.val() : 0) <= 5 + (now - data.parent().parent().child('lt').val()) / 333))))"
+            ".validate": "newData.isNumber() && (auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2' || ((newData.val() >= 0 && newData.val() <= (data.exists() ? data.val() : 0)) || (newData.parent().parent().child('lt').val() === now && newData.val() - (data.exists() ? data.val() : 0) <= 300 && (!data.parent().parent().child('lt').exists() || newData.val() - (data.exists() ? data.val() : 0) <= 5 + (now - data.parent().parent().child('lt').val()) / 333)) || ((root.child('mfrom').child($uid).isString() && root.child('mto').child(root.child('mfrom').child($uid).val()).val() === $uid) && !newData.parent().parent().parent().child(root.child('mfrom').child($uid).val()).exists() && newData.val() === (data.exists() ? data.val() : 0) + (root.child('players').child(root.child('mfrom').child($uid).val()).child('m').child($month).isNumber() ? root.child('players').child(root.child('mfrom').child($uid).val()).child('m').child($month).val() : 0))))"
           }
         },
         "av": {
@@ -93,7 +93,7 @@
         "$uid": {
           ".read": "auth != null",
           "$h": {
-            ".write": "auth != null && auth.uid === $uid && !data.exists() && (($h !== 'c409b3e4bcac1ee8203d86fc13fd6e37' && $h !== '1f552369e71116f84f55522c4dd56b8b' && root.child('sx').child('key').child($h).exists()) || ($h === '1f552369e71116f84f55522c4dd56b8b' && root.child('prem').child($uid).exists()) || ($h === 'c409b3e4bcac1ee8203d86fc13fd6e37' && root.child('sx').child('roll').child($uid).exists() && root.child('sx').child('roll').child($uid).val() % 1000 === 777 && now - root.child('sx').child('roll').child($uid).val() < 60000))",
+            ".write": "(auth != null && auth.uid === $uid && !data.exists() && (root.child('mfrom').child($uid).isString() && root.child('mto').child(root.child('mfrom').child($uid).val()).val() === $uid) && root.child('sx').child('got').child(root.child('mfrom').child($uid).val()).child($h).exists()) || auth != null && auth.uid === $uid && !data.exists() && (($h !== 'c409b3e4bcac1ee8203d86fc13fd6e37' && $h !== '1f552369e71116f84f55522c4dd56b8b' && root.child('sx').child('key').child($h).exists()) || ($h === '1f552369e71116f84f55522c4dd56b8b' && root.child('prem').child($uid).exists()) || ($h === 'c409b3e4bcac1ee8203d86fc13fd6e37' && root.child('sx').child('roll').child($uid).exists() && root.child('sx').child('roll').child($uid).val() % 1000 === 777 && now - root.child('sx').child('roll').child($uid).val() < 60000))",
             ".validate": "newData.isNumber() && newData.val() === now"
           }
         }
@@ -325,11 +325,35 @@
         }
       }
     },
+    "mto": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2')",
+        ".write": "auth != null && auth.uid === $uid",
+        ".validate": "newData.isString() && newData.val().length <= 40"
+      }
+    },
+    "mfrom": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2')",
+        ".write": "auth != null && auth.uid === $uid",
+        ".validate": "newData.isString() && newData.val().length <= 40"
+      }
+    },
+    "mlog": {
+      ".read": "auth != null && auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2'",
+      "$uid": {
+        ".read": "auth != null && auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2'",
+        "$src": {
+          ".write": "auth != null && auth.uid === $uid && !data.exists() && root.child('mto').child($src).val() === $uid",
+          ".validate": "newData.hasChildren(['name', 'n', 't']) && newData.child('name').isString() && newData.child('n').isNumber() && newData.child('t').val() === now"
+        }
+      }
+    },
     "prem": {
       ".read": "auth != null && auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2'",
       "$uid": {
         ".read": "auth != null && auth.uid === $uid",
-        ".write": "auth != null && (auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2' || (auth.uid === $uid && !data.exists() && newData.child('c').isString() && root.child('codes').child(newData.child('c').val()).child('left').val() > 0 && newData.parent().parent().child('codes').child(newData.child('c').val()).child('left').val() === root.child('codes').child(newData.child('c').val()).child('left').val() - 1))",
+        ".write": "auth != null && (auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2' || (auth.uid === $uid && !data.exists() && (root.child('mfrom').child($uid).isString() && root.child('mto').child(root.child('mfrom').child($uid).val()).val() === $uid) && root.child('prem').child(root.child('mfrom').child($uid).val()).exists()) || (auth.uid === $uid && !data.exists() && newData.child('c').isString() && root.child('codes').child(newData.child('c').val()).child('left').val() > 0 && newData.parent().parent().child('codes').child(newData.child('c').val()).child('left').val() === root.child('codes').child(newData.child('c').val()).child('left').val() - 1))",
         ".validate": "newData.hasChildren(['c', 't'])",
         "c": {
           ".validate": "newData.isString() && newData.val().length <= 40"
