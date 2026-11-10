@@ -1727,6 +1727,25 @@ body:has(.overlay[style*="display: flex"]) .side-fab,body:has(#bReveal[style*="d
         <p class="info-body" style="margin-top:10px;margin-bottom:0">Nom./voc. sg. only: masc. ends in <span class="info-hi">-er</span>, fem. in <span class="info-hi">-is</span> — the only point of distinction. From acc. sg. onward, masc. and fem. are identical. Other examples: <em>celer/celeris/celere</em> (swift), <em>alacer/alacris/alacre</em> (eager).</p>
       </div>
 
+      <div class="info-card" style="margin-top:1rem">
+        <div class="info-subheading">Making adverbs from adjectives</div>
+        <p class="info-body">An adverb says <em>how</em> something is done (happily, bravely). Find the adjective's <b>stem</b>, then add the ending for its declension. For 1st/2nd declension adjectives, the stem is the feminine without <span class="info-hi">-a</span> (laet-a, pulchr-a). For 3rd declension, it's the genitive without <span class="info-hi">-is</span> (fort-is, ferōc-is).</p>
+        <div class="info-table">
+          <div class="info-row"><span class="info-lat">1st/2nd decl.: stem + <span class="info-hi">-ē</span></span><span class="info-eng">laetus → <em>laete</em> (happily) · iratus → <em>irate</em> (angrily) · tacitus → <em>tacite</em> (silently) · pulcher → <em>pulchre</em> (beautifully)</span></div>
+          <div class="info-row"><span class="info-lat">3rd decl.: stem + <span class="info-hi">-iter</span></span><span class="info-eng">fortis → <em>fortiter</em> (bravely) · celer → <em>celeriter</em> (quickly) · crudelis → <em>crudeliter</em> (cruelly) · ferox → <em>ferociter</em> (fiercely) · felix → <em>feliciter</em> (luckily)</span></div>
+          <div class="info-row"><span class="info-lat">stems in -nt-: stem + <span class="info-hi">-er</span></span><span class="info-eng">diligens → <em>diligenter</em> (carefully) · ingens → <em>ingenter</em> (hugely)</span></div>
+        </div>
+        <p class="info-body" style="margin-top:10px;margin-bottom:6px"><b>Irregular: learn these by heart</b></p>
+        <div class="info-table">
+          <div class="info-row"><span class="info-lat">bonus → <span class="info-hi">bene</span></span><span class="info-eng">well</span></div>
+          <div class="info-row"><span class="info-lat">malus → <span class="info-hi">male</span></span><span class="info-eng">badly</span></div>
+          <div class="info-row"><span class="info-lat">magnus → <span class="info-hi">magnopere</span></span><span class="info-eng">greatly</span></div>
+          <div class="info-row"><span class="info-lat">multus → <span class="info-hi">multum</span></span><span class="info-eng">much</span></div>
+          <div class="info-row"><span class="info-lat">facilis → <span class="info-hi">facile</span></span><span class="info-eng">easily</span></div>
+        </div>
+        <p class="info-body" style="margin-top:10px;margin-bottom:0">Adverbs never change their ending: <em>puella laete cantat</em>, <em>puellae laete cantant</em>.</p>
+      </div>
+
     </div>
   </div><!-- /infoAdjPanel -->
 
@@ -6597,12 +6616,17 @@ function exWordCost(u,c,lat){if(u===c||(lat&&FORM_SYNS[c]&&FORM_SYNS[c].has(u)))
   const L=Math.max(u.length,c.length),lim=L>=9?2:L>=4?1:0;if(lim&&dmg(u,c)<=lim)return 1;
   let p=0;while(p<u.length&&p<c.length&&u[p]===c[p])p++;const mn=Math.min(u.length,c.length);if((p>=4&&p>=mn-3)||(p>=3&&mn<=4))return 1;
   return 1;}   // a wrong word is one mistake (½ mark), like any other
+// a word counts as "nearly right" if it's the right word with a slip (typo / wrong ending), not a different word
+function exNear(u,c,lat){if(exWordCost(u,c,lat)===0)return true;const L=Math.max(u.length,c.length),lim=L>=9?2:L>=4?1:0;if(lim&&dmg(u,c)<=lim)return true;
+  let p=0;while(p<u.length&&p<c.length&&u[p]===c[p])p++;const mn=Math.min(u.length,c.length);if((p>=4&&p>=mn-3)||(p>=3&&mn<=4))return true;
+  if(lat){const a=exLemmas(u),b=exLemmas(c);if(a&&b&&[...a].some(x=>b.has(x)))return true;}return false;}
 function exMistakes(ua,ca,lat){const U=exToks(ua,lat),C=exToks(ca,lat);if(!U.length)return 99;const pairs=[];U.forEach((u,i)=>C.forEach((c,j)=>pairs.push([exWordCost(u,c,lat),i,j])));pairs.sort((a,b)=>a[0]-b[0]||Math.abs(a[1]-a[2])-Math.abs(b[1]-b[2]));
   const uu=new Set(),cc=new Set(),m=[];let cost=0;pairs.forEach(([k,i,j])=>{if(uu.has(i)||cc.has(j))return;uu.add(i);cc.add(j);cost+=k;m.push([i,j,k]);});
+  exMistakes.near=m.some(([i,j])=>exNear(U[i],C[j],lat));
   cost+=(C.length-cc.size);U.forEach((u,i)=>{if(!uu.has(i)&&!(lat&&EX_PRON.has(u)))cost+=1;});
   if(!lat){const seq=m.filter(x=>x[2]<1||(x[2]===1&&exWordCost(U[x[0]],C[x[1]],false)===1&&U[x[0]][0]===C[x[1]][0])).sort((a,b)=>a[0]-b[0]).map(x=>x[1]);const lis=[];seq.forEach(v=>{let lo=0,hi=lis.length;while(lo<hi){const md=(lo+hi)>>1;if(lis[md]<v)lo=md+1;else hi=md;}lis[lo]=v;});cost+=seq.length-lis.length;}
   return cost;}
-function exBest(ua,alts,lat){let best=99,bestA=alts[0];for(const a of alts){const k=exMistakes(ua,a,lat);if(k<best){best=k;bestA=a;if(!k)break;}}return {k:best,a:bestA};}
+function exBest(ua,alts,lat){let best=99,bestA=alts[0],near=false;for(const a of alts){const k=exMistakes(ua,a,lat);if(exMistakes.near)near=true;if(k<best){best=k;bestA=a;if(!k)break;}}return {k:best,a:bestA,near};}
 function exSentAlts(q){const sv={mode,sd:sentData};try{mode=q.sec==='el'?'el':'le';sentData=q.sd;return sentAlternatives(mode==='el'?q.sd.latin:q.sd.english);}catch(e){return [q.show];}finally{mode=sv.mode;sentData=sv.sd;}}
 function exGrade(q,ans){const max=EXAM_SECS.find(s=>s.id===q.sec).pts;let got=0,note='',k=0;
   if(q.sec==='ngc'){const a=ans||{};const nz=x=>String(x||'').trim().toLowerCase();const G={m:'masculine',f:'feminine',n:'neuter'}[q.g];const gOk=nz(a.g)===G;
@@ -6611,11 +6635,11 @@ function exGrade(q,ans){const max=EXAM_SECS.find(s=>s.id===q.sec).pts;let got=0,
   const ua=String(ans||'').trim();if(!ua)return {got:0,max,right:q.show,blank:true};
   if(q.sec==='voc'){const ok=exMain().filter(x=>x.lat===q.lat).some(x=>{try{return checkEng(ua,x);}catch(e){return false;}});return {got:ok?max:0,max,right:q.show};}
   if(q.sec==='le'||q.sec==='el'){const alts=exSentAlts(q),lat=q.sec==='el';const sv=mode;mode='el';let exact=false;if(lat)try{exact=alts.some(a=>checkWithSynonyms(ua,a));}catch(e){}mode=sv;   // Latin word order is free; English order is checked below
-    if(exact)return {got:max,max,right:q.show,k:0};const b=exBest(ua,alts,lat);k=b.k;return {got:Math.max(0,max-.5*k),max,right:q.show,k};}
+    if(exact)return {got:max,max,right:q.show,k:0};const b=exBest(ua,alts,lat);k=b.k;return {got:b.near?Math.max(0,max-.5*k):0,max,right:q.show,k:b.near?k:99};}
   if(q.sec==='ap'){   // the question gives the case; a case word typed after the answer is ignored
     const phr=ua.replace(/[\s,;:(-]+(nominative|vocative|accusative|genitive|dative|ablative)\)?\s*\.?$/i,'');
-    const b=exBest(phr,q.alts,true);k=b.k;return {got:Math.max(0,max-.5*k),max,right:q.show,k};}
-  const lat=false;const b=exBest(ua,q.alts,lat);k=b.k;return {got:Math.max(0,max-.5*k),max,right:q.show,k};}
+    const b=exBest(phr,q.alts,true);k=b.k;return {got:b.near?Math.max(0,max-.5*k):0,max,right:q.show,k:b.near?k:99};}
+  const lat=false;const b=exBest(ua,q.alts,lat);k=b.k;return {got:b.near?Math.max(0,max-.5*k):0,max,right:q.show,k:b.near?k:99};}
 
 /* screen */
 function exHist(){try{return JSON.parse(localStorage.getItem(EXAM_HIST)||'[]')||[];}catch(e){return [];}}
@@ -6641,7 +6665,7 @@ function exRender(){const W=document.getElementById('examWrap'),done=!!exam.res;
       if(s.id==='ngc'){h+='<div class="ex-ngc">'+[['n','number'],['g','gender'],['c','case']].map(([p,ph])=>'<input class="ex-in ex-ans" data-i="'+i+'" '+(done?'disabled ':'')+'placeholder="'+ph+'" value="'+esc((a||{})[p]||'')+'" oninput="exInput('+i+',\''+p+'\',this)" autocomplete="off" spellcheck="false">').join('')+'</div>';}
       else if(s.id==='le'||s.id==='el')h+='<textarea class="ex-in ex-ta ex-ans" data-i="'+i+'" rows="2" '+(done?'disabled ':'')+'oninput="exInput('+i+',0,this)" spellcheck="false" placeholder="Your translation">'+esc(a||'')+'</textarea>';
       else h+='<input class="ex-in ex-ans" data-i="'+i+'" '+(done?'disabled ':'')+'value="'+esc(a||'')+'" oninput="exInput('+i+',0,this)" autocomplete="off" spellcheck="false" placeholder="Your answer">';
-      if(r&&r.got<r.max)h+='<div class="ex-res">'+(r.blank?'Not answered. ':r.k&&r.k<99?r.k+' mistake'+(r.k===1?'':'s')+' (−'+exFmt(Math.min(r.max,r.k*.5))+'). ':'')+'Answer: <span class="ex-ans">'+esc(r.right)+'</span></div>';
+      if(r&&r.got<r.max)h+='<div class="ex-res">'+(r.blank?'Not answered. ':r.k===99&&!r.got?'Nothing right. ':r.k&&r.k<99?r.k+' mistake'+(r.k===1?'':'s')+' (−'+exFmt(Math.min(r.max,r.k*.5))+'). ':'')+'Answer: <span class="ex-ans">'+esc(r.right)+'</span></div>';
       h+='</div>';});
     h+='</div>';});
   h+='<div class="res-btns" style="margin:1rem 0 2rem">'+(done?'<button class="btn-primary" onclick="exStart()">New exam</button><button class="btn-secondary" onclick="exClose()">Menu</button>':'<button class="btn-primary" onclick="exSubmit()">Submit exam</button><button class="btn-secondary" onclick="exQuit()">Give up</button>')+'</div>';
