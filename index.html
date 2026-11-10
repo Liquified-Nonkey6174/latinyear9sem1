@@ -3991,7 +3991,7 @@ function fbStream(path,query,onChange,onFail){let ctrl=null,timer=null,delay=200
 function saveLbMe(){try{if(lbMe)window.storage.set(LB_KEY,JSON.stringify(lbMe));else window.storage.delete(LB_KEY);}catch(e){}}
 async function loadLbMe(){try{const r=await window.storage.get(LB_KEY),a=await window.storage.get(AUTH_KEY);const auth=a&&a.value?JSON.parse(a.value):null;if(auth&&auth.uid&&!playerAuth)playerAuth=auth;
     if(r&&r.value){const v=JSON.parse(r.value);if(v&&v.pid&&v.name&&auth&&auth.uid===v.pid)lbMe=v;}
-    const pend=await window.storage.get(LB_PENDING_KEY);if(pend&&+pend.value>0){window.storage.delete(LB_PENDING_KEY);if(lbMe){lbPending+=+pend.value;lbFlushTimer=setTimeout(()=>lbFlush(),3000);}}
+    const pend=await window.storage.get(LB_PENDING_KEY);if(pend&&+pend.value>0){window.storage.delete(LB_PENDING_KEY);try{const x=JSON.parse(localStorage.getItem('latin_lb_pending_ex')||'null');localStorage.removeItem('latin_lb_pending_ex');if(x&&lbMe&&x.n>0){lbExamPend+=Math.min(x.n,+pend.value);lbExamInfo=x.i;}}catch(e){}if(lbMe){lbPending+=+pend.value;lbFlushTimer=setTimeout(()=>lbFlush(),3000);}}
   }catch(e){}renderLbProfile();lbUpdatePoints();}
 function lbKeys(d){d=d||new Date();const p=n=>String(n).padStart(2,'0');const day=d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate());
   const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));const dn=t.getUTCDay()||7;t.setUTCDate(t.getUTCDate()+4-dn);const y=t.getUTCFullYear();const wk=Math.ceil(((t-Date.UTC(y,0,1))/86400000+1)/7);
@@ -4016,21 +4016,23 @@ function startAttempt(){quizNoPoints=false;const n=isDrill?drillQs.length:quizWo
 function lbCount(n){try{badgeCheckSoon();}catch(e){}n=n||1;if(!lbMe)return;
   if(quizNoPoints){const pill=document.getElementById('pointsPill');if(pill){pill.textContent='⭐ no points: quiz repeated';pill.classList.add('dim');clearTimeout(ptsNoteTimer);ptsNoteTimer=setTimeout(()=>{pill.classList.remove('dim');lbUpdatePoints();},1400);}return;}
   lbPending+=n;lbUpdatePoints(true);renderLb();if(!lbFlushTimer)lbFlushTimer=setTimeout(()=>lbFlush(),8000);}
-let lbLastOk=0;
+let lbLastOk=0,lbExamPend=0,lbExamInfo=null;
+function lbExamKeep(){try{if(lbExamPend>0)localStorage.setItem('latin_lb_pending_ex',JSON.stringify({n:lbExamPend,i:lbExamInfo}));lbExamPend=0;}catch(e){}}
 async function lbFlush(keepalive){clearTimeout(lbFlushTimer);lbFlushTimer=null;if(!lbMe||!lbPending||lbInFlight)return;
   // Leaving the page with an expired sign-in: keep the count for next time instead of losing it.
-  if(keepalive&&!authFresh(playerAuth)){try{window.storage.set(LB_PENDING_KEY,String(lbPending));}catch(e){}lbPending=0;return;}
+  if(keepalive&&!authFresh(playerAuth)){try{window.storage.set(LB_PENDING_KEY,String(lbPending));lbExamKeep();}catch(e){}lbPending=0;return;}
   // the server allows at most 300 per save and about 3 a second since the last one, so a big award (an exam) goes up in safe chunks
   const mine=lbPlayers[lbMe.pid];if(!lbLastOk)lbLastOk=(mine&&mine.lt)||0;const allow=Math.max(1,Math.min(300,4+Math.floor((Date.now()-lbLastOk)/350)));
   const n=Math.min(lbPending,allow),k=lbKeys(),inc={'.sv':{increment:n}};
+  const exN=Math.min(lbExamPend,n);lbExamPend-=exN;   // ⭐ from an exam are labelled so the admin's points history doesn't flag them
   const lk=Date.now().toString(36)+Math.random().toString(36).slice(2,7),P='players/'+lbMe.pid+'/';
   // the server checks points can't go up faster than people can earn them, and that every save is logged (plog) for the admin
-  const body={[P+'total']:inc,[P+'lt']:{'.sv':'timestamp'},[P+'lk']:lk,['plog/'+lbMe.pid+'/'+lk]:(()=>{const S=ansStats,md=['mc','ty','dr','ma'].sort((x,y)=>S[y]-S[x])[0];const e={n,t:{'.sv':'timestamp'},a:S.a,w:S.w};if(S.a)e.md=md;if(S.pn)e.pc=Math.round(S.ps/S.pn/100);ansStats={a:0,w:0,mc:0,ty:0,dr:0,ma:0,ps:0,pn:0};return e;})()};['d','w','m'].forEach(x=>{body[P+x+'/'+k[x]]=inc;if(mine&&mine[x])Object.keys(mine[x]).forEach(old=>{if(old!==k[x])body[P+x+'/'+old]=null;});});
+  const body={[P+'total']:inc,[P+'lt']:{'.sv':'timestamp'},[P+'lk']:lk,['plog/'+lbMe.pid+'/'+lk]:(()=>{const S=ansStats,md=['mc','ty','dr','ma'].sort((x,y)=>S[y]-S[x])[0];const e={n,t:{'.sv':'timestamp'},a:S.a,w:S.w};if(S.a)e.md=md;if(exN){e.ex=exN;e.es=lbExamInfo.s;e.ed=lbExamInfo.d;}if(S.pn)e.pc=Math.round(S.ps/S.pn/100);ansStats={a:0,w:0,mc:0,ty:0,dr:0,ma:0,ps:0,pn:0};return e;})()};['d','w','m'].forEach(x=>{body[P+x+'/'+k[x]]=inc;if(mine&&mine[x])Object.keys(mine[x]).forEach(old=>{if(old!==k[x])body[P+x+'/'+old]=null;});});
   lbInFlightBase=(mine&&mine.total)||0;lbInFlight=n;lbPending-=n;
-  if(lbPending>0){if(keepalive){try{window.storage.set(LB_PENDING_KEY,String(lbPending));}catch(e){}lbPending=0;}else if(!lbFlushTimer)lbFlushTimer=setTimeout(()=>lbFlush(),30000);}
+  if(lbPending>0){if(keepalive){try{window.storage.set(LB_PENDING_KEY,String(lbPending));lbExamKeep();}catch(e){}lbPending=0;}else if(!lbFlushTimer)lbFlushTimer=setTimeout(()=>lbFlush(),30000);}
   try{if(!keepalive&&(await fbReq('GET','players/'+lbMe.pid+'/name'))==null){lbInFlight=0;lbRemoved();return;}
     await fbReq('PATCH','',body,{keepalive});lbInFlight=0;lbLastOk=Date.now();}
-  catch(e){lbInFlight=0;lbPending+=n;if(!lbFlushTimer)lbFlushTimer=setTimeout(()=>lbFlush(),30000);}
+  catch(e){lbInFlight=0;lbPending+=n;lbExamPend+=exN;if(!lbFlushTimer)lbFlushTimer=setTimeout(()=>lbFlush(),30000);}
   lbUpdatePoints();}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')lbFlush(true);});
 window.addEventListener('pagehide',()=>lbFlush(true));
@@ -4307,18 +4309,18 @@ async function saveLook(){const me=lbPlayers[lbMe.pid]||{},fontChanged=lookSel.f
 async function showPointsHistory(pid,box){box.innerHTML='<p class="muted">Loading…</p>';let r;
   try{r=await fbReq('GET','plog/'+pid,null,{admin:true,query:'?orderBy=%22$key%22&limitToLast=300'});}catch(e){box.innerHTML='<p class="muted">Couldn’t load the history ('+esc(e.message)+'). The database rules may need updating.</p>';return;}
   const rows=Object.values(r||{}).filter(x=>x&&x.t).sort((a,b)=>a.t-b.t);if(!rows.length){box.innerHTML='<p class="muted">No points saved since the history started.</p>';return;}
-  const MD={mc:'multiple choice',ty:'typed',dr:'declension/conj.',ma:'matching'};
+  const MD={mc:'multiple choice',ty:'typed',dr:'declension/conj.',ma:'matching'};let exT=0;rows.forEach(x=>{if(x.ex)exT+=x.ex;});
   const tot=rows.reduce((a,x)=>a+(+x.n||0),0),days={},byMode={};rows.forEach(x=>{const d=new Date(x.t).toLocaleDateString();days[d]=(days[d]||0)+(+x.n||0);
     if(x.a){const m=byMode[x.md]=byMode[x.md]||{a:0,w:0,ps:0,pn:0};m.a+=x.a;m.w+=x.w||0;if(x.pc){m.ps+=x.pc*x.a;m.pn+=x.a;}}});
   // suspicious: lots of answers at under a second each (an autoclicker), especially multiple choice
   const sus=x=>x.a>=5&&x.pc!=null&&x.pc<10;
-  let h='<p style="margin:6px 0"><b>'+rows.length+'</b> saves, <b>'+tot.toLocaleString()+'</b> points since the history started. '+Object.entries(days).slice(-7).map(([d,n])=>esc(d)+': '+n.toLocaleString()).join(' · ')+'</p>';
+  let h='<p style="margin:6px 0"><b>'+rows.length+'</b> saves, <b>'+tot.toLocaleString()+'</b> points since the history started'+(exT?' (<b>'+exT.toLocaleString()+'</b> from exams)':'')+'. '+Object.entries(days).slice(-7).map(([d,n])=>esc(d)+': '+n.toLocaleString()).join(' · ')+'</p>';
   const modes=Object.entries(byMode).filter(([k])=>MD[k]);if(modes.length)h+='<p style="margin:4px 0 8px;font-size:13px">'+modes.map(([k,m])=>'<b>'+MD[k]+'</b>: '+m.a+' answers, '+Math.round((m.a-m.w)/m.a*100)+'% right'+(m.pn?', '+(m.ps/m.pn/10).toFixed(1)+' s each':'')).join(' · ')+'</p>';
   h+='<div style="max-height:280px;overflow-y:auto"><table class="nh-table"><tr><th>When</th><th>Points</th><th>Answers</th><th>Mode</th><th>Pace</th></tr>';
-  rows.slice().reverse().forEach((x,i,arr)=>{const prev=arr[i+1],gap=prev?(x.t-prev.t)/1000:null,rate=gap?x.n/gap:null,fast=(rate!=null&&rate>2.5)||sus(x);
+  rows.slice().reverse().forEach((x,i,arr)=>{const prev=arr[i+1],gap=prev?(x.t-prev.t)/1000:null,rate=gap?(x.n-(x.ex||0))/gap:null,fast=(rate!=null&&rate>2.5)||sus(x);
     h+='<tr'+(fast?' style="color:var(--red,#e07a6a)"':'')+'><td class="muted">'+new Date(x.t).toLocaleString([], {day:'numeric',month:'short',hour:'numeric',minute:'2-digit',second:'2-digit'})+'</td><td><b>+'+x.n+'</b></td>'
-      +'<td>'+(x.a?(x.a-(x.w||0))+'/'+x.a+' right':'<span class="muted">–</span>')+'</td><td class="muted">'+(x.md?MD[x.md]||'':'')+'</td><td class="muted">'+(x.pc!=null?(x.pc/10).toFixed(1)+' s each':'')+(fast?' ⚠':'')+'</td></tr>';});
-  box.innerHTML=h+'</table></div><p class="muted" style="font-size:11.5px">⚠ = 5+ answers at under 1 second each (what an autoclicker looks like), or points coming in faster than 2.5 a second. Answer details are recorded from now on; older saves show “–”.</p>';}
+      +'<td>'+(x.a?(x.a-(x.w||0))+'/'+x.a+' right':x.ex?'':'<span class="muted">–</span>')+(x.ex?(x.a?'<br>':'')+'📝 exam '+(x.es!=null?x.es+'/100':'')+(x.ex<x.n?' <span class="muted">(+'+x.ex+')</span>':''):'')+'</td><td class="muted">'+(x.md?MD[x.md]||'':'')+(x.ex?(x.md?' + ':'')+'exam':'')+'</td><td class="muted">'+(x.pc!=null?(x.pc/10).toFixed(1)+' s each':'')+(x.ex&&x.ed?(x.pc!=null?'<br>':'')+'took '+Math.max(1,Math.round(x.ed/60))+' min':'')+(fast?' ⚠':'')+'</td></tr>';});
+  box.innerHTML=h+'</table></div><p class="muted" style="font-size:11.5px">⚠ = 5+ answers at under 1 second each (what an autoclicker looks like), or points coming in faster than 2.5 a second. Answer details are recorded from now on; older saves show “–”. 📝 exam = ⭐ from an exam (5 per mark, never more than one per second spent on the paper); a big award arrives over several saves.</p>';}
 function openPlayerCard(pid){const p=lbPlayers[pid];if(!p)return;const k=lbKeys();const box=document.getElementById('playerCard');box.innerHTML='';
   const h=document.createElement('div');h.className='pc-name';const big=nameEl(pid,p.name);h.appendChild(big);box.appendChild(h);{const bc=badgeChipsEl(p,true,pid);if(bc){const r=document.createElement('div');r.style.cssText='text-align:center;margin:-4px 0 10px';r.appendChild(bc);box.appendChild(r);}}
   const g=document.createElement('div');g.className='pc-grid';[['Today','d'],['Week','w'],['Month','m'],['All time','all']].forEach(([l,per])=>{const c=document.createElement('div');c.innerHTML='<b>'+lbScore(p,per,k).toLocaleString()+'</b><span>'+l+'</span>';g.appendChild(c);});box.appendChild(g);
@@ -6481,7 +6483,7 @@ function exSubmit(){if(!exam||exam.res)return;const blank=exam.qs.filter((q,i)=>
   const marks={},sec={};let total=0;exam.qs.forEach((q,i)=>{let r;try{r=exGrade(q,exam.ans[i]);}catch(e){r={got:0,max:EXAM_SECS.find(s=>s.id===q.sec).pts,right:q.show||''};}marks[i]=r;sec[q.sec]=(sec[q.sec]||0)+r.got;total+=r.got;});
   total=Math.round(total*2)/2;const secs=Math.round((Date.now()-exam.start)/1000);
   // ⭐ = EXAM_STAR_X × the mark (out of 100), but never more than one per second spent on the paper
-  let stars=0;if(typeof lbMe!=='undefined'&&lbMe){stars=Math.min(Math.round(total*EXAM_STAR_X),secs);if(stars>0){const s=quizNoPoints;quizNoPoints=false;try{lbCount(stars);}finally{quizNoPoints=s;}}}
+  let stars=0;if(typeof lbMe!=='undefined'&&lbMe){stars=Math.min(Math.round(total*EXAM_STAR_X),secs);if(stars>0){const s=quizNoPoints;quizNoPoints=false;try{lbCount(stars);lbExamPend+=stars;lbExamInfo={s:total,d:secs};}finally{quizNoPoints=s;}}}
   exam.res={marks,sec,total,secs,stars};try{localStorage.removeItem(EXAM_KEY);const h=exHist();h.unshift({t:Date.now(),s:total,secs});localStorage.setItem(EXAM_HIST,JSON.stringify(h.slice(0,30)));}catch(e){}
   exRender();window.scrollTo(0,0);}
 
