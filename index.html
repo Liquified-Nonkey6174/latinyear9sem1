@@ -3492,7 +3492,7 @@ function noteAnswer(ok){const now=Date.now(),S=ansStats;S.a++;if(!ok)S.w++;S[isM
   if(lastAnsAt&&now-lastAnsAt<60000){S.ps+=now-lastAnsAt;S.pn++;}lastAnsAt=now;}
 function recAns0(w,ok){reviseAnswer(w,ok);try{noteAnswer(ok);}catch(e){}if(!ok)try{ansFlags();}catch(e){}const ck=w.catKey;if(!statsData.catStats[ck])statsData.catStats[ck]={seen:0,correct:0};statsData.catStats[ck].seen++;if(ok)statsData.catStats[ck].correct++;saveStats();if(ok){if(mcFast||tooFast())tooFastNote();else lbCount(isDrill&&!isSent?2:1);dailyTick();}mcFast=false;trackMistake(w,ok);badgeAnswer(ok);}   // declension/conjugation questions are worth 2 ⭐
 let sessionFinished=true;
-function finishSession(){sessionFinished=true;const total=isDrill?drillQs.length:isSent?sentTotal:quizWords.length;const pct=total>0?Math.round(score/total*100):0;if(window.resumeDate)statsData.sessions=statsData.sessions.filter(s=>s.date!==window.resumeDate);statsData.sessions.push({date:Date.now(),score,total,pct});if(total>=50&&score>=total)bump('perfect');if(total>0&&score===0)sxTry('s|zero|'+Math.min(total,9));window.resumeDate=null;if(statsData.sessions.length>20)statsData.sessions=statsData.sessions.slice(-20);saveStats();}
+function finishSession(){sessionFinished=true;const total=isDrill?drillQs.length:isSent?sentTotal:quizWords.length;const pct=total>0?Math.round(score/total*100):0;if(window.resumeDate)statsData.sessions=statsData.sessions.filter(s=>s.date!==window.resumeDate);statsData.sessions.push({date:Date.now(),score,total,pct});if(total>=50&&score>=total)bump('perfect');if(total>0&&score===0)sxTry('s|zero|'+Math.min(total,9));if(total>0&&!isDrill&&!isSent&&!isMatch&&quizType==='vocab'&&(inputMode==='typed'||inputMode==='mc')&&Math.abs(score*100-total*total)<1e-6)sxTry('s|eq|1');window.resumeDate=null;if(statsData.sessions.length>20)statsData.sessions=statsData.sessions.slice(-20);saveStats();}
 const PHRASES=[[100,'Optime! Perfectly done.'],[80,'Bene! Well done.'],[60,'Satis bene. Keep going.'],[0,'Persevera. Try again.']];
 function showResult(){finishSession();reviseFinish();showView('resultView');const total=isDrill?drillQs.length:quizWords.length;const pct=total>0?Math.round(score/total*100):0;document.getElementById('resLabel').textContent='Result';document.getElementById('resScore').textContent=fmtScore(score)+' / '+total;document.getElementById('resTotal').textContent=pct+'%';document.getElementById('resPhrase').textContent=(PHRASES.find(([t])=>pct>=t)||PHRASES[PHRASES.length-1])[1];const banner=document.getElementById('reviewBanner');if(!isDrill&&wrongWords.length>0){banner.style.display='flex';document.getElementById('reviewBannerTitle').textContent=wrongWords.length+' word'+(wrongWords.length===1?' needs':' words need')+' more practice';document.getElementById('reviewBannerSub').textContent='Round '+(round+1)+' will drill just these words.';}else banner.style.display='none';}
 function continueReview(){round++;quizWords=shuffle([...wrongWords]);wrongWords=[];current=0;score=0;answered=false;showView('quizView');showQ();}
@@ -4377,17 +4377,27 @@ async function showPointsHistory(pid,box){box.innerHTML='<p class="muted">Loadin
   box.innerHTML=h+'</table></div><p class="muted" style="font-size:11.5px">⚠ = 5+ answers at under 1 second each (what an autoclicker looks like), or points coming in faster than 2.5 a second. Answer details are recorded from now on; older saves show “–”. 📝 exam = ⭐ from an exam (5 per mark, never more than one per second spent on the paper); a big award arrives over several saves. 🔀 = another account was merged into this one (its points were added).</p>';}
 // admin: see a player's badges (from their cloud save) and give / take them away. An override sets the badge to exactly
 // that level (0 = removed) until it's set back to "auto"; the player's app applies it next time it checks.
-async function adminBadges(pid,box){box.innerHTML='<p class="muted">Loading…</p>';let prog=null,gr={};
+async function adminBadges(pid,box){box.innerHTML='<p class="muted">Loading…</p>';let prog=null,gr={},keys={},sgot={},sold='';const SN={};
   try{const r=await fbReq('GET','progress/'+pid,null,{admin:true});if(r&&typeof r.d==='string')prog=JSON.parse(r.d);}catch(e){}
   try{gr=(await fbReq('GET','bgrant/'+pid,null,{admin:true}))||{};}catch(e){box.innerHTML='<p class="muted">Couldn’t load: the database rules may need updating.</p>';return;}
+  try{keys=(await fbReq('GET','sx/key',null,{admin:true}))||{};}catch(e){}
+  try{sgot=(await fbReq('GET','sx/got/'+pid,null,{admin:true}))||{};}catch(e){}try{sold=(await fbReq('GET','sx/old/'+pid,null,{admin:true}))||'';}catch(e){}
+  const hOf={};Object.entries(keys).forEach(([h,id])=>{(hOf[id]=hOf[id]||[]).push(h);});
+  for(const id of SX_IDS){const h=(hOf[id]||[])[0];if(sxCfg[id])SN[id]=sxCfg[id].name;else if(h){try{const c=JSON.parse(await fbReq('GET','sx/cfg/'+h,null,{admin:true}));if(c&&c.name)SN[id]=c.name;}catch(e){}}}
+  const hasS=id=>(hOf[id]||[]).some(h=>sgot[h])||String(sold).split(',').includes(id);
   const have=(prog&&prog.badges)||{},p=lbPlayers[pid]||{},shown=Object.fromEntries(shownBadges(p));
-  const rows=[...BADGES.filter(b=>!b.secret),...META_BADGES.filter(b=>b.meta!=='count')].map(bd=>{const cur=have[bd.id]?have[bd.id].l:(shown[bd.id]||0),o=gr[bd.id],max=bd.lv.length;
-    const opts=['<option value="auto"'+(o?'':' selected')+'>auto</option>'].concat(Array.from({length:max+1},(_,i)=>'<option value="'+i+'"'+(o&&+o.l===i?' selected':'')+'>'+(i===0?'✖ removed':max>1?'level '+i:'✔ given')+'</option>'));
-    return '<tr><td>'+esc(bd.name)+'</td><td>'+(cur?(max>1?'level '+cur:'✔'):'<span class="muted">–</span>')+'</td><td><select data-b="'+bd.id+'">'+opts.join('')+'</select></td></tr>';}).join('');
-  const nSec=BADGES.filter(b=>b.secret&&have[b.id]).length;
-  box.innerHTML='<p style="margin:6px 0">'+(prog?'From their last cloud save.':'No cloud save yet: showing the badges on their name only.')+' Secret badges: '+nSec+'. Changes apply the next time they open Latin Trainer.</p><div style="max-height:300px;overflow-y:auto"><table class="nh-table"><tr><th>Badge</th><th>Has</th><th>Set to</th></tr>'+rows+'</table></div><p class="muted" style="font-size:11.5px">“auto” = earned normally. Any other choice fixes the badge at that level (✖ removed = taken away) until you set it back to auto.</p>';
-  box.querySelectorAll('select[data-b]').forEach(sel=>sel.onchange=async()=>{const id=sel.dataset.b,v=sel.value;sel.disabled=true;
-    try{if(v==='auto')await fbReq('DELETE','bgrant/'+pid+'/'+id,null,{admin:true});else await fbReq('PUT','bgrant/'+pid+'/'+id,{l:+v,t:{'.sv':'timestamp'}},{admin:true});toast('Saved.');}catch(e){toast('Couldn’t save: '+(/40[13]/.test(e.message)?'the database rules need updating.':e.message));}sel.disabled=false;});}
+  const list=[...BADGES.filter(b=>!b.secret),...META_BADGES.filter(b=>b.meta!=='count'),...BADGES.filter(b=>b.secret)];
+  const rows=list.map(bd=>{const sec=!!bd.secret,cur=sec?(hasS(bd.id)?1:0):(have[bd.id]?have[bd.id].l:(shown[bd.id]||0)),max=bd.lv.length,nm=sec?'🔒 '+(SN[bd.id]||bd.id):bd.name,o=gr[bd.id];
+    const opts=['<option value="">—</option>','<option value="0">✖ remove</option>'].concat(Array.from({length:max},(_,i)=>'<option value="'+(i+1)+'">'+(max>1?'give level '+(i+1):'✔ give')+'</option>'));
+    const last=o?' <span class="muted" style="font-size:11px">('+(+o.l?'given':'removed')+' '+new Date(o.t).toLocaleDateString()+')</span>':'';
+    return '<tr><td>'+esc(nm)+last+'</td><td>'+(cur?(max>1?'level '+cur:'✔'):'<span class="muted">–</span>')+'</td><td><select data-b="'+bd.id+'"'+(sec&&!(hOf[bd.id]||[]).length?' disabled title="Upload the secret badge answers first"':'')+'>'+opts.join('')+'</select></td></tr>';}).join('');
+  box.innerHTML='<p style="margin:6px 0">'+(prog?'From their last cloud save.':'No cloud save yet: showing the badges on their name only.')+' Changes reach them the next time their app checks.</p><div style="max-height:320px;overflow-y:auto"><table class="nh-table"><tr><th>Badge</th><th>Has</th><th>Action</th></tr>'+rows+'</table></div><p class="muted" style="font-size:11.5px">✖ remove takes the badge away; they can earn it again, but only with new progress from now on. Give sets it to that level; normal earning carries on from there.</p>';
+  box.querySelectorAll('select[data-b]').forEach(sel=>sel.onchange=async()=>{const id=sel.dataset.b,v=sel.value;if(v==='')return;const bd=badgeById(id),L=+v;sel.disabled=true;
+    try{if(bd&&bd.secret){const hs=hOf[id]||[];
+        if(L)await fbReq('PUT','sx/got/'+pid+'/'+hs[0],{'.sv':'timestamp'},{admin:true});
+        else{for(const h of hs)if(sgot[h])await fbReq('DELETE','sx/got/'+pid+'/'+h,null,{admin:true});const ol=String(sold||'').split(',').filter(Boolean);if(ol.includes(id)){const nl=ol.filter(x=>x!==id).join(',');await fbReq(nl?'PUT':'DELETE','sx/old/'+pid,nl||null,{admin:true});}}}
+      await fbReq('PUT','bgrant/'+pid+'/'+id,{l:L,t:{'.sv':'timestamp'}},{admin:true});toast('Saved: '+(L?'given':'removed')+'.');adminBadges(pid,box);}
+    catch(e){toast('Couldn’t save: '+(/40[13]/.test(e.message)?'the database rules need updating.':e.message));sel.disabled=false;}});}
 function openPlayerCard(pid){const p=lbPlayers[pid];if(!p)return;const k=lbKeys();const box=document.getElementById('playerCard');box.innerHTML='';
   const h=document.createElement('div');h.className='pc-name';const big=nameEl(pid,p.name);h.appendChild(big);box.appendChild(h);{const bc=badgeChipsEl(p,true,pid);if(bc){const r=document.createElement('div');r.style.cssText='text-align:center;margin:-4px 0 10px';r.appendChild(bc);box.appendChild(r);}}
   if(isVer(pid)){const v=document.createElement('div');v.className='pc-ver';v.textContent='✔ Verified player';v.title='Challenges against them and reactions from them count towards badges.';box.appendChild(v);}
@@ -4668,7 +4678,7 @@ const ROMAN=['I','II','III','IV','V','VI','VII'];
 // hidden answer, and only then lets that player read the badge's name, description and art.
 const SX_LEGACY_N=16;   // the first 16 ids existed before secret badges moved online
 const SX_PREM='1f552369e71116f84f55522c4dd56b8b';
-const SX_IDS=["ssvnj", "s49gm", "s4xmr", "s5szq", "sc5fe", "sdcuc", "szhg2", "s6zrc", "scqbh", "sgady", "sc784", "swt4g", "sr66c", "s6xum", "sp6ju", "suzqc", "sk7wq"],SX_LUCK='c409b3e4bcac1ee8203d86fc13fd6e37',SX_CACHE='latin_sx',SX_OLDNAMES={"a68feff1": "ssvnj", "9b8a8f72": "s49gm", "b6c52459": "s4xmr", "1f86cf2f": "s5szq", "d49dd484": "sc5fe", "dd920cc1": "sdcuc", "6d83c105": "szhg2", "f1c1e166": "s6zrc", "88fe7e2a": "scqbh", "70d14112": "sgady", "8d8fc94b": "sc784", "eb31a16d": "swt4g", "eaa5f88a": "sr66c", "8b16fee1": "s6xum", "c4ce7952": "sp6ju", "e5094ede": "suzqc"};
+const SX_IDS=["ssvnj", "s49gm", "s4xmr", "s5szq", "sc5fe", "sdcuc", "szhg2", "s6zrc", "scqbh", "sgady", "sc784", "swt4g", "sr66c", "s6xum", "sp6ju", "suzqc", "sk7wq", "sh3wd", "sv9ke"],SX_LUCK='c409b3e4bcac1ee8203d86fc13fd6e37',SX_CACHE='latin_sx',SX_OLDNAMES={"a68feff1": "ssvnj", "9b8a8f72": "s49gm", "b6c52459": "s4xmr", "1f86cf2f": "s5szq", "d49dd484": "sc5fe", "dd920cc1": "sdcuc", "6d83c105": "szhg2", "f1c1e166": "s6zrc", "88fe7e2a": "scqbh", "70d14112": "sgady", "8d8fc94b": "sc784", "eb31a16d": "swt4g", "eaa5f88a": "sr66c", "8b16fee1": "s6xum", "c4ce7952": "sp6ju", "e5094ede": "suzqc"};
 function _fnv(t){let h=0x811c9dc5;t=String(t);for(let i=0;i<t.length;i++){h^=t.charCodeAt(i);h=Math.imul(h,0x01000193)>>>0;}return ('0000000'+h.toString(16)).slice(-8);}
 let sxCfg=(()=>{try{return JSON.parse(localStorage.getItem(SX_CACHE)||'{}')||{};}catch(e){return {};}})();
 const sxTried=new Set();let sxLastRoll=0;
@@ -4758,7 +4768,7 @@ function bsave(){try{localStorage.setItem(BSTAT_KEY,JSON.stringify(bstat()));}ca
 function bump(k,n){const b=bstat();b[k]=(b[k]||0)+(n||1);bsave();badgeCheckSoon();}
 function lbTodayPts(){if(!lbMe)return 0;const me=lbPlayers[lbMe.pid]||{},k=lbKeys();return ((me.d||{})[k.d]||0)+lbPending;}
 // every answer (vocab, drills, sentences, parse, challenges)
-function badgeAnswer(ok){const b=bstat();sxAnswer(ok);b.lastAns={t:Date.now(),ok:!!ok};if(ok){b.correct=(b.correct||0)+1;b.run=(b.run||0)+1;if(b.run>(b.bestRun||0))b.bestRun=b.run;const h=new Date().getHours();if(h<8)b.early=1;if(h>=20)b.late=1;}else b.run=0;bsave();badgeCheckSoon();}
+function badgeAnswer(ok){const b=bstat();sxAnswer(ok);b.lastAns={t:Date.now(),ok:!!ok};if(ok){b.correct=(b.correct||0)+1;b.run=(b.run||0)+1;if(b.run>(b.bestRun||0))b.bestRun=b.run;const h=new Date().getHours();if(h<8)b.early=(+b.early||0)+1;if(h>=20)b.late=(+b.late||0)+1;}else b.run=0;bsave();badgeCheckSoon();}
 function lexWords(scope){const main=[];Object.entries(DATA).forEach(([ck,c])=>{if(c.packOnly)return;Object.entries(c.sub).forEach(([sk,sub])=>sub.words.forEach(w=>{if(!(typeof customWords!=='undefined'&&customWords.some(x=>x.lat===w.lat&&x.catKey===ck)))main.push({...w,catKey:ck,subKey:sk});}));});
   if(scope==='main')return main;const seen=new Set(main.map(wKey)),all=[...main];WORD_PACKS.forEach(pk=>pk.words.forEach(w=>{if(!seen.has(wKey(w))){seen.add(wKey(w));all.push(w);}}));return all;}
 function lexStat(scope,what){const acc=accData();const ws=lexWords(scope);const ok=w=>{const k=wKey(w),a=acc[k],r=srData[k];return what==='seen'?((a&&a.s>0)||(r&&r.seen>0)):((a&&a.c>0)||(r&&r.correct>0));};
@@ -4837,17 +4847,26 @@ setInterval(()=>{if(document.visibilityState==='visible')try{badgeCheck();}catch
 function secretWipe(){try{const g=bjson(BADGE_KEY);let ch=false;
   Object.keys(g).forEach(k=>{const n=SX_OLDNAMES[_fnv(k)];if(n){if(!g[n]||g[k].l>g[n].l)g[n]=g[k];delete g[k];ch=true;}});
   if(ch){localStorage.setItem(BADGE_KEY,JSON.stringify(g));const pins=badgePins().map(x=>SX_OLDNAMES[_fnv(x)]||x).filter(id=>g[id]);localStorage.setItem(PIN_KEY,JSON.stringify(pins));}}catch(e){}}
+function badgeStatV(bd){let v=0;try{v=bd.stat();}catch(e){}if(bd.secret)return v;return Math.max(0,v-(+bstat()['base_'+bd.id]||0));}
+// the admin's give / take-away actions: each one is applied once per device (it can be earned back after a removal)
+function bgApply(got){let ch=false,done={};try{done=JSON.parse(localStorage.getItem('latin_bgdone')||'{}')||{};}catch(e){}
+  Object.entries(BGRANT||{}).forEach(([id,o])=>{if(!o||done[id]===o.t)return;const bd=badgeById(id);if(!bd)return;done[id]=o.t;const L=Math.max(0,Math.min(+o.l||0,bd.lv.length)),cur=got[id];
+    if(L===0){if(cur&&!(cur.t>(o.t||0)+60000)){delete got[id];ch=true;}
+      if(bd.secret){if(sxCfg[id]){delete sxCfg[id];try{localStorage.setItem(SX_CACHE,JSON.stringify(sxCfg));}catch(e){}sxArt();}sxTried.clear();}
+      else{const b=bstat();let v=0;try{v=bd.stat();}catch(e){}b['base_'+id]=v;bsave();}
+      try{const pins=badgePins();if(pins.includes(id))localStorage.setItem(PIN_KEY,JSON.stringify(pins.filter(x=>x!==id)));}catch(e){}}
+    else{if(!cur||cur.l!==L){got[id]={l:L,t:Date.now()};ch=true;}if(bd.secret)setTimeout(()=>{try{sxSync();}catch(e){}},0);}});
+  try{localStorage.setItem('latin_bgdone',JSON.stringify(done));}catch(e){}return ch;}
 function badgeCheck(){secretWipe();try{verLoad();}catch(e){}const got=bjson(BADGE_KEY);let changed=false;const b=bstat();const fresh=[];
   {let lv=0,t0=0;Object.keys(OLD_RANK).forEach(k=>{if(got[k]){lv=Math.max(lv,oldRankLv(k,got[k].l));t0=t0?Math.min(t0,got[k].t||t0):got[k].t||0;delete got[k];changed=true;}});if(lv&&(!got.rank||got.rank.l<lv))got.rank={l:lv,t:got.rank?got.rank.t:(t0||Date.now())};
    const pins=badgePins();if(pins.some(x=>OLD_RANK[x]!=null)){const np=[...new Set(pins.map(x=>OLD_RANK[x]!=null?'rank':x))];try{localStorage.setItem(PIN_KEY,JSON.stringify(np));}catch(e){}}}
   // remember personal bests that the live data might forget
   b.bestDay=Math.max(b.bestDay||0,lbTodayPts());b.bestStreak=Math.max(b.bestStreak||0,dailyStreak());reactsTally();
   if(lbMe&&classChal&&+classChal.target){const me=lbPlayers[lbMe.pid]||{};if(((me.w||{})[lbKeys().w]||0)>=500)b.civis=1;}bsave();
-  BADGES.forEach(bd=>{if(BGRANT[bd.id])return;let v=0;try{v=bd.stat();}catch(e){}const l=badgeLevel(bd,v);const old=got[bd.id]?got[bd.id].l:0;
+  if(bgApply(got))changed=true;
+  BADGES.forEach(bd=>{const v=badgeStatV(bd);const l=badgeLevel(bd,v);const old=got[bd.id]?got[bd.id].l:0;
     if(l>old){got[bd.id]={l,t:Date.now()};changed=true;fresh.push({bd,l,first:!old});}});
-  // the admin's overrides win: a set level (given) or 0 (taken away)
-  Object.entries(BGRANT||{}).forEach(([id,o])=>{const bd=badgeById(id);if(!bd||bd.secret||!o)return;const L=Math.max(0,Math.min(+o.l||0,bd.lv.length)),cur=got[id]?got[id].l:0;if(L!==cur){if(L)got[id]={l:L,t:got[id]?got[id].t:Date.now()};else delete got[id];changed=true;}});
-  META_BADGES.forEach(bd=>{if(BGRANT[bd.id])return;const v=metaValue(bd,got),old=got[bd.id]?got[bd.id].l:0;if(v>old){got[bd.id]={l:v,t:Date.now()};changed=true;if(bd.meta!=='count')fresh.push({bd,l:v,first:!old});else toast('🗝️ Arcana: '+v+' secret badge'+(v===1?'':'s')+' found!');}});
+  META_BADGES.forEach(bd=>{const v=metaValue(bd,got),old=got[bd.id]?got[bd.id].l:0;if(v>old){got[bd.id]={l:v,t:Date.now()};changed=true;if(bd.meta!=='count')fresh.push({bd,l:v,first:!old});else toast('🗝️ Arcana: '+v+' secret badge'+(v===1?'':'s')+' found!');}});
   if(changed){try{localStorage.setItem(BADGE_KEY,JSON.stringify(got));}catch(e){}}
   syncShownBadges();
   if(document.getElementById('badgeOverlay')&&document.getElementById('badgeOverlay').style.display==='flex')renderBadges();renderBadgeSide();
@@ -4858,7 +4877,7 @@ function setBadgeFilter(f){badgeFilter=f;try{localStorage.setItem('latin_bfilter
 function badgeShown(l,max){return badgeFilter==='all'||(badgeFilter==='none'&&!l)||(badgeFilter==='got'&&l>0)||(badgeFilter==='unmax'&&l>0&&l<max);}
 function renderBadges(){document.querySelectorAll('#badgeSort button').forEach(b=>b.classList.toggle('on',b.dataset.f===badgeFilter));const g=document.getElementById('badgeGrid');if(!g)return;const sc=g.closest('.badge-scroll'),keep=sc?sc.scrollTop:0,bx=g.closest('.badge-box'),keepB=bx?bx.scrollTop:0;requestAnimationFrame(()=>{if(sc)sc.scrollTop=keep;if(bx)bx.scrollTop=keepB;});const got=bjson(BADGE_KEY);let earned=0,total=0;g.innerHTML='';
   BADGES.forEach(bd=>{const e=got[bd.id],l=e?e.l:0;total+=bd.lv.length;earned+=l;if(!badgeShown(l,bd.lv.length))return;if(bd.secret&&!l){const c=document.createElement('div');c.className='badge-card locked';c.innerHTML='<div class="bd-art">'+badgeArt('unknown',0,1,{secret:true,size:74})+'</div><div class="bd-name">Secret badge</div><div class="bd-desc">Keep exploring…</div>';g.appendChild(c);return;}
-    let v=0;try{v=bd.stat();}catch(e){}const next=bd.lv[l];const c=document.createElement('div');c.className='badge-card'+(l?' earned':' locked')+(bd.tiers?(l?' m-'+tierMetal(l,bd.lv.length):''):l?' lvl'+Math.min(l,7):'')+(GRAND[bd.id]?' grand'+GRAND[bd.id]:'');
+    const v=badgeStatV(bd);const next=bd.lv[l];const c=document.createElement('div');c.className='badge-card'+(l?' earned':' locked')+(bd.tiers?(l?' m-'+tierMetal(l,bd.lv.length):''):l?' lvl'+Math.min(l,7):'')+(GRAND[bd.id]?' grand'+GRAND[bd.id]:'');
     let prog='';if(next!=null){if(bd.id.startsWith('lex')||bd.id.startsWith('doct'))prog=lexProgress(bd.id==='lexicon'||bd.id==='doctus'?'main':'all',bd.id.startsWith('lex')?'seen':'correct');else if(bd.lv.length>1||next>1)prog=Math.min(v,next).toLocaleString()+' / '+next.toLocaleString()+(bd.unit?' '+bd.unit:'');}
     c.innerHTML='<div class="bd-art">'+bdArt(bd,l,74,{locked:!l})+'</div><div class="bd-name">'+esc(l?badgeTierName(bd,l):bd.name)+'</div>'+(bd.lat?'<div class="bd-lat">'+esc(bd.lat)+'</div>':'')
       +'<div class="bd-desc">'+esc(bd.desc)+(bd.lv.length>1&&!bd.tiers?' Levels: '+bd.lv.map(x=>x.toLocaleString()).join(' · ')+'.':'')+'</div>'+(prog?'<div class="bd-prog">'+(l?'Next: ':'')+prog+'</div>':'')+(e?'<div class="bd-date">'+new Date(e.t).toLocaleDateString()+'</div>':'');
@@ -6712,7 +6731,7 @@ function exSubmit(){if(!exam||exam.res)return;const blank=exam.qs.filter((q,i)=>
   // ⭐ = EXAM_STAR_X × the marks, counting only answers typed at least half a second after the paper appeared
   const tm=exam.tm||{};let starMarks=0,fast=0;exam.qs.forEach((q,i)=>{const r=marks[i];if(!r||!r.got)return;if(tm[i]!=null&&tm[i]>=500)starMarks+=r.got;else fast++;});
   let stars=0;if(typeof lbMe!=='undefined'&&lbMe){stars=Math.round(starMarks*EXAM_STAR_X);if(stars>0){const s=quizNoPoints;quizNoPoints=false;try{lbCount(stars);lbExamPend+=stars;lbExamInfo={s:total,d:secs};}finally{quizNoPoints=s;}}}
-  exam.res={marks,sec,total,secs,stars,fast};try{localStorage.removeItem(EXAM_KEY);const h=exHist();h.unshift({t:Date.now(),s:total,secs});localStorage.setItem(EXAM_HIST,JSON.stringify(h.slice(0,30)));}catch(e){}
+  exam.res={marks,sec,total,secs,stars,fast};try{localStorage.removeItem(EXAM_KEY);const h=exHist();h.unshift({t:Date.now(),s:total,secs});localStorage.setItem(EXAM_HIST,JSON.stringify(h.slice(0,30)));if(total===67||(h.some(x=>x.s===6)&&h.some(x=>x.s===7)))sxTry('s|ex|67');}catch(e){}
   exRender();window.scrollTo(0,0);}
 
 // quiz side effects must never block moving to the next question
