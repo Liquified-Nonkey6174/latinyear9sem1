@@ -326,8 +326,8 @@
       }
     },
     "mto": {
+      ".read": "auth != null",
       "$uid": {
-        ".read": "auth != null && (auth.uid === $uid || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2')",
         ".write": "auth != null && auth.uid === $uid",
         ".validate": "newData.isString() && newData.val().length <= 40"
       }

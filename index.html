@@ -2035,6 +2035,7 @@ body:has(.overlay[style*="display: flex"]) .side-fab,body:has(#bReveal[style*="d
     <form onsubmit="event.preventDefault();acctSubmit()">
       <input class="acct-in" id="acctEmail" type="email" autocomplete="email" placeholder="Email" spellcheck="false">
       <input class="acct-in" id="acctPass" type="password" autocomplete="current-password" placeholder="Password">
+      <input class="acct-in" id="acctPass2" type="password" autocomplete="new-password" placeholder="New password (at least 6 characters)" style="display:none">
       <div id="acctMsg" class="backup-msg"></div>
       <div class="ann-btns"><button class="btn-primary" id="acctGo" type="submit">Sign in</button><button type="button" class="lb-link" id="acctSwapBtn" onclick="acctSwap()"></button><button type="button" class="lb-link muted" id="acctForgotBtn" onclick="acctForgot()">Forgot password?</button><button type="button" class="lb-link muted" id="acctCodeBtn" onclick="acctMergeCode()">Use a recovery code instead</button></div>
     </form>
@@ -3566,7 +3567,7 @@ const authFresh=a=>!!(a&&a.idToken&&a.exp>Date.now());
 async function playerToken(){if(authFresh(playerAuth))return playerAuth.idToken;
   if(!playerAuthP)playerAuthP=(async()=>{
     if(!playerAuth){try{const r=await window.storage.get(AUTH_KEY);if(r&&r.value)playerAuth=JSON.parse(r.value);}catch(e){}}
-    if(playerAuth&&playerAuth.refreshToken){try{playerAuth=await refreshAuth(playerAuth);}catch(e){if(/TOKEN|USER|INVALID/.test(e.message))playerAuth=null;else throw e;}}
+    if(playerAuth&&playerAuth.refreshToken){try{playerAuth=await refreshAuth(playerAuth);}catch(e){if(/TOKEN|USER|INVALID/.test(e.message)){playerAuth=null;try{if(typeof cloudInfo==='function'&&cloudInfo().email){cloudSetInfo({email:null});setTimeout(()=>{toast('You’ve been signed out (your email or password changed). Use 👤 Account → Sign in.');renderCloud();},500);}}catch(x){}}else throw e;}}
     if(!authFresh(playerAuth))playerAuth=authFrom(await authPost('https://identitytoolkit.googleapis.com/v1/accounts:signUp',{returnSecureToken:true}));
     savePlayerAuth();
   })().finally(()=>{playerAuthP=null;});
@@ -4059,7 +4060,10 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 window.addEventListener('pagehide',()=>lbFlush(true));
 // Removed by the admin (or left on another device): stop sending points under this id.
 function lbRemoved(){if(!lbMe)return;lbMe=null;lbPending=0;saveLbMe();renderLbProfile('You’re no longer on the leaderboard. Join again to take part.',true);lbUpdatePoints();renderLb();}
-function lbName(pid){const p=lbPlayers[pid];return p&&p.name?p.name:'(left)';}
+// merged accounts: old id → the account it was merged into (mto), so old chat messages and feed posts show under it
+let MTO={},mtoAt=0;function pidMain(pid){let p=pid,n=0;while(p&&!lbPlayers[p]&&MTO[p]&&n++<6)p=MTO[p];return p;}
+function mtoLoad(){if(Date.now()-mtoAt<120000||!playerAuth)return;mtoAt=Date.now();fbReq('GET','mto').then(r=>{const a=JSON.stringify(MTO);MTO=r||{};if(JSON.stringify(MTO)!==a){try{renderChat();}catch(e){}try{renderBadgeFeed();}catch(e){}}}).catch(()=>{});}
+function lbName(pid){mtoLoad();const p=lbPlayers[pidMain(pid)];return p&&p.name?p.name:'(left)';}
 
 // Profile box at the top of the sidebar.
 function renderLbProfile(msg,isErr){document.querySelectorAll('.lb-profile').forEach(box=>{box.innerHTML='';
@@ -4273,7 +4277,7 @@ async function adminCodes(box){const w=document.createElement('div');w.className
       try{await fbReq('PUT','codes/'+c,{left:n},{admin:true});}catch(err){alert('Couldn’t save: '+err.message);}draw();};w.appendChild(f);};
   draw();}
 function applyNameFont(el,f){const nf=NAME_FONTS[f];if(!nf)return;loadNameFonts();el.style.fontFamily=nf[1];if(nf[2]!==1)el.style.fontSize=nf[2]+'em';}
-function nameEl(pid,name){const p=lbPlayers[pid]||{};const s=document.createElement('span');s.className='pname';
+function nameEl(pid,name){pid=pidMain(pid);const p=lbPlayers[pid]||{};const s=document.createElement('span');s.className='pname';
   if(p.av&&AVATARS.includes(p.av)){const a=document.createElement('span');a.className='pav';a.textContent=p.av;s.appendChild(a);}
   const n=document.createElement('span');n.textContent=name;applyNameColor(n,p.color);applyNameFont(n,p.font);applyNameFx(n,p.fx,name);fixGradName(n,p.color,p.font);if(NAME_FX[p.fx])s.classList.add('has-fx');s.appendChild(n);return s;}
 // ── ANNOUNCEMENT: written by the admin, pops up each time the site is opened ──
@@ -4572,11 +4576,11 @@ function laurel(c,dark){let s='';for(const side of [-1,1]){for(let i=0;i<7;i++){
   let rot=(108+i*19)+90-25;if(side>0)rot=180-rot;const rx=8.5-i*.3,ry=4-i*.15;
   s+='<ellipse cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" rx="'+rx.toFixed(1)+'" ry="'+ry.toFixed(1)+'" transform="rotate('+rot.toFixed(0)+' '+x.toFixed(1)+' '+y.toFixed(1)+')" fill="'+c+'" stroke="'+dark+'" stroke-width=".5"/>';}}return s;}
 let uid=0;
-function badgeArt(id,level,max,o){o=o||{};if(id==='omniamax'){id='omnia';o={...o,rainbow:true};}const gr=o.locked?0:(GRAND[id]||0);if(gr)o={...o,grand:gr};const mk=metalFor(level,max,o),m=METALS[mk];const k='ba'+(++uid);const size=o.size||96;
+function badgeArt(id,level,max,o){o=o||{};if(id==='rank')id='gradus';if(id==='omniamax'){id='omnia';o={...o,rainbow:true};}const gr=o.locked?0:(GRAND[id]||0);if(gr)o={...o,grand:gr};const mk=metalFor(level,max,o),m=METALS[mk];const k='ba'+(++uid);const size=o.size||96;
   const shape=o.secret?'diamond':o.meta?'rosette':(SHAPE[id]||'circle');
   let en=ENAMEL[id]||(root._qE&&root._qE(id))||['#3a3a3a','#141414'];if(o.locked)en=['#3a3a3a','#1a1a1a'];
   const ink=o.locked?'#8d8d8d':m[0];
-  const sym=(id==='gradus'&&level>=4)?S.gradus4:(S[id]||'<circle cx="50" cy="50" r="18"/>');
+  const sym=(id==='gradus'&&max>1&&level>=max)?S.gradus4:(S[id]||'<circle cx="50" cy="50" r="18"/>');
   const wreath=!o.locked&&!o.secret&&(o.meta||gr||(level>=max&&max>1));
   const ribbon=max>1&&level>0&&!o.meta&&!o.locked;
   const rb=mk==='rainbow';
@@ -4678,13 +4682,14 @@ const META_BADGES=[
  {id:'chester',icon:'🎩',name:'Be Chester',lat:'esto Chester',desc:'Only for the one and only \u2011Chester\u2011.',meta:'name',lv:[1]}];
 function metaValue(bd,got){if(bd.meta==='name')return lbMe&&lbMe.name==='-Chester-'?1:0;if(bd.meta==='count')return BADGES.filter(b=>b.secret&&got[b.id]).length;if(bd.meta==='public')return BADGES.filter(b=>!b.secret).every(b=>got[b.id])?1:0;if(bd.meta==='all')return BADGES.every(b=>got[b.id])?1:0;return BADGES.every(b=>got[b.id]&&got[b.id].l>=b.lv.length)?1:0;}
 const METAL=['bronze','silver','gold','diamond'];
+function tierMetal(l,n){const f=l/n;return f>=1?'diamond':f>=.6?'gold':f>=.3?'silver':'bronze';}   // ranks: bronze → silver → gold → diamond at the top
 // lv: thresholds for tiered badges; stat(): current value. secret: hidden until earned.
 const BADGES=[
  {id:'salve',icon:'👋',name:'Salve!',desc:'Join the leaderboard.',stat:()=>lbMe?1:0,lv:[1]},
  {id:'primus',icon:'🥇',name:'Primus Gradus',lat:'first step',desc:'Get your first correct answer.',stat:()=>bstat().correct||0,lv:[1]},
  {id:'scriptor',icon:'✍️',name:'Scriptor',lat:'writer',desc:'Send your first chat message.',stat:()=>bstat().chat||0,lv:[1]},
- {id:'gradus',icon:'⭐',name:'Centurio',desc:'Earn ⭐ in total: Centurio 100, Legatus 1,000, Imperator 10,000, Optimus 100,000.',unit:'⭐',stat:()=>lbMyPoints(),lv:[100,1000,10000,100000],
-  tiers:[{name:'Centurio',icon:'⭐'},{name:'Legatus',icon:'⭐'},{name:'Imperator',icon:'⭐'},{name:'Optimus',icon:'💎'}]},
+ {id:'rank',icon:'⭐',name:'Centurio',desc:'Earn ⭐ in total: Centurio 100, Tribunus 500, Legatus 1,000, Praefectus 5,000, Imperator 10,000, Consul 50,000, Optimus 100,000.',unit:'⭐',stat:()=>lbMyPoints(),lv:[100,500,1000,5000,10000,50000,100000],
+  tiers:[{name:'Centurio',icon:'⭐'},{name:'Tribunus',icon:'⭐'},{name:'Legatus',icon:'⭐'},{name:'Praefectus',icon:'⭐'},{name:'Imperator',icon:'⭐'},{name:'Consul',icon:'⭐'},{name:'Optimus',icon:'💎'}]},
  {id:'diesmagnus',icon:'☀️',name:'Dies Magnus',lat:'big day',desc:'Earn lots of ⭐ in a single day.',unit:'⭐ in a day',stat:()=>Math.max(bstat().bestDay||0,lbTodayPts()),lv:[50,100,200,300,500,750,1000]},
  {id:'constans',icon:'🔥',name:'Constans',lat:'steady',desc:'Reach your daily goal several days in a row.',unit:'day streak',stat:()=>Math.max(bstat().bestStreak||0,dailyStreak()),lv:[1,3,5,7,10,20,30]},
  {id:'matutinus',icon:'🌅',name:'Matutinus',lat:'early riser',desc:'Get a question right before 8 am.',stat:()=>bstat().early||0,lv:[1]},
@@ -4730,8 +4735,9 @@ function badgeTierName(bd,l){if(bd.tiers)return bd.tiers[Math.max(0,l-1)].name+'
 function badgeFeedPost(fresh,nSecret){if(!lbMe)return;let secretK=nSecret-fresh.filter(f=>f.bd.secret&&f.first).length;
   fresh.slice(0,4).forEach(f=>{const e=f.bd.secret?(f.first?{pid:lbMe.pid,b:'?',k:++secretK}:null):{pid:lbMe.pid,b:f.bd.id,l:f.l};if(e)fbReq('POST','bfeed',{...e,t:{'.sv':'timestamp'}}).catch(()=>{});});}
 let bfeed=[],bfeedTab='mine',bfeedAt=0;
-function badgeFeedText(e){const name=(lbPlayers[e.pid]&&lbPlayers[e.pid].name)||'Someone';
+function badgeFeedText(e){if(!lbPlayers[e.pid]&&MTO[e.pid])e={...e,pid:pidMain(e.pid)};const name=(lbPlayers[e.pid]&&lbPlayers[e.pid].name)||'Someone';
   if(e.b==='?')return {name,what:'found their '+ordinal(+e.k||1)+' secret badge',art:badgeArt('unknown',0,1,{secret:true,size:30})};
+  if(OLD_RANK[e.b]!=null)e={...e,b:'rank',l:oldRankLv(e.b,e.l)};
   const bd=BADGES.find(x=>x.id===e.b)||META_BADGES.find(x=>x.id===e.b);if(!bd)return null;
   const l=+e.l||1,nm=bd.meta?bd.name:badgeTierName(bd,l);return {name,what:(l>1&&!bd.meta?'reached ':'earned ')+nm,art:bd.meta?badgeArt(bd.id,1,1,{meta:true,size:30}):bdArt(bd,l,30)};}
 async function loadBadgeFeed(force){if(!force&&Date.now()-bfeedAt<20000)return renderBadgeFeed();const box=document.getElementById('bfeedList');if(box&&!bfeed.length)box.innerHTML='<p class="bfeed-empty">Loading…</p>';
@@ -4739,14 +4745,14 @@ async function loadBadgeFeed(force){if(!force&&Date.now()-bfeedAt<20000)return r
   catch(e){if(box)box.innerHTML='<p class="bfeed-empty">Couldn’t load the badge feed'+(/40[13]/.test(e.message)?' (the database rules need updating).':'. Check your internet.')+'</p>';return;}renderBadgeFeed();}
 const BF_SEEN='latin_bfeed_seen';
 function bfeedSeen(){try{return +localStorage.getItem(BF_SEEN)||0;}catch(e){return 0;}}
-function bfeedVisible(){return bfeed.filter(e=>lbVisible(e.pid)&&badgeFeedText(e)&&sxFeedOk(e));}
-function sxFeedOk(e){const n=sxCountOf(e.pid);if(n==null)return true;if(e.b==='?')return n>=(+e.k||1);if(e.b==='omnia'||e.b==='omniamax')return n>=SX_IDS.length;if(e.b==='chester')return ((lbPlayers[e.pid]||{}).name)==='-Chester-';return true;}
+function bfeedVisible(){return bfeed.filter(e=>lbVisible(pidMain(e.pid))&&badgeFeedText(e)&&sxFeedOk(e));}
+function sxFeedOk(e){if(!lbPlayers[e.pid]&&MTO[e.pid])e={...e,pid:pidMain(e.pid)};const n=sxCountOf(e.pid);if(n==null)return true;if(e.b==='?')return n>=(+e.k||1);if(e.b==='omnia'||e.b==='omniamax')return n>=SX_IDS.length;if(e.b==='chester')return ((lbPlayers[e.pid]||{}).name)==='-Chester-';return true;}
 function renderFeedBits(){const vis=bfeedVisible(),sec=document.getElementById('sideFeed'),list=document.getElementById('sideFeedList');
   if(sec&&list){sec.style.display=vis.length?'':'none';list.innerHTML=vis.slice(0,6).map(e=>{const x=badgeFeedText(e);if(EPIC[e.b])return '<div class="sf-row epic '+EPIC[e.b].cls+(bfHid(e)?' bf-hid':'')+'" onclick="openBadges(\'feed\')"><span class="ep-shine"></span><span class="sf-art">'+x.art+'</span><span class="sf-txt"><b>'+esc(x.name)+'</b> earned <b>'+EPIC[e.b].name+'</b>! 🎉</span><span class="sf-t">'+(e.t?timeAgo(e.t):'')+'</span></div>';return '<div class="sf-row'+(bfHid(e)?' bf-hid':'')+'" onclick="openBadges(\'feed\')"><span class="sf-art">'+x.art+'</span><span class="sf-txt"><b>'+esc(x.name)+'</b> '+esc(x.what)+'</span><span class="sf-t">'+(e.t?timeAgo(e.t):'')+'</span></div>';}).join('');}
   const seen=bfeedSeen(),fresh=vis.some(e=>(e.t||0)>seen&&!(lbMe&&e.pid===lbMe.pid));['badgeBtnDot','feedTabDot'].forEach(id=>{const d=document.getElementById(id);if(d)d.classList.toggle('on',fresh&&!(id==='feedTabDot'&&bfeedTab==='feed'&&document.getElementById('badgeOverlay').style.display==='flex'));});}
 function bfeedMarkSeen(){const t=Math.max(0,...bfeed.map(e=>e.t||0));try{localStorage.setItem(BF_SEEN,String(Math.max(t,bfeedSeen())));}catch(e){}renderFeedBits();}
 function renderBadgeFeed(){renderFeedBits();if(bfeedTab==='feed'&&document.getElementById('badgeOverlay').style.display==='flex')bfeedMarkSeen();const box=document.getElementById('bfeedList');if(!box)return;
-  const vis=bfeed.filter(e=>lbVisible(e.pid)&&sxFeedOk(e));
+  const vis=bfeed.filter(e=>lbVisible(pidMain(e.pid))&&sxFeedOk(e));
   // the newest Fere Omnia / Omnia / Omnia Maxima stays pinned at the top for 3 days (shown once, as the banner)
   const pin=vis.find(e=>EPIC[e.b]&&e.t&&Date.now()-e.t<3*86400e3),px=pin&&badgeFeedText(pin);
   const rows=vis.filter(e=>e!==pin).map(e=>{const x=badgeFeedText(e);if(!x)return '';if(EPIC[e.b])return epicRow(e,x,false);
@@ -4775,7 +4781,9 @@ function setBadgeTab(t){bfeedTab=t;document.getElementById('bTabMine').classList
 function bdArt(bd,l,size,extra){return badgeArt(bd.id,l,bd.lv?bd.lv.length:1,Object.assign({secret:!!bd.secret,meta:!!bd.meta,size},extra||{}));}
 function bdIcon(bd,l){return bd.tiers?bd.tiers[Math.max(0,(l||1)-1)].icon:bd.icon;}
 // the old separate points badges (centurio, legatus, imperator, optimus) became levels of one badge
-const OLD_RANK={centurio:1,legatus:2,imperator:3,optimus:4};
+// older versions: separate rank badges, then 'gradus' with 4 levels (100/1k/10k/100k). Both become 'rank' (7 levels).
+const OLD_RANK={centurio:1,legatus:3,imperator:5,optimus:7,gradus:0};
+function oldRankLv(id,l){return id==='gradus'?[0,1,3,5,7][Math.max(1,Math.min(4,+l||1))]:OLD_RANK[id];}
 let _bTimer=null;function badgeCheckSoon(){if(_bTimer)return;_bTimer=setTimeout(()=>{_bTimer=null;badgeCheck();},200);}
 // keep badges up to date without waiting for the next answer (points arriving, reactions on your messages, streaks…)
 setInterval(()=>{if(document.visibilityState==='visible')try{badgeCheck();}catch(e){}},8000);
@@ -4784,8 +4792,8 @@ function secretWipe(){try{const g=bjson(BADGE_KEY);let ch=false;
   Object.keys(g).forEach(k=>{const n=SX_OLDNAMES[_fnv(k)];if(n){if(!g[n]||g[k].l>g[n].l)g[n]=g[k];delete g[k];ch=true;}});
   if(ch){localStorage.setItem(BADGE_KEY,JSON.stringify(g));const pins=badgePins().map(x=>SX_OLDNAMES[_fnv(x)]||x).filter(id=>g[id]);localStorage.setItem(PIN_KEY,JSON.stringify(pins));}}catch(e){}}
 function badgeCheck(){secretWipe();const got=bjson(BADGE_KEY);let changed=false;const b=bstat();const fresh=[];
-  {let lv=0;Object.keys(OLD_RANK).forEach(k=>{if(got[k]){lv=Math.max(lv,OLD_RANK[k]);delete got[k];changed=true;}});if(lv&&(!got.gradus||got.gradus.l<lv))got.gradus={l:lv,t:Date.now()};
-   const pins=badgePins();if(pins.some(x=>OLD_RANK[x])){const np=[...new Set(pins.map(x=>OLD_RANK[x]?'gradus':x))];try{localStorage.setItem(PIN_KEY,JSON.stringify(np));}catch(e){}}}
+  {let lv=0,t0=0;Object.keys(OLD_RANK).forEach(k=>{if(got[k]){lv=Math.max(lv,oldRankLv(k,got[k].l));t0=t0?Math.min(t0,got[k].t||t0):got[k].t||0;delete got[k];changed=true;}});if(lv&&(!got.rank||got.rank.l<lv))got.rank={l:lv,t:got.rank?got.rank.t:(t0||Date.now())};
+   const pins=badgePins();if(pins.some(x=>OLD_RANK[x]!=null)){const np=[...new Set(pins.map(x=>OLD_RANK[x]!=null?'rank':x))];try{localStorage.setItem(PIN_KEY,JSON.stringify(np));}catch(e){}}}
   // remember personal bests that the live data might forget
   b.bestDay=Math.max(b.bestDay||0,lbTodayPts());b.bestStreak=Math.max(b.bestStreak||0,dailyStreak());reactsTally();
   if(lbMe&&classChal&&+classChal.target){const me=lbPlayers[lbMe.pid]||{};if(((me.w||{})[lbKeys().w]||0)>=500)b.civis=1;}bsave();
@@ -4802,7 +4810,7 @@ function setBadgeFilter(f){badgeFilter=f;try{localStorage.setItem('latin_bfilter
 function badgeShown(l,max){return badgeFilter==='all'||(badgeFilter==='none'&&!l)||(badgeFilter==='got'&&l>0)||(badgeFilter==='unmax'&&l>0&&l<max);}
 function renderBadges(){document.querySelectorAll('#badgeSort button').forEach(b=>b.classList.toggle('on',b.dataset.f===badgeFilter));const g=document.getElementById('badgeGrid');if(!g)return;const sc=g.closest('.badge-scroll'),keep=sc?sc.scrollTop:0,bx=g.closest('.badge-box'),keepB=bx?bx.scrollTop:0;requestAnimationFrame(()=>{if(sc)sc.scrollTop=keep;if(bx)bx.scrollTop=keepB;});const got=bjson(BADGE_KEY);let earned=0,total=0;g.innerHTML='';
   BADGES.forEach(bd=>{const e=got[bd.id],l=e?e.l:0;total+=bd.lv.length;earned+=l;if(!badgeShown(l,bd.lv.length))return;if(bd.secret&&!l){const c=document.createElement('div');c.className='badge-card locked';c.innerHTML='<div class="bd-art">'+badgeArt('unknown',0,1,{secret:true,size:74})+'</div><div class="bd-name">Secret badge</div><div class="bd-desc">Keep exploring…</div>';g.appendChild(c);return;}
-    let v=0;try{v=bd.stat();}catch(e){}const next=bd.lv[l];const c=document.createElement('div');c.className='badge-card'+(l?' earned':' locked')+(bd.tiers?(l?' m-'+METAL[l-1]:''):l?' lvl'+Math.min(l,7):'')+(GRAND[bd.id]?' grand'+GRAND[bd.id]:'');
+    let v=0;try{v=bd.stat();}catch(e){}const next=bd.lv[l];const c=document.createElement('div');c.className='badge-card'+(l?' earned':' locked')+(bd.tiers?(l?' m-'+tierMetal(l,bd.lv.length):''):l?' lvl'+Math.min(l,7):'')+(GRAND[bd.id]?' grand'+GRAND[bd.id]:'');
     let prog='';if(next!=null){if(bd.id.startsWith('lex')||bd.id.startsWith('doct'))prog=lexProgress(bd.id==='lexicon'||bd.id==='doctus'?'main':'all',bd.id.startsWith('lex')?'seen':'correct');else if(bd.lv.length>1||next>1)prog=Math.min(v,next).toLocaleString()+' / '+next.toLocaleString()+(bd.unit?' '+bd.unit:'');}
     c.innerHTML='<div class="bd-art">'+bdArt(bd,l,74,{locked:!l})+'</div><div class="bd-name">'+esc(l?badgeTierName(bd,l):bd.name)+'</div>'+(bd.lat?'<div class="bd-lat">'+esc(bd.lat)+'</div>':'')
       +'<div class="bd-desc">'+esc(bd.desc)+(bd.lv.length>1&&!bd.tiers?' Levels: '+bd.lv.map(x=>x.toLocaleString()).join(' · ')+'.':'')+'</div>'+(prog?'<div class="bd-prog">'+(l?'Next: ':'')+prog+'</div>':'')+(e?'<div class="bd-date">'+new Date(e.t).toLocaleDateString()+'</div>':'');
@@ -4823,7 +4831,7 @@ function badgePins(){try{const a=JSON.parse(localStorage.getItem(PIN_KEY)||'[]')
 function badgeById(id){return BADGES.find(b=>b.id===id)||META_BADGES.find(b=>b.id===id);}
 // a small badge chip: icon + level numeral (tiered) or metal ring (points badges)
 function badgeChip(id,l,big){const bd=badgeById(id);if(!bd||!l)return null;const c=document.createElement('span');
-  c.className='bchip'+(big?' big':'')+(bd.meta==='count'?' arc':'')+(bd.tiers?' m-'+METAL[l-1]:bd.lv.length>1?' lv'+Math.min(l,7):'');c.title=(bd.meta==='count'?bd.name+': '+l+' secret badge'+(l===1?'':'s'):badgeTierName(bd,l))+(bd.lat?' ('+bd.lat+')':'');
+  c.className='bchip'+(big?' big':'')+(bd.meta==='count'?' arc':'')+(bd.tiers?' m-'+tierMetal(l,bd.lv.length):bd.lv.length>1?' lv'+Math.min(l,7):'');c.title=(bd.meta==='count'?bd.name+': '+l+' secret badge'+(l===1?'':'s'):badgeTierName(bd,l))+(bd.lat?' ('+bd.lat+')':'');
   c.classList.add('art');c.innerHTML=bd.meta?badgeArt(bd.id,1,1,{meta:true,size:big?46:30,count:bd.meta==='count'?l:null}):bdArt(bd,l,big?46:30);
   return c;}
 // Other players' secret badges only count if the server has a record of them earning them.
@@ -4836,7 +4844,7 @@ function sxCountOf(pid){if(!pid||(lbMe&&pid===lbMe.pid))return null;const c=sxCo
 function sxVerify(list,pid){const n=sxCountOf(pid);if(n==null)return list;const c=sxCounts[pid]||{g:0,old:new Set()};let left=c.g;
   return list.filter(([id,l])=>{const b=badgeById(id);if(!b)return false;if(b.secret){if(c.old.has(id))return true;if(left<=0)return false;left--;return true;}if(b.meta==='all'||b.meta==='max')return n>=SX_IDS.length;if(b.meta==='name')return ((lbPlayers[pid]||{}).name)==='-Chester-';return true;})
     .map(([id,l])=>badgeById(id).meta==='count'?[id,Math.min(l,n)]:[id,l]).filter(([id,l])=>l>0);}
-function shownBadges(p,pid){if(pid)return sxVerify(shownBadges(p),pid);const seen={};String((p&&p.bd)||'').split(',').map(x=>x.split(':')).map(([id,l])=>OLD_RANK[id]?['gradus',String(OLD_RANK[id])]:[id,l]).forEach(([id,l])=>{if(id&&(!seen[id]||+l>+seen[id]))seen[id]=l;});return Object.entries(seen).filter(([id,l])=>badgeById(id)&&+l>0).slice(0,MAX_PINS).map(([id,l])=>[id,badgeById(id).meta==='count'?+l:Math.min(+l,badgeById(id).lv.length)]);}
+function shownBadges(p,pid){if(pid)return sxVerify(shownBadges(p),pid);const seen={};String((p&&p.bd)||'').split(',').map(x=>x.split(':')).map(([id,l])=>OLD_RANK[id]!=null?['rank',String(oldRankLv(id,l))]:[id,l]).forEach(([id,l])=>{if(id&&(!seen[id]||+l>+seen[id]))seen[id]=l;});return Object.entries(seen).filter(([id,l])=>badgeById(id)&&+l>0).slice(0,MAX_PINS).map(([id,l])=>[id,badgeById(id).meta==='count'?+l:Math.min(+l,badgeById(id).lv.length)]);}
 function badgeChipsEl(p,big,pid){const w=document.createElement('span');w.className='bchips';shownBadges(p,pid).forEach(([id,l])=>{const c=badgeChip(id,l,big);if(c)w.appendChild(c);});return w.childNodes.length?w:null;}
 let _bdSaving=false;
 async function syncShownBadges(){if(!lbMe||_bdSaving)return;const got=bjson(BADGE_KEY);const str=badgePins().filter(id=>got[id]).map(id=>id+':'+got[id].l).join(',');
@@ -6143,8 +6151,13 @@ async function acctSwitch(d,how){playerAuth=authFrom(d);savePlayerAuth();lbMe=nu
 // "Save with email" adds an email + password to the account this device already has (same id, so points, badges and
 // progress stay). "Sign in" on another device opens that account there and merges in what the device had.
 let acctMode='signin';
-function acctOpen(m){acctMode=['create','merge'].includes(m)?m:'signin';const c=acctMode==='create',I=cloudInfo(),$=id=>document.getElementById(id);
-  closeOverlay('acctHubOverlay');$('acctCodeBtn').style.display=acctMode==='merge'?'':'none';
+function acctOpen(m){acctMode=['create','merge','chpass','chemail'].includes(m)?m:'signin';const c=acctMode==='create',I=cloudInfo(),$=id=>document.getElementById(id);
+  closeOverlay('acctHubOverlay');$('acctCodeBtn').style.display=acctMode==='merge'?'':'none';$('acctPass2').style.display=acctMode==='chpass'?'':'none';$('acctPass2').value='';$('acctEmail').style.display=acctMode==='chpass'?'none':'';
+  if(acctMode==='chpass'||acctMode==='chemail'){const pw=acctMode==='chpass';$('acctTitle').textContent=pw?'Change password':'Change email';
+    $('acctNote').textContent=pw?'Type your current password, then the new one.':'Type the new email address and your current password.'+(I.email?' (Now: '+I.email+')':'');
+    $('acctGo').textContent='Save';$('acctSwapBtn').textContent='';$('acctForgotBtn').style.display='';$('acctPass').placeholder='Current password';$('acctPass').autocomplete='current-password';$('acctPass').value='';$('acctEmail').value='';$('acctEmail').placeholder=pw?'Email':'New email';acctMsg('');
+    $('acctOverlay').style.display='flex';setTimeout(()=>$(pw?'acctPass':'acctEmail').focus(),50);return;}
+  $('acctEmail').placeholder='Email';
   if(acctMode==='merge'){$('acctTitle').textContent='Merge another account in';$('acctNote').textContent='Sign in to your OTHER account here. Its points, badges, secret badges, stats and progress are added to this one'+(lbMe?' ('+lbMe.name+')':'')+', and then the other account is deleted.';
     $('acctGo').textContent='Merge';$('acctSwapBtn').textContent='';$('acctForgotBtn').style.display='none';$('acctPass').placeholder='Password';$('acctPass').autocomplete='off';$('acctPass').value='';$('acctEmail').value='';acctMsg('');$('acctOverlay').style.display='flex';setTimeout(()=>$('acctEmail').focus(),50);return;}
   $('acctTitle').textContent=c?'Save with email':'Sign in';
@@ -6155,7 +6168,7 @@ function acctOpen(m){acctMode=['create','merge'].includes(m)?m:'signin';const c=
 function acctSwap(){acctOpen(acctMode==='create'?'signin':'create');}
 function acctMsg(t,ok){const el=document.getElementById('acctMsg');if(el){el.textContent=t||'';el.style.color=ok===false?'var(--red)':ok?'var(--green)':'var(--text3)';}}
 function acctErr(e){const m=String(e&&e.message||'');return /EMAIL_EXISTS/.test(m)?'That email already has an account. Press “I already have an account” to sign in.':/INVALID_EMAIL|MISSING_EMAIL/.test(m)?'That email address doesn’t look right.':/WEAK_PASSWORD/.test(m)?'Use a password of at least 6 characters.':/INVALID_LOGIN|INVALID_PASSWORD|EMAIL_NOT_FOUND|CREDENTIAL|USER_DISABLED/.test(m)?'Wrong email or password.':/TOO_MANY/.test(m)?'Too many tries. Wait a few minutes and try again.':/OPERATION_NOT_ALLOWED/.test(m)?'Email sign-in isn’t switched on for this site yet (ask the admin).':'Couldn’t reach the server. Check your internet.';}
-async function acctSubmit(){const email=document.getElementById('acctEmail').value.trim().toLowerCase(),pw=document.getElementById('acctPass').value;
+async function acctSubmit(){if(acctMode==='chpass'||acctMode==='chemail')return acctChange();const email=document.getElementById('acctEmail').value.trim().toLowerCase(),pw=document.getElementById('acctPass').value;
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){acctMsg('Type your email address.',false);return;}if(!pw){acctMsg('Type your password.',false);return;}
   if(acctMode==='merge'){acctMsg('Signing in to the other account…');let d;try{d=await authPost('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword',{email,password:pw,returnSecureToken:true});}catch(e){acctMsg(acctErr(e),false);return;}
     return acctMergeIn(authFrom(d),email);}
@@ -6178,7 +6191,7 @@ async function acctSubmit(){const email=document.getElementById('acctEmail').val
 // points in the same save that deletes src, so nothing can be counted twice.
 function mergeErr(e){const m=String(e&&e.message||'');return /HTTP 40[13]/.test(m)?'the database rules need updating (ask the admin).':/same/.test(m)?'that’s the account you’re already using.':'check your internet and try again.';}
 async function mergeAccounts(tgt,src){const T=tgt.uid,S=src.uid;if(!T||!S||T===S)throw new Error('same account');const as=a=>({tok:a.idToken});
-  await fbReq('PUT','mto/'+S,T,as(src));
+  await fbReq('PUT','mto/'+S,T,as(src));MTO[S]=T;
   const [pS,gotS,oldS,premS,progS]=await Promise.all([fbReq('GET','players/'+S,null,as(src)),fbReq('GET','sx/got/'+S,null,as(src)).catch(()=>null),fbReq('GET','sx/old/'+S,null,as(src)).catch(()=>null),fbReq('GET','prem/'+S,null,as(src)).catch(()=>null),fbReq('GET','progress/'+S,null,as(src)).catch(()=>null)]);
   await fbReq('PUT','mfrom/'+T,S,as(tgt));
   const gotT=(await fbReq('GET','sx/got/'+T,null,as(tgt)).catch(()=>null))||{};
@@ -6207,13 +6220,32 @@ async function acctMergeIn(src,label){
 async function acctMergeCode(){const code=normCode(prompt('Type the OTHER account’s recovery code (e.g. rosa-bellum-via-aqua-47):'));if(!code)return;acctMsg('Checking the code…');
   let d;try{d=await authPost('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword',{email:await codeEmail(code),password:code,returnSecureToken:true});}catch(e){acctMsg(/INVALID|NOT_FOUND|PASSWORD|CREDENTIAL/.test(e.message)?'That code didn’t work. Check the spelling.':'Couldn’t reach the server. Check your internet.',false);return;}
   return acctMergeIn(authFrom(d),'the account with that code');}
-function acctHub(){const I=cloudInfo(),b=document.getElementById('acctHubBody');
-  b.innerHTML=(I.email?'<p class="acct-note">Signed in as <b>'+esc(I.email)+'</b>'+(lbMe?' ('+esc(lbMe.name)+')':'')+'. Sign in with this email on any device to get your points, badges and progress there.</p><div class="backup-btns"><button class="btn-secondary" onclick="closeOverlay(\'acctHubOverlay\');acctSignOut()">Sign out</button></div>'
+function acctHub(){try{acctSyncEmail();}catch(e){}const I=cloudInfo(),b=document.getElementById('acctHubBody');
+  b.innerHTML=(I.email?'<p class="acct-note">Signed in as <b>'+esc(I.email)+'</b>'+(lbMe?' ('+esc(lbMe.name)+')':'')+'. Sign in with this email on any device to get your points, badges and progress there.</p>'+(I.pendingEmail?'<p class="acct-note">Waiting for you to click the link sent to <b>'+esc(I.pendingEmail)+'</b>.</p>':'')+'<div class="backup-btns"><button class="btn-secondary" onclick="acctOpen(\'chemail\')">Change email</button><button class="btn-secondary" onclick="acctOpen(\'chpass\')">Change password</button><button class="btn-secondary" onclick="closeOverlay(\'acctHubOverlay\');acctSignOut()">Sign out</button></div>'
     :'<p class="acct-note">Use one account on all your devices: save it with an email and password, then sign in anywhere.</p><div class="backup-btns"><button class="btn-primary" onclick="acctOpen(\'create\')">Save with email</button><button class="btn-secondary" onclick="acctOpen(\'signin\')">Sign in</button></div>')
     +'<p class="acct-note" style="margin-top:16px"><b>Two accounts?</b> Merge one into the other: points, badges, secret badges, stats and progress are put together.</p><div class="backup-btns"><button class="btn-secondary" onclick="acctOpen(\'merge\')">Merge another account in</button></div>';
   document.getElementById('acctHubOverlay').style.display='flex';}
 function acctBtnUpd(){const b=document.getElementById('acctBtn');if(!b)return;const I=cloudInfo();b.textContent=I.email?'👤 '+I.email.split('@')[0]:'👤 Sign in';}
-async function acctForgot(){const email=document.getElementById('acctEmail').value.trim().toLowerCase();if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){acctMsg('Type your email above first, then press “Forgot password?”.',false);return;}
+// change password / email: check the current password first (Firebase wants a recent sign-in for both)
+async function acctChange(){const I=cloudInfo(),cur=document.getElementById('acctPass').value,isPw=acctMode==='chpass';
+  const nv=isPw?document.getElementById('acctPass2').value:document.getElementById('acctEmail').value.trim().toLowerCase();
+  if(!I.email){acctMsg('Sign in first.',false);return;}if(!cur){acctMsg('Type your current password.',false);return;}
+  if(isPw&&nv.length<6){acctMsg('Use a new password of at least 6 characters.',false);return;}
+  if(!isPw&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(nv)){acctMsg('Type the new email address.',false);return;}
+  if(!isPw&&nv===I.email){acctMsg('That’s already your email.',false);return;}
+  acctMsg('Checking…');let d;try{d=await authPost('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword',{email:I.email,password:cur,returnSecureToken:true});}catch(e){acctMsg(/INVALID|PASSWORD|CREDENTIAL/.test(e.message)?'Your current password isn’t right.':acctErr(e),false);return;}
+  if(playerAuth&&d.localId!==playerAuth.uid){acctMsg('That isn’t the account this device uses. Sign out and in again.',false);return;}
+  try{const r=await authPost('https://identitytoolkit.googleapis.com/v1/accounts:update',{idToken:d.idToken,...(isPw?{password:nv}:{email:nv}),returnSecureToken:true});
+    if(r.idToken){playerAuth=authFrom({...r,localId:r.localId||d.localId});savePlayerAuth();}
+    if(!isPw)cloudSetInfo({email:nv});closeOverlay('acctOverlay');toast(isPw?'✓ Password changed.':'✓ Email changed to '+nv+'.');renderCloud();return;}
+  catch(e){if(isPw||!/OPERATION_NOT_ALLOWED.*verify|verify the new email/i.test(e.message)){acctMsg(acctErr(e),false);return;}}
+  // Firebase wants the new email checked first: send it a link; the change happens when it's clicked
+  try{await authPost('https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode',{requestType:'VERIFY_AND_CHANGE_EMAIL',idToken:d.idToken,newEmail:nv});}catch(e){acctMsg(acctErr(e),false);return;}
+  cloudSetInfo({pendingEmail:nv});acctMsg('✓ We’ve emailed a link to '+nv+'. Click it to finish (check junk too). After that, sign in with '+nv+'.',true);}
+// the email shown comes from the account itself (in its sign-in token), so it's always right
+function tokEmail(){try{const p=String(playerAuth&&playerAuth.idToken||'').split('.')[1];if(!p)return undefined;const j=JSON.parse(atob(p.replace(/-/g,'+').replace(/_/g,'/')+'==='.slice((p.length+3)%4)));const e=j.email||null;return e&&/@latin-trainer\.app$/.test(e)?null:e;}catch(e){return undefined;}}
+function acctSyncEmail(){const te=tokEmail();if(te===undefined)return;const I=cloudInfo();if(te!==(I.email||null))cloudSetInfo({email:te,pendingEmail:te&&I.pendingEmail===te?null:I.pendingEmail});}
+async function acctForgot(){const email=(acctMode==='chpass'||acctMode==='chemail')?(cloudInfo().email||''):document.getElementById('acctEmail').value.trim().toLowerCase();if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){acctMsg('Type your email above first, then press “Forgot password?”.',false);return;}
   acctMsg('Sending…');try{await authPost('https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode',{requestType:'PASSWORD_RESET',email});acctMsg('If that email has an account, a link to reset your password is on its way. Check your junk folder too.',true);}
   catch(e){acctMsg(/TOO_MANY/.test(e.message)?'Too many tries. Wait a few minutes.':/EMAIL_NOT_FOUND/.test(e.message)?'There’s no account with that email.':'Couldn’t send the email. Check your internet.',false);}}
 // signing out clears this device (it's all saved in the account), so the next person on a shared computer starts fresh
@@ -6223,10 +6255,10 @@ async function acctSignOut(){const I=cloudInfo();if(!confirm('Sign out of '+(I.e
   try{Object.keys(localStorage).filter(k=>/^(latin|lt:|lt_)/.test(k)).forEach(k=>localStorage.removeItem(k));sessionStorage.clear();}catch(e){}
   location.reload();}
 function cloudCopyCode(){const c=cloudInfo().code;if(!c)return;navigator.clipboard&&navigator.clipboard.writeText(c).then(()=>cloudMsg('Code copied.',true),()=>{});}
-function renderCloud(){try{acctBtnUpd();}catch(e){}const box=document.getElementById('cloudBox');if(!box)return;const I=cloudInfo(),on=cloudOn();
+function renderCloud(){try{acctSyncEmail();acctBtnUpd();}catch(e){}const box=document.getElementById('cloudBox');if(!box)return;const I=cloudInfo(),on=cloudOn();
   const when=I.saved?new Date(I.saved).toLocaleString([], {hour:'numeric',minute:'2-digit',day:'numeric',month:'short'}):null;
   const st=!on?'Cloud save starts once you join the leaderboard, sign in, or get a recovery code.':I.err==='rules'?'⚠ Not saved online: the database rules need updating (ask the admin).':I.err==='net'?'⚠ Not saved online yet (offline?). It will try again.':when?'☁ Saved online · last saved '+when:'☁ Saving online…';
-  const acct=I.email?'<p class="cloud-st">👤 Signed in as <b>'+esc(I.email)+'</b>. Sign in with this email on any device to get your points, badges and progress there.</p><div class="backup-btns" style="margin-bottom:12px"><button class="btn-secondary" onclick="acctSignOut()">Sign out</button><button class="btn-secondary" onclick="acctOpen(\'merge\')">Merge another account in</button></div>'
+  const acct=I.email?'<p class="cloud-st">👤 Signed in as <b>'+esc(I.email)+'</b>. Sign in with this email on any device to get your points, badges and progress there.</p><div class="backup-btns" style="margin-bottom:12px"><button class="btn-secondary" onclick="acctOpen(\'chemail\')">Change email</button><button class="btn-secondary" onclick="acctOpen(\'chpass\')">Change password</button><button class="btn-secondary" onclick="acctSignOut()">Sign out</button><button class="btn-secondary" onclick="acctOpen(\'merge\')">Merge another account in</button></div>'
     :'<p class="cloud-st">👤 Use the same account on several devices: save it with an email and password, then sign in anywhere.</p><div class="backup-btns" style="margin-bottom:12px"><button class="btn-primary" onclick="acctOpen(\'create\')">Save with email</button><button class="btn-secondary" onclick="acctOpen(\'signin\')">Sign in</button><button class="btn-secondary" onclick="acctOpen(\'merge\')">Merge another account in</button></div>';
   box.innerHTML=acct+'<p class="cloud-st">'+esc(st)+'</p>'+(I.email?'<div id="cloudMsg" class="backup-msg"></div>':'')
     +(I.email?'':(I.code&&cloudShowCode?'<div class="cloud-code"><code>'+esc(I.code)+'</code><button class="btn-secondary" onclick="cloudCopyCode()">Copy</button></div><p class="cloud-note">Write this down somewhere safe. On a new device (or if this browser gets cleared), press <b>Restore with a code</b> and type it in to get everything back. Don’t share it: anyone with it can use your account.</p>':'')
