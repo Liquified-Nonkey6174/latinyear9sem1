@@ -3201,7 +3201,9 @@ const MULTI_FORMS={};
 // typing that word is right too, since the English prompt can't tell them apart.
 let _latSyn=null;
 function latSynonyms(w){if(!_latSyn){_latSyn={};const key=e=>String(e).toLowerCase().replace(/^to /,'').replace(/\s+/g,' ').trim();const by={};
-    allWordsFlat().forEach(x=>{if(x.catKey==='pronouns')return;new Set(x.eng.map(key)).forEach(k=>{(by[k]=by[k]||[]).push(x);});});
+    // only the same part of speech counts: the noun auxilium (help) isn't a synonym of the verb iuvo (to help)
+    const pos=x=>x.catKey==='verbs'||/^to /i.test(String(x.eng[0]||''))?'v':x.catKey;
+    allWordsFlat().forEach(x=>{if(x.catKey==='pronouns')return;new Set(x.eng.map(key)).forEach(k=>{k=pos(x)+'|'+k;(by[k]=by[k]||[]).push(x);});});
     Object.values(by).forEach(g=>{if(g.length<2)return;g.forEach(x=>{const l=_latSyn[x.lat]=_latSyn[x.lat]||[];g.forEach(y=>{if(y.lat!==x.lat&&!l.some(z=>z.lat===y.lat))l.push(y);});});});}
   return w&&w.catKey!=='pronouns'?(_latSyn[w.lat]||[]):[];}
 function checkLat(inp,w){if(w.greek&&[w.greek,...(w.alt||[])].some(n=>normalise(inp)===normalise(n)))return true;return checkLatOne(inp,w)||latSynonyms(w).some(x=>checkLatOne(inp,x));}
