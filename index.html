@@ -6699,7 +6699,7 @@ function exIntro(){exam=null;clearInterval(exTick);const h=exHist(),best=h.lengt
   document.getElementById('examWrap').innerHTML='<div class="ex-head"><div><div class="ex-title">📝 Exam</div><div class="ex-meta">100 marks · words from the main word list only</div></div><button class="quiz-menu-btn" onclick="exClose()">Menu</button></div>'
    +'<div class="ex-card"><table class="ex-plan">'+EXAM_SECS.map((s,i)=>'<tr><td>'+(i+1)+'</td><td>'+esc(s.title)+'</td><td>'+s.n+' × '+exFmt(s.pts)+'</td><td><b>'+exFmt(s.n*s.pts)+'</b></td></tr>').join('')+'<tr class="ex-tot"><td></td><td>Total</td><td></td><td><b>100</b></td></tr></table>'
    +'<p class="ex-note">Every mistake — a wrong ending, a spelling slip, a missing or extra word, or words in the wrong order — costs ½ mark. A question can’t go below 0. Answers are marked when you submit, and you earn '+EXAM_STAR_X+' ⭐ for every mark (answers given in under half a second earn no ⭐).</p>'
-   +(h.length?'<p class="ex-note">Best so far: <b>'+exFmt(best)+'/100</b> · last: '+exFmt(h[0].s)+'/100 ('+h.length+' taken)</p>':'')
+   +(h.length?'<p class="ex-note">Best so far: <b>'+exFmt(best)+'/100</b> · last: '+exFmt(h[0].s)+'/100 ('+h.length+' taken)</p><p class="ex-note" style="margin-top:-6px">Recent scores: '+h.slice(0,15).map(x=>'<span title="'+esc(new Date(x.t).toLocaleString())+'">'+exFmt(x.s)+'</span>').join(' · ')+'</p>':'')
    +'<div class="res-btns"><button class="btn-primary" onclick="exStart()">Start exam</button></div></div>';}
 function exStart(){const qs=exBuild();exam={qs,ans:{},start:Date.now()};exSave();exRender();window.scrollTo(0,0);}
 function exClose(){clearInterval(exTick);exSave();showView('selectorView');}
