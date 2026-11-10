@@ -6526,7 +6526,7 @@ const EXAM_SECS=[
   {id:'le',title:'Latin → English sentences',sub:'Translate each sentence into English.',n:13,pts:2},
   {id:'ngc',title:'Number, gender and case',sub:'Write the number, gender and case of each noun as full words (e.g. singular, feminine, accusative). If the form could be more than one case, any correct one counts.',n:8,pts:1.5},
   {id:'vp',title:'Verb phrases',sub:'Translate each Latin phrase into English.',n:10,pts:1},
-  {id:'ap',title:'Adjective + noun phrases',sub:'Translate each phrase into Latin (nominative).',n:8,pts:1.5},
+  {id:'ap',title:'Adjective + noun phrases',sub:'Translate each phrase into Latin. Nominative, or put it in any case and name the case after a comma (e.g. leonem magnum, accusative).',n:8,pts:1.5},
   {id:'el',title:'English → Latin sentences',sub:'Translate each sentence into Latin.',n:10,pts:3}];
 let exam=null,exSaveT=null,exTick=null;
 const exFmt=x=>(Math.round(x*2)/2).toString();
@@ -6575,7 +6575,7 @@ function exAP(){const adjs=exMain().filter(w=>w.catKey==='adjectives'&&!EX_ADJ_S
     const aE=exMeanings(a)[0];if(!aE||/\s/.test(aE))continue;const nE0=String(n.eng[0]).replace(/\s*\([^)]*\)/g,'').trim();let nE;try{nE=num==='singular'?nE0:ePl(n);}catch(e){continue;}
     const nAlts=exNouns().filter(x=>x.eng.some(e=>String(e).replace(/\s*\([^)]*\)/g,'').trim()===nE0)),aAlts=adjs.filter(x=>exMeanings(x).includes(aE));
     const alts=[];nAlts.forEach(nx=>aAlts.forEach(ax=>{const nf=declineN(nx,'nominative',num),af=declineA(ax,nx.gender,'nominative',num);if(nf&&af)alts.push(nf+' '+af);}));
-    if(!alts.length)continue;used.add(n.lat);used.add(a.lat);out.push({sec:'ap',prompt:aE+' '+nE,alts,show:alts[0]});}
+    if(!alts.length)continue;used.add(n.lat);used.add(a.lat);const pick=w=>({lat:w.lat,gen:w.gen||null,gender:w.gender,subKey:w.subKey,catKey:w.catKey});out.push({sec:'ap',prompt:aE+' '+nE,alts,show:alts[0],num,nw:nAlts.map(pick),aw:aAlts.map(pick)});}
   return out;}
 function exBuild(){const qs=[];const seen=new Set();
   exVocab().slice(0,20).forEach(w=>qs.push({sec:'voc',prompt:fullLat(w),lat:w.lat,show:w.eng.join(', ')}));
@@ -6610,7 +6610,11 @@ function exGrade(q,ans){const max=EXAM_SECS.find(s=>s.id===q.sec).pts;let got=0,
   if(q.sec==='voc'){const ok=exMain().filter(x=>x.lat===q.lat).some(x=>{try{return checkEng(ua,x);}catch(e){return false;}});return {got:ok?max:0,max,right:q.show};}
   if(q.sec==='le'||q.sec==='el'){const alts=exSentAlts(q),lat=q.sec==='el';const sv=mode;mode='el';let exact=false;if(lat)try{exact=alts.some(a=>checkWithSynonyms(ua,a));}catch(e){}mode=sv;   // Latin word order is free; English order is checked below
     if(exact)return {got:max,max,right:q.show,k:0};const b=exBest(ua,alts,lat);k=b.k;return {got:Math.max(0,max-.5*k),max,right:q.show,k};}
-  const lat=q.sec==='ap';const b=exBest(ua,q.alts,lat);k=b.k;return {got:Math.max(0,max-.5*k),max,right:q.show,k};}
+  if(q.sec==='ap'){   // "leonem magnum, accusative": any case is fine if it's named (and right); otherwise nominative
+    const m=ua.match(/^(.*?)[\s,;:(-]+(nominative|vocative|accusative|genitive|dative|ablative)\)?\s*\.?$/i);let alts=q.alts,phr=ua,cs='nominative';
+    if(m&&q.nw&&q.aw){cs=m[2].toLowerCase();phr=m[1];alts=[];q.nw.forEach(nx=>q.aw.forEach(ax=>{const nf=declineN(nx,cs,q.num),af=declineA(ax,nx.gender,cs,q.num);if(nf&&af)alts.push(nf+' '+af);}));if(!alts.length)alts=q.alts;}
+    const b=exBest(phr,alts,true);k=b.k;return {got:Math.max(0,max-.5*k),max,right:cs==='nominative'?q.show:b.a+', '+cs+' (or nominative: '+q.show+')',k};}
+  const lat=false;const b=exBest(ua,q.alts,lat);k=b.k;return {got:Math.max(0,max-.5*k),max,right:q.show,k};}
 
 /* screen */
 function exHist(){try{return JSON.parse(localStorage.getItem(EXAM_HIST)||'[]')||[];}catch(e){return [];}}
