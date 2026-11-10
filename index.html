@@ -672,6 +672,7 @@ body.calm .nfx-type .tw-caret{display:none}
 .sf-row.epic{border:1px solid;margin:2px 0}.sf-row.epic .sf-txt b{color:#fff}
 @media (prefers-reduced-motion:reduce){.ep-shine,.ep-spark,.ep-rainbow,.ep-rainbow .ep-title,.ep-rainbow .ep-art svg{animation:none}}
 .bf-hid{opacity:.45}.bf-hid .bfeed-txt::after,.sf-row.bf-hid .sf-txt::after{content:' (hidden)';font-style:italic;font-size:12px;color:var(--text3)}
+.acct-note{font-size:14px;color:var(--text2);margin:0 0 12px;line-height:1.45}.acct-in{display:block;width:100%;box-sizing:border-box;font-size:16px;padding:10px 14px;margin:0 0 8px;border:1.5px solid var(--border2);border-radius:var(--rs);background:var(--surface2);color:var(--text);outline:none}.acct-in:focus{border-color:var(--accent)}
 .ann-box{max-width:520px;width:94%;text-align:left}.ann-head{font-family:var(--serif,Georgia,serif);font-size:24px;font-weight:700;margin:0 30px 10px 0;color:var(--accent,#e6b422)}
 .ann-body{font-size:15px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere;max-height:55vh;overflow-y:auto}.ann-date{font-size:12px;color:var(--text3);margin-top:10px}
 .ann-btns{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px}
@@ -2019,6 +2020,19 @@ body:has(.overlay[style*="display: flex"]) .side-fab,body:has(#bReveal[style*="d
   </div>
 </div>
 
+<div id="acctOverlay" class="overlay" style="display:none;z-index:130" onclick="closeOverlay('acctOverlay')">
+  <div class="about-box ann-box" onclick="event.stopPropagation()">
+    <button class="about-close" onclick="closeOverlay('acctOverlay')">×</button>
+    <div class="ann-head" id="acctTitle">Sign in</div>
+    <p class="acct-note" id="acctNote"></p>
+    <form onsubmit="event.preventDefault();acctSubmit()">
+      <input class="acct-in" id="acctEmail" type="email" autocomplete="email" placeholder="Email" spellcheck="false">
+      <input class="acct-in" id="acctPass" type="password" autocomplete="current-password" placeholder="Password">
+      <div id="acctMsg" class="backup-msg"></div>
+      <div class="ann-btns"><button class="btn-primary" id="acctGo" type="submit">Sign in</button><button type="button" class="lb-link" id="acctSwapBtn" onclick="acctSwap()"></button><button type="button" class="lb-link muted" id="acctForgotBtn" onclick="acctForgot()">Forgot password?</button></div>
+    </form>
+  </div>
+</div>
 <div id="annOverlay" class="overlay" style="display:none" onclick="closeAnn()">
   <div class="about-box ann-box" onclick="event.stopPropagation()">
     <button class="about-close" onclick="closeAnn()">×</button>
@@ -4048,10 +4062,12 @@ function renderLbProfile(msg,isErr){document.querySelectorAll('.lb-profile').for
     const ok=document.createElement('button');ok.className='btn-primary';ok.textContent=lbMe?'Save':'Join';row.appendChild(ok);
     if(lbMe){const c=document.createElement('button');c.type='button';c.className='btn-secondary';c.textContent='Cancel';c.onclick=()=>{lbEditing=false;renderLbProfile();};row.appendChild(c);}
     box.appendChild(row);
+    if(!lbMe){const si=document.createElement('div');si.style.cssText='font-size:12px;margin-top:6px;color:var(--text3)';si.append('Already have an account? ');const b=document.createElement('button');b.className='lb-link';b.textContent='Sign in';b.onclick=()=>acctOpen('signin');si.appendChild(b);box.appendChild(si);}
   }else{const line=document.createElement('div');line.append('You’re ');line.appendChild(nameEl(lbMe.pid,lbMe.name));
     line.append(' · ');const pts=document.createElement('span');pts.className='lb-pts';pts.append('⭐ ');const n=document.createElement('span');n.id='lbMyPts';n.textContent=lbMyPoints().toLocaleString();pts.appendChild(n);line.appendChild(pts);line.append(' ');
     if(premMe){const pb=document.createElement('span');pb.className='prem-badge';pb.textContent='✨ Premium';pb.title='You have Latin Trainer Premium';line.appendChild(pb);line.append(' ');}
     const look=document.createElement('button');look.className='lb-link';look.textContent='Look';look.onclick=openLook;line.appendChild(look);
+    if(typeof cloudInfo==='function'&&!cloudInfo().email){const sv=document.createElement('button');sv.className='lb-link';sv.textContent='Save with email';sv.title='Use this account on other devices';sv.onclick=()=>acctOpen('create');line.appendChild(sv);}
     const ed=document.createElement('button');ed.className='lb-link';ed.textContent='Change name';ed.onclick=async()=>{let locked=false;try{locked=(await fbReq('GET','nlock/'+lbMe.pid))===true;}catch(e){}
       if(locked){renderLbProfile('The admin has turned off name changes for you.',true);return;}lbEditing=true;renderLbProfile();};line.appendChild(ed);
     const lv=document.createElement('button');lv.className='lb-link muted';lv.textContent='Leave';lv.onclick=lbLeave;line.appendChild(lv);box.appendChild(line);
@@ -6065,7 +6081,7 @@ const CLOUD_KEY='latin_cloud';
 let cloudLast='',cloudTimer=null,cloudPulled=false,cloudBusy=false,cloudShowCode=false;
 function cloudInfo(){try{return JSON.parse(localStorage.getItem(CLOUD_KEY)||'{}')||{};}catch(e){return {};}}
 function cloudSetInfo(o){try{localStorage.setItem(CLOUD_KEY,JSON.stringify({...cloudInfo(),...o}));}catch(e){}}
-function cloudOn(){return !!(playerAuth&&playerAuth.uid&&(lbMe||cloudInfo().code));}
+function cloudOn(){const I=cloudInfo();return !!(playerAuth&&playerAuth.uid&&(lbMe||I.code||I.email));}
 function cloudPayload(){const b=buildBackup();delete b.lb;delete b.exported;return JSON.stringify(b);}
 function cloudSoon(ms){if(!cloudOn())return;clearTimeout(cloudTimer);cloudTimer=setTimeout(cloudPush,ms==null?15000:ms);}
 const cloudErr=e=>/HTTP 40[13]/.test(e&&e.message)?'rules':'net';
@@ -6090,17 +6106,55 @@ async function cloudRestore(){const code=normCode(prompt('Type your recovery cod
   catch(e){cloudMsg(/INVALID|NOT_FOUND|PASSWORD|CREDENTIAL/.test(e.message)?'That code didn’t work. Check the spelling.':'Couldn’t reach the server. Check your internet.',false);return;}
   if(playerAuth&&playerAuth.uid===d.localId){cloudSetInfo({code});cloudMsg('This device already uses that account.',true);renderCloud();return;}
   if(!confirm('Switch this device to the account with that code? Its progress and badges will be merged with what’s on this device.'+(lbMe?' This device’s leaderboard name ('+lbMe.name+') will be swapped for that account’s.':''))){cloudMsg('');return;}
-  playerAuth=authFrom(d);savePlayerAuth();cloudSetInfo({code,err:''});lbMe=null;
+  cloudSetInfo({code,err:''});await acctSwitch(d);cloudMsg('✓ Restored. Your progress is back.',true);}
+// move this device onto another account (recovery code or email sign-in): its progress is merged in
+async function acctSwitch(d){playerAuth=authFrom(d);savePlayerAuth();lbMe=null;
   try{const name=await fbReq('GET','players/'+playerAuth.uid+'/name');if(typeof name==='string')lbMe={pid:playerAuth.uid,name};}catch(e){}
   saveLbMe();renderLbProfile();lbUpdatePoints();try{renderLb();renderChat();}catch(e){}
-  cloudPulled=false;cloudLast='';await cloudPull();cloudMsg('✓ Restored. Your progress is back.',true);}
+  cloudPulled=false;cloudLast='';await cloudPull();}
+
+// ── EMAIL + PASSWORD ACCOUNTS ────────────────────────────────────────────────
+// "Save with email" adds an email + password to the account this device already has (same id, so points, badges and
+// progress stay). "Sign in" on another device opens that account there and merges in what the device had.
+let acctMode='signin';
+function acctOpen(m){acctMode=m==='create'?'create':'signin';const c=acctMode==='create',I=cloudInfo(),$=id=>document.getElementById(id);
+  $('acctTitle').textContent=c?'Save with email':'Sign in';
+  $('acctNote').textContent=c?'Add an email and password to your account. Then sign in on any other device to get the same points, badges, stats and progress.'+(I.code?' Your recovery code will stop working: use your email instead.':''):'Sign in to use your account on this device. Anything you’ve done on this device gets added to it.';
+  $('acctGo').textContent=c?'Save':'Sign in';$('acctSwapBtn').textContent=c?'I already have an account':'No account yet? Save this one with email';
+  $('acctForgotBtn').style.display=c?'none':'';$('acctPass').placeholder=c?'Password (at least 6 characters)':'Password';$('acctPass').autocomplete=c?'new-password':'current-password';$('acctPass').value='';acctMsg('');
+  $('acctOverlay').style.display='flex';setTimeout(()=>$('acctEmail').focus(),50);}
+function acctSwap(){acctOpen(acctMode==='create'?'signin':'create');}
+function acctMsg(t,ok){const el=document.getElementById('acctMsg');if(el){el.textContent=t||'';el.style.color=ok===false?'var(--red)':ok?'var(--green)':'var(--text3)';}}
+function acctErr(e){const m=String(e&&e.message||'');return /EMAIL_EXISTS/.test(m)?'That email already has an account. Press “I already have an account” to sign in.':/INVALID_EMAIL|MISSING_EMAIL/.test(m)?'That email address doesn’t look right.':/WEAK_PASSWORD/.test(m)?'Use a password of at least 6 characters.':/INVALID_LOGIN|INVALID_PASSWORD|EMAIL_NOT_FOUND|CREDENTIAL|USER_DISABLED/.test(m)?'Wrong email or password.':/TOO_MANY/.test(m)?'Too many tries. Wait a few minutes and try again.':/OPERATION_NOT_ALLOWED/.test(m)?'Email sign-in isn’t switched on for this site yet (ask the admin).':'Couldn’t reach the server. Check your internet.';}
+async function acctSubmit(){const email=document.getElementById('acctEmail').value.trim().toLowerCase(),pw=document.getElementById('acctPass').value;
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){acctMsg('Type your email address.',false);return;}if(!pw){acctMsg('Type your password.',false);return;}
+  if(acctMode==='create'){if(pw.length<6){acctMsg('Use a password of at least 6 characters.',false);return;}acctMsg('Saving…');
+    try{await playerToken();const d=await authPost('https://identitytoolkit.googleapis.com/v1/accounts:update',{idToken:playerAuth.idToken,email,password:pw,returnSecureToken:true});
+      playerAuth=authFrom({...d,localId:d.localId||playerAuth.uid});savePlayerAuth();}catch(e){acctMsg(acctErr(e),false);return;}
+    cloudSetInfo({email,code:null,err:''});closeOverlay('acctOverlay');toast('✓ Saved. Sign in with '+email+' on any device to get everything there.');renderCloud();renderLbProfile();cloudPulled?cloudPush():cloudPull();return;}
+  acctMsg('Signing in…');let d;try{d=await authPost('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword',{email,password:pw,returnSecureToken:true});}catch(e){acctMsg(acctErr(e),false);return;}
+  if(playerAuth&&playerAuth.uid===d.localId){playerAuth=authFrom(d);savePlayerAuth();cloudSetInfo({email,code:null});closeOverlay('acctOverlay');toast('You’re already signed in to that account here.');renderCloud();renderLbProfile();return;}
+  if(lbMe&&!confirm('Sign in as '+email+' on this device? This device’s leaderboard name ('+lbMe.name+') will be swapped for that account’s. Its progress, stats and badges are added to the account.')){acctMsg('');return;}
+  try{await lbFlush();}catch(e){}
+  cloudSetInfo({email,code:null,err:''});await acctSwitch(d);closeOverlay('acctOverlay');toast('✓ Signed in as '+email+'. Your points, badges and progress are here.');renderCloud();}
+async function acctForgot(){const email=document.getElementById('acctEmail').value.trim().toLowerCase();if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){acctMsg('Type your email above first, then press “Forgot password?”.',false);return;}
+  acctMsg('Sending…');try{await authPost('https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode',{requestType:'PASSWORD_RESET',email});acctMsg('If that email has an account, a link to reset your password is on its way. Check your junk folder too.',true);}
+  catch(e){acctMsg(/TOO_MANY/.test(e.message)?'Too many tries. Wait a few minutes.':/EMAIL_NOT_FOUND/.test(e.message)?'There’s no account with that email.':'Couldn’t send the email. Check your internet.',false);}}
+// signing out clears this device (it's all saved in the account), so the next person on a shared computer starts fresh
+async function acctSignOut(){const I=cloudInfo();if(!confirm('Sign out of '+(I.email||'your account')+' on this device?\n\nEverything is kept in your account. This device starts fresh: its progress, stats, badges and settings are cleared.'))return;
+  cloudMsg('Saving your latest progress…');try{await lbFlush();}catch(e){}for(let i=0;i<50&&cloudBusy;i++)await new Promise(r=>setTimeout(r,100));if(!cloudPulled)await cloudPull();else{cloudLast='';await cloudPush();}
+  if(cloudInfo().err&&!confirm('Your latest progress couldn’t be saved online (offline?). Signing out now would lose it. Sign out anyway?')){cloudMsg('');return;}
+  try{Object.keys(localStorage).filter(k=>/^(latin|lt:|lt_)/.test(k)).forEach(k=>localStorage.removeItem(k));sessionStorage.clear();}catch(e){}
+  location.reload();}
 function cloudCopyCode(){const c=cloudInfo().code;if(!c)return;navigator.clipboard&&navigator.clipboard.writeText(c).then(()=>cloudMsg('Code copied.',true),()=>{});}
 function renderCloud(){const box=document.getElementById('cloudBox');if(!box)return;const I=cloudInfo(),on=cloudOn();
   const when=I.saved?new Date(I.saved).toLocaleString([], {hour:'numeric',minute:'2-digit',day:'numeric',month:'short'}):null;
-  const st=!on?'Cloud save starts once you join the leaderboard or get a recovery code.':I.err==='rules'?'⚠ Not saved online: the database rules need updating (ask the admin).':I.err==='net'?'⚠ Not saved online yet (offline?). It will try again.':when?'☁ Saved online · last saved '+when:'☁ Saving online…';
-  box.innerHTML='<p class="cloud-st">'+esc(st)+'</p>'
-    +(I.code&&cloudShowCode?'<div class="cloud-code"><code>'+esc(I.code)+'</code><button class="btn-secondary" onclick="cloudCopyCode()">Copy</button></div><p class="cloud-note">Write this down somewhere safe. On a new device (or if this browser gets cleared), press <b>Restore with a code</b> and type it in to get everything back. Don’t share it: anyone with it can use your account.</p>':'')
-    +'<div class="backup-btns"><button class="btn-primary" onclick="cloudMakeCode()">'+(I.code?(cloudShowCode?'Code shown above':'Show my recovery code'):'Get a recovery code')+'</button><button class="btn-secondary" onclick="cloudRestore()">Restore with a code</button></div><div id="cloudMsg" class="backup-msg"></div>';}
+  const st=!on?'Cloud save starts once you join the leaderboard, sign in, or get a recovery code.':I.err==='rules'?'⚠ Not saved online: the database rules need updating (ask the admin).':I.err==='net'?'⚠ Not saved online yet (offline?). It will try again.':when?'☁ Saved online · last saved '+when:'☁ Saving online…';
+  const acct=I.email?'<p class="cloud-st">👤 Signed in as <b>'+esc(I.email)+'</b>. Sign in with this email on any device to get your points, badges and progress there.</p><div class="backup-btns" style="margin-bottom:12px"><button class="btn-secondary" onclick="acctSignOut()">Sign out</button></div>'
+    :'<p class="cloud-st">👤 Use the same account on several devices: save it with an email and password, then sign in anywhere.</p><div class="backup-btns" style="margin-bottom:12px"><button class="btn-primary" onclick="acctOpen(\'create\')">Save with email</button><button class="btn-secondary" onclick="acctOpen(\'signin\')">Sign in</button></div>';
+  box.innerHTML=acct+'<p class="cloud-st">'+esc(st)+'</p>'+(I.email?'<div id="cloudMsg" class="backup-msg"></div>':'')
+    +(I.email?'':(I.code&&cloudShowCode?'<div class="cloud-code"><code>'+esc(I.code)+'</code><button class="btn-secondary" onclick="cloudCopyCode()">Copy</button></div><p class="cloud-note">Write this down somewhere safe. On a new device (or if this browser gets cleared), press <b>Restore with a code</b> and type it in to get everything back. Don’t share it: anyone with it can use your account.</p>':'')
+    +'<div class="backup-btns"><button class="btn-primary" onclick="cloudMakeCode()">'+(I.code?(cloudShowCode?'Code shown above':'Show my recovery code'):'Get a recovery code')+'</button><button class="btn-secondary" onclick="cloudRestore()">Restore with a code</button></div><div id="cloudMsg" class="backup-msg"></div>');}
 setInterval(()=>cloudPush(),60000);
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')cloudPush();});
 
