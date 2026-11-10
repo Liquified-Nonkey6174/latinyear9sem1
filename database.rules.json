@@ -325,6 +325,22 @@
         }
       }
     },
+    "ver": {
+      ".read": "auth != null",
+      "$uid": {
+        ".write": "auth != null && auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2'",
+        ".validate": "newData.val() === true"
+      }
+    },
+    "bgrant": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2')",
+        ".write": "auth != null && auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2'",
+        "$b": {
+          ".validate": "newData.hasChildren(['l', 't']) && newData.child('l').isNumber() && newData.child('l').val() >= 0 && newData.child('l').val() <= 20"
+        }
+      }
+    },
     "mto": {
       ".read": "auth != null",
       "$uid": {
