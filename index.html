@@ -4534,6 +4534,7 @@ const S={
  arcana:'<circle cx="38" cy="38" r="12"/><circle cx="38" cy="38" r="4"/><path d="M46 46 L72 72 M62 62 L68 56 M68 68 L74 62"/>',
  fereomnia:'<path d="M50 24 C52 40 56 46 72 50 C56 54 52 60 50 76 C48 60 44 54 28 50 C44 46 48 40 50 24 Z"/><path d="M70 26 C71 32 72 33 78 34 C72 35 71 36 70 42 C69 36 68 35 62 34 C68 33 69 32 70 26 Z" class="f"/>',
  omnia:'<path d="M50 20 L56 40 L76 36 L62 50 L76 64 L56 60 L50 80 L44 60 L24 64 L38 50 L24 36 L44 40 Z"/><circle cx="50" cy="50" r="6" class="f"/>',
+ inscriptus:'<rect x="27" y="35" width="46" height="32" rx="3"/><path d="M28 37 L50 54 L72 37"/><path d="M28 66 L43 50 M72 66 L57 50"/>',
  chester:'<path d="M34 66 V34 C34 28 66 28 66 34 V66"/><path d="M22 66 C22 74 78 74 78 66 C78 62 22 62 22 66 Z"/><path d="M34 56 H66" stroke-width="6"/><text x="50" y="49" text-anchor="middle" font-family="Georgia,serif" font-size="16" font-weight="700" class="t">C</text>',
  unknown:'<text x="50" y="64" text-anchor="middle" font-family="Georgia,serif" font-size="44" font-weight="700" class="t">?</text>',
  omniamax:'<path d="M26 68 L22 34 L38 48 L50 26 L62 48 L78 34 L74 68 Z M26 76 H74"/><circle cx="22" cy="34" r="3" class="f"/><circle cx="50" cy="26" r="3" class="f"/><circle cx="78" cy="34" r="3" class="f"/>'
@@ -4549,7 +4550,7 @@ const ROMAN=['I','II','III','IV','V','VI','VII'];
 const METALS={bronze:['#ffd2a1','#c07a3a','#5e3110','#2a1406'],silver:['#ffffff','#bfc8d2','#59626c','#1c2228'],gold:['#fff4b8','#e6b422','#7a4f00','#2b1c00'],
   diamond:['#f0fdff','#86e0ff','#1f6a99','#062236'],obsidian:['#fbf0ff','#d08cff','#7b2cbf','#1a0b2e'],rainbow:['#ffffff','#ff7ad9','#5b2a86','#2b1c00'],royal:['#fff0b8','#d9ae4c','#6b4a10','#2b1c00'],locked:['#a5a5a5','#727272','#3a3a3a','#1c1c1c']};
 // enamel (face) colours per badge: [light, dark]
-const ENAMEL={salve:['#3f7a5a','#163a27'],primus:['#8a2d2d','#3c0f0f'],scriptor:['#2f5a8a','#0f2440'],gradus:['#7a1f2b','#2e0710'],
+const ENAMEL={inscriptus:['#2f6f8a','#0f2a38'],salve:['#3f7a5a','#163a27'],primus:['#8a2d2d','#3c0f0f'],scriptor:['#2f5a8a','#0f2440'],gradus:['#7a1f2b','#2e0710'],
   diesmagnus:['#b5651d','#4a2306'],constans:['#a33a17','#3d1205'],matutinus:['#c27a3a','#4d2a0c'],nocturnus:['#28336e','#0b1030'],
   sineerrore:['#1f6b6b','#072a2a'],perfectus:['#5c2a7a','#220b33'],lexicon:['#9a6a24','#3a2408'],lexiconmagnus:['#5f8f2a','#1d3a08'],
   doctus:['#1f7fc0','#05284a'],doctissimus:['#6a3ad0','#1a0750'],gladiator:['#6b1f1f','#2a0707'],victor:['#2a6b3a','#0b2a13'],
@@ -4679,8 +4680,9 @@ const META_BADGES=[
  {id:'fereomnia',icon:'✨',name:'Fere Omnia',lat:'almost everything',desc:'Earn every badge in the main section that isn’t secret.',meta:'public',lv:[1]},
  {id:'omnia',icon:'🌟',name:'Omnia',lat:'everything',desc:'Earn every badge in the main section (secret ones too).',meta:'all',lv:[1]},
  {id:'omniamax',icon:'👑',name:'Omnia Maxima',lat:'everything, to the max',desc:'Get every badge in the main section to its top level.',meta:'max',lv:[1]},
- {id:'chester',icon:'🎩',name:'Be Chester',lat:'esto Chester',desc:'Only for the one and only \u2011Chester\u2011.',meta:'name',lv:[1]}];
-function metaValue(bd,got){if(bd.meta==='name')return lbMe&&lbMe.name==='-Chester-'?1:0;if(bd.meta==='count')return BADGES.filter(b=>b.secret&&got[b.id]).length;if(bd.meta==='public')return BADGES.filter(b=>!b.secret).every(b=>got[b.id])?1:0;if(bd.meta==='all')return BADGES.every(b=>got[b.id])?1:0;return BADGES.every(b=>got[b.id]&&got[b.id].l>=b.lv.length)?1:0;}
+ {id:'chester',icon:'🎩',name:'Be Chester',lat:'esto Chester',desc:'Only for the one and only \u2011Chester\u2011.',meta:'name',lv:[1]},
+ {id:'inscriptus',icon:'📧',name:'Inscriptus',lat:'enrolled',desc:'Save your account with an email (👤 Account → Save with email). Doesn’t count towards Omnia.',meta:'acct',lv:[1]}];
+function metaValue(bd,got){if(bd.meta==='acct')return typeof cloudInfo==='function'&&cloudInfo().email?1:0;if(bd.meta==='name')return lbMe&&lbMe.name==='-Chester-'?1:0;if(bd.meta==='count')return BADGES.filter(b=>b.secret&&got[b.id]).length;if(bd.meta==='public')return BADGES.filter(b=>!b.secret).every(b=>got[b.id])?1:0;if(bd.meta==='all')return BADGES.every(b=>got[b.id])?1:0;return BADGES.every(b=>got[b.id]&&got[b.id].l>=b.lv.length)?1:0;}
 const METAL=['bronze','silver','gold','diamond'];
 function tierMetal(l,n){const f=l/n;return f>=1?'diamond':f>=.6?'gold':f>=.3?'silver':'bronze';}   // ranks: bronze → silver → gold → diamond at the top
 // lv: thresholds for tiered badges; stat(): current value. secret: hidden until earned.
@@ -4818,7 +4820,7 @@ function renderBadges(){document.querySelectorAll('#badgeSort button').forEach(b
     g.appendChild(c);});
   const sh=document.createElement('div');sh.className='badge-sec-h';sh.textContent='Special (not counted)';g.appendChild(sh);let metaN=0;
   META_BADGES.forEach(bd=>{const e=got[bd.id],l=e?e.l:0,v=metaValue(bd,got);const c=document.createElement('div');const on=bd.meta==='count'?v>0:!!l;if(!badgeShown(on?1:0,1))return;metaN++;c.className='badge-card meta'+(on?' earned':' locked');
-    let prog='';if(bd.meta==='count'||bd.meta==='name')prog='';else{const pool=bd.meta==='public'?BADGES.filter(b=>!b.secret):BADGES,need=pool.length,have=bd.meta==='max'?pool.filter(b=>got[b.id]&&got[b.id].l>=b.lv.length).length:pool.filter(b=>got[b.id]).length;prog=have+' / '+need+' badges'+(bd.meta==='max'?' maxed':'');}
+    let prog='';if(bd.meta==='count'||bd.meta==='name'||bd.meta==='acct')prog='';else{const pool=bd.meta==='public'?BADGES.filter(b=>!b.secret):BADGES,need=pool.length,have=bd.meta==='max'?pool.filter(b=>got[b.id]&&got[b.id].l>=b.lv.length).length:pool.filter(b=>got[b.id]).length;prog=have+' / '+need+' badges'+(bd.meta==='max'?' maxed':'');}
     c.innerHTML='<div class="bd-art">'+badgeArt(bd.id,1,1,{meta:true,size:74,locked:!on,count:bd.meta==='count'?v:null})+'</div><div class="bd-name">'+esc(bd.name)+'</div><div class="bd-lat">'+esc(bd.lat)+'</div><div class="bd-desc">'+esc(bd.desc)+'</div>'+(prog&&!l?'<div class="bd-prog">'+prog+'</div>':'')+(e&&bd.meta!=='count'?'<div class="bd-date">'+new Date(e.t).toLocaleDateString()+'</div>':'');
     if(on&&lbMe){const pinned=badgePins().includes(bd.id);const pb=document.createElement('button');pb.className='bd-pin'+(pinned?' on':'');pb.textContent=pinned?'📌 Shown':'📌 Show';pb.onclick=()=>toggleBadgePin(bd.id);c.appendChild(pb);if(pinned)c.classList.add('pinned');}
     g.appendChild(c);});
@@ -6255,7 +6257,7 @@ async function acctSignOut(){const I=cloudInfo();if(!confirm('Sign out of '+(I.e
   try{Object.keys(localStorage).filter(k=>/^(latin|lt:|lt_)/.test(k)).forEach(k=>localStorage.removeItem(k));sessionStorage.clear();}catch(e){}
   location.reload();}
 function cloudCopyCode(){const c=cloudInfo().code;if(!c)return;navigator.clipboard&&navigator.clipboard.writeText(c).then(()=>cloudMsg('Code copied.',true),()=>{});}
-function renderCloud(){try{acctSyncEmail();acctBtnUpd();}catch(e){}const box=document.getElementById('cloudBox');if(!box)return;const I=cloudInfo(),on=cloudOn();
+function renderCloud(){try{acctSyncEmail();acctBtnUpd();badgeCheckSoon();}catch(e){}const box=document.getElementById('cloudBox');if(!box)return;const I=cloudInfo(),on=cloudOn();
   const when=I.saved?new Date(I.saved).toLocaleString([], {hour:'numeric',minute:'2-digit',day:'numeric',month:'short'}):null;
   const st=!on?'Cloud save starts once you join the leaderboard, sign in, or get a recovery code.':I.err==='rules'?'⚠ Not saved online: the database rules need updating (ask the admin).':I.err==='net'?'⚠ Not saved online yet (offline?). It will try again.':when?'☁ Saved online · last saved '+when:'☁ Saving online…';
   const acct=I.email?'<p class="cloud-st">👤 Signed in as <b>'+esc(I.email)+'</b>. Sign in with this email on any device to get your points, badges and progress there.</p><div class="backup-btns" style="margin-bottom:12px"><button class="btn-secondary" onclick="acctOpen(\'chemail\')">Change email</button><button class="btn-secondary" onclick="acctOpen(\'chpass\')">Change password</button><button class="btn-secondary" onclick="acctSignOut()">Sign out</button><button class="btn-secondary" onclick="acctOpen(\'merge\')">Merge another account in</button></div>'
@@ -6638,7 +6640,10 @@ function exRender(){const W=document.getElementById('examWrap'),done=!!exam.res;
       h+='</div>';});
     h+='</div>';});
   h+='<div class="res-btns" style="margin:1rem 0 2rem">'+(done?'<button class="btn-primary" onclick="exStart()">New exam</button><button class="btn-secondary" onclick="exClose()">Menu</button>':'<button class="btn-primary" onclick="exSubmit()">Submit exam</button><button class="btn-secondary" onclick="exQuit()">Give up</button>')+'</div>';
-  W.innerHTML=h;clearInterval(exTick);if(!done){const tk=()=>{const e=document.getElementById('exClock');if(!e){clearInterval(exTick);return;}const s=Math.floor((Date.now()-exam.start)/1000);e.textContent='⏱ '+Math.floor(s/60)+':'+String(s%60).padStart(2,'0');};tk();exTick=setInterval(tk,1000);}}
+  W.innerHTML=h;clearInterval(exTick);
+  // Enter moves to the next answer box (the last one goes to Submit); Shift+Enter still makes a new line in a sentence box
+  W.onkeydown=e=>{if(e.key!=='Enter'||e.shiftKey||e.isComposing||!e.target.classList||!e.target.classList.contains('ex-in'))return;e.preventDefault();
+    const ins=[...W.querySelectorAll('.ex-in:not([disabled])')],i=ins.indexOf(e.target),nx=ins[i+1];if(nx){nx.focus();nx.scrollIntoView({block:'center',behavior:'smooth'});}else{const sb=[...W.querySelectorAll('button')].find(b=>/Submit exam/.test(b.textContent));if(sb){sb.focus();sb.scrollIntoView({block:'center',behavior:'smooth'});}}};if(!done){const tk=()=>{const e=document.getElementById('exClock');if(!e){clearInterval(exTick);return;}const s=Math.floor((Date.now()-exam.start)/1000);e.textContent='⏱ '+Math.floor(s/60)+':'+String(s%60).padStart(2,'0');};tk();exTick=setInterval(tk,1000);}}
 function exQuit(){if(!confirm('Give up this exam? Your answers will be lost.'))return;try{localStorage.removeItem(EXAM_KEY);}catch(e){}exIntro();}
 function exSubmit(){if(!exam||exam.res)return;const blank=exam.qs.filter((q,i)=>{const a=exam.ans[i];return q.sec==='ngc'?!(a&&(a.n||a.g||a.c)):!String(a||'').trim();}).length;
   if(blank&&!confirm(blank+' question'+(blank===1?' is':'s are')+' blank. Submit anyway?'))return;
