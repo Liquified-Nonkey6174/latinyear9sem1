@@ -3406,13 +3406,24 @@ function enMeaningAlts(sd,eng){const clean=x=>String(x).replace(/\s*\([^)]*\)/g,
   let out=[eng.toLowerCase()];const esc2=x=>x.replace(/[.*+?^\${}()|[\]\\]/g,'\\$&');
   pairs.forEach(([a,b])=>{if(!a||!b||a===b)return;const re=new RegExp('\\b'+esc2(a)+'\\b','g');const add=[];out.forEach(v=>{if(re.test(v)){re.lastIndex=0;add.push(v.replace(re,b));}re.lastIndex=0;});out=out.concat(add).slice(0,400);});
   return out.slice(1);}
+// A singular -ae / -ei noun is genitive as well as dative: "Servus agricolae carmen tradebat" can be
+// "the slave was handing over the poem to the farmer" or "the slave of the farmer was handing over the poem".
+function genDatAlts(sd,eng){const out=[];const DET=/^(the|this|that|these|those|his|her|its|their|my|your|our)$/i;
+  const toks=String(sd&&sd.latin||'').toLowerCase().replace(/[^a-z\s]/g,' ').split(/\s+/).filter(Boolean);
+  toks.forEach(t=>{const l=formIndex().get(t)||[];const d=l.find(e=>e.c==='dative'&&e.n==='singular');if(!d||!l.some(e=>e.c==='genitive'&&e.n==='singular'&&e.lemma===d.lemma))return;
+    const nm=String(d.eng||'').toLowerCase().replace(/[.*+?^${}()|[\]\\]/g,'\\$&');if(!nm)return;
+    const m=String(eng).match(new RegExp('\\s*\\bto ((?:the|this|that|his|her|its|their|my|your|our) (?:\\w+ )?'+nm+')\\b','i'));if(!m)return;
+    const ws=String(eng).replace(m[0],'').replace(/\s+([,.!?])/g,'$1').trim().split(/\s+/);
+    ws.forEach((w,i)=>{if(!(i>0&&DET.test(ws[i-1]))&&!(i>1&&DET.test(ws[i-2])))return;const c=ws.slice();c[i]=w.replace(/^([^,.!?;:]*)(.*)$/,'$1 of '+m[1]+'$2');out.push(c.join(' '));});});
+  return out.slice(0,12);}
 function sentAlternatives(ca){const alts=[ca];if(!sentData)return alts;
   if(mode==='le'){
     // hints in [ ] like "his [own] father" or "his [someone else's] master" are optional: "his father" and "his own father" both count
     const bases=[ca];if(/\[[^\]]*\]/.test(ca)){bases.push(ca.replace(/\s*\[[^\]]*\]/g,''),ca.replace(/[\[\]]/g,''));}
     // "(pl.)" is optional too, combined with everything else
     if(/\(pl\.\)/.test(ca))bases.slice().forEach(b=>bases.push(b.replace(/\s*\(pl\.\)/g,'')));
-    bases.slice(1).forEach(b=>alts.push(b));bases.forEach(b=>alts.push(...enMeaningAlts(sentData,b)));}
+    bases.slice(1).forEach(b=>alts.push(b));bases.forEach(b=>alts.push(...enMeaningAlts(sentData,b)));
+    bases.forEach(b=>genDatAlts(sentData,b).forEach(g=>{alts.push(g);alts.push(...enMeaningAlts(sentData,g).slice(0,150));}));}
   if(mode==='el'&&sentData.altLatin)alts.push(...sentData.altLatin);
   // "you" without "(pl.)" could mean several people, so the plural verb (and vos) is right too
   if(mode==='el'&&sentData.youAlts&&sentData.youAlts.length&&/\byou\b(?! \(pl)/i.test(sentData.english)){const sw=x=>{let y=x;sentData.youAlts.forEach(({sg,pl})=>{y=y.replace(new RegExp('(^|[^A-Za-z])('+sg+')(?=[^A-Za-z]|$)','gi'),(m,a,w)=>a+(w[0]===w[0].toUpperCase()?pl[0].toUpperCase()+pl.slice(1):pl));});return y.replace(/(^|[^A-Za-z])(tu)(?=[^A-Za-z]|$)/gi,(m,a,w)=>a+(w[0]==='T'?'Vos':'vos'));};
@@ -4005,16 +4016,20 @@ function startAttempt(){quizNoPoints=false;const n=isDrill?drillQs.length:quizWo
 function lbCount(n){try{badgeCheckSoon();}catch(e){}n=n||1;if(!lbMe)return;
   if(quizNoPoints){const pill=document.getElementById('pointsPill');if(pill){pill.textContent='⭐ no points: quiz repeated';pill.classList.add('dim');clearTimeout(ptsNoteTimer);ptsNoteTimer=setTimeout(()=>{pill.classList.remove('dim');lbUpdatePoints();},1400);}return;}
   lbPending+=n;lbUpdatePoints(true);renderLb();if(!lbFlushTimer)lbFlushTimer=setTimeout(()=>lbFlush(),8000);}
+let lbLastOk=0;
 async function lbFlush(keepalive){clearTimeout(lbFlushTimer);lbFlushTimer=null;if(!lbMe||!lbPending||lbInFlight)return;
   // Leaving the page with an expired sign-in: keep the count for next time instead of losing it.
   if(keepalive&&!authFresh(playerAuth)){try{window.storage.set(LB_PENDING_KEY,String(lbPending));}catch(e){}lbPending=0;return;}
-  const n=lbPending,k=lbKeys(),inc={'.sv':{increment:n}},mine=lbPlayers[lbMe.pid];
+  // the server allows at most 300 per save and about 3 a second since the last one, so a big award (an exam) goes up in safe chunks
+  const mine=lbPlayers[lbMe.pid];if(!lbLastOk)lbLastOk=(mine&&mine.lt)||0;const allow=Math.max(1,Math.min(300,4+Math.floor((Date.now()-lbLastOk)/350)));
+  const n=Math.min(lbPending,allow),k=lbKeys(),inc={'.sv':{increment:n}};
   const lk=Date.now().toString(36)+Math.random().toString(36).slice(2,7),P='players/'+lbMe.pid+'/';
   // the server checks points can't go up faster than people can earn them, and that every save is logged (plog) for the admin
   const body={[P+'total']:inc,[P+'lt']:{'.sv':'timestamp'},[P+'lk']:lk,['plog/'+lbMe.pid+'/'+lk]:(()=>{const S=ansStats,md=['mc','ty','dr','ma'].sort((x,y)=>S[y]-S[x])[0];const e={n,t:{'.sv':'timestamp'},a:S.a,w:S.w};if(S.a)e.md=md;if(S.pn)e.pc=Math.round(S.ps/S.pn/100);ansStats={a:0,w:0,mc:0,ty:0,dr:0,ma:0,ps:0,pn:0};return e;})()};['d','w','m'].forEach(x=>{body[P+x+'/'+k[x]]=inc;if(mine&&mine[x])Object.keys(mine[x]).forEach(old=>{if(old!==k[x])body[P+x+'/'+old]=null;});});
-  lbInFlightBase=(mine&&mine.total)||0;lbInFlight=n;lbPending=0;
+  lbInFlightBase=(mine&&mine.total)||0;lbInFlight=n;lbPending-=n;
+  if(lbPending>0){if(keepalive){try{window.storage.set(LB_PENDING_KEY,String(lbPending));}catch(e){}lbPending=0;}else if(!lbFlushTimer)lbFlushTimer=setTimeout(()=>lbFlush(),30000);}
   try{if(!keepalive&&(await fbReq('GET','players/'+lbMe.pid+'/name'))==null){lbInFlight=0;lbRemoved();return;}
-    await fbReq('PATCH','',body,{keepalive});lbInFlight=0;}
+    await fbReq('PATCH','',body,{keepalive});lbInFlight=0;lbLastOk=Date.now();}
   catch(e){lbInFlight=0;lbPending+=n;if(!lbFlushTimer)lbFlushTimer=setTimeout(()=>lbFlush(),30000);}
   lbUpdatePoints();}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')lbFlush(true);});
@@ -6339,7 +6354,7 @@ function toggleLatinUI(){setLatinUI(!latinUI);if(latinUI){sxTry('s|latin|1');toa
 {const go=()=>{clearTimeout(window._cuT);window._cuT=setTimeout(sxInfo,150);};window.addEventListener('scroll',go,{passive:true});window.addEventListener('touchend',()=>setTimeout(sxInfo,400),{passive:true});window.addEventListener('resize',go);if(window.visualViewport)visualViewport.addEventListener('resize',go);setInterval(()=>{const v=document.getElementById('infoView');if(v&&v.style.display!=='none')sxInfo();},1500);}
 
 /* ---------- EXAM: a 100-mark paper from the main word list ---------- */
-const EXAM_KEY='latin_exam_draft',EXAM_HIST='latin_exam_hist';
+const EXAM_KEY='latin_exam_draft',EXAM_HIST='latin_exam_hist',EXAM_STAR_X=5;   // ⭐ per mark: a perfect paper ≈ what the same questions earn in practice
 const EXAM_SECS=[
   {id:'voc',title:'Vocabulary',sub:'Give one English meaning of each Latin word.',n:20,pts:.5},
   {id:'le',title:'Latin → English sentences',sub:'Translate each sentence into English.',n:13,pts:2},
@@ -6398,9 +6413,9 @@ function exAP(){const adjs=exMain().filter(w=>w.catKey==='adjectives'&&!EX_ADJ_S
   return out;}
 function exBuild(){const qs=[];const seen=new Set();
   exVocab().slice(0,20).forEach(w=>qs.push({sec:'voc',prompt:fullLat(w),lat:w.lat,show:w.eng.join(', ')}));
-  for(let i=0;i<13;i++){const sd=exSentence('le',i<7?'easy':'medium',seen);if(sd)qs.push({sec:'le',prompt:sd.latin,sd,show:sd.english});}
+  for(let i=0;i<13;i++){const sd=exSentence('le',i<7?'insane':'expert',seen);if(sd)qs.push({sec:'le',prompt:sd.latin,sd,show:sd.english});}
   qs.push(...exNGC());qs.push(...exVP());qs.push(...exAP());
-  for(let i=0;i<10;i++){const sd=exSentence('el',i<5?'easy':'medium',seen);if(sd)qs.push({sec:'el',prompt:sd.english,sd,show:sd.latin});}
+  for(let i=0;i<10;i++){const sd=exSentence('el',i<5?'insane':'expert',seen);if(sd)qs.push({sec:'el',prompt:sd.english,sd,show:sd.latin});}
   return qs;}
 
 /* marking: each mistake (wrong ending, spelling slip, missing or extra word, words in the wrong order) costs ½ mark */
@@ -6439,7 +6454,7 @@ function openExam(){showView('examView');if(!exam){try{const d=JSON.parse(localS
 function exIntro(){exam=null;clearInterval(exTick);const h=exHist(),best=h.length?Math.max(...h.map(x=>x.s)):null;
   document.getElementById('examWrap').innerHTML='<div class="ex-head"><div><div class="ex-title">📝 Exam</div><div class="ex-meta">100 marks · words from the main word list only</div></div><button class="quiz-menu-btn" onclick="exClose()">Menu</button></div>'
    +'<div class="ex-card"><table class="ex-plan">'+EXAM_SECS.map((s,i)=>'<tr><td>'+(i+1)+'</td><td>'+esc(s.title)+'</td><td>'+s.n+' × '+exFmt(s.pts)+'</td><td><b>'+exFmt(s.n*s.pts)+'</b></td></tr>').join('')+'<tr class="ex-tot"><td></td><td>Total</td><td></td><td><b>100</b></td></tr></table>'
-   +'<p class="ex-note">Every mistake — a wrong ending, a spelling slip, a missing or extra word, or words in the wrong order — costs ½ mark. A question can’t go below 0. Answers are marked when you submit, and your score is turned into ⭐.</p>'
+   +'<p class="ex-note">Every mistake — a wrong ending, a spelling slip, a missing or extra word, or words in the wrong order — costs ½ mark. A question can’t go below 0. Answers are marked when you submit, and you earn '+EXAM_STAR_X+' ⭐ for every mark.</p>'
    +(h.length?'<p class="ex-note">Best so far: <b>'+exFmt(best)+'/100</b> · last: '+exFmt(h[0].s)+'/100 ('+h.length+' taken)</p>':'')
    +'<div class="res-btns"><button class="btn-primary" onclick="exStart()">Start exam</button></div></div>';}
 function exStart(){const qs=exBuild();exam={qs,ans:{},start:Date.now()};exSave();exRender();window.scrollTo(0,0);}
@@ -6465,8 +6480,8 @@ function exSubmit(){if(!exam||exam.res)return;const blank=exam.qs.filter((q,i)=>
   if(blank&&!confirm(blank+' question'+(blank===1?' is':'s are')+' blank. Submit anyway?'))return;
   const marks={},sec={};let total=0;exam.qs.forEach((q,i)=>{let r;try{r=exGrade(q,exam.ans[i]);}catch(e){r={got:0,max:EXAM_SECS.find(s=>s.id===q.sec).pts,right:q.show||''};}marks[i]=r;sec[q.sec]=(sec[q.sec]||0)+r.got;total+=r.got;});
   total=Math.round(total*2)/2;const secs=Math.round((Date.now()-exam.start)/1000);
-  // ⭐ = the mark, but never faster than one per 3 seconds spent on the paper
-  let stars=0;if(typeof lbMe!=='undefined'&&lbMe){stars=Math.min(Math.round(total),Math.floor(secs/3));if(stars>0){const s=quizNoPoints;quizNoPoints=false;try{lbCount(stars);}finally{quizNoPoints=s;}}}
+  // ⭐ = EXAM_STAR_X × the mark (out of 100), but never more than one per second spent on the paper
+  let stars=0;if(typeof lbMe!=='undefined'&&lbMe){stars=Math.min(Math.round(total*EXAM_STAR_X),secs);if(stars>0){const s=quizNoPoints;quizNoPoints=false;try{lbCount(stars);}finally{quizNoPoints=s;}}}
   exam.res={marks,sec,total,secs,stars};try{localStorage.removeItem(EXAM_KEY);const h=exHist();h.unshift({t:Date.now(),s:total,secs});localStorage.setItem(EXAM_HIST,JSON.stringify(h.slice(0,30)));}catch(e){}
   exRender();window.scrollTo(0,0);}
 
