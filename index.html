@@ -4497,7 +4497,9 @@ async function sendChat(){const inp=document.getElementById('chatInput'),err=doc
   try{const pr=await fbReq('POST','chat',msg);bump('chat');
     // time-based badges use the message's own time (the server's, as shown in the chat), not the device clock
     let when=null;try{const st=await fbReq('GET','chat/'+pr.name+'/t');if(typeof st==='number')when=new Date(st);}catch(e){}sxChat(text,when,prevMsg);}
-  catch(e){// older database rules don't allow replies yet: send it as a normal message instead
+  catch(e){// a hiccup: try the reply once more before blaming the database rules
+    if(msg.re){try{await new Promise(r=>setTimeout(r,800));const pr=await fbReq('POST','chat',msg);bump('chat');sxChat(text,null,prevMsg);return;}catch(e1){}}
+    // older database rules don't allow replies yet: send it as a normal message instead
     if(msg.re){delete msg.re;try{await fbReq('POST','chat',msg);err.textContent='Sent, but not as a reply: the database rules need updating (ask the admin).';return;}catch(e2){}}
     inp.value=text;setChatReply(was);
     err.textContent='Message not sent. Check your internet and try again.';}}
