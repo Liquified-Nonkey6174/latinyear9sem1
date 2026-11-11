@@ -389,8 +389,8 @@ input[type=range]{flex:1;accent-color:var(--accent)}
 .lb-pts{color:var(--gold);font-weight:600}
 .lb-link{background:none;border:none;font-family:var(--sans);font-size:12px;color:var(--accent);cursor:pointer;padding:2px 4px;text-decoration:underline;text-underline-offset:2px}
 .lb-link.muted{color:var(--text3)}
-.atag{font-family:var(--sans);font-size:10.5px;font-weight:600;color:var(--bg);background:var(--accent);border-radius:999px;padding:1px 7px;margin-left:5px;vertical-align:middle;white-space:nowrap}
-.pc-ver{text-align:center;font-size:12px;color:var(--green);margin:-4px 0 8px;font-family:var(--sans)}
+.pname.has-tag{flex-wrap:wrap;row-gap:2px}.atag-row{flex:0 0 100%;display:block;line-height:1;overflow:visible!important}
+.atag{display:inline-block;font-family:var(--sans);font-size:10.5px;font-weight:600;color:var(--bg);background:var(--accent);border-radius:999px;padding:2px 7px;white-space:nowrap;font-style:normal}
 .lb-msg{font-size:12px;margin-top:6px}
 .lb-msg:empty{display:none}
 .lb-msg.err{color:var(--red)}
@@ -4081,11 +4081,10 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 window.addEventListener('pagehide',()=>lbFlush(true));
 // Removed by the admin (or left on another device): stop sending points under this id.
 function lbRemoved(){if(!lbMe)return;lbMe=null;lbPending=0;saveLbMe();renderLbProfile('You’re no longer on the leaderboard. Join again to take part.',true);lbUpdatePoints();renderLb();}
-// Verified players (ticked by the admin). Badges that depend on other people (challenge wins, rivals, reactions, Echo)
-// only count verified opponents/reactors, so bot accounts can't farm them. BGRANT: the admin's badge overrides for me.
-let VER={},BGRANT={},verAt=0;function isVer(pid){return !!pid&&(pid===ADMIN_UID||VER[pid]===true);}
-function verLoad(force){if((!force&&Date.now()-verAt<120000)||!playerAuth)return;verAt=Date.now();
-  fbReq('GET','ver').then(r=>{const a=JSON.stringify(VER);VER=r||{};if(JSON.stringify(VER)!==a)badgeCheckSoon();}).catch(()=>{});
+// Members = players the admin has given a member tag. Badges that depend on other people (challenge wins, rivals,
+// reactions, Echo) only count members, so bot accounts can't farm them. BGRANT: the admin's badge overrides for me.
+let BGRANT={},verAt=0;function isVer(pid){return !!pid&&(pid===ADMIN_UID||!!(ATAG||{})[pid]);}
+function verLoad(force){if((!force&&Date.now()-verAt<120000)||!playerAuth)return;verAt=Date.now();try{atagLoad();}catch(e){}
   if(lbMe)fbReq('GET','bgrant/'+lbMe.pid).then(r=>{const a=JSON.stringify(BGRANT);BGRANT=r||{};if(JSON.stringify(BGRANT)!==a)badgeCheckSoon();}).catch(()=>{});}
 // merged accounts: old id → the account it was merged into (mto), so old chat messages and feed posts show under it
 let MTO={},mtoAt=0;function pidMain(pid){let p=pid,n=0;while(p&&!lbPlayers[p]&&MTO[p]&&n++<6)p=MTO[p];return p;}
@@ -4307,10 +4306,10 @@ function applyNameFont(el,f){const nf=NAME_FONTS[f];if(!nf)return;loadNameFonts(
 function nameEl(pid,name){pid=pidMain(pid);const p=lbPlayers[pid]||{};const s=document.createElement('span');s.className='pname';
   if(p.av&&AVATARS.includes(p.av)){const a=document.createElement('span');a.className='pav';a.textContent=p.av;s.appendChild(a);}
   const n=document.createElement('span');n.textContent=name;applyNameColor(n,p.color);applyNameFont(n,p.font);applyNameFx(n,p.fx,name);fixGradName(n,p.color,p.font);if(NAME_FX[p.fx])s.classList.add('has-fx');s.appendChild(n);
-  if(isAdmin&&ATAG[pid]){const t=document.createElement('span');t.className='atag';t.textContent=ATAG[pid];t.title='Your private tag (only the admin sees it)';s.appendChild(t);}return s;}
-// admin-only private tags ("who is this?"), stored at atag/{uid}; only the admin can read or write them
-let ATAG={};async function atagLoad(){if(!isAdmin)return;try{ATAG=(await fbReq('GET','atag',null,{admin:true}))||{};}catch(e){ATAG={};}try{renderLb();renderChat();renderBadgeFeed();}catch(e){}}
-async function atagEdit(pid,name){const v=prompt('Private tag for '+name+' (only you see it, e.g. their real name). Leave empty to remove:',ATAG[pid]||'');if(v===null)return;const t=v.trim().slice(0,40);
+  if((ATAG||{})[pid]){s.classList.add('has-tag');const row=document.createElement('span');row.className='atag-row';const t=document.createElement('span');t.className='atag';t.textContent=ATAG[pid];t.title='Member tag (given by the admin)';row.appendChild(t);s.appendChild(row);}return s;}   // the tag sits on its own line under the name
+// tags the admin gives players (e.g. their real name), stored at atag/{uid}; everyone sees them, only the admin can change them
+var ATAG={};async function atagLoad(){const was=JSON.stringify(ATAG);try{ATAG=(await fbReq('GET','atag',null,isAdmin?{admin:true}:{}))||{};}catch(e){return;}if(JSON.stringify(ATAG)!==was)try{badgeCheckSoon();}catch(e){}try{renderLb();renderChat();renderBadgeFeed();}catch(e){}}
+async function atagEdit(pid,name){const v=prompt('Member tag for '+name+' (everyone sees it, e.g. their real name). Members count for the challenge, Rival, Popularis and Echo badges. Leave empty to remove:',ATAG[pid]||'');if(v===null)return;const t=v.trim().slice(0,40);
   try{await fbReq(t?'PUT':'DELETE','atag/'+pid,t||null,{admin:true});if(t)ATAG[pid]=t;else delete ATAG[pid];toast(t?'Tag saved.':'Tag removed.');try{renderLb();renderChat();}catch(e){}openPlayerCard(pid);}
   catch(e){alert('Couldn’t save the tag ('+e.message+').'+(/40[13]/.test(e.message)?'\n\nPublish the latest database rules first.':''));}}
 // ── ANNOUNCEMENT: written by the admin, pops up each time the site is opened ──
@@ -4388,7 +4387,7 @@ async function showPointsHistory(pid,box){box.innerHTML='<p class="muted">Loadin
 // admin: see a player's badges (from their cloud save) and give / take them away. An override sets the badge to exactly
 // that level (0 = removed) until it's set back to "auto"; the player's app applies it next time it checks.
 // which version of database.rules.json is live? Each check is a harmless read that only works with a given update.
-async function rulesCheck(){const T=[['Secret badges: admin give / take away (11 Nov)','sx/key'],['Verified players (11 Nov)','ver'],['Account merging (10 Nov)','mlog'],['Points history + negative scores (9 Nov)','plog']];const out=[];let ok=0;
+async function rulesCheck(){const T=[['Secret badges: admin give / take away (11 Nov)','sx/key'],['Member tags (11 Nov)','atag'],['Account merging (10 Nov)','mlog'],['Points history + negative scores (9 Nov)','plog']];const out=[];let ok=0;
   for(const [label,path] of T){let r;try{await fbReq('GET',path,null,{admin:true,query:'?shallow=true'});r=true;ok++;}catch(e){r=/40[13]/.test(e.message)?false:null;}out.push((r?'✔ ':r===false?'✖ ':'? ')+label);}
   alert((ok===T.length?'✔ Your live database rules are up to date.':'✖ Your live database rules are OLD. Publish the latest database.rules.json (Firebase → Realtime Database → Rules → paste it all → Publish).')+'\n\n'+out.join('\n')+(out.some(x=>x[0]==='?')?'\n\n? = couldn’t check (offline?)':''));}
 async function adminBadges(pid,box){box.innerHTML='<p class="muted">Loading…</p>';let prog=null,gr={},keys={},sgot={},sold='';const SN={};
@@ -4414,17 +4413,14 @@ async function adminBadges(pid,box){box.innerHTML='<p class="muted">Loading…</
     catch(e){toast('Couldn’t save: '+(/40[13]/.test(e.message)?'the database rules need updating.':e.message));sel.disabled=false;}});}
 function openPlayerCard(pid){const p=lbPlayers[pid];if(!p)return;const k=lbKeys();const box=document.getElementById('playerCard');box.innerHTML='';
   const h=document.createElement('div');h.className='pc-name';const big=nameEl(pid,p.name);h.appendChild(big);box.appendChild(h);{const bc=badgeChipsEl(p,true,pid);if(bc){const r=document.createElement('div');r.style.cssText='text-align:center;margin:-4px 0 10px';r.appendChild(bc);box.appendChild(r);}}
-  if(isVer(pid)){const v=document.createElement('div');v.className='pc-ver';v.textContent='✔ Verified player';v.title='Challenges against them and reactions from them count towards badges.';box.appendChild(v);}
   const g=document.createElement('div');g.className='pc-grid';[['Today','d'],['Week','w'],['Month','m'],['All time','all']].forEach(([l,per])=>{const c=document.createElement('div');c.innerHTML='<b>'+lbScore(p,per,k).toLocaleString()+'</b><span>'+l+'</span>';g.appendChild(c);});box.appendChild(g);
   if(isAdmin){const rb=document.createElement('button');rb.className='btn-secondary';rb.style.marginBottom='8px';rb.textContent='Rename (admin)';rb.onclick=()=>{closeOverlay('playerOverlay');adminRename(pid);};box.appendChild(rb);
     const hb=document.createElement('button');hb.className='btn-secondary';hb.style.margin='0 0 8px 6px';hb.textContent='Name history';const hist=document.createElement('div');hist.className='nh-box';
     hb.onclick=()=>{hb.disabled=true;showNameHistory(pid,hist);};box.appendChild(hb);
     const lk=document.createElement('button');lk.className='btn-secondary';lk.style.margin='0 0 8px 6px';lk.textContent='…';lk.disabled=true;box.appendChild(lk);box.appendChild(hist);
     const ph=document.createElement('button');ph.className='btn-secondary';ph.style.margin='0 0 8px 6px';ph.textContent='📈 Points history';ph.onclick=()=>{ph.disabled=true;showPointsHistory(pid,hist);};box.insertBefore(ph,hist);
-    const vb=document.createElement('button');vb.className='btn-secondary';vb.style.margin='0 0 8px 6px';const setV=()=>{vb.textContent=isVer(pid)?'✔ Verified (unverify)':'Verify player';vb.title='Verified players count as opponents / reactors for badges. Only verify real students.';};setV();
-    vb.onclick=async()=>{vb.disabled=true;const on=!isVer(pid);try{await fbReq(on?'PUT':'DELETE','ver/'+pid,on?true:null,{admin:true});if(on)VER[pid]=true;else delete VER[pid];}catch(e){toast('Couldn’t change it: '+(/40[13]/.test(e.message)?'the database rules need updating.':e.message));}vb.disabled=false;setV();};box.insertBefore(vb,hist);
     const bb=document.createElement('button');bb.className='btn-secondary';bb.style.margin='0 0 8px 6px';bb.textContent='🏅 Badges';bb.onclick=()=>adminBadges(pid,hist);box.insertBefore(bb,hist);
-    const tg=document.createElement('button');tg.className='btn-secondary';tg.style.margin='0 0 8px 6px';tg.textContent=ATAG[pid]?'🏷 Tag: '+ATAG[pid]:'🏷 Add tag';tg.title='A private label only you can see, e.g. their real name';tg.onclick=()=>atagEdit(pid,p.name);box.insertBefore(tg,hist);
+    const tg=document.createElement('button');tg.className='btn-secondary';tg.style.margin='0 0 8px 6px';tg.textContent=ATAG[pid]?'🏷 Member tag: '+ATAG[pid]:'🏷 Add member tag';tg.title='Shown under their name to everyone. Members count for badges that involve other players.';tg.onclick=()=>atagEdit(pid,p.name);box.insertBefore(tg,hist);
     let locked=false;const setLk=()=>{lk.textContent=locked?'🔒 Name locked (unlock)':'Lock name';lk.title=locked?'They can’t change their own name. Click to allow it again.':'Stop them changing their own name (you can still rename them).';lk.disabled=false;};
     fbReq('GET','nlock/'+pid,null,{admin:true}).then(v=>{locked=v===true;setLk();}).catch(()=>{lk.textContent='Lock name (unavailable)';});
     lk.onclick=async()=>{lk.disabled=true;try{await fbReq(locked?'DELETE':'PUT','nlock/'+pid,locked?null:true,{admin:true});locked=!locked;}catch(e){alert('Couldn’t save: '+e.message);}setLk();};
@@ -4772,11 +4768,11 @@ const BADGES=[
  {id:'lexiconmagnus',icon:'📚',name:'Lexicon Magnum',lat:'great dictionary',desc:'See every word in the main list and all word packs.',stat:()=>lexStat('all','seen'),lv:[1]},
  {id:'doctus',icon:'🎓',name:'Doctus',lat:'learned',desc:'Get every word in the main list right at least once.',stat:()=>lexStat('main','correct'),lv:[1]},
  {id:'doctissimus',icon:'🏛️',name:'Doctissimus',lat:'most learned',desc:'Get every word in the main list and all word packs right at least once.',stat:()=>lexStat('all','correct'),lv:[1]},
- {id:'gladiator',icon:'⚔️',name:'Gladiator',desc:'Win your first challenge against a verified player.',stat:()=>duelStats(true).wins,lv:[1]},
- {id:'victor',icon:'🏆',name:'Victor',desc:'Win 10 challenges against verified players.',stat:()=>duelStats(true).wins,lv:[10]},
- {id:'invictus',icon:'🛡️',name:'Invictus',lat:'unbeaten',desc:'Win 5 challenges in a row against verified players.',stat:()=>duelStats(true).bestRun,lv:[5]},
- {id:'rival',icon:'🤺',name:'Rival',desc:'Challenge 5 different verified players.',stat:()=>(bstat().rivals||[]).filter(isVer).length,lv:[5]},
- {id:'popularis',icon:'👍',name:'Popularis',lat:'popular',desc:'Get reactions on your chat messages from verified players.',unit:'reactions',stat:()=>bstat().reacts||0,lv:[3,10,20,50,100,200,500]},
+ {id:'gladiator',icon:'⚔️',name:'Gladiator',desc:'Win your first challenge against a member.',stat:()=>duelStats(true).wins,lv:[1]},
+ {id:'victor',icon:'🏆',name:'Victor',desc:'Win 10 challenges against members.',stat:()=>duelStats(true).wins,lv:[10]},
+ {id:'invictus',icon:'🛡️',name:'Invictus',lat:'unbeaten',desc:'Win 5 challenges in a row against members.',stat:()=>duelStats(true).bestRun,lv:[5]},
+ {id:'rival',icon:'🤺',name:'Rival',desc:'Challenge 5 different members.',stat:()=>(bstat().rivals||[]).filter(isVer).length,lv:[5]},
+ {id:'popularis',icon:'👍',name:'Popularis',lat:'popular',desc:'Get reactions on your chat messages from members.',unit:'reactions',stat:()=>bstat().reacts||0,lv:[3,10,20,50,100,200,500]},
  {id:'civis',icon:'🤝',name:'Civis Bonus',lat:'good citizen',desc:'Contribute 500 ⭐ to a weekly class challenge.',stat:()=>bstat().civis||0,lv:[1]},
  ...SX_IDS.map(sxEntry)];
 function bjson(k){try{return JSON.parse(localStorage.getItem(k)||'{}')||{};}catch(e){return {};}}
