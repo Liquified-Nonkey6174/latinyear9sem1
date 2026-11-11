@@ -768,7 +768,7 @@ body:has(.overlay[style*="display: flex"]) .side-fab,body:has(#bReveal[style*="d
         <button class="btn-primary" style="font-size:12px;padding:6px 16px" onclick="saveDesc()">Save</button>
         <button class="btn-secondary" style="font-size:12px;padding:6px 14px" onclick="cancelDescEdit()">Cancel</button>
       </div>
-      <div style="margin-top:8px"><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="annEdit()">📢 Edit announcement</button><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="rulesCheck()" title="Find out whether the rules published in Firebase are up to date">🔍 Check database rules</button><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="apprByName()" title="Let a player be seen by everyone on the leaderboard and in chat">✔ Approve player</button><label class="btn-secondary" style="font-size:12px;padding:6px 14px;cursor:pointer;display:inline-block">🔒 Upload secret badge answers<input type="file" accept=".json" style="display:none" onchange="if(this.files[0])sxUpload(this.files[0]);this.value=''"></label></div>
+      <div style="margin-top:8px"><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="annEdit()">📢 Edit announcement</button><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="rulesCheck()" title="Find out whether the rules published in Firebase are up to date">🔍 Check database rules</button><button class="btn-secondary" id="asStudentBtn" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="toggleAsStudent()" title="See the leaderboard, chat and Online now exactly as a student does">👁 View as a student</button><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="apprByName()" title="Let a player be seen by everyone on the leaderboard and in chat">✔ Approve player</button><label class="btn-secondary" style="font-size:12px;padding:6px 14px;cursor:pointer;display:inline-block">🔒 Upload secret badge answers<input type="file" accept=".json" style="display:none" onchange="if(this.files[0])sxUpload(this.files[0]);this.value=''"></label></div>
     </div>
   </div>
   <div class="settings-row"><button class="settings-btn" onclick="showSettings()">⚙ Settings</button> <button class="settings-btn" id="acctBtn" onclick="acctHub()" title="Sign in, or use your account on other devices">👤 Account</button> <button class="settings-btn" onclick="openBadges()">🏅 Badges <span id="badgeBtnCount" style="opacity:.7;font-size:12px"></span><span class="bf-dot" id="badgeBtnDot" title="New in the badge feed"></span></button></div>
@@ -4067,6 +4067,8 @@ function lbCount(n){try{badgeCheckSoon();}catch(e){}n=Math.round(+n||1);if(n<1||
 let lbLastOk=0,lbExamPend=0,lbExamInfo=null;
 function lbExamKeep(){try{if(lbExamPend>0)localStorage.setItem('latin_lb_pending_ex',JSON.stringify({n:lbExamPend,i:lbExamInfo}));lbExamPend=0;}catch(e){}}
 async function lbFlush(keepalive){clearTimeout(lbFlushTimer);lbFlushTimer=null;if(!lbMe||!lbPending||lbInFlight)return;
+  // not approved yet: the server won't add points, so keep them on this device until the admin approves (then they go up)
+  if(!isPublic(lbMe.pid)){try{window.storage.set(LB_PENDING_KEY,String(lbPending));}catch(e){}if(!keepalive)lbFlushTimer=setTimeout(()=>lbFlush(),60000);return;}
   // Leaving the page with an expired sign-in: keep the count for next time instead of losing it.
   if(keepalive&&!authFresh(playerAuth)){try{window.storage.set(LB_PENDING_KEY,String(lbPending));lbExamKeep();}catch(e){}lbPending=0;return;}
   // the server allows at most 300 per save and about 1 a second since the last one, so a big award (an exam) goes up in safe chunks
@@ -4122,7 +4124,8 @@ let chatMuted=false;
 // "Shadow" blocks set by the admin: mute/{uid} hides someone's chat messages, lbhide/{uid} hides them from the
 // leaderboard. They still see themselves normally; everyone else (except the admin) doesn't see them.
 let mutedSet=new Set(),lbHidden=new Set();
-const seesPid=pid=>isAdmin||(lbMe&&pid===lbMe.pid);
+let asStudent=false;const seesPid=pid=>(isAdmin&&!asStudent)||(lbMe&&pid===lbMe.pid);
+function toggleAsStudent(){asStudent=!asStudent;const b=document.getElementById('asStudentBtn');if(b)b.textContent=asStudent?'👁 Back to admin view':'👁 View as a student';try{renderLb();renderChat();renderOnline();renderBadgeFeed();}catch(e){}toast(asStudent?'Showing what students see.':'Back to the admin view.');}
 // Public view: only the admin, players with a member tag, and players the admin approved (appr/{uid}) are seen by everyone.
 // Others still play, chat and appear on the leaderboard, but only they (and the admin) can see it.
 var APPR={};const isPublic=pid=>!!pid&&(pid===ADMIN_UID||!!(ATAG||{})[pid]||APPR[pid]===true);
@@ -4134,8 +4137,8 @@ const lbVisible=pid=>(!lbHidden.has(pid)&&lbEnough(pid)&&isPublic(pid))||seesPid
 // New accounts need CHAT_MIN_PTS points before they can chat (stops spam from throwaway accounts; the database rules check it too).
 const CHAT_MIN_PTS=100;
 function updChatInput(){const ci=document.getElementById('chatInput'),cs=document.getElementById('chatSend');if(!ci)return;const pts=lbMyPoints(),short=!!lbMe&&pts<CHAT_MIN_PTS;
-  ci.disabled=cs.disabled=!lbMe||chatMuted||short;
-  ci.placeholder=!lbMe?'Join above to chat':chatMuted?'The admin has blocked you from sending messages':short?'Earn '+CHAT_MIN_PTS+' ⭐ to unlock chat ('+(CHAT_MIN_PTS-pts)+' to go)':!isPublic(lbMe.pid)?'Only you and the admin see your messages until you’re approved':'Message everyone…';}
+  const unappr=!!lbMe&&!isPublic(lbMe.pid);ci.disabled=cs.disabled=!lbMe||chatMuted||short||unappr;
+  ci.placeholder=!lbMe?'Join above to chat':chatMuted?'The admin has blocked you from sending messages':short?'Earn '+CHAT_MIN_PTS+' ⭐ to unlock chat ('+(CHAT_MIN_PTS-pts)+' to go)':unappr?'Chat unlocks once the admin approves you':'Message everyone…';}
 function setChatMuted(m){chatMuted=false;}
 async function lbSaveName(raw){const name=lbCleanName(raw);{const blk=await sxName(name,lbMe&&lbMe.name);if(blk){renderLbProfile(blk,true);return;}}const err=lbNameError(name);if(err){renderLbProfile(err,true);return;}
   let pid;const prev=lbMe?lbMe.name:null;   // remember it now: the live stream may update lbMe.name while we wait
@@ -4174,7 +4177,7 @@ function renderLb(){const list=document.getElementById('lbList');if(!list||!lbPl
     const it=document.createElement('div');it.className='lb-item'+(lbMe&&r.pid===lbMe.pid?' me':'')+(rank<=3&&r.n>0?' top':'');
     const rk=document.createElement('span');rk.className='lb-rank';rk.textContent=SET.ordinal?ordinal(rank):rank;
     const nm=document.createElement('span');nm.className='lb-name';nm.appendChild(nameEl(r.pid,r.name));{const bc=badgeChipsEl(lbPlayers[r.pid],false,r.pid);if(bc){nm.classList.add('has-chips');nm.appendChild(bc);}}if(isAdmin&&lbHidden.has(r.pid)){it.style.opacity='.55';nm.title='Hidden from everyone else';nm.append(' 👻');}
-    else if(!isPublic(r.pid)&&(isAdmin||(lbMe&&r.pid===lbMe.pid))){const note=document.createElement('span');note.className='lb-note';note.textContent=lbMe&&r.pid===lbMe.pid?'only you can see this · waiting for the admin to approve you':'🔒 not approved';note.title='Only approved players (and players with a member tag) are seen by everyone.';nm.appendChild(note);if(isAdmin&&!(lbMe&&r.pid===lbMe.pid))it.style.opacity='.55';}
+    else if(!isPublic(r.pid)&&((isAdmin&&!asStudent)||(lbMe&&r.pid===lbMe.pid))){const note=document.createElement('span');note.className='lb-note';note.textContent=lbMe&&r.pid===lbMe.pid?'only you can see this · new ⭐ are kept on this device until the admin approves you':'🔒 not approved';note.title='Only approved players (and players with a member tag) are seen by everyone.';nm.appendChild(note);if(isAdmin&&!(lbMe&&r.pid===lbMe.pid))it.style.opacity='.55';}
     else if(!lbEnough(r.pid)&&(isAdmin||(lbMe&&r.pid===lbMe.pid))){const left=LB_MIN_PTS-((lbPlayers[r.pid]||{}).total||0);const note=document.createElement('span');note.className='lb-note';note.textContent=lbMe&&r.pid===lbMe.pid?'only you can see this · '+left+' ⭐ to go':'under '+LB_MIN_PTS+' ⭐';note.title='Players appear on the leaderboard for everyone once they have '+LB_MIN_PTS+' ⭐ in total.';nm.appendChild(note);if(isAdmin&&!(lbMe&&r.pid===lbMe.pid))it.style.opacity='.55';}
     const ct=document.createElement('span');ct.className='lb-count';ct.textContent=r.n.toLocaleString();
     it.append(rk,nm,ct);it.classList.add('click');it.title=lbMe&&r.pid===lbMe.pid?'Change your look':'View '+r.name;
@@ -4331,7 +4334,7 @@ function renderOnline(){const sec=document.getElementById('sideOnline'),list=doc
   const ids=on.filter(show).sort((a,b)=>(lbMe&&a===lbMe.pid?-1:lbMe&&b===lbMe.pid?1:String(lbPlayers[a].name).localeCompare(lbPlayers[b].name))),hid=on.length-ids.length;
   sec.style.display=on.length?'':'none';document.getElementById('onlineN').textContent=on.length?'('+on.length+')':'';list.innerHTML='';
   ids.forEach(pid=>{const e=document.createElement('span');e.className='on-p';e.title='Open their card';e.innerHTML='<span class="on-dot"></span>';e.appendChild(nameEl(pid,(lbPlayers[pid]||{}).name||lbMe.name));e.onclick=()=>openPlayerCard(pid);list.appendChild(e);});
-  if(hid&&isAdmin){const hh=document.createElement('div');hh.className='on-sub';hh.textContent='Hidden ('+hid+')';list.appendChild(hh);
+  if(hid&&isAdmin&&!asStudent){const hh=document.createElement('div');hh.className='on-sub';hh.textContent='Hidden ('+hid+')';list.appendChild(hh);
     on.filter(pid=>!show(pid)).forEach(pid=>{const p=lbPlayers[pid]||{},why=lbHidden.has(pid)?'blocked':!p.name?'not on the leaderboard':!isPublic(pid)?'not approved':'under '+LB_MIN_PTS+' ⭐';const e=document.createElement('span');e.className='on-p on-hidden';e.title=why;e.innerHTML='<span class="on-dot"></span>';e.appendChild(nameEl(pid,p.name||'(no name)'));const w=document.createElement('span');w.className='on-why';w.textContent=why;e.appendChild(w);if(p.name)e.onclick=()=>openPlayerCard(pid);list.appendChild(e);});}
   else if(hid){const h=document.createElement('span');h.className='on-hid';h.textContent=(ids.length?'+ ':'')+hid+' hidden player'+(hid===1?'':'s');h.title='Online, but not approved yet, blocked, under 100 ⭐, or not on the leaderboard yet';list.appendChild(h);}}
 setTimeout(()=>{try{atagLoad();}catch(e){}},1200);setTimeout(()=>onlineBeat(),4000);setInterval(()=>onlineBeat(),60000);
