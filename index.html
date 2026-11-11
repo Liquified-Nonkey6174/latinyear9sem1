@@ -3516,7 +3516,7 @@ function recAns(w,ok){try{recAns0(w,ok);}catch(e){reportErr(e,'recording the ans
 let ansStats={a:0,w:0,mc:0,ty:0,dr:0,ma:0,se:0,ps:0,pn:0},lastAnsAt=0;
 function noteAnswer(ok){const now=Date.now(),S=ansStats;S.a++;if(!ok)S.w++;S[isMatch?'ma':isSent?'se':isDrill?'dr':inputMode==='mc'?'mc':'ty']=(S[isMatch?'ma':isSent?'se':isDrill?'dr':inputMode==='mc'?'mc':'ty']||0)+1;
   if(lastAnsAt&&now-lastAnsAt<60000){S.ps+=now-lastAnsAt;S.pn++;}lastAnsAt=now;}
-function recAns0(w,ok){reviseAnswer(w,ok);try{noteAnswer(ok);}catch(e){}if(!ok)try{ansFlags();}catch(e){}const ck=w.catKey;if(!statsData.catStats[ck])statsData.catStats[ck]={seen:0,correct:0};statsData.catStats[ck].seen++;if(ok)statsData.catStats[ck].correct++;saveStats();if(ok){if(mcFast||tooFast())tooFastNote();else lbCount(isDrill&&!isSent?2:1);dailyTick();}mcFast=false;trackMistake(w,ok);badgeAnswer(ok);}   // declension/conjugation questions are worth 2 ⭐
+function recAns0(w,ok){reviseAnswer(w,ok);try{noteAnswer(ok);}catch(e){}if(!ok)try{ansFlags();}catch(e){}const ck=w.catKey;if(!statsData.catStats[ck])statsData.catStats[ck]={seen:0,correct:0};statsData.catStats[ck].seen++;if(ok)statsData.catStats[ck].correct++;saveStats();if(ok){if(mcFast||tooFast())tooFastNote();else lbCount(isDrill&&!isSent?2:1);dailyTick();}mcFast=false;trackMistake(w,ok);window._ansW=w;badgeAnswer(ok);}   // declension/conjugation questions are worth 2 ⭐
 let sessionFinished=true;
 function finishSession(){sessionFinished=true;const total=isDrill?drillQs.length:isSent?sentTotal:quizWords.length;const pct=total>0?Math.round(score/total*100):0;if(window.resumeDate)statsData.sessions=statsData.sessions.filter(s=>s.date!==window.resumeDate);statsData.sessions.push({date:Date.now(),score,total,pct});if(total>=50&&score>=total)bump('perfect');if(total>0)sxTry('z|'+score+'|'+Math.min(total,9));if(total>0&&!isDrill&&!isSent&&!isMatch&&quizType==='vocab')sxTry('q|'+inputMode+'|'+score+'/'+total);window.resumeDate=null;if(statsData.sessions.length>20)statsData.sessions=statsData.sessions.slice(-20);saveStats();}
 const PHRASES=[[100,'Optime! Perfectly done.'],[80,'Bene! Well done.'],[60,'Satis bene. Keep going.'],[0,'Persevera. Try again.']];
@@ -3650,7 +3650,7 @@ async function checkAdminAuth(){
   try{
     const a=authFrom(await authPost('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword',{email:u,password:p,returnSecureToken:true}));
     if(a.uid!==ADMIN_UID){err.textContent='That account isn’t the admin.';return;}
-    adminAuth=a;isAdmin=true;hideAdminModal();startDescEdit();setTimeout(()=>atagLoad(),0);
+    adminAuth=a;isAdmin=true;hideAdminModal();startDescEdit();setTimeout(()=>atagLoad(),0);setTimeout(()=>{try{srvAdminSetup();}catch(e){}},1500);
     renderLb();renderChat();
   }catch(e){err.textContent=/TOO_MANY/.test(e.message)?'Too many attempts. Wait a few minutes and try again.':/INVALID|EMAIL|PASSWORD|USER_DISABLED/.test(e.message)?'Incorrect email or password.':'Couldn’t reach the server. Check your internet.';}
   finally{btn.disabled=false;}
@@ -4152,10 +4152,10 @@ var APPR={};const isPublic=pid=>!!pid&&(pid===ADMIN_UID||!!(ATAG||{})[pid]||APPR
 const chatVisible=pid=>(!mutedSet.has(pid)&&isPublic(pid))||seesPid(pid);
 // New players appear on other people's leaderboards once they have LB_MIN_PTS all-time points (they always see themselves).
 const LB_MIN_PTS=100;
-const lbEnough=pid=>{const t=(lbPlayers[pid]||{}).total||0;return t>=LB_MIN_PTS||t<0;};   // 0–99 hidden; penalty (negative) scores are shown
+const lbEnough=pid=>true;   // everyone counts; being a member (tag or approval) is what makes someone public   // 0–99 hidden; penalty (negative) scores are shown
 const lbVisible=pid=>(!lbHidden.has(pid)&&lbEnough(pid)&&isPublic(pid))||seesPid(pid);
 // New accounts need CHAT_MIN_PTS points before they can chat (stops spam from throwaway accounts; the database rules check it too).
-const CHAT_MIN_PTS=100;
+const CHAT_MIN_PTS=0;
 function updChatInput(){const ci=document.getElementById('chatInput'),cs=document.getElementById('chatSend');if(!ci)return;const pts=lbMyPoints(),short=!!lbMe&&pts<CHAT_MIN_PTS;
   const unappr=!!lbMe&&!isPublic(lbMe.pid);ci.disabled=cs.disabled=!lbMe||chatMuted||short||unappr;
   ci.placeholder=!lbMe?'Join above to chat':chatMuted?'The admin has blocked you from sending messages':short?'Earn '+CHAT_MIN_PTS+' ⭐ to unlock chat ('+(CHAT_MIN_PTS-pts)+' to go)':unappr?'Chat unlocks once the admin approves you':'Message everyone…';}
@@ -4461,7 +4461,7 @@ async function apprByName(){const v=prompt('Type the username to approve (they�
   if(!ids.length){alert('No player is called “'+v.trim()+'”. Check the spelling (it must be the exact name).');return;}
   if(ids.length>1&&!confirm(ids.length+' players are called “'+v.trim()+'”. Approve all of them?'))return;
   try{for(const pid of ids)await apprSet(pid,true);toast('✔ Approved '+v.trim()+(ids.length>1?' ('+ids.length+' players)':'')+'.');}catch(e){alert('Couldn’t approve ('+e.message+').'+(/40[13]/.test(e.message)?'\n\nPublish the latest database rules first.':''));}}
-async function adminBadges(pid,box){box.innerHTML='<p class="muted">Loading…</p>';let prog=null,gr={},keys={},sgot={},sold='';const SN={};
+async function adminBadges(pid,box){box.innerHTML='<p class="muted">Loading…</p>';let prog=null,gr={},keys={},sgot={},sold='';const SN={};try{await srvFetchP(pid);}catch(e){}const SL=SRV.frozen?srvLevels(pid):null;
   try{const r=await fbReq('GET','progress/'+pid,null,{admin:true});if(r&&typeof r.d==='string')prog=JSON.parse(r.d);}catch(e){}
   try{gr=(await fbReq('GET','bgrant/'+pid,null,{admin:true}))||{};}catch(e){box.innerHTML='<p class="muted">Couldn’t load: the database rules may need updating.</p>';return;}
   try{keys=(await fbReq('GET','sx/key',null,{admin:true}))||{};}catch(e){}
@@ -4471,7 +4471,7 @@ async function adminBadges(pid,box){box.innerHTML='<p class="muted">Loading…</
   const hasS=id=>(hOf[id]||[]).some(h=>sgot[h])||String(sold).split(',').includes(id);
   const have=(prog&&prog.badges)||{},p=lbPlayers[pid]||{},shown=Object.fromEntries(shownBadges(p));
   const list=[...BADGES.filter(b=>!b.secret),...META_BADGES.filter(b=>b.meta!=='count'),...BADGES.filter(b=>b.secret)];
-  const rows=list.map(bd=>{const sec=!!bd.secret,cur=sec?(hasS(bd.id)?1:0):(have[bd.id]?have[bd.id].l:(shown[bd.id]||0)),max=bd.lv.length,nm=sec?'🔒 '+(SN[bd.id]||bd.id):bd.name,o=gr[bd.id];
+  const rows=list.map(bd=>{const sec=!!bd.secret,cur=sec?(hasS(bd.id)?1:0):SL?Math.min(SL[bd.id]||0,bd.lv.length):(have[bd.id]?have[bd.id].l:(shown[bd.id]||0)),max=bd.lv.length,nm=sec?'🔒 '+(SN[bd.id]||bd.id):bd.name,o=gr[bd.id];
     const opts=['<option value="">—</option>','<option value="0">✖ remove</option>'].concat(Array.from({length:max},(_,i)=>'<option value="'+(i+1)+'">'+(max>1?'give level '+(i+1):'✔ give')+'</option>'));
     const last=o?' <span class="muted" style="font-size:11px">('+(+o.l?'given':'removed')+' '+new Date(o.t).toLocaleDateString()+')</span>':'';
     const st=sec?((hOf[bd.id]||[]).map(h=>sgot[h]).filter(x=>typeof x==='number')[0]):null,when=sec&&cur?(st?'<br><span class="muted" style="font-size:11px">'+new Date(st).toLocaleString([], {day:'numeric',month:'short',hour:'numeric',minute:'2-digit'})+'</span>':'<br><span class="muted" style="font-size:11px">old (registered)</span>'):'';
@@ -4479,12 +4479,13 @@ async function adminBadges(pid,box){box.innerHTML='<p class="muted">Loading…</
   // several secret badges within a few minutes is what triggering them by hand (or by script) looks like
   const ts=Object.values(sgot).filter(x=>typeof x==='number').sort((a,b)=>a-b);let burst=0;ts.forEach((t,i)=>{let n=0;for(let j=i;j<ts.length&&ts[j]-t<=600000;j++)n++;burst=Math.max(burst,n);});
   const oldN=String(sold||'').split(',').filter(Boolean).length;
-  box.innerHTML=(burst>=3?'<p style="margin:6px 0;color:var(--red,#e07a6a)"><b>⚠ '+burst+' secret badges within 10 minutes</b>, which is what getting them by hand from the browser console looks like. You can remove them below.</p>':'')+(oldN>=8?'<p style="margin:6px 0;color:var(--red,#e07a6a)"><b>⚠ '+oldN+' “old” secret badges registered.</b> Registering old badges was open to anyone until now; a long list is suspicious.</p>':'')+'<p style="margin:6px 0">'+(prog?'From their last cloud save.':'No cloud save yet: showing the badges on their name only.')+' Changes reach them the next time their app checks.</p><div style="max-height:320px;overflow-y:auto"><table class="nh-table"><tr><th>Badge</th><th>Has</th><th>Action</th></tr>'+rows+'</table></div><p class="muted" style="font-size:11.5px">✖ remove takes the badge away; they can earn it again, but only with new progress from now on. Give sets it to that level; normal earning carries on from there.</p>';
+  box.innerHTML=(burst>=3?'<p style="margin:6px 0;color:var(--red,#e07a6a)"><b>⚠ '+burst+' secret badges within 10 minutes</b>, which is what getting them by hand from the browser console looks like. You can remove them below.</p>':'')+(oldN>=8?'<p style="margin:6px 0;color:var(--red,#e07a6a)"><b>⚠ '+oldN+' “old” secret badges registered.</b> Registering old badges was open to anyone until now; a long list is suspicious.</p>':'')+'<p style="margin:6px 0">'+(SL?'Checked by the server (frozen badges + server-recorded progress + your actions).':prog?'From their last cloud save.':'No cloud save yet: showing the badges on their name only.')+' Changes reach them the next time their app checks.</p><div style="max-height:320px;overflow-y:auto"><table class="nh-table"><tr><th>Badge</th><th>Has</th><th>Action</th></tr>'+rows+'</table></div><p class="muted" style="font-size:11.5px">✖ remove takes the badge away; they can earn it again, but only with new progress from now on. Give sets it to that level; normal earning carries on from there.</p>';
   box.querySelectorAll('select[data-b]').forEach(sel=>sel.onchange=async()=>{const id=sel.dataset.b,v=sel.value;if(v==='')return;const bd=badgeById(id),L=+v;sel.disabled=true;
     try{if(bd&&bd.secret){const hs=hOf[id]||[];
         if(L)await fbReq('PUT','sx/got/'+pid+'/'+hs[0],{'.sv':'timestamp'},{admin:true});
         else{for(const h of hs)if(sgot[h])await fbReq('DELETE','sx/got/'+pid+'/'+h,null,{admin:true});const ol=String(sold||'').split(',').filter(Boolean);if(ol.includes(id)){const nl=ol.filter(x=>x!==id).join(',');await fbReq(nl?'PUT':'DELETE','sx/old/'+pid,nl||null,{admin:true});}}}
-      await fbReq('PUT','bgrant/'+pid+'/'+id,{l:L,t:{'.sv':'timestamp'}},{admin:true});toast('Saved: '+(L?'given':'removed')+'.');adminBadges(pid,box);}
+      let base=null;if(bd&&!bd.secret&&SRV.frozen){try{await srvFetchP(pid);base=srvBase(pid)[id]||0;}catch(e){}}   // removed / lowered badges come back only with progress beyond this
+      await fbReq('PUT','bgrant/'+pid+'/'+id,base==null?{l:L,t:{'.sv':'timestamp'}}:{l:L,t:{'.sv':'timestamp'},base},{admin:true});SRV.at[pid]=0;toast('Saved: '+(L?'given':'removed')+'.');adminBadges(pid,box);}
     catch(e){toast('Couldn’t save: '+(/40[13]/.test(e.message)?'the database rules need updating.':e.message));sel.disabled=false;}});}
 function openPlayerCard(pid){const p=lbPlayers[pid];if(!p)return;const k=lbKeys();const box=document.getElementById('playerCard');box.innerHTML='';
   const h=document.createElement('div');h.className='pc-name';const big=nameEl(pid,p.name);h.appendChild(big);box.appendChild(h);{const bc=badgeChipsEl(p,true,pid);if(bc){const r=document.createElement('div');r.style.cssText='text-align:center;margin:-4px 0 10px';r.appendChild(bc);box.appendChild(r);}}
@@ -4579,7 +4580,7 @@ async function sendChat(){const inp=document.getElementById('chatInput'),err=doc
   chatLastSend=Date.now();inp.value='';document.getElementById('chatList').dataset.first='';
   const msg={pid:lbMe.pid,text:text.slice(0,300),t:{'.sv':'timestamp'}};if(chatReplyTo&&chatObj[chatReplyTo])msg.re=chatReplyTo;
   const was=chatReplyTo;setChatReply(null);
-  try{const pr=await fbReq('POST','chat',msg);bump('chat');
+  try{const pr=await fbReq('POST','chat',msg);bump('chat');try{if(SRV.me&&!SRV.me.sc)srvPut('sc',pr.name).then(ok=>{if(ok)SRV.me.sc=pr.name;});}catch(e){}
     // time-based badges use the message's own time (the server's, as shown in the chat), not the device clock
     let when=null;try{const st=await fbReq('GET','chat/'+pr.name+'/t');if(typeof st==='number')when=new Date(st);}catch(e){}sxChat(text,when,prevMsg);}
   catch(e){// a hiccup: try the reply once more before blaming the database rules
@@ -4841,11 +4842,11 @@ const BADGES=[
  {id:'rank',icon:'⭐',name:'Centurio',desc:'Earn ⭐ in total: Centurio 100, Tribunus 200, Legatus 500, Praefectus 1,000, Imperator 2,000, Consul 5,000, Optimus 10,000.',unit:'⭐',stat:()=>lbMe&&lbPlayers[lbMe.pid]?Math.max(0,+lbPlayers[lbMe.pid].total||0):0,lv:[100,200,500,1000,2000,5000,10000],
   tiers:[{name:'Centurio',icon:'⭐'},{name:'Tribunus',icon:'⭐'},{name:'Legatus',icon:'⭐'},{name:'Praefectus',icon:'⭐'},{name:'Imperator',icon:'⭐'},{name:'Consul',icon:'⭐'},{name:'Optimus',icon:'💎'}]},
  {id:'diesmagnus',icon:'☀️',name:'Dies Magnus',lat:'big day',desc:'Earn lots of ⭐ in a single day.',unit:'⭐ in a day',stat:()=>Math.max(bstat().bestDay||0,lbTodayPts()),lv:[50,100,200,300,500,750,1000]},
- {id:'constans',icon:'🔥',name:'Constans',lat:'steady',desc:'Reach your daily goal several days in a row.',unit:'day streak',stat:()=>Math.max(bstat().bestStreak||0,dailyStreak()),lv:[1,3,5,7,10,20,30]},
+ {id:'constans',icon:'🔥',name:'Constans',lat:'steady',desc:'Earn 20+ ⭐ on several days in a row.',unit:'day streak',stat:()=>Math.max(bstat().bestStreak||0,dailyStreak()),lv:[1,3,5,7,10,20,30]},
  {id:'matutinus',icon:'🌅',name:'Matutinus',lat:'early riser',desc:'Get a question right before 8 am.',stat:()=>bstat().early||0,lv:[1]},
  {id:'nocturnus',icon:'🦉',name:'Nocturnus',lat:'night owl',desc:'Get a question right after 8 pm.',stat:()=>bstat().late||0,lv:[1]},
  {id:'sineerrore',icon:'🎯',name:'Sine Errore',lat:'without error',desc:'Get questions right in a row (any type).',unit:'in a row',stat:()=>bstat().bestRun||0,lv:[10,20,30,50,100,200,300]},
- {id:'perfectus',icon:'💯',name:'Perfectus',desc:'Score 100% on a quiz of 50 or more questions.',stat:()=>bstat().perfect||0,lv:[1]},
+ {id:'perfectus',icon:'💯',name:'Perfectus',desc:'Get 50 questions right in a row.',stat:()=>bstat().perfect||0,lv:[1]},
  {id:'lexicon',icon:'📖',name:'Lexicon',desc:'See every word in the main list (word packs not included). New words make it harder, but once earned it stays.',stat:()=>lexStat('main','seen'),lv:[1]},
  {id:'lexiconmagnus',icon:'📚',name:'Lexicon Magnum',lat:'great dictionary',desc:'See every word in the main list and all word packs.',stat:()=>lexStat('all','seen'),lv:[1]},
  {id:'doctus',icon:'🎓',name:'Doctus',lat:'learned',desc:'Get every word in the main list right at least once.',stat:()=>lexStat('main','correct'),lv:[1]},
@@ -4864,12 +4865,12 @@ function bsave(){try{localStorage.setItem(BSTAT_KEY,JSON.stringify(bstat()));}ca
 function bump(k,n){const b=bstat();b[k]=(b[k]||0)+(n||1);bsave();badgeCheckSoon();}
 function lbTodayPts(){if(!lbMe)return 0;const me=lbPlayers[lbMe.pid]||{},k=lbKeys();return ((me.d||{})[k.d]||0)+lbPending;}
 // every answer (vocab, drills, sentences, parse, challenges)
-function badgeAnswer(ok){const b=bstat();sxAnswer(ok);b.lastAns={t:Date.now(),ok:!!ok};if(ok){b.correct=(b.correct||0)+1;b.run=(b.run||0)+1;if(b.run>(b.bestRun||0))b.bestRun=b.run;const h=new Date().getHours();if(h<8)b.early=(+b.early||0)+1;if(h>=20)b.late=(+b.late||0)+1;}else b.run=0;bsave();badgeCheckSoon();}
+function badgeAnswer(ok){try{alogAnswer(ok,window._ansW);}catch(e){}window._ansW=null;const b=bstat();sxAnswer(ok);b.lastAns={t:Date.now(),ok:!!ok};if(ok){b.correct=(b.correct||0)+1;b.run=(b.run||0)+1;if(b.run>(b.bestRun||0))b.bestRun=b.run;const h=new Date().getHours();if(h<8)b.early=(+b.early||0)+1;if(h>=20)b.late=(+b.late||0)+1;}else b.run=0;bsave();badgeCheckSoon();}
 function lexWords(scope){const main=[];Object.entries(DATA).forEach(([ck,c])=>{if(c.packOnly)return;Object.entries(c.sub).forEach(([sk,sub])=>sub.words.forEach(w=>{if(!(typeof customWords!=='undefined'&&customWords.some(x=>x.lat===w.lat&&x.catKey===ck)))main.push({...w,catKey:ck,subKey:sk});}));});
   if(scope==='main')return main;const seen=new Set(main.map(wKey)),all=[...main];WORD_PACKS.forEach(pk=>pk.words.forEach(w=>{if(!seen.has(wKey(w))){seen.add(wKey(w));all.push(w);}}));return all;}
 function lexStat(scope,what){const acc=accData();const ws=lexWords(scope);const ok=w=>{const k=wKey(w),a=acc[k],r=srData[k];return what==='seen'?((a&&a.s>0)||(r&&r.seen>0)):((a&&a.c>0)||(r&&r.correct>0));};
   return ws.length&&ws.every(ok)?1:0;}
-function lexProgress(scope,what){const acc=accData();const ws=lexWords(scope);let n=0;ws.forEach(w=>{const k=wKey(w),a=acc[k],r=srData[k];if(what==='seen'?((a&&a.s>0)||(r&&r.seen>0)):((a&&a.c>0)||(r&&r.correct>0)))n++;});return n+' / '+ws.length;}
+function lexProgress(scope,what){if(srvOn()){const c=wsCounts(),L=SRV.me||{};return (scope==='main'?(what==='seen'?+L.nsm||0:+L.nkm||0):(what==='seen'?+L.ns||0:+L.nk||0))+' / '+(scope==='main'?c.m:c.all);}const acc=accData();const ws=lexWords(scope);let n=0;ws.forEach(w=>{const k=wKey(w),a=acc[k],r=srData[k];if(what==='seen'?((a&&a.s>0)||(r&&r.seen>0)):((a&&a.c>0)||(r&&r.correct>0)))n++;});return n+' / '+ws.length;}
 // challenges: remember results locally (finished challenges can be deleted later)
 function duelStats(verOnly){const b=bstat();const res=b.duels||{};if(lbMe)Object.entries(duelsObj||{}).forEach(([id,d])=>{if(!d||!d.res||!d.res[d.from]||!d.res[d.to])return;if(d.from!==lbMe.pid&&d.to!==lbMe.pid)return;if(res[id])return;const w=duelWinner(d);res[id]={t:d.t||Date.now(),r:w===lbMe.pid?'w':w?'l':'d',o:d.from===lbMe.pid?d.to:d.from};b.duels=res;bsave();});
   Object.entries(res).forEach(([id,x])=>{const d=duelsObj&&duelsObj[id];if(x&&!x.o&&d&&lbMe){x.o=d.from===lbMe.pid?d.to:d.from;b.duels=res;bsave();}});
@@ -4943,7 +4944,7 @@ setInterval(()=>{if(document.visibilityState==='visible')try{badgeCheck();}catch
 function secretWipe(){try{const g=bjson(BADGE_KEY);let ch=false;
   Object.keys(g).forEach(k=>{const n=SX_OLDNAMES[_fnv(k)];if(n){if(!g[n]||g[k].l>g[n].l)g[n]=g[k];delete g[k];ch=true;}});
   if(ch){localStorage.setItem(BADGE_KEY,JSON.stringify(g));const pins=badgePins().map(x=>SX_OLDNAMES[_fnv(x)]||x).filter(id=>g[id]);localStorage.setItem(PIN_KEY,JSON.stringify(pins));}}catch(e){}}
-function badgeStatV(bd){let v=0;try{v=bd.stat();}catch(e){}if(bd.secret)return v;return Math.max(0,v-(+bstat()['base_'+bd.id]||0));}
+function badgeStatV(bd){if(!bd.secret&&srvOn())return srvProg(bd);let v=0;try{v=bd.stat();}catch(e){}if(bd.secret)return v;return Math.max(0,v-(+bstat()['base_'+bd.id]||0));}
 // the admin's give / take-away actions: each one is applied once per device (it can be earned back after a removal)
 function bgApply(got){let ch=false,done={};if(lbMe&&!lbPlayers[lbMe.pid])return false;   // wait until my points have loaded
   try{done=JSON.parse(localStorage.getItem('latin_bgdone')||'{}')||{};}catch(e){}
@@ -4962,10 +4963,12 @@ function badgeCheck(){secretWipe();try{verLoad();}catch(e){}const got=bjson(BADG
   // remember personal bests that the live data might forget
   b.bestDay=Math.max(b.bestDay||0,lbTodayPts());b.bestStreak=Math.max(b.bestStreak||0,dailyStreak());reactsTally();
   if(lbMe&&classChal&&+classChal.target&&isPublic(lbMe.pid)){const me=lbPlayers[lbMe.pid]||{};if(((me.w||{})[lbKeys().w]||0)>=500)b.civis=1;}bsave();
-  if(bgApply(got))changed=true;
-  BADGES.forEach(bd=>{const v=badgeStatV(bd);const l=badgeLevel(bd,v);const old=got[bd.id]?got[bd.id].l:0;
+  if(srvOn()){const lv=srvLevels(lbMe.pid);[...BADGES.filter(b=>!b.secret),...META_BADGES].forEach(bd=>{if(bd.meta==='count')return;const L=Math.min(lv[bd.id]||0,bd.lv.length),old=got[bd.id]?got[bd.id].l:0;
+      if(L!==old){if(L>old)fresh.push({bd,l:L,first:!old});if(L)got[bd.id]={l:L,t:got[bd.id]?got[bd.id].t:Date.now()};else delete got[bd.id];changed=true;}});}
+  if(!srvOn()&&bgApply(got))changed=true;
+  if(!srvOn())BADGES.forEach(bd=>{const v=badgeStatV(bd);const l=badgeLevel(bd,v);const old=got[bd.id]?got[bd.id].l:0;
     if(l>old){got[bd.id]={l,t:Date.now()};changed=true;fresh.push({bd,l,first:!old});}});
-  META_BADGES.forEach(bd=>{const v=metaValue(bd,got),old=got[bd.id]?got[bd.id].l:0;if(v>old){got[bd.id]={l:v,t:Date.now()};changed=true;if(bd.meta!=='count')fresh.push({bd,l:v,first:!old});else toast('🗝️ Arcana: '+v+' secret badge'+(v===1?'':'s')+' found!');}});
+  if(!srvOn())META_BADGES.forEach(bd=>{const v=metaValue(bd,got),old=got[bd.id]?got[bd.id].l:0;if(v>old){got[bd.id]={l:v,t:Date.now()};changed=true;if(bd.meta!=='count')fresh.push({bd,l:v,first:!old});else toast('🗝️ Arcana: '+v+' secret badge'+(v===1?'':'s')+' found!');}});
   // anything the server can check must match it: changes made only on this screen are undone
   if(lbMe&&lbPlayers[lbMe.pid]){const rb=badgeById('rank'),mx=badgeLevel(rb,Math.max(0,+lbPlayers[lbMe.pid].total||0)),base=+b['base_rank']||0,lim=badgeLevel(rb,Math.max(0,(+lbPlayers[lbMe.pid].total||0)-base));
     const cap=BGRANT&&BGRANT.rank&&+BGRANT.rank.l?Math.max(lim,+BGRANT.rank.l):mx;if(got.rank&&got.rank.l>cap){if(cap>0)got.rank.l=cap;else delete got.rank;changed=true;}}
@@ -5018,9 +5021,13 @@ function rankCap(list,pid){const p=lbPlayers[pid],rb=badgeById('rank');if(!p||!r
 // tag), Be Chester (name), secret badges and Arcana (server records). Every other badge is worked out in the player's own
 // browser, where it could be faked, so it stays personal (only they see it).
 const PUBLIC_BADGES=new Set(['rank','salve','socius','chester']);
-function badgePublicOk(id,pid){const b=badgeById(id);if(!b)return false;if(b.secret||b.meta==='count')return true;if(!PUBLIC_BADGES.has(id))return false;if(id==='socius')return !!(ATAG||{})[pid];if(id==='salve')return !!lbPlayers[pid];return true;}
-function feedPublicOk(e){if(lbMe&&pidMain(e.pid)===lbMe.pid)return true;if(e.b==='?')return true;if(!badgePublicOk(e.b,pidMain(e.pid)))return false;if(e.b==='rank'){const rb=badgeById('rank'),p=lbPlayers[pidMain(e.pid)];return !!p&&(+e.l||1)<=badgeLevel(rb,Math.max(0,+p.total||0));}return true;}
-function sxVerify(list,pid){if(!(lbMe&&pid===lbMe.pid)){list=rankCap(list,pid).filter(([id])=>badgePublicOk(id,pid));}const n=sxCountOf(pid);if(n==null)return list;const c=sxCounts[pid]||{g:0,old:new Set()};let left=c.g;
+function badgePublicOk(id,pid){const b=badgeById(id);if(!b)return false;if(b.secret||b.meta==='count')return true;if(!PUBLIC_BADGES.has(id))return false;if(id==='socius')return !!(ATAG||{})[pid];if(id==='salve')return !!lbPlayers[pid];if(id==='chester')return ((lbPlayers[pid]||{}).name)==='-Chester-';return true;}
+function feedPublicOk(e){if(lbMe&&pidMain(e.pid)===lbMe.pid)return true;if(e.b==='?')return true;
+  if(SRV.frozen){const pid=pidMain(e.pid),b=badgeById(e.b);if(!b)return false;if(!srvFetch(pid))return false;return (+e.l||1)<=(srvLevels(pid)[e.b]||0);}if(!badgePublicOk(e.b,pidMain(e.pid)))return false;if(e.b==='rank'){const rb=badgeById('rank'),p=lbPlayers[pidMain(e.pid)];return !!p&&(+e.l||1)<=badgeLevel(rb,Math.max(0,+p.total||0));}return true;}
+function sxVerify(list,pid){if(!(lbMe&&pid===lbMe.pid)){
+    if(SRV.frozen){if(!srvFetch(pid))list=list.filter(([id])=>{const b=badgeById(id);return b&&b.secret;});
+      else{const lv=srvLevels(pid);list=list.map(([id,l])=>{const b=badgeById(id);if(!b)return null;if(b.secret||b.meta==='count')return [id,l];return [id,Math.min(lv[id]||0,b.lv.length)];}).filter(x=>x&&x[1]>0);}}
+    else list=rankCap(list,pid).filter(([id])=>badgePublicOk(id,pid));}const n=sxCountOf(pid);if(n==null)return list;const c=sxCounts[pid]||{g:0,old:new Set()};let left=c.g;
   return list.filter(([id,l])=>{const b=badgeById(id);if(!b)return false;if(b.secret){if(c.old.has(id))return true;if(left<=0)return false;left--;return true;}if(b.meta==='all'||b.meta==='max')return n>=SX_IDS.length;if(b.meta==='name')return ((lbPlayers[pid]||{}).name)==='-Chester-';return true;})
     .map(([id,l])=>badgeById(id).meta==='count'?[id,Math.min(l,n)]:[id,l]).filter(([id,l])=>l>0);}
 function shownBadges(p,pid){if(pid)return sxVerify(shownBadges(p),pid);const seen={};String((p&&p.bd)||'').split(',').map(x=>x.split(':')).map(([id,l])=>OLD_RANK[id]!=null?['rank',String(oldRankLv(id,l))]:[id,l]).forEach(([id,l])=>{if(id&&(!seen[id]||+l>+seen[id]))seen[id]=l;});return Object.entries(seen).filter(([id,l])=>badgeById(id)&&+l>0).slice(0,MAX_PINS).map(([id,l])=>[id,badgeById(id).meta==='count'?+l:Math.min(+l,badgeById(id).lv.length)]);}
@@ -6870,6 +6877,92 @@ function exSubmit(){if(!exam||exam.res)return;const blank=exam.qs.filter((q,i)=>
   let stars=0;if(typeof lbMe!=='undefined'&&lbMe){stars=Math.round(starMarks*EXAM_STAR_X);if(stars>0){const s=quizNoPoints;quizNoPoints=false;try{lbCount(stars);lbExamPend+=stars;lbExamInfo={s:total,d:secs};}finally{quizNoPoints=s;}}}
   exam.res={marks,sec,total,secs,stars,fast};try{localStorage.removeItem(EXAM_KEY);const h=exHist();h.unshift({t:Date.now(),s:total,secs});localStorage.setItem(EXAM_HIST,JSON.stringify(h.slice(0,30)));sxTry('x|'+total);[...new Set(h.slice(1).map(x=>x.s))].forEach(p=>{if(p!==total)sxTry('xp|'+Math.min(p,total)+','+Math.max(p,total));});}catch(e){}
   exRender();window.scrollTo(0,0);}
+
+// ── SERVER BADGE RECORDS ─────────────────────────────────────────────────────
+// Every answer goes into a server-checked log (alog/{uid}: answers, correct, streaks, words seen / known, early / late,
+// at most one answer per 0.5 s; aw/{uid}: which words). Other records are tied to things the server can check (points
+// per day, chat messages, challenge results, reactions from members, a verified email). Badge levels everywhere come
+// from: the badges everyone had when this started (frozen by the admin: blegacy/{uid}) + server-checked progress +
+// the admin's give / remove actions. Nothing a player changes on their own screen counts.
+const akey=w=>w?String(wKey(w)).replace(/[.$#\[\]\/]/g,'_').slice(0,120):'_';
+var SRV={me:null,aw:null,ws:null,frozen:false,leg:{},log:{},gr:{},at:{}};
+let alogQ=[],alogBusy=false,alogLast=0,srvMeAt=0,srvExtrasBusy=false;
+async function srvLoadMe(){if(!playerAuth||!playerAuth.uid)return;const u=playerAuth.uid;
+  try{const [a,w,ws,lg,fz]=await Promise.all([fbReq('GET','alog/'+u),fbReq('GET','aw/'+u),SRV.ws?Promise.resolve(SRV.ws):fbReq('GET','wset'),fbReq('GET','blegacy/'+u),fbReq('GET','blegacy/_done')]);
+    SRV.me=a||{};SRV.aw=w||{};SRV.ws=ws||{};SRV.leg[u]=lg||{};SRV.frozen=!!fz;srvMeAt=Date.now();badgeCheckSoon();}catch(e){}}
+function srvOn(){return !!(SRV.frozen&&lbMe&&playerAuth&&lbMe.pid===playerAuth.uid&&SRV.me&&SRV.ws&&lbPlayers[lbMe.pid]);}
+function alogAnswer(ok,w){if(!playerAuth||!lbMe)return;alogQ.push({ok:!!ok,k:akey(w)});if(alogQ.length>300)alogQ.shift();alogPump();}
+async function alogPump(){if(alogBusy||!alogQ.length)return;alogBusy=true;
+  try{if(!SRV.me)await srvLoadMe();if(!SRV.me)return;
+    while(alogQ.length){const wait=520-(Date.now()-alogLast);if(wait>0)await new Promise(r=>setTimeout(r,wait));const q=alogQ[0];
+      let ok=await alogSend(q,true);if(!ok){await srvLoadMe();ok=await alogSend(q,false);}alogQ.shift();alogLast=Date.now();}}
+  finally{alogBusy=false;}}
+async function alogSend(q,withTime){const u=playerAuth.uid,L=SRV.me||{},AW=SRV.aw||{},ws=SRV.ws||{};let k=q.k;if(!ws[k])k='_';if(!ws[k])return true;   // word list not on the server yet
+  const n=x=>+L[x]||0,ci=q.ok,sNew=!(AW.s&&AW.s[k]),kNew=!(AW.k&&AW.k[k]),t=ws[k],run=ci?n('run')+1:0;
+  const v={a:n('a')+1,c:n('c')+(ci?1:0),run,best:Math.max(n('best'),run),lw:k,ns:n('ns')+(t!=='x'&&sNew?1:0),nsm:n('nsm')+(t==='m'&&sNew?1:0),nk:n('nk')+(ci&&t!=='x'&&kNew?1:0),nkm:n('nkm')+(ci&&t==='m'&&kNew?1:0),e:n('e'),n:n('n')};
+  if(withTime&&ci){const now=Date.now(),h10=(now+36e6)%864e5,h11=(now+396e5)%864e5;if(h10<288e5||h11<288e5)v.e++;if(h10>=72e6||h11>=72e6)v.n++;}
+  const P='alog/'+u+'/',body={};Object.entries(v).forEach(([x,y])=>{body[P+x]=y;});body[P+'lt']={'.sv':'timestamp'};body['aw/'+u+'/s/'+k]=true;if(ci)body['aw/'+u+'/k/'+k]=true;
+  try{await fbReq('PATCH','',body);Object.assign(L,v);SRV.me=L;AW.s=AW.s||{};AW.s[k]=true;if(ci){AW.k=AW.k||{};AW.k[k]=true;}SRV.aw=AW;badgeCheckSoon();return true;}catch(e){return false;}}
+async function srvPut(path,val){try{await fbReq('PUT','alog/'+playerAuth.uid+'/'+path,val);return true;}catch(e){return false;}}
+// records that come from other server data: best day, days with 20+ ⭐, chat, email, class challenge, challenges, reactions
+async function srvExtras(){if(srvExtrasBusy||!lbMe||!SRV.me||!playerAuth||lbMe.pid!==playerAuth.uid)return;srvExtrasBusy=true;
+  try{const L=SRV.me,u=playerAuth.uid,me=lbPlayers[u]||{},k=lbKeys(),dv=(me.d||{})[k.d]||0,mem=x=>isPublic(x)&&x!==ADMIN_UID||x===ADMIN_UID;
+    if(dv>(+L.bd||0)){try{await fbReq('PATCH','alog/'+u,{bd:dv,bdk:k.d});L.bd=dv;L.bdk=k.d;}catch(e){}}
+    if(dv>=20&&!(L.dd&&L.dd[k.d])&&await srvPut('dd/'+k.d,true)){L.dd=L.dd||{};L.dd[k.d]=true;}
+    if(!L.ins&&tokVerified()&&await srvPut('ins',true))L.ins=true;
+    if(!L.civ&&classChal&&+classChal.target&&((me.w||{})[k.w]||0)>=500&&await srvPut('civ',k.w))L.civ=k.w;
+    for(const [id,d] of Object.entries(duelsObj||{})){if(!d||(d.from!==u&&d.to!==u))continue;const op=d.from===u?d.to:d.from;if(!mem(op))continue;
+      if(d.from===u&&!(L.rv&&L.rv[op])&&await srvPut('rv/'+op,id)){L.rv=L.rv||{};L.rv[op]=id;}
+      if(d.res&&d.res[u]&&d.res[op]&&!(L.dr&&L.dr[id])){const w=duelWinner(d),r=w===u?'w':w?'l':'d';if(await srvPut('dr/'+id,r)){L.dr=L.dr||{};L.dr[id]=r;}}}
+    const AW=SRV.aw=SRV.aw||{};for(const [mid,m] of Object.entries(chatObj||{})){if(!m||m.pid!==u||!m.rx)continue;
+      for(const [e,who] of Object.entries(m.rx))for(const r of Object.keys(who||{})){if(r===u||!mem(r)||(AW.rx&&AW.rx[mid]&&AW.rx[mid][r]))continue;
+        const n=(+L.nrx||0)+1;try{await fbReq('PATCH','',{['alog/'+u+'/nrx']:n,['alog/'+u+'/lrm']:mid,['alog/'+u+'/lrr']:r,['aw/'+u+'/rx/'+mid+'/'+r]:e});L.nrx=n;AW.rx=AW.rx||{};AW.rx[mid]=AW.rx[mid]||{};AW.rx[mid][r]=e;}catch(x){}}}}
+  finally{srvExtrasBusy=false;}}
+function constansOf(dd){let best=0,cur=0,prev=null;Object.keys(dd||{}).sort().forEach(k=>{const t=Date.parse(k+'T00:00:00Z');cur=(prev!=null&&t-prev===864e5)?cur+1:1;prev=t;best=Math.max(best,cur);});return best;}
+function duelRuns(dr){let w=0,run=0,best=0;Object.keys(dr||{}).sort().forEach(k=>{if(dr[k]==='w'){w++;run++;best=Math.max(best,run);}else run=0;});return {w,best};}
+function wsCounts(){let m=0,all=0;Object.values(SRV.ws||{}).forEach(t=>{if(t==='m'){m++;all++;}else if(t==='p')all++;});return {m,all};}
+// the numbers behind each badge, from one account's server log
+function srvNums(L,p){const c=wsCounts(),dr=duelRuns(L.dr);return {salve:p&&p.name?1:0,primus:+L.c||0,scriptor:L.sc?1:0,rank:Math.max(0,+(p&&p.total)||0),diesmagnus:+L.bd||0,constans:constansOf(L.dd),
+  matutinus:+L.e||0,nocturnus:+L.n||0,sineerrore:+L.best||0,perfectus:(+L.best||0)>=50?1:0,
+  lexicon:c.m&&(+L.nsm||0)>=c.m?1:0,lexiconmagnus:c.all&&(+L.ns||0)>=c.all?1:0,doctus:c.m&&(+L.nkm||0)>=c.m?1:0,doctissimus:c.all&&(+L.nk||0)>=c.all?1:0,
+  gladiator:dr.w,victor:dr.w,invictus:dr.best,rival:Object.keys(L.rv||{}).length,popularis:+L.nrx||0,civis:L.civ?1:0};}
+// levels before the admin's actions (frozen badges + server-checked progress, over this account and any merged into it)
+function srvBase(pid){const me=lbMe&&pid===lbMe.pid,p=lbPlayers[pid],ids=[pid,...Object.keys(MTO||{}).filter(s=>MTO[s]===pid)],res={};
+  ids.forEach((u,i)=>{const L=me&&i===0?(SRV.me||{}):(SRV.log[u]||{}),nums=srvNums(L,p),leg=SRV.leg[u]||{};
+    BADGES.forEach(b=>{if(b.secret)return;const lv=badgeLevel(b,nums[b.id]||0);res[b.id]=Math.max(res[b.id]||0,lv,b.id==='rank'?0:Math.min(+leg[b.id]||0,b.lv.length));});
+    ['fereomnia','omnia','omniamax','inscriptus'].forEach(id=>{res['leg_'+id]=Math.max(res['leg_'+id]||0,+leg[id]||0);});if(L.ins)res.inscriptus=1;});
+  res.rank=badgeLevel(badgeById('rank'),Math.max(0,+(p&&p.total)||0));res.salve=p&&p.name?1:0;res.socius=(ATAG||{})[pid]?1:0;res.chester=p&&p.name==='-Chester-'?1:0;return res;}
+function srvLevels(pid){const me=lbMe&&pid===lbMe.pid,res=srvBase(pid),gr=me?(BGRANT||{}):(SRV.gr[pid]||{});
+  Object.entries(gr).forEach(([id,o])=>{const b=badgeById(id);if(!b||b.secret||!o||b.meta==='count'||id==='chester')return;const L=Math.min(+o.l||0,b.lv.length),base=o.base==null?Infinity:+o.base,raw=res[id]||0;res[id]=raw>base?Math.max(raw,L):L;});
+  const ns=BADGES.filter(b=>!b.secret),sc=me?(sxServer?sxServer.size:BADGES.filter(b=>b.secret&&bjson(BADGE_KEY)[b.id]).length):(sxCountOf(pid)||0),all=sc>=SX_IDS.length;
+  const got=ns.every(b=>(res[b.id]||0)>=1),max=ns.every(b=>(res[b.id]||0)>=b.lv.length);
+  res.fereomnia=Math.max(got?1:0,res.leg_fereomnia||0);res.omnia=Math.max(got&&all?1:0,res.leg_omnia||0);res.omniamax=Math.max(max&&all?1:0,res.leg_omniamax||0);res.arcana=sc;res.inscriptus=res.inscriptus||0;
+  ['fereomnia','omnia','omniamax','inscriptus'].forEach(id=>{const o=gr[id];if(o){const L=+o.l||0,base=o.base==null?Infinity:+o.base;res[id]=res[id]>base?Math.max(res[id],L):L;}});return res;}
+// other players' server records (cached a few minutes)
+const srvPend=new Set();
+function srvFetch(pid,force){const t=SRV.at[pid];if(!force&&t&&Date.now()-t<180000)return true;if(srvPend.has(pid)||!playerAuth)return !!t;srvFetchP(pid);return !!t;}
+const srvPromises={};
+function srvFetchP(pid){if(srvPromises[pid])return srvPromises[pid];srvPend.add(pid);
+  const ids=[pid,...Object.keys(MTO||{}).filter(s=>MTO[s]===pid)];
+  return srvPromises[pid]=(async()=>{try{if(!SRV.ws)SRV.ws=(await fbReq('GET','wset'))||{};if(!SRV.frozen)SRV.frozen=!!(await fbReq('GET','blegacy/_done'));
+    await Promise.all(ids.map(async u=>{const [a,l]=await Promise.all([fbReq('GET','alog/'+u).catch(()=>null),fbReq('GET','blegacy/'+u).catch(()=>null)]);SRV.log[u]=a||{};SRV.leg[u]=l||{};}));
+    SRV.gr[pid]=(await fbReq('GET','bgrant/'+pid).catch(()=>null))||{};SRV.at[pid]=Date.now();}catch(e){}
+    srvPend.delete(pid);delete srvPromises[pid];try{renderLb();renderChat();renderFeedBits();renderBadgeFeed();}catch(e){}})();}
+// numbers shown under each badge ("Next: 12 / 20") come from the server too
+function srvProg(bd){const L=SRV.me||{},p=lbPlayers[lbMe.pid];return (srvNums(L,p)[bd.id])||0;}
+// admin: freeze everyone's current badges (once), and keep the server's word list in step with the app
+async function srvAdminSetup(){if(!isAdmin)return;try{
+    const want={'_':'x'};lexWords('main').forEach(w=>{want[akey(w)]='m';});lexWords('all').forEach(w=>{const k=akey(w);if(!want[k])want[k]='p';});
+    const have=(await fbReq('GET','wset',null,{admin:true}))||{};const diff={};Object.entries(want).forEach(([k,v])=>{if(have[k]!==v)diff[k]=v;});
+    if(Object.keys(diff).length)await fbReq('PATCH','wset',diff,{admin:true});SRV.ws={...have,...diff};
+    if(await fbReq('GET','blegacy/_done',null,{admin:true}))return;
+    const pids=Object.keys(lbPlayers);let n=0;toast('Saving everyone’s current badges on the server… (once)');
+    for(const pid of pids){const p=lbPlayers[pid]||{},lv={};try{const r=await fbReq('GET','progress/'+pid,null,{admin:true});const g=r&&typeof r.d==='string'?(JSON.parse(r.d).badges||{}):{};Object.entries(g).forEach(([id,o])=>{const b=badgeById(id);if(b&&!b.secret&&b.meta!=='count'&&id!=='chester'&&id!=='rank'&&o&&+o.l>0)lv[id]=Math.min(+o.l,b.lv.length);});}catch(e){}
+      String(p.bd||'').split(',').map(x=>x.split(':')).forEach(([id,l])=>{const b=badgeById(id);if(b&&!b.secret&&b.meta!=='count'&&id!=='chester'&&id!=='rank'&&+l>0)lv[id]=Math.max(lv[id]||0,Math.min(+l,b.lv.length));});
+      if(Object.keys(lv).length){try{await fbReq('PUT','blegacy/'+pid,lv,{admin:true});n++;}catch(e){}}}
+    await fbReq('PUT','blegacy/_done',{'.sv':'timestamp'},{admin:true});SRV.frozen=true;toast('✓ Saved the current badges of '+n+' players. From now on badges are checked by the server.');}
+  catch(e){toast('Couldn’t set up server badges ('+e.message+'). Publish the latest database rules, then log in again.');}}
+setInterval(()=>{try{if(lbMe&&Date.now()-srvMeAt>120000)srvLoadMe();srvExtras();}catch(e){}},15000);setTimeout(()=>{try{srvLoadMe();}catch(e){}},2500);
 
 // quiz side effects must never block moving to the next question
 ['updateSR','updScorePill','updPct','playTone','saveResumeSoon','saveResume','dailyTick'].forEach(n=>{const f=window[n];if(typeof f!=='function')return;window[n]=function(){try{return f.apply(this,arguments);}catch(e){reportErr(e,n);}};});
