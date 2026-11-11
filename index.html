@@ -4061,7 +4061,7 @@ function startAttempt(){quizNoPoints=false;const n=isDrill?drillQs.length:quizWo
   const d=lbKeys().d;let st;try{st=JSON.parse(localStorage.getItem(ATTEMPTS_KEY)||'null');}catch(e){}if(!st||st.d!==d)st={d,c:{}};
   const sig=quizSig();st.c[sig]=(st.c[sig]||0)+1;try{localStorage.setItem(ATTEMPTS_KEY,JSON.stringify(st));}catch(e){}
   if(st.c[sig]>=3){quizNoPoints=true;if(lbMe)toast('You’ve done this short quiz 3 times today, so it won’t earn leaderboard points now.');}}
-function lbCount(n){try{badgeCheckSoon();}catch(e){}n=n||1;if(!lbMe)return;
+function lbCount(n){try{badgeCheckSoon();}catch(e){}n=Math.round(+n||1);if(n<1||!lbMe)return;   // whole stars only (the server refuses anything else)
   if(quizNoPoints){const pill=document.getElementById('pointsPill');if(pill){pill.textContent='⭐ no points: quiz repeated';pill.classList.add('dim');clearTimeout(ptsNoteTimer);ptsNoteTimer=setTimeout(()=>{pill.classList.remove('dim');lbUpdatePoints();},1400);}return;}
   lbPending+=n;lbUpdatePoints(true);renderLb();if(!lbFlushTimer)lbFlushTimer=setTimeout(()=>lbFlush(),8000);}
 let lbLastOk=0,lbExamPend=0,lbExamInfo=null;
