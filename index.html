@@ -4850,7 +4850,7 @@ function badgeFeedText(e){if(!lbPlayers[e.pid]&&MTO[e.pid])e={...e,pid:pidMain(e
   const bd=BADGES.find(x=>x.id===e.b)||META_BADGES.find(x=>x.id===e.b);if(!bd)return null;
   const l=+e.l||1,nm=bd.meta?bd.name:badgeTierName(bd,l);return {name,what:(l>1&&!bd.meta?'reached ':'earned ')+nm,art:bd.meta?badgeArt(bd.id,1,1,{meta:true,size:30}):bdArt(bd,l,30)};}
 async function loadBadgeFeed(force){if(!force&&Date.now()-bfeedAt<20000)return renderBadgeFeed();const box=document.getElementById('bfeedList');if(box&&!bfeed.length)box.innerHTML='<p class="bfeed-empty">Loading…</p>';
-  try{const r=await fbReq('GET','bfeed',null,{query:'?orderBy=%22$key%22&limitToLast=80'});bfeed=Object.entries(r||{}).map(([id,v])=>({id,...v})).filter(v=>v&&v.pid&&v.b).sort((a,b)=>(b.t||0)-(a.t||0));bfeedAt=Date.now();}
+  try{const r=await fbReq('GET','bfeed',null,{query:'?orderBy=%22$key%22&limitToLast=80'});bfeed=Object.entries(safeKeys(r)).map(([id,v])=>({id,...v})).filter(v=>v&&v.pid&&v.b).sort((a,b)=>(b.t||0)-(a.t||0));bfeedAt=Date.now();}
   catch(e){if(box)box.innerHTML='<p class="bfeed-empty">Couldn’t load the badge feed'+(/40[13]/.test(e.message)?' (the database rules need updating).':'. Check your internet.')+'</p>';return;}renderBadgeFeed();}
 const BF_SEEN='latin_bfeed_seen';
 function bfeedSeen(){try{return +localStorage.getItem(BF_SEEN)||0;}catch(e){return 0;}}
@@ -5056,7 +5056,7 @@ async function pollShared(){if(pollBusy)return;pollBusy=true;
     if(mu!==undefined)mutedSet=new Set(Object.keys(mu||{}));if(lh!==undefined)lbHidden=new Set(Object.keys(lh||{}));
     if(setsKey()!==before){renderLb();renderChat();try{renderOnline();}catch(e){}}
     if(lbMe){const pr=await fbReq('GET','prem/'+lbMe.pid).catch(()=>undefined);if(pr!==undefined&&!!pr!==premMe){premMe=!!pr;renderLbProfile();if(premMe)sxPremClaim();if(document.getElementById('lookOverlay').style.display==='flex')renderLook();}}
-    if(d!==undefined){duelsObj=d||{};updDuelBtn();if(document.getElementById('duelInboxOverlay').style.display==='flex')renderDuelInbox();}
+    if(d!==undefined){duelsObj=safeKeys(d);updDuelBtn();if(document.getElementById('duelInboxOverlay').style.display==='flex')renderDuelInbox();}
     if(c!==undefined){classChal=c&&c.target?c:null;renderClassChallenge();}}
   finally{pollBusy=false;}}
 // ── HEAD-TO-HEAD CHALLENGES ──────────────────────────────────────────────────
@@ -5140,7 +5140,7 @@ loadLbMe().then(()=>{
   // kept to two per tab (leaderboard + chat).
   pollShared();setInterval(()=>{if(document.visibilityState==='visible')pollShared();},15000);
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')pollShared();});
-  fbStream('chat','orderBy=%22$key%22&limitToLast=100',(path,data,isPatch)=>{chatObj=applyAt(chatObj,path,data,isPatch);chatLoaded=true;
+  fbStream('chat','orderBy=%22$key%22&limitToLast=100',(path,data,isPatch)=>{chatObj=safeKeys(applyAt(chatObj,path,data,isPatch));chatLoaded=true;
     chatMsgs=Object.entries(chatObj).map(([id,m])=>({id,...m})).sort((a,b)=>a.id<b.id?-1:1);renderChat();},
     ()=>{if(!chatLoaded)document.getElementById('chatList').innerHTML='<div class="lb-empty">Couldn’t load the chat. Check your internet connection.</div>';});
 });
@@ -5227,7 +5227,10 @@ function allWordsFlat(){const out=[];Object.entries(DATA).forEach(([ck,cat])=>Ob
 function dailyBoxesOf(w){return (typeof ALL_DAILY!=='undefined'?ALL_DAILY:[]).filter(d=>d.words.some(x=>x.lat===w.lat)).map(d=>d.label);}
 function searchWords(q){q=q.toLowerCase().trim();if(!q)return [];const sc=w=>{const l=w.lat.toLowerCase();const e=w.eng.map(x=>String(x).toLowerCase().replace(/[()]/g,''));if(l===q||e.includes(q))return 0;if(l.startsWith(q)||e.some(x=>x.startsWith(q)))return 1;if(l.includes(q))return 2;if(e.some(x=>x.includes(q)))return 3;if(w.gen&&w.gen.toLowerCase().includes(q))return 4;return 9;};
   return allWordsFlat().map(w=>({w,s:sc(w)})).filter(x=>x.s<9).sort((a,b)=>a.s-b.s||a.w.lat.localeCompare(b.w.lat)).map(x=>x.w);}
-function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+// ids made by players (challenges, chat, feed) must look like normal database ids; anything else is ignored, so an id
+// full of quotes and brackets can't sneak code into a button
+const SAFE_ID=/^[-A-Za-z0-9_]{1,40}$/;function safeKeys(o){const r={};Object.entries(o||{}).forEach(([k,v])=>{if(SAFE_ID.test(k))r[k]=v;});return r;}
 function toggleStarOnly(){wdStarOnly=!wdStarOnly;const b=document.getElementById('wdStarBtn');if(b)b.classList.toggle('on',wdStarOnly);renderWordList();}
 function wdRowHTML(w,i,extraTag){const r=getSR(w);const due=isDue(w);const st=isStarred(w);
   return '<div class="word-row clickable" onclick="openRow('+i+')"><div style="display:flex;align-items:flex-start;gap:8px"><div style="flex:1;min-width:0"><div class="word-row-lat">'+esc(fullLat(w))+(extraTag||'')+'</div><div class="word-row-eng">'+esc(displayEng(w))+'</div></div><button class="row-star'+(st?' on':'')+'" title="Mark as hard" onclick="event.stopPropagation();starRow('+i+')">'+(st?'★':'☆')+'</button></div><div class="word-row-meta">'+esc(DATA[w.catKey]?catSubLabel(w):'daily')+'</div>'+(r.seen>0?'<div class="word-row-sr" style="color:'+(due?'var(--gold)':'var(--green)')+'">SR: '+r.seen+' seen · '+Math.round(r.correct/r.seen*100)+'% · '+(due?'due now':'interval '+r.interval+'d')+'</div>':'')+'</div>';}
