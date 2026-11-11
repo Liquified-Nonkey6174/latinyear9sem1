@@ -762,7 +762,7 @@ body:has(.overlay[style*="display: flex"]) .side-fab,body:has(#bReveal[style*="d
         <button class="btn-primary" style="font-size:12px;padding:6px 16px" onclick="saveDesc()">Save</button>
         <button class="btn-secondary" style="font-size:12px;padding:6px 14px" onclick="cancelDescEdit()">Cancel</button>
       </div>
-      <div style="margin-top:8px"><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="annEdit()">📢 Edit announcement</button><label class="btn-secondary" style="font-size:12px;padding:6px 14px;cursor:pointer;display:inline-block">🔒 Upload secret badge answers<input type="file" accept=".json" style="display:none" onchange="if(this.files[0])sxUpload(this.files[0]);this.value=''"></label></div>
+      <div style="margin-top:8px"><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="annEdit()">📢 Edit announcement</button><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="rulesCheck()" title="Find out whether the rules published in Firebase are up to date">🔍 Check database rules</button><label class="btn-secondary" style="font-size:12px;padding:6px 14px;cursor:pointer;display:inline-block">🔒 Upload secret badge answers<input type="file" accept=".json" style="display:none" onchange="if(this.files[0])sxUpload(this.files[0]);this.value=''"></label></div>
     </div>
   </div>
   <div class="settings-row"><button class="settings-btn" onclick="showSettings()">⚙ Settings</button> <button class="settings-btn" id="acctBtn" onclick="acctHub()" title="Sign in, or use your account on other devices">👤 Account</button> <button class="settings-btn" onclick="openBadges()">🏅 Badges <span id="badgeBtnCount" style="opacity:.7;font-size:12px"></span><span class="bf-dot" id="badgeBtnDot" title="New in the badge feed"></span></button></div>
@@ -4212,7 +4212,7 @@ async function lbAdminEdit(pid,name,cur){const per=lbPeriod,label=LB_PERIOD_NAME
   order.forEach((x,j)=>{if(j===i)val[x]=n;else if(j>i)val[x]=val[x]+delta;});
   for(let j=order.length-2;j>=0;j--)val[order[j]]=Math.min(val[order[j]],val[order[j+1]]);   // smaller periods never exceed bigger ones
   const body={total:val.all,['d/'+k.d]:val.d,['w/'+k.w]:val.w,['m/'+k.m]:val.m};
-  try{await fbReq('PATCH','players/'+pid,body,{admin:true});}catch(e){alert('Couldn’t save: '+e.message);}}
+  try{await fbReq('PATCH','players/'+pid,body,{admin:true});toast('Saved: '+name+' → '+n.toLocaleString()+' ('+label+').');}catch(e){alert('Couldn’t save '+name+'’s score ('+e.message+').'+(/40[13]/.test(e.message)?'\n\nYour live database rules are probably out of date (old rules don’t allow negative scores). Press “🔍 Check database rules”.':''));}}
 function lbStreamFail(){if(!lbPlayersLoaded)document.getElementById('lbList').innerHTML='<div class="lb-empty">Couldn’t load the leaderboard. Check your internet connection.</div>';}
 
 // Looks: avatar + name colour, shown on the leaderboard and in chat
@@ -4380,6 +4380,10 @@ async function showPointsHistory(pid,box){box.innerHTML='<p class="muted">Loadin
   box.innerHTML=h+'</table></div><p class="muted" style="font-size:11.5px">⚠ = 5+ answers at under 1 second each (what an autoclicker looks like), points coming in faster than 2.5 a second, or far more ⭐ than the answers in that save can give. Answer details are recorded from now on; older saves show “–”. 📝 exam = ⭐ from an exam (5 per mark, never more than one per second spent on the paper); a big award arrives over several saves. 🔀 = another account was merged into this one (its points were added).</p>';}
 // admin: see a player's badges (from their cloud save) and give / take them away. An override sets the badge to exactly
 // that level (0 = removed) until it's set back to "auto"; the player's app applies it next time it checks.
+// which version of database.rules.json is live? Each check is a harmless read that only works with a given update.
+async function rulesCheck(){const T=[['Secret badges: admin give / take away (11 Nov)','sx/key'],['Verified players (11 Nov)','ver'],['Account merging (10 Nov)','mlog'],['Points history + negative scores (9 Nov)','plog']];const out=[];let ok=0;
+  for(const [label,path] of T){let r;try{await fbReq('GET',path,null,{admin:true,query:'?shallow=true'});r=true;ok++;}catch(e){r=/40[13]/.test(e.message)?false:null;}out.push((r?'✔ ':r===false?'✖ ':'? ')+label);}
+  alert((ok===T.length?'✔ Your live database rules are up to date.':'✖ Your live database rules are OLD. Publish the latest database.rules.json (Firebase → Realtime Database → Rules → paste it all → Publish).')+'\n\n'+out.join('\n')+(out.some(x=>x[0]==='?')?'\n\n? = couldn’t check (offline?)':''));}
 async function adminBadges(pid,box){box.innerHTML='<p class="muted">Loading…</p>';let prog=null,gr={},keys={},sgot={},sold='';const SN={};
   try{const r=await fbReq('GET','progress/'+pid,null,{admin:true});if(r&&typeof r.d==='string')prog=JSON.parse(r.d);}catch(e){}
   try{gr=(await fbReq('GET','bgrant/'+pid,null,{admin:true}))||{};}catch(e){box.innerHTML='<p class="muted">Couldn’t load: the database rules may need updating.</p>';return;}
