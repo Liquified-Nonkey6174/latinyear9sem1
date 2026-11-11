@@ -4854,13 +4854,16 @@ function secretWipe(){try{const g=bjson(BADGE_KEY);let ch=false;
   if(ch){localStorage.setItem(BADGE_KEY,JSON.stringify(g));const pins=badgePins().map(x=>SX_OLDNAMES[_fnv(x)]||x).filter(id=>g[id]);localStorage.setItem(PIN_KEY,JSON.stringify(pins));}}catch(e){}}
 function badgeStatV(bd){let v=0;try{v=bd.stat();}catch(e){}if(bd.secret)return v;return Math.max(0,v-(+bstat()['base_'+bd.id]||0));}
 // the admin's give / take-away actions: each one is applied once per device (it can be earned back after a removal)
-function bgApply(got){let ch=false,done={};try{done=JSON.parse(localStorage.getItem('latin_bgdone')||'{}')||{};}catch(e){}
+function bgApply(got){let ch=false,done={};if(lbMe&&!lbPlayers[lbMe.pid])return false;   // wait until my points have loaded
+  try{done=JSON.parse(localStorage.getItem('latin_bgdone')||'{}')||{};}catch(e){}
   Object.entries(BGRANT||{}).forEach(([id,o])=>{if(!o||done[id]===o.t)return;const bd=badgeById(id);if(!bd)return;done[id]=o.t;const L=Math.max(0,Math.min(+o.l||0,bd.lv.length)),cur=got[id];
     if(L===0){if(cur&&!(cur.t>(o.t||0)+60000)){delete got[id];ch=true;}
       if(bd.secret){if(sxCfg[id]){delete sxCfg[id];try{localStorage.setItem(SX_CACHE,JSON.stringify(sxCfg));}catch(e){}sxArt();}sxTried.clear();}
       else{const b=bstat();let v=0;try{v=bd.stat();}catch(e){}b['base_'+id]=v;bsave();}
       try{const pins=badgePins();if(pins.includes(id))localStorage.setItem(PIN_KEY,JSON.stringify(pins.filter(x=>x!==id)));}catch(e){}}
-    else{if(!cur||cur.l!==L){got[id]={l:L,t:Date.now()};ch=true;}if(bd.secret)setTimeout(()=>{try{sxSync();}catch(e){}},0);}});
+    else{if(!cur||cur.l!==L){got[id]={l:L,t:Date.now()};ch=true;}if(bd.secret)setTimeout(()=>{try{sxSync();}catch(e){}},0);
+      // set lower than their progress would give: move the starting point so progress counts as exactly this level (they can climb again)
+      else if(badgeLevel(bd,badgeStatV(bd))>L){const b=bstat();let v=0;try{v=bd.stat();}catch(e){}b['base_'+id]=Math.max(0,v-bd.lv[L-1]);bsave();}}});
   try{localStorage.setItem('latin_bgdone',JSON.stringify(done));}catch(e){}return ch;}
 function badgeCheck(){secretWipe();try{verLoad();}catch(e){}const got=bjson(BADGE_KEY);let changed=false;const b=bstat();const fresh=[];
   {let lv=0,t0=0;Object.keys(OLD_RANK).forEach(k=>{if(got[k]){lv=Math.max(lv,oldRankLv(k,got[k].l));t0=t0?Math.min(t0,got[k].t||t0):got[k].t||0;delete got[k];changed=true;}});if(lv&&(!got.rank||got.rank.l<lv))got.rank={l:lv,t:got.rank?got.rank.t:(t0||Date.now())};
