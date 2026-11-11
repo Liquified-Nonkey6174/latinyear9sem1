@@ -389,6 +389,7 @@ input[type=range]{flex:1;accent-color:var(--accent)}
 .lb-pts{color:var(--gold);font-weight:600}
 .lb-link{background:none;border:none;font-family:var(--sans);font-size:12px;color:var(--accent);cursor:pointer;padding:2px 4px;text-decoration:underline;text-underline-offset:2px}
 .lb-link.muted{color:var(--text3)}
+.atag{font-family:var(--sans);font-size:10.5px;font-weight:600;color:var(--bg);background:var(--accent);border-radius:999px;padding:1px 7px;margin-left:5px;vertical-align:middle;white-space:nowrap}
 .pc-ver{text-align:center;font-size:12px;color:var(--green);margin:-4px 0 8px;font-family:var(--sans)}
 .lb-msg{font-size:12px;margin-top:6px}
 .lb-msg:empty{display:none}
@@ -3624,7 +3625,7 @@ async function checkAdminAuth(){
   try{
     const a=authFrom(await authPost('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword',{email:u,password:p,returnSecureToken:true}));
     if(a.uid!==ADMIN_UID){err.textContent='That account isn’t the admin.';return;}
-    adminAuth=a;isAdmin=true;hideAdminModal();startDescEdit();
+    adminAuth=a;isAdmin=true;hideAdminModal();startDescEdit();setTimeout(()=>atagLoad(),0);
     renderLb();renderChat();
   }catch(e){err.textContent=/TOO_MANY/.test(e.message)?'Too many attempts. Wait a few minutes and try again.':/INVALID|EMAIL|PASSWORD|USER_DISABLED/.test(e.message)?'Incorrect email or password.':'Couldn’t reach the server. Check your internet.';}
   finally{btn.disabled=false;}
@@ -4305,7 +4306,13 @@ async function adminCodes(box){const w=document.createElement('div');w.className
 function applyNameFont(el,f){const nf=NAME_FONTS[f];if(!nf)return;loadNameFonts();el.style.fontFamily=nf[1];if(nf[2]!==1)el.style.fontSize=nf[2]+'em';}
 function nameEl(pid,name){pid=pidMain(pid);const p=lbPlayers[pid]||{};const s=document.createElement('span');s.className='pname';
   if(p.av&&AVATARS.includes(p.av)){const a=document.createElement('span');a.className='pav';a.textContent=p.av;s.appendChild(a);}
-  const n=document.createElement('span');n.textContent=name;applyNameColor(n,p.color);applyNameFont(n,p.font);applyNameFx(n,p.fx,name);fixGradName(n,p.color,p.font);if(NAME_FX[p.fx])s.classList.add('has-fx');s.appendChild(n);return s;}
+  const n=document.createElement('span');n.textContent=name;applyNameColor(n,p.color);applyNameFont(n,p.font);applyNameFx(n,p.fx,name);fixGradName(n,p.color,p.font);if(NAME_FX[p.fx])s.classList.add('has-fx');s.appendChild(n);
+  if(isAdmin&&ATAG[pid]){const t=document.createElement('span');t.className='atag';t.textContent=ATAG[pid];t.title='Your private tag (only the admin sees it)';s.appendChild(t);}return s;}
+// admin-only private tags ("who is this?"), stored at atag/{uid}; only the admin can read or write them
+let ATAG={};async function atagLoad(){if(!isAdmin)return;try{ATAG=(await fbReq('GET','atag',null,{admin:true}))||{};}catch(e){ATAG={};}try{renderLb();renderChat();renderBadgeFeed();}catch(e){}}
+async function atagEdit(pid,name){const v=prompt('Private tag for '+name+' (only you see it, e.g. their real name). Leave empty to remove:',ATAG[pid]||'');if(v===null)return;const t=v.trim().slice(0,40);
+  try{await fbReq(t?'PUT':'DELETE','atag/'+pid,t||null,{admin:true});if(t)ATAG[pid]=t;else delete ATAG[pid];toast(t?'Tag saved.':'Tag removed.');try{renderLb();renderChat();}catch(e){}openPlayerCard(pid);}
+  catch(e){alert('Couldn’t save the tag ('+e.message+').'+(/40[13]/.test(e.message)?'\n\nPublish the latest database rules first.':''));}}
 // ── ANNOUNCEMENT: written by the admin, pops up each time the site is opened ──
 const ANN_HIDE='latin_ann_hidden';let annCur=null;
 function annFormat(t){return esc(t).replace(/\*\*([^*\n]+)\*\*/g,'<b>$1</b>');}
@@ -4417,6 +4424,7 @@ function openPlayerCard(pid){const p=lbPlayers[pid];if(!p)return;const k=lbKeys(
     const vb=document.createElement('button');vb.className='btn-secondary';vb.style.margin='0 0 8px 6px';const setV=()=>{vb.textContent=isVer(pid)?'✔ Verified (unverify)':'Verify player';vb.title='Verified players count as opponents / reactors for badges. Only verify real students.';};setV();
     vb.onclick=async()=>{vb.disabled=true;const on=!isVer(pid);try{await fbReq(on?'PUT':'DELETE','ver/'+pid,on?true:null,{admin:true});if(on)VER[pid]=true;else delete VER[pid];}catch(e){toast('Couldn’t change it: '+(/40[13]/.test(e.message)?'the database rules need updating.':e.message));}vb.disabled=false;setV();};box.insertBefore(vb,hist);
     const bb=document.createElement('button');bb.className='btn-secondary';bb.style.margin='0 0 8px 6px';bb.textContent='🏅 Badges';bb.onclick=()=>adminBadges(pid,hist);box.insertBefore(bb,hist);
+    const tg=document.createElement('button');tg.className='btn-secondary';tg.style.margin='0 0 8px 6px';tg.textContent=ATAG[pid]?'🏷 Tag: '+ATAG[pid]:'🏷 Add tag';tg.title='A private label only you can see, e.g. their real name';tg.onclick=()=>atagEdit(pid,p.name);box.insertBefore(tg,hist);
     let locked=false;const setLk=()=>{lk.textContent=locked?'🔒 Name locked (unlock)':'Lock name';lk.title=locked?'They can’t change their own name. Click to allow it again.':'Stop them changing their own name (you can still rename them).';lk.disabled=false;};
     fbReq('GET','nlock/'+pid,null,{admin:true}).then(v=>{locked=v===true;setLk();}).catch(()=>{lk.textContent='Lock name (unavailable)';});
     lk.onclick=async()=>{lk.disabled=true;try{await fbReq(locked?'DELETE':'PUT','nlock/'+pid,locked?null:true,{admin:true});locked=!locked;}catch(e){alert('Couldn’t save: '+e.message);}setLk();};

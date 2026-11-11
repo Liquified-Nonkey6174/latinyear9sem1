@@ -328,6 +328,13 @@
         }
       }
     },
+    "atag": {
+      ".read": "auth != null && auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2'",
+      "$uid": {
+        ".write": "auth != null && auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2'",
+        ".validate": "newData.isString() && newData.val().length <= 40"
+      }
+    },
     "ver": {
       ".read": "auth != null",
       "$uid": {
