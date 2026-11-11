@@ -25,7 +25,7 @@
     "players": {
       ".read": "auth != null",
       "$uid": {
-        ".write": "auth != null && (auth.uid === $uid || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2' || (!newData.exists() && root.child('mto').child($uid).val() === auth.uid))",
+        ".write": "auth != null && ((auth.uid === $uid && (newData.exists() || !data.child('total').isNumber() || data.child('total').val() >= 0)) || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2' || (!newData.exists() && root.child('mto').child($uid).val() === auth.uid && data.child('total').val() >= 0))",
         ".validate": "newData.hasChildren(['name', 'total'])",
         "name": {
           ".validate": "newData.isString() && newData.val().length >= 2 && newData.val().length <= 30 && (data.val() === newData.val() || root.child('nlock').child($uid).val() !== true || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2')"
