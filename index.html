@@ -4916,7 +4916,9 @@ function sxCountOf(pid){if(!pid||(lbMe&&pid===lbMe.pid))return null;const c=sxCo
   if(!sxPending.has(pid)){sxPending.add(pid);(async()=>{let g=0,old=new Set();try{const r=await fbReq('GET','sx/got/'+pid);g=r?Object.keys(r).length:0;}catch(e){}
     try{const o=await fbReq('GET','sx/old/'+pid);if(typeof o==='string')o.split(',').forEach(x=>{if(SX_IDS.includes(x))old.add(x);});}catch(e){}
     sxCounts[pid]={g,old,t:Date.now()};sxPending.delete(pid);try{renderLb();renderFeedBits();renderBadgeFeed();}catch(e){}})();}return c?c.g+c.old.size:0;}
-function sxVerify(list,pid){const n=sxCountOf(pid);if(n==null)return list;const c=sxCounts[pid]||{g:0,old:new Set()};let left=c.g;
+// the ⭐ rank on someone's name can't be higher than their real points allow (badge lists are published by players themselves)
+function rankCap(list,pid){const p=lbPlayers[pid],rb=badgeById('rank');if(!p||!rb)return list;const lv=badgeLevel(rb,Math.max(0,+p.total||0));return list.map(([id,l])=>id==='rank'?[id,Math.min(l,lv)]:[id,l]).filter(([id,l])=>l>0);}
+function sxVerify(list,pid){if(!(lbMe&&pid===lbMe.pid))list=rankCap(list,pid);const n=sxCountOf(pid);if(n==null)return list;const c=sxCounts[pid]||{g:0,old:new Set()};let left=c.g;
   return list.filter(([id,l])=>{const b=badgeById(id);if(!b)return false;if(b.secret){if(c.old.has(id))return true;if(left<=0)return false;left--;return true;}if(b.meta==='all'||b.meta==='max')return n>=SX_IDS.length;if(b.meta==='name')return ((lbPlayers[pid]||{}).name)==='-Chester-';return true;})
     .map(([id,l])=>badgeById(id).meta==='count'?[id,Math.min(l,n)]:[id,l]).filter(([id,l])=>l>0);}
 function shownBadges(p,pid){if(pid)return sxVerify(shownBadges(p),pid);const seen={};String((p&&p.bd)||'').split(',').map(x=>x.split(':')).map(([id,l])=>OLD_RANK[id]!=null?['rank',String(oldRankLv(id,l))]:[id,l]).forEach(([id,l])=>{if(id&&(!seen[id]||+l>+seen[id]))seen[id]=l;});return Object.entries(seen).filter(([id,l])=>badgeById(id)&&+l>0).slice(0,MAX_PINS).map(([id,l])=>[id,badgeById(id).meta==='count'?+l:Math.min(+l,badgeById(id).lv.length)]);}
