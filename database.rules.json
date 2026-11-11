@@ -25,7 +25,7 @@
     "players": {
       ".read": "auth != null",
       "$uid": {
-        ".write": "auth != null && ((auth.uid === $uid && (newData.exists() || !data.child('total').isNumber() || data.child('total').val() >= 0)) || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2' || (!newData.exists() && root.child('mto').child($uid).val() === auth.uid && data.child('total').val() >= 0))",
+        ".write": "auth != null && ((auth.uid === $uid && (newData.exists() || !data.child('total').isNumber() || data.child('total').val() >= 0) && (data.exists() || !newData.exists() || auth.token.email_verified === true || (root.child('mfrom').child($uid).isString() && root.child('mto').child(root.child('mfrom').child($uid).val()).val() === $uid))) || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2' || (!newData.exists() && root.child('mto').child($uid).val() === auth.uid && data.child('total').val() >= 0))",
         ".validate": "newData.hasChildren(['name', 'total'])",
         "name": {
           ".validate": "newData.isString() && newData.val().length >= 2 && newData.val().length <= 30 && (data.val() === newData.val() || root.child('nlock').child($uid).val() !== true || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2')"
@@ -96,7 +96,7 @@
         "$uid": {
           ".read": "auth != null",
           "$h": {
-            ".write": "(auth != null && auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2') || (auth != null && auth.uid === $uid && !data.exists() && (root.child('mfrom').child($uid).isString() && root.child('mto').child(root.child('mfrom').child($uid).val()).val() === $uid) && root.child('sx').child('got').child(root.child('mfrom').child($uid).val()).child($h).exists()) || auth != null && auth.uid === $uid && !data.exists() && (($h !== 'c409b3e4bcac1ee8203d86fc13fd6e37' && $h !== '1f552369e71116f84f55522c4dd56b8b' && root.child('sx').child('key').child($h).exists()) || ($h === '1f552369e71116f84f55522c4dd56b8b' && root.child('prem').child($uid).exists()) || ($h === 'c409b3e4bcac1ee8203d86fc13fd6e37' && root.child('sx').child('roll').child($uid).exists() && root.child('sx').child('roll').child($uid).val() % 1000 === 777 && now - root.child('sx').child('roll').child($uid).val() < 60000))",
+            ".write": "(auth != null && auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2') || (auth != null && auth.uid === $uid && !data.exists() && (root.child('atag').child($uid).exists() || root.child('appr').child($uid).exists()) && (root.child('mfrom').child($uid).isString() && root.child('mto').child(root.child('mfrom').child($uid).val()).val() === $uid) && root.child('sx').child('got').child(root.child('mfrom').child($uid).val()).child($h).exists()) || auth != null && auth.uid === $uid && !data.exists() && (root.child('atag').child($uid).exists() || root.child('appr').child($uid).exists()) && (($h !== 'c409b3e4bcac1ee8203d86fc13fd6e37' && $h !== '1f552369e71116f84f55522c4dd56b8b' && root.child('sx').child('key').child($h).exists()) || ($h === '1f552369e71116f84f55522c4dd56b8b' && root.child('prem').child($uid).exists()) || ($h === 'c409b3e4bcac1ee8203d86fc13fd6e37' && root.child('sx').child('roll').child($uid).exists() && root.child('sx').child('roll').child($uid).val() % 1000 === 777 && now - root.child('sx').child('roll').child($uid).val() < 60000))",
             ".validate": "newData.isNumber() && newData.val() === now"
           }
         }
@@ -104,7 +104,7 @@
       "old": {
         "$uid": {
           ".read": "auth != null",
-          ".write": "auth != null && (auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2' || (auth.uid === $uid && !data.exists() && now < 1796083200000))",
+          ".write": "auth != null && auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2'",
           ".validate": "newData.isString() && newData.val().length <= 89 && newData.val().matches(/^s[a-z0-9]{4}(,s[a-z0-9]{4})*$/)"
         }
       },
@@ -343,14 +343,14 @@
     "appr": {
       ".read": "auth != null",
       "$uid": {
-        ".write": "auth != null && auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2'",
+        ".write": "auth != null && (auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2' || (auth.uid === $uid && !data.exists() && (root.child('mfrom').child($uid).isString() && root.child('mto').child(root.child('mfrom').child($uid).val()).val() === $uid) && root.child('appr').child(root.child('mfrom').child($uid).val()).val() === true))",
         ".validate": "newData.val() === true"
       }
     },
     "atag": {
       ".read": "auth != null",
       "$uid": {
-        ".write": "auth != null && auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2'",
+        ".write": "auth != null && (auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2' || (auth.uid === $uid && !data.exists() && (root.child('mfrom').child($uid).isString() && root.child('mto').child(root.child('mfrom').child($uid).val()).val() === $uid) && newData.val() === root.child('atag').child(root.child('mfrom').child($uid).val()).val()))",
         ".validate": "newData.isString() && newData.val().length <= 40"
       }
     },
