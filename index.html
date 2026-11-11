@@ -768,7 +768,7 @@ body:has(.overlay[style*="display: flex"]) .side-fab,body:has(#bReveal[style*="d
         <button class="btn-primary" style="font-size:12px;padding:6px 16px" onclick="saveDesc()">Save</button>
         <button class="btn-secondary" style="font-size:12px;padding:6px 14px" onclick="cancelDescEdit()">Cancel</button>
       </div>
-      <div style="margin-top:8px"><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="annEdit()">📢 Edit announcement</button><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="rulesCheck()" title="Find out whether the rules published in Firebase are up to date">🔍 Check database rules</button><label class="btn-secondary" style="font-size:12px;padding:6px 14px;cursor:pointer;display:inline-block">🔒 Upload secret badge answers<input type="file" accept=".json" style="display:none" onchange="if(this.files[0])sxUpload(this.files[0]);this.value=''"></label></div>
+      <div style="margin-top:8px"><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="annEdit()">📢 Edit announcement</button><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="rulesCheck()" title="Find out whether the rules published in Firebase are up to date">🔍 Check database rules</button><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="apprByName()" title="Let a player be seen by everyone on the leaderboard and in chat">✔ Approve player</button><label class="btn-secondary" style="font-size:12px;padding:6px 14px;cursor:pointer;display:inline-block">🔒 Upload secret badge answers<input type="file" accept=".json" style="display:none" onchange="if(this.files[0])sxUpload(this.files[0]);this.value=''"></label></div>
     </div>
   </div>
   <div class="settings-row"><button class="settings-btn" onclick="showSettings()">⚙ Settings</button> <button class="settings-btn" id="acctBtn" onclick="acctHub()" title="Sign in, or use your account on other devices">👤 Account</button> <button class="settings-btn" onclick="openBadges()">🏅 Badges <span id="badgeBtnCount" style="opacity:.7;font-size:12px"></span><span class="bf-dot" id="badgeBtnDot" title="New in the badge feed"></span></button></div>
@@ -4123,16 +4123,19 @@ let chatMuted=false;
 // leaderboard. They still see themselves normally; everyone else (except the admin) doesn't see them.
 let mutedSet=new Set(),lbHidden=new Set();
 const seesPid=pid=>isAdmin||(lbMe&&pid===lbMe.pid);
-const chatVisible=pid=>!mutedSet.has(pid)||seesPid(pid);
+// Public view: only the admin, players with a member tag, and players the admin approved (appr/{uid}) are seen by everyone.
+// Others still play, chat and appear on the leaderboard, but only they (and the admin) can see it.
+var APPR={};const isPublic=pid=>!!pid&&(pid===ADMIN_UID||!!(ATAG||{})[pid]||APPR[pid]===true);
+const chatVisible=pid=>(!mutedSet.has(pid)&&isPublic(pid))||seesPid(pid);
 // New players appear on other people's leaderboards once they have LB_MIN_PTS all-time points (they always see themselves).
 const LB_MIN_PTS=100;
 const lbEnough=pid=>{const t=(lbPlayers[pid]||{}).total||0;return t>=LB_MIN_PTS||t<0;};   // 0–99 hidden; penalty (negative) scores are shown
-const lbVisible=pid=>(!lbHidden.has(pid)&&lbEnough(pid))||seesPid(pid);
+const lbVisible=pid=>(!lbHidden.has(pid)&&lbEnough(pid)&&isPublic(pid))||seesPid(pid);
 // New accounts need CHAT_MIN_PTS points before they can chat (stops spam from throwaway accounts; the database rules check it too).
 const CHAT_MIN_PTS=100;
 function updChatInput(){const ci=document.getElementById('chatInput'),cs=document.getElementById('chatSend');if(!ci)return;const pts=lbMyPoints(),short=!!lbMe&&pts<CHAT_MIN_PTS;
   ci.disabled=cs.disabled=!lbMe||chatMuted||short;
-  ci.placeholder=!lbMe?'Join above to chat':chatMuted?'The admin has blocked you from sending messages':short?'Earn '+CHAT_MIN_PTS+' ⭐ to unlock chat ('+(CHAT_MIN_PTS-pts)+' to go)':'Message everyone…';}
+  ci.placeholder=!lbMe?'Join above to chat':chatMuted?'The admin has blocked you from sending messages':short?'Earn '+CHAT_MIN_PTS+' ⭐ to unlock chat ('+(CHAT_MIN_PTS-pts)+' to go)':!isPublic(lbMe.pid)?'Only you and the admin see your messages until you’re approved':'Message everyone…';}
 function setChatMuted(m){chatMuted=false;}
 async function lbSaveName(raw){const name=lbCleanName(raw);{const blk=await sxName(name,lbMe&&lbMe.name);if(blk){renderLbProfile(blk,true);return;}}const err=lbNameError(name);if(err){renderLbProfile(err,true);return;}
   let pid;const prev=lbMe?lbMe.name:null;   // remember it now: the live stream may update lbMe.name while we wait
@@ -4171,6 +4174,7 @@ function renderLb(){const list=document.getElementById('lbList');if(!list||!lbPl
     const it=document.createElement('div');it.className='lb-item'+(lbMe&&r.pid===lbMe.pid?' me':'')+(rank<=3&&r.n>0?' top':'');
     const rk=document.createElement('span');rk.className='lb-rank';rk.textContent=SET.ordinal?ordinal(rank):rank;
     const nm=document.createElement('span');nm.className='lb-name';nm.appendChild(nameEl(r.pid,r.name));{const bc=badgeChipsEl(lbPlayers[r.pid],false,r.pid);if(bc){nm.classList.add('has-chips');nm.appendChild(bc);}}if(isAdmin&&lbHidden.has(r.pid)){it.style.opacity='.55';nm.title='Hidden from everyone else';nm.append(' 👻');}
+    else if(!isPublic(r.pid)&&(isAdmin||(lbMe&&r.pid===lbMe.pid))){const note=document.createElement('span');note.className='lb-note';note.textContent=lbMe&&r.pid===lbMe.pid?'only you can see this · waiting for the admin to approve you':'🔒 not approved';note.title='Only approved players (and players with a member tag) are seen by everyone.';nm.appendChild(note);if(isAdmin&&!(lbMe&&r.pid===lbMe.pid))it.style.opacity='.55';}
     else if(!lbEnough(r.pid)&&(isAdmin||(lbMe&&r.pid===lbMe.pid))){const left=LB_MIN_PTS-((lbPlayers[r.pid]||{}).total||0);const note=document.createElement('span');note.className='lb-note';note.textContent=lbMe&&r.pid===lbMe.pid?'only you can see this · '+left+' ⭐ to go':'under '+LB_MIN_PTS+' ⭐';note.title='Players appear on the leaderboard for everyone once they have '+LB_MIN_PTS+' ⭐ in total.';nm.appendChild(note);if(isAdmin&&!(lbMe&&r.pid===lbMe.pid))it.style.opacity='.55';}
     const ct=document.createElement('span');ct.className='lb-count';ct.textContent=r.n.toLocaleString();
     it.append(rk,nm,ct);it.classList.add('click');it.title=lbMe&&r.pid===lbMe.pid?'Change your look':'View '+r.name;
@@ -4323,16 +4327,16 @@ function renderOnline(){const sec=document.getElementById('sideOnline'),list=doc
   const mine=lbMe&&ONLINE[lbMe.pid],now=mine&&onlineBeatAt?mine+(Date.now()-onlineBeatAt):Math.max(...vals);   // server time, not this device's clock
   // shown: you, and players others can see on the leaderboard (not blocked / hidden, 100+ ⭐). Everyone else online is counted as hidden.
   const on=Object.entries(ONLINE).filter(([pid,t])=>typeof t==='number'&&now-t<150000).map(([pid])=>pid);
-  const show=pid=>(lbMe&&pid===lbMe.pid)||(lbPlayers[pid]&&lbPlayers[pid].name&&!lbHidden.has(pid)&&lbEnough(pid));
+  const show=pid=>(lbMe&&pid===lbMe.pid)||(lbPlayers[pid]&&lbPlayers[pid].name&&!lbHidden.has(pid)&&lbEnough(pid)&&isPublic(pid));
   const ids=on.filter(show).sort((a,b)=>(lbMe&&a===lbMe.pid?-1:lbMe&&b===lbMe.pid?1:String(lbPlayers[a].name).localeCompare(lbPlayers[b].name))),hid=on.length-ids.length;
   sec.style.display=on.length?'':'none';document.getElementById('onlineN').textContent=on.length?'('+on.length+')':'';list.innerHTML='';
   ids.forEach(pid=>{const e=document.createElement('span');e.className='on-p';e.title='Open their card';e.innerHTML='<span class="on-dot"></span>';e.appendChild(nameEl(pid,(lbPlayers[pid]||{}).name||lbMe.name));e.onclick=()=>openPlayerCard(pid);list.appendChild(e);});
   if(hid&&isAdmin){const hh=document.createElement('div');hh.className='on-sub';hh.textContent='Hidden ('+hid+')';list.appendChild(hh);
-    on.filter(pid=>!show(pid)).forEach(pid=>{const p=lbPlayers[pid]||{},why=lbHidden.has(pid)?'blocked':!p.name?'not on the leaderboard':'under '+LB_MIN_PTS+' ⭐';const e=document.createElement('span');e.className='on-p on-hidden';e.title=why;e.innerHTML='<span class="on-dot"></span>';e.appendChild(nameEl(pid,p.name||'(no name)'));const w=document.createElement('span');w.className='on-why';w.textContent=why;e.appendChild(w);if(p.name)e.onclick=()=>openPlayerCard(pid);list.appendChild(e);});}
-  else if(hid){const h=document.createElement('span');h.className='on-hid';h.textContent=(ids.length?'+ ':'')+hid+' hidden player'+(hid===1?'':'s');h.title='Online, but blocked from the leaderboard, under 100 ⭐, or not on the leaderboard yet';list.appendChild(h);}}
-setTimeout(()=>onlineBeat(),4000);setInterval(()=>onlineBeat(),60000);
+    on.filter(pid=>!show(pid)).forEach(pid=>{const p=lbPlayers[pid]||{},why=lbHidden.has(pid)?'blocked':!p.name?'not on the leaderboard':!isPublic(pid)?'not approved':'under '+LB_MIN_PTS+' ⭐';const e=document.createElement('span');e.className='on-p on-hidden';e.title=why;e.innerHTML='<span class="on-dot"></span>';e.appendChild(nameEl(pid,p.name||'(no name)'));const w=document.createElement('span');w.className='on-why';w.textContent=why;e.appendChild(w);if(p.name)e.onclick=()=>openPlayerCard(pid);list.appendChild(e);});}
+  else if(hid){const h=document.createElement('span');h.className='on-hid';h.textContent=(ids.length?'+ ':'')+hid+' hidden player'+(hid===1?'':'s');h.title='Online, but not approved yet, blocked, under 100 ⭐, or not on the leaderboard yet';list.appendChild(h);}}
+setTimeout(()=>{try{atagLoad();}catch(e){}},1200);setTimeout(()=>onlineBeat(),4000);setInterval(()=>onlineBeat(),60000);
 document.addEventListener('visibilitychange',()=>{if(!lbMe)return;if(document.visibilityState==='hidden'){try{fbReq('DELETE','online/'+lbMe.pid,null,{keepalive:true}).catch(()=>{});}catch(e){}}else onlineBeat();});
-var ATAG={};async function atagLoad(){const was=JSON.stringify(ATAG);try{ATAG=(await fbReq('GET','atag',null,isAdmin?{admin:true}:{}))||{};}catch(e){return;}if(JSON.stringify(ATAG)!==was)try{badgeCheckSoon();}catch(e){}try{renderLb();renderChat();renderBadgeFeed();}catch(e){}}
+var ATAG={};async function atagLoad(){const was=JSON.stringify([ATAG,APPR]);try{const [t,a]=await Promise.all([fbReq('GET','atag',null,isAdmin?{admin:true}:{}),fbReq('GET','appr',null,isAdmin?{admin:true}:{}).catch(()=>undefined)]);ATAG=t||{};if(a!==undefined)APPR=a||{};}catch(e){return;}if(JSON.stringify([ATAG,APPR])!==was){try{badgeCheckSoon();renderLb();renderChat();renderOnline();updChatInput();}catch(e){}}try{renderLb();renderChat();renderBadgeFeed();}catch(e){}}
 async function atagEdit(pid,name){const v=prompt('Member tag for '+name+' (everyone sees it, e.g. their real name). Members count for the challenge, Rival, Popularis and Echo badges. Leave empty to remove:',ATAG[pid]||'');if(v===null)return;const t=v.trim().slice(0,40);
   try{await fbReq(t?'PUT':'DELETE','atag/'+pid,t||null,{admin:true});if(t)ATAG[pid]=t;else delete ATAG[pid];toast(t?'Tag saved.':'Tag removed.');try{renderLb();renderChat();}catch(e){}openPlayerCard(pid);}
   catch(e){alert('Couldn’t save the tag ('+e.message+').'+(/40[13]/.test(e.message)?'\n\nPublish the latest database rules first.':''));}}
@@ -4414,6 +4418,12 @@ async function showPointsHistory(pid,box){box.innerHTML='<p class="muted">Loadin
 async function rulesCheck(){const T=[['Secret badges: admin give / take away (11 Nov)','sx/key'],['Member tags (11 Nov)','atag'],['Account merging (10 Nov)','mlog'],['Points history + negative scores (9 Nov)','plog']];const out=[];let ok=0;
   for(const [label,path] of T){let r;try{await fbReq('GET',path,null,{admin:true,query:'?shallow=true'});r=true;ok++;}catch(e){r=/40[13]/.test(e.message)?false:null;}out.push((r?'✔ ':r===false?'✖ ':'? ')+label);}
   alert((ok===T.length?'✔ Your live database rules are up to date.':'✖ Your live database rules are OLD. Publish the latest database.rules.json (Firebase → Realtime Database → Rules → paste it all → Publish).')+'\n\n'+out.join('\n')+(out.some(x=>x[0]==='?')?'\n\n? = couldn’t check (offline?)':''));}
+async function apprSet(pid,on){await fbReq(on?'PUT':'DELETE','appr/'+pid,on?true:null,{admin:true});if(on)APPR[pid]=true;else delete APPR[pid];try{renderLb();renderChat();renderOnline();}catch(e){}}
+async function apprByName(){const v=prompt('Type the username to approve (they’ll be seen by everyone on the leaderboard and in chat):');if(v===null)return;const n=v.trim().toLowerCase();if(!n)return;
+  const ids=Object.keys(lbPlayers).filter(pid=>String((lbPlayers[pid]||{}).name||'').trim().toLowerCase()===n);
+  if(!ids.length){alert('No player is called “'+v.trim()+'”. Check the spelling (it must be the exact name).');return;}
+  if(ids.length>1&&!confirm(ids.length+' players are called “'+v.trim()+'”. Approve all of them?'))return;
+  try{for(const pid of ids)await apprSet(pid,true);toast('✔ Approved '+v.trim()+(ids.length>1?' ('+ids.length+' players)':'')+'.');}catch(e){alert('Couldn’t approve ('+e.message+').'+(/40[13]/.test(e.message)?'\n\nPublish the latest database rules first.':''));}}
 async function adminBadges(pid,box){box.innerHTML='<p class="muted">Loading…</p>';let prog=null,gr={},keys={},sgot={},sold='';const SN={};
   try{const r=await fbReq('GET','progress/'+pid,null,{admin:true});if(r&&typeof r.d==='string')prog=JSON.parse(r.d);}catch(e){}
   try{gr=(await fbReq('GET','bgrant/'+pid,null,{admin:true}))||{};}catch(e){box.innerHTML='<p class="muted">Couldn’t load: the database rules may need updating.</p>';return;}
@@ -4444,6 +4454,8 @@ function openPlayerCard(pid){const p=lbPlayers[pid];if(!p)return;const k=lbKeys(
     const lk=document.createElement('button');lk.className='btn-secondary';lk.style.margin='0 0 8px 6px';lk.textContent='…';lk.disabled=true;box.appendChild(lk);box.appendChild(hist);
     const ph=document.createElement('button');ph.className='btn-secondary';ph.style.margin='0 0 8px 6px';ph.textContent='📈 Points history';ph.onclick=()=>{ph.disabled=true;showPointsHistory(pid,hist);};box.insertBefore(ph,hist);
     const bb=document.createElement('button');bb.className='btn-secondary';bb.style.margin='0 0 8px 6px';bb.textContent='🏅 Badges';bb.onclick=()=>adminBadges(pid,hist);box.insertBefore(bb,hist);
+    const ap=document.createElement('button');ap.className='btn-secondary';ap.style.margin='0 0 8px 6px';const setAp=()=>{ap.textContent=APPR[pid]?'✔ Approved (unapprove)':(ATAG[pid]?'✔ Public (member tag)':'Approve (show to everyone)');ap.disabled=!APPR[pid]&&!!ATAG[pid];};setAp();
+    ap.onclick=async()=>{ap.disabled=true;try{await apprSet(pid,!APPR[pid]);}catch(e){toast('Couldn’t change it: '+e.message);}setAp();ap.disabled=false;setAp();};box.insertBefore(ap,hist);
     const tg=document.createElement('button');tg.className='btn-secondary';tg.style.margin='0 0 8px 6px';tg.textContent=ATAG[pid]?'🏷 Member tag: '+ATAG[pid]:'🏷 Add member tag';tg.title='Shown under their name to everyone. Members count for badges that involve other players.';tg.onclick=()=>atagEdit(pid,p.name);box.insertBefore(tg,hist);
     let locked=false;const setLk=()=>{lk.textContent=locked?'🔒 Name locked (unlock)':'Lock name';lk.title=locked?'They can’t change their own name. Click to allow it again.':'Stop them changing their own name (you can still rename them).';lk.disabled=false;};
     fbReq('GET','nlock/'+pid,null,{admin:true}).then(v=>{locked=v===true;setLk();}).catch(()=>{lk.textContent='Lock name (unavailable)';});
@@ -5035,6 +5047,7 @@ function pickParse(i){if(!parseQ||parseQ.picked!=null)return;parseQ.picked=i;con
 
 let pollBusy=false;
 async function pollShared(){if(pollBusy)return;pollBusy=true;
+  try{atagLoad();}catch(e){}
   try{const [d,c,mu,lh]=await Promise.all([fbReq('GET','duels').catch(()=>undefined),fbReq('GET','challenge').catch(()=>undefined),fbReq('GET','mute').catch(()=>undefined),fbReq('GET','lbhide').catch(()=>undefined)]);
     const setsKey=()=>[...mutedSet].sort().join()+'|'+[...lbHidden].sort().join();const before=setsKey();
     if(mu!==undefined)mutedSet=new Set(Object.keys(mu||{}));if(lh!==undefined)lbHidden=new Set(Object.keys(lh||{}));
