@@ -390,6 +390,7 @@ input[type=range]{flex:1;accent-color:var(--accent)}
 .lb-link{background:none;border:none;font-family:var(--sans);font-size:12px;color:var(--accent);cursor:pointer;padding:2px 4px;text-decoration:underline;text-underline-offset:2px}
 .lb-link.muted{color:var(--text3)}
 .pname.has-tag{flex-wrap:wrap;row-gap:2px}.chat-m .pname.has-tag,.chat-quote .pname.has-tag{flex-wrap:nowrap;vertical-align:baseline}.chat-m .atag-row{flex:0 0 auto;display:inline-block;margin-left:2px}.chat-m .atag{font-size:10px;padding:1px 6px;vertical-align:1px}.atag-row{flex:0 0 100%;display:block;line-height:1;overflow:visible!important}
+#memberBody a{color:var(--accent);text-decoration:underline}
 .atag{display:inline-block;font-family:var(--sans);font-size:10.5px;font-weight:600;color:var(--bg);background:var(--accent);border-radius:999px;padding:2px 7px;white-space:nowrap;font-style:normal}
 .lb-msg{font-size:12px;margin-top:6px}
 .lb-msg:empty{display:none}
@@ -768,7 +769,7 @@ body:has(.overlay[style*="display: flex"]) .side-fab,body:has(#bReveal[style*="d
         <button class="btn-primary" style="font-size:12px;padding:6px 16px" onclick="saveDesc()">Save</button>
         <button class="btn-secondary" style="font-size:12px;padding:6px 14px" onclick="cancelDescEdit()">Cancel</button>
       </div>
-      <div style="margin-top:8px"><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="annEdit()">📢 Edit announcement</button><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="rulesCheck()" title="Find out whether the rules published in Firebase are up to date">🔍 Check database rules</button><button class="btn-secondary" id="asStudentBtn" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="toggleAsStudent()" title="See the leaderboard, chat and Online now exactly as a student does">👁 View as a student</button><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="apprByName()" title="Let a player be seen by everyone on the leaderboard and in chat">✔ Approve player</button><label class="btn-secondary" style="font-size:12px;padding:6px 14px;cursor:pointer;display:inline-block">🔒 Upload secret badge answers<input type="file" accept=".json" style="display:none" onchange="if(this.files[0])sxUpload(this.files[0]);this.value=''"></label></div>
+      <div style="margin-top:8px"><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="annEdit()">📢 Edit announcement</button><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="rulesCheck()" title="Find out whether the rules published in Firebase are up to date">🔍 Check database rules</button><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="contactEdit()" title="The email non-members are told to contact for a member tag">✉ Contact email</button><button class="btn-secondary" id="asStudentBtn" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="toggleAsStudent()" title="See the leaderboard, chat and Online now exactly as a student does">👁 View as a student</button><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="apprByName()" title="Let a player be seen by everyone on the leaderboard and in chat">✔ Approve player</button><label class="btn-secondary" style="font-size:12px;padding:6px 14px;cursor:pointer;display:inline-block">🔒 Upload secret badge answers<input type="file" accept=".json" style="display:none" onchange="if(this.files[0])sxUpload(this.files[0]);this.value=''"></label></div>
     </div>
   </div>
   <div class="settings-row"><button class="settings-btn" onclick="showSettings()">⚙ Settings</button> <button class="settings-btn" id="acctBtn" onclick="acctHub()" title="Sign in, or use your account on other devices">👤 Account</button> <button class="settings-btn" onclick="openBadges()">🏅 Badges <span id="badgeBtnCount" style="opacity:.7;font-size:12px"></span><span class="bf-dot" id="badgeBtnDot" title="New in the badge feed"></span></button></div>
@@ -2046,6 +2047,14 @@ body:has(.overlay[style*="display: flex"]) .side-fab,body:has(#bReveal[style*="d
   </div>
 </div>
 
+<div id="memberOverlay" class="overlay" style="display:none;z-index:128" onclick="closeOverlay('memberOverlay')">
+  <div class="about-box ann-box" onclick="event.stopPropagation()">
+    <button class="about-close" onclick="closeOverlay('memberOverlay')">×</button>
+    <div class="ann-head">🏷 Become a member</div>
+    <div class="ann-body" id="memberBody"></div>
+    <div class="ann-btns"><button class="btn-primary" onclick="closeOverlay('memberOverlay')">OK</button></div>
+  </div>
+</div>
 <div id="acctHubOverlay" class="overlay" style="display:none;z-index:125" onclick="closeOverlay('acctHubOverlay')">
   <div class="about-box ann-box" onclick="event.stopPropagation()">
     <button class="about-close" onclick="closeOverlay('acctHubOverlay')">×</button>
@@ -4339,7 +4348,17 @@ function renderOnline(){const sec=document.getElementById('sideOnline'),list=doc
   else if(hid){const h=document.createElement('span');h.className='on-hid';h.textContent=(ids.length?'+ ':'')+hid+' hidden player'+(hid===1?'':'s');h.title='Online, but not approved yet, blocked, under 100 ⭐, or not on the leaderboard yet';list.appendChild(h);}}
 setTimeout(()=>{try{atagLoad();}catch(e){}},1200);setTimeout(()=>onlineBeat(),4000);setInterval(()=>onlineBeat(),60000);
 document.addEventListener('visibilitychange',()=>{if(!lbMe)return;if(document.visibilityState==='hidden'){try{fbReq('DELETE','online/'+lbMe.pid,null,{keepalive:true}).catch(()=>{});}catch(e){}}else onlineBeat();});
-var ATAG={};async function atagLoad(){const was=JSON.stringify([ATAG,APPR]);try{const [t,a]=await Promise.all([fbReq('GET','atag',null,isAdmin?{admin:true}:{}),fbReq('GET','appr',null,isAdmin?{admin:true}:{}).catch(()=>undefined)]);ATAG=t||{};if(a!==undefined)APPR=a||{};}catch(e){return;}if(JSON.stringify([ATAG,APPR])!==was){try{badgeCheckSoon();renderLb();renderChat();renderOnline();updChatInput();}catch(e){}}try{renderLb();renderChat();renderBadgeFeed();}catch(e){}}
+// non-members see this each time they open Latin Trainer (once the member list has loaded and other pop-ups are closed)
+let CONTACT='',memberShown=false;
+function memberHow(){return CONTACT?'Email '+CONTACT+' to get a member tag.':'Ask the admin for a member tag.';}
+function memberPopup(){if(memberShown||isAdmin||(lbMe&&isPublic(lbMe.pid)))return;const busy=['helpOverlay','annOverlay','tourOverlay','bReveal','acctOverlay','acctHubOverlay'].some(id=>{const e=document.getElementById(id);return e&&e.style.display&&e.style.display!=='none';})||document.querySelector('.guide-overlay[style*="flex"],.tour-pop');
+  if(busy){setTimeout(memberPopup,1500);return;}memberShown=true;const b=document.getElementById('memberBody');
+  b.innerHTML='<p>Only <b>members</b> show up on the leaderboard for everyone, can use the chat, send challenges, react to messages and count towards class challenges.</p><p>'+(CONTACT?'Email <a href="mailto:'+esc(CONTACT)+'?subject='+encodeURIComponent('Latin Trainer member tag')+'"><b>'+esc(CONTACT)+'</b></a>':'Ask the admin')+' to get a member tag'+(lbMe?' (say your leaderboard name: <b>'+esc(lbMe.name)+'</b>)':' — join the leaderboard with your name first')+'. Until then you can still practise, and your ⭐ are kept for you.</p>';
+  document.getElementById('memberOverlay').style.display='flex';}
+async function contactEdit(){const v=prompt('Contact email shown to non-members (“Email … to get a member tag”). Leave empty to remove:',CONTACT);if(v===null)return;const t=v.trim().slice(0,100);
+  try{await fbReq(t?'PUT':'DELETE','contact',t||null,{admin:true});CONTACT=t;toast(t?'Contact email saved.':'Contact email removed.');}catch(e){alert('Couldn’t save ('+e.message+').'+(/40[13]/.test(e.message)?'\n\nPublish the latest database rules first.':''));}}
+var ATAG={};async function atagLoad(){const was=JSON.stringify([ATAG,APPR]);try{const [t,a]=await Promise.all([fbReq('GET','atag',null,isAdmin?{admin:true}:{}),fbReq('GET','appr',null,isAdmin?{admin:true}:{}).catch(()=>undefined)]);ATAG=t||{};if(a!==undefined)APPR=a||{};}catch(e){return;}
+  if(!memberShown){try{const c=await fbReq('GET','contact');if(typeof c==='string')CONTACT=c;}catch(e){}setTimeout(memberPopup,800);}if(JSON.stringify([ATAG,APPR])!==was){try{badgeCheckSoon();renderLb();renderChat();renderOnline();updChatInput();}catch(e){}}try{renderLb();renderChat();renderBadgeFeed();}catch(e){}}
 async function atagEdit(pid,name){const v=prompt('Member tag for '+name+' (everyone sees it, e.g. their real name). Members count for the challenge, Rival, Popularis and Echo badges. Leave empty to remove:',ATAG[pid]||'');if(v===null)return;const t=v.trim().slice(0,40);
   try{await fbReq(t?'PUT':'DELETE','atag/'+pid,t||null,{admin:true});if(t)ATAG[pid]=t;else delete ATAG[pid];toast(t?'Tag saved.':'Tag removed.');try{renderLb();renderChat();}catch(e){}openPlayerCard(pid);}
   catch(e){alert('Couldn’t save the tag ('+e.message+').'+(/40[13]/.test(e.message)?'\n\nPublish the latest database rules first.':''));}}
@@ -4491,9 +4510,9 @@ function openPlayerCard(pid){const p=lbPlayers[pid];if(!p)return;const k=lbKeys(
 let classChal=null;
 function renderClassChallenge(){const box=document.getElementById('classChallenge');if(!box)return;box.innerHTML='';
   const target=classChal&&+classChal.target;if(!target){if(isAdmin){const b=document.createElement('button');b.className='lb-link';b.textContent='+ Set a class challenge';b.onclick=editClassChallenge;box.appendChild(b);}return;}
-  const wk=lbKeys().w;const total=Object.entries(lbPlayers).filter(([pid])=>!lbHidden.has(pid)||seesPid(pid)).reduce((a,[,p])=>a+Math.max(0,(p&&p.w&&p.w[wk])||0),0);/* a negative (penalty) score counts as 0 here */const pct=Math.min(100,Math.round(total/target*100));
+  const wk=lbKeys().w;const total=Object.entries(lbPlayers).filter(([pid])=>!lbHidden.has(pid)&&isPublic(pid)).reduce((a,[,p])=>a+Math.max(0,(p&&p.w&&p.w[wk])||0),0);/* a negative (penalty) score counts as 0 here */const pct=Math.min(100,Math.round(total/target*100));
   box.className='cc-box'+(total>=target?' done':'');
-  box.innerHTML='<div class="cc-top"><span>🏆 '+esc(classChal.title||'Class challenge')+'</span><span>'+total.toLocaleString()+' / '+target.toLocaleString()+'</span></div><div class="cc-bar"><div style="width:'+pct+'%"></div></div><div class="cc-sub">'+(total>=target?'Goal reached this week! 🎉':'Correct answers by everyone this week')+'</div>';
+  box.innerHTML='<div class="cc-top"><span>🏆 '+esc(classChal.title||'Class challenge')+'</span><span>'+total.toLocaleString()+' / '+target.toLocaleString()+'</span></div><div class="cc-bar"><div style="width:'+pct+'%"></div></div><div class="cc-sub">'+(total>=target?'Goal reached this week! 🎉':'Correct answers by members this week')+'</div>';
   if(isAdmin){const b=document.createElement('button');b.className='lb-act';b.textContent='✎';b.title='Edit challenge';b.onclick=editClassChallenge;box.querySelector('.cc-top').appendChild(b);}}
 async function editClassChallenge(){const t=prompt('Weekly target for the whole class (correct answers). Enter 0 to remove the challenge:',classChal&&classChal.target||1000);if(t===null)return;
   const n=Math.floor(Number(t));if(!Number.isFinite(n)||n<0){alert('Enter a whole number.');return;}
@@ -4502,7 +4521,7 @@ async function editClassChallenge(){const t=prompt('Weekly target for the whole 
 
 // Chat reactions
 const REACTS=[['like','👍'],['laugh','😂'],['love','❤️'],['wow','😮']];
-async function toggleReact(id,k){if(!lbMe)return;const m=chatObj[id];const mine=m&&m.rx&&m.rx[k]&&m.rx[k][lbMe.pid];
+async function toggleReact(id,k){if(!lbMe)return;if(!isPublic(lbMe.pid)){toast('Only members can do this. '+memberHow());return;}const m=chatObj[id];const mine=m&&m.rx&&m.rx[k]&&m.rx[k][lbMe.pid];
   try{if(mine)await fbReq('DELETE','chat/'+id+'/rx/'+k+'/'+lbMe.pid);else{await fbReq('PUT','chat/'+id+'/rx/'+k+'/'+lbMe.pid,true);
     if(m&&lbMe&&m.pid===lbMe.pid)sxTry('s|selfreact|'+REACTS.filter(([kk])=>kk===k||(m.rx&&m.rx[kk]&&m.rx[kk][lbMe.pid])).length);}}
   catch(e){document.getElementById('chatErr').textContent='Couldn’t react. The database rules may need updating (ask the admin).';}}
@@ -4841,7 +4860,7 @@ function reactsReceived(){if(!lbMe)return 0;let n=0;Object.values(chatObj||{}).f
 function badgeLevel(bd,v){let l=0;bd.lv.forEach((t,i)=>{if(v>=t)l=i+1;});return l;}
 function badgeTierName(bd,l){if(bd.tiers)return bd.tiers[Math.max(0,l-1)].name+' '+ROMAN[Math.max(0,l-1)];return bd.lv.length>1?bd.name+' '+ROMAN[l-1]:bd.name;}
 // ── BADGE FEED: everyone's new badges (secret ones only say "their nth secret badge") ──
-function badgeFeedPost(fresh,nSecret){if(!lbMe)return;let secretK=nSecret-fresh.filter(f=>f.bd.secret&&f.first).length;
+function badgeFeedPost(fresh,nSecret){if(!lbMe||!isPublic(lbMe.pid))return;let secretK=nSecret-fresh.filter(f=>f.bd.secret&&f.first).length;
   fresh.slice(0,4).forEach(f=>{const e=f.bd.secret?(f.first?{pid:lbMe.pid,b:'?',k:++secretK}:null):{pid:lbMe.pid,b:f.bd.id,l:f.l};if(e)fbReq('POST','bfeed',{...e,t:{'.sv':'timestamp'}}).catch(()=>{});});}
 let bfeed=[],bfeedTab='mine',bfeedAt=0;
 function badgeFeedText(e){if(!lbPlayers[e.pid]&&MTO[e.pid])e={...e,pid:pidMain(e.pid)};const name=(lbPlayers[e.pid]&&lbPlayers[e.pid].name)||'Someone';
@@ -4918,7 +4937,7 @@ function badgeCheck(){secretWipe();try{verLoad();}catch(e){}const got=bjson(BADG
    const pins=badgePins();if(pins.some(x=>OLD_RANK[x]!=null)){const np=[...new Set(pins.map(x=>OLD_RANK[x]!=null?'rank':x))];try{localStorage.setItem(PIN_KEY,JSON.stringify(np));}catch(e){}}}
   // remember personal bests that the live data might forget
   b.bestDay=Math.max(b.bestDay||0,lbTodayPts());b.bestStreak=Math.max(b.bestStreak||0,dailyStreak());reactsTally();
-  if(lbMe&&classChal&&+classChal.target){const me=lbPlayers[lbMe.pid]||{};if(((me.w||{})[lbKeys().w]||0)>=500)b.civis=1;}bsave();
+  if(lbMe&&classChal&&+classChal.target&&isPublic(lbMe.pid)){const me=lbPlayers[lbMe.pid]||{};if(((me.w||{})[lbKeys().w]||0)>=500)b.civis=1;}bsave();
   if(bgApply(got))changed=true;
   BADGES.forEach(bd=>{const v=badgeStatV(bd);const l=badgeLevel(bd,v);const old=got[bd.id]?got[bd.id].l:0;
     if(l>old){got[bd.id]={l,t:Date.now()};changed=true;fresh.push({bd,l,first:!old});}});
@@ -5073,7 +5092,7 @@ function updDuelBtn(){badgeCheckSoon();const b=document.getElementById('duelBtn'
   pend.innerHTML=inc.slice(0,3).map(d=>'<div class="dpn-row"><span>⚔ <b>'+esc(lbPlayers[d.from]?lbPlayers[d.from].name:'Someone')+'</b> challenged you</span><span><button class="btn-primary" onclick="startDuel(\''+d.id+'\')">Play</button><button class="lb-link muted" onclick="deleteDuel(\''+d.id+'\')">Decline</button></span></div>').join('')
     +(inc.length>3?'<button class="lb-link" onclick="openDuelInbox()">+ '+(inc.length-3)+' more</button>':'');}
 function wordByKey(k){return allWordsFlat().find(w=>wKey(w)===k);}
-function openDuelSetup(pid){const p=lbPlayers[pid];if(!p||!lbMe)return;duelSel={to:pid,subs:{},packs:{},dir:'mixed'};renderDuelSetup();document.getElementById('duelSetupOverlay').style.display='flex';}
+function openDuelSetup(pid){const p=lbPlayers[pid];if(!p||!lbMe)return;if(!isPublic(lbMe.pid)){toast('Only members can do this. '+memberHow());return;}duelSel={to:pid,subs:{},packs:{},dir:'mixed'};renderDuelSetup();document.getElementById('duelSetupOverlay').style.display='flex';}
 function duelPool(){const ws=[],seen=new Set();Object.entries(duelSel.subs).forEach(([k,on])=>{if(!on)return;const [ck,sk]=k.split('||');DATA[ck].sub[sk].words.forEach(w=>{const x={...w,catKey:ck,subKey:sk};if(!seen.has(wKey(x))){seen.add(wKey(x));ws.push(x);}});});
   WORD_PACKS.forEach(pk=>{if(duelSel.packs[pk.id])pk.words.forEach(w=>{if(!seen.has(wKey(w))){seen.add(wKey(w));ws.push(w);}});});return ws;}
 function renderDuelSetup(){const p=lbPlayers[duelSel.to];const box=document.getElementById('duelSetup');const n=duelPool().length;

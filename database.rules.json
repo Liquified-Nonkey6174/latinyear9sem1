@@ -126,7 +126,7 @@
     "bfeed": {
       ".read": "auth != null",
       "$id": {
-        ".write": "auth != null && ((!data.exists() && newData.child('pid').val() === auth.uid && root.child('players').child(auth.uid).exists()) || (!newData.exists() && (data.child('pid').val() === auth.uid || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2')))",
+        ".write": "auth != null && ((!data.exists() && newData.child('pid').val() === auth.uid && root.child('players').child(auth.uid).exists() && (root.child('atag').child(auth.uid).exists() || root.child('appr').child(auth.uid).exists() || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2')) || (!newData.exists() && (data.child('pid').val() === auth.uid || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2')))",
         ".validate": "$id.matches(/^[-A-Za-z0-9_]{1,40}$/) && newData.hasChildren(['pid', 'b', 't'])",
         "pid": {
           ".validate": "newData.isString()"
@@ -193,7 +193,7 @@
         "rx": {
           "$e": {
             "$uid": {
-              ".write": "auth != null && auth.uid === $uid",
+              ".write": "auth != null && auth.uid === $uid && (!newData.exists() || (root.child('atag').child(auth.uid).exists() || root.child('appr').child(auth.uid).exists() || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2'))",
               ".validate": "newData.val() === true && ($e === 'like' || $e === 'laugh' || $e === 'love' || $e === 'wow')"
             }
           }
@@ -223,7 +223,7 @@
     "duels": {
       ".read": "auth != null",
       "$id": {
-        ".write": "auth != null && ((!data.exists() && newData.child('from').val() === auth.uid && root.child('players').child(auth.uid).exists()) || (!newData.exists() && (data.child('from').val() === auth.uid || data.child('to').val() === auth.uid || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2')))",
+        ".write": "auth != null && ((!data.exists() && newData.child('from').val() === auth.uid && root.child('players').child(auth.uid).exists() && (root.child('atag').child(auth.uid).exists() || root.child('appr').child(auth.uid).exists() || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2')) || (!newData.exists() && (data.child('from').val() === auth.uid || data.child('to').val() === auth.uid || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2')))",
         ".validate": "$id.matches(/^[-A-Za-z0-9_]{1,40}$/) && newData.hasChildren(['from', 'to', 'qs', 't'])",
         "from": {
           ".validate": "newData.isString()"
@@ -334,6 +334,11 @@
         ".write": "auth != null && auth.uid === $uid",
         ".validate": "newData.isNumber() && newData.val() === now"
       }
+    },
+    "contact": {
+      ".read": "auth != null",
+      ".write": "auth != null && auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2'",
+      ".validate": "newData.isString() && newData.val().length <= 100"
     },
     "appr": {
       ".read": "auth != null",
