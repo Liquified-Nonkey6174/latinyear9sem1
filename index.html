@@ -4369,7 +4369,7 @@ function memberPopup(){if(memberShown||isAdmin||(lbMe&&isPublic(lbMe.pid)))retur
   document.getElementById('memberOverlay').style.display='flex';}
 async function contactEdit(){const v=prompt('Contact email shown to non-members (“Email … to get a member tag”). Leave empty to remove:',CONTACT);if(v===null)return;const t=v.trim().slice(0,100);
   try{await fbReq(t?'PUT':'DELETE','contact',t||null,{admin:true});CONTACT=t;toast(t?'Contact email saved.':'Contact email removed.');}catch(e){alert('Couldn’t save ('+e.message+').'+(/40[13]/.test(e.message)?'\n\nPublish the latest database rules first.':''));}}
-var ATAG={};async function atagLoad(){const was=JSON.stringify([ATAG,APPR]);try{const [t,a]=await Promise.all([fbReq('GET','atag',null,isAdmin?{admin:true}:{}),fbReq('GET','appr',null,isAdmin?{admin:true}:{}).catch(()=>undefined)]);ATAG=t||{};if(a!==undefined)APPR=a||{};}catch(e){return;}
+var ATAG={},atagLoaded=false;async function atagLoad(){const was=JSON.stringify([ATAG,APPR]);try{const [t,a]=await Promise.all([fbReq('GET','atag',null,isAdmin?{admin:true}:{}),fbReq('GET','appr',null,isAdmin?{admin:true}:{}).catch(()=>undefined)]);ATAG=t||{};atagLoaded=true;if(a!==undefined)APPR=a||{};}catch(e){return;}
   if(!memberShown){try{const c=await fbReq('GET','contact');if(typeof c==='string')CONTACT=c;}catch(e){}setTimeout(memberPopup,800);}if(JSON.stringify([ATAG,APPR])!==was){try{badgeCheckSoon();renderLb();renderChat();renderOnline();updChatInput();}catch(e){}}try{renderLb();renderChat();renderBadgeFeed();}catch(e){}}
 async function atagEdit(pid,name){const v=prompt('Member tag for '+name+' (everyone sees it, e.g. their real name). Members count for the challenge, Rival, Popularis and Echo badges. Leave empty to remove:',ATAG[pid]||'');if(v===null)return;const t=v.trim().slice(0,40);
   try{await fbReq(t?'PUT':'DELETE','atag/'+pid,t||null,{admin:true});if(t)ATAG[pid]=t;else delete ATAG[pid];toast(t?'Tag saved.':'Tag removed.');try{renderLb();renderChat();}catch(e){}openPlayerCard(pid);}
@@ -4782,7 +4782,9 @@ function sxLearn(h,raw){let c=raw;try{if(typeof raw==='string')c=JSON.parse(raw)
   sxCfg[c.id]={...c,h};try{localStorage.setItem(SX_CACHE,JSON.stringify(sxCfg));}catch(e){}sxArt();setTimeout(()=>{try{badgeCheck();}catch(e){}},0);return sxCfg[c.id];}
 async function sxTry(c){try{if(!c)return null;const h=await sxHash(c);const known=Object.values(sxCfg).find(x=>x.h===h);if(known)return known;if(sxTried.has(h))return null;sxTried.add(h);
   await playerToken();await fbReq('PUT','sx/got/'+playerAuth.uid+'/'+h,{'.sv':'timestamp'});return sxLearn(h,await fbReq('GET','sx/cfg/'+h));}catch(e){return null;}}
-async function sxSync(){try{await playerToken();const got=await fbReq('GET','sx/got/'+playerAuth.uid);if(got)for(const h of Object.keys(got)){if(!Object.values(sxCfg).some(x=>x.h===h))sxLearn(h,await fbReq('GET','sx/cfg/'+h));}}catch(e){}
+var sxServer=null;   // ids of secret badges the server has a record of (null = not checked yet)
+async function sxSync(){try{await playerToken();const got=await fbReq('GET','sx/got/'+playerAuth.uid);const ids=new Set();if(got)for(const h of Object.keys(got)){let c=Object.values(sxCfg).find(x=>x.h===h);if(!c)c=sxLearn(h,await fbReq('GET','sx/cfg/'+h));if(c&&c.id)ids.add(c.id);}
+    try{const o=await fbReq('GET','sx/old/'+playerAuth.uid);if(typeof o==='string')o.split(',').forEach(x=>ids.add(x));}catch(e){}sxServer=ids;}catch(e){}
   // secret badges earned before they moved online: register them once (max 15), then load their details
   try{badgeCheck();const uid=playerAuth.uid,g=bjson(BADGE_KEY);let old=await fbReq('GET','sx/old/'+uid);
     if(typeof old!=='string'){const mine=SX_IDS.slice(0,SX_LEGACY_N).filter(id=>g[id]&&!(sxCfg[id]&&sxCfg[id].h));if(mine.length&&mine.length<SX_LEGACY_N){try{await fbReq('PUT','sx/old/'+uid,mine.join(','));old=mine.join(',');}catch(e){}}}
@@ -4819,7 +4821,7 @@ async function sxUpload(file){let cfg;try{cfg=JSON.parse(await file.text());if(!
   try{const keep=new Set();for(const b of cfg)for(const k of (b.keys||[]))keep.add(await sxHash(k));const ids=new Set(cfg.map(b=>b.id));const all=(await fbReq('GET','sx/key',null,{admin:true}))||{};
     for(const [h,id] of Object.entries(all))if(ids.has(id)&&!keep.has(h)){try{await fbReq('DELETE','sx/key/'+h,null,{admin:true});}catch(e){}}}catch(e){}
   alert(bad.length?'Uploaded '+ok.length+' of '+cfg.length+' secret badges.\n\nThese failed — press Upload again to retry them:\n'+bad.join('\n'):'All '+cfg.length+' secret badges uploaded.');}
-setTimeout(()=>{sxArt();sxSync();},1500);
+setTimeout(()=>{sxArt();sxSync();},1500);setInterval(()=>{try{sxSync();}catch(e){}},60000);
 // Special section (not counted in the badge totals): Arcana counts your secret badges; Omnia / Omnia Maxima need every main badge.
 const META_BADGES=[
  {id:'arcana',icon:'🗝️',name:'Arcana',lat:'secrets',desc:'Counts the secret badges you have found. No limit.',meta:'count',lv:[1]},
@@ -4836,7 +4838,7 @@ const BADGES=[
  {id:'salve',icon:'👋',name:'Salve!',desc:'Join the leaderboard.',stat:()=>lbMe?1:0,lv:[1]},
  {id:'primus',icon:'🥇',name:'Primus Gradus',lat:'first step',desc:'Get your first correct answer.',stat:()=>bstat().correct||0,lv:[1]},
  {id:'scriptor',icon:'✍️',name:'Scriptor',lat:'writer',desc:'Send your first chat message.',stat:()=>bstat().chat||0,lv:[1]},
- {id:'rank',icon:'⭐',name:'Centurio',desc:'Earn ⭐ in total: Centurio 100, Tribunus 200, Legatus 500, Praefectus 1,000, Imperator 2,000, Consul 5,000, Optimus 10,000.',unit:'⭐',stat:()=>lbMyPoints(),lv:[100,200,500,1000,2000,5000,10000],
+ {id:'rank',icon:'⭐',name:'Centurio',desc:'Earn ⭐ in total: Centurio 100, Tribunus 200, Legatus 500, Praefectus 1,000, Imperator 2,000, Consul 5,000, Optimus 10,000.',unit:'⭐',stat:()=>lbMe&&lbPlayers[lbMe.pid]?Math.max(0,+lbPlayers[lbMe.pid].total||0):0,lv:[100,200,500,1000,2000,5000,10000],
   tiers:[{name:'Centurio',icon:'⭐'},{name:'Tribunus',icon:'⭐'},{name:'Legatus',icon:'⭐'},{name:'Praefectus',icon:'⭐'},{name:'Imperator',icon:'⭐'},{name:'Consul',icon:'⭐'},{name:'Optimus',icon:'💎'}]},
  {id:'diesmagnus',icon:'☀️',name:'Dies Magnus',lat:'big day',desc:'Earn lots of ⭐ in a single day.',unit:'⭐ in a day',stat:()=>Math.max(bstat().bestDay||0,lbTodayPts()),lv:[50,100,200,300,500,750,1000]},
  {id:'constans',icon:'🔥',name:'Constans',lat:'steady',desc:'Reach your daily goal several days in a row.',unit:'day streak',stat:()=>Math.max(bstat().bestStreak||0,dailyStreak()),lv:[1,3,5,7,10,20,30]},
@@ -4964,6 +4966,11 @@ function badgeCheck(){secretWipe();try{verLoad();}catch(e){}const got=bjson(BADG
   BADGES.forEach(bd=>{const v=badgeStatV(bd);const l=badgeLevel(bd,v);const old=got[bd.id]?got[bd.id].l:0;
     if(l>old){got[bd.id]={l,t:Date.now()};changed=true;fresh.push({bd,l,first:!old});}});
   META_BADGES.forEach(bd=>{const v=metaValue(bd,got),old=got[bd.id]?got[bd.id].l:0;if(v>old){got[bd.id]={l:v,t:Date.now()};changed=true;if(bd.meta!=='count')fresh.push({bd,l:v,first:!old});else toast('🗝️ Arcana: '+v+' secret badge'+(v===1?'':'s')+' found!');}});
+  // anything the server can check must match it: changes made only on this screen are undone
+  if(lbMe&&lbPlayers[lbMe.pid]){const rb=badgeById('rank'),mx=badgeLevel(rb,Math.max(0,+lbPlayers[lbMe.pid].total||0)),base=+b['base_rank']||0,lim=badgeLevel(rb,Math.max(0,(+lbPlayers[lbMe.pid].total||0)-base));
+    const cap=BGRANT&&BGRANT.rank&&+BGRANT.rank.l?Math.max(lim,+BGRANT.rank.l):mx;if(got.rank&&got.rank.l>cap){if(cap>0)got.rank.l=cap;else delete got.rank;changed=true;}}
+  if(atagLoaded&&got.socius&&!(lbMe&&(ATAG||{})[lbMe.pid])&&!(BGRANT&&BGRANT.socius&&+BGRANT.socius.l)){delete got.socius;changed=true;}
+  if(sxServer){BADGES.forEach(bd=>{if(bd.secret&&got[bd.id]&&!sxServer.has(bd.id)&&!(BGRANT&&BGRANT[bd.id]&&+BGRANT[bd.id].l)){delete got[bd.id];changed=true;}});}
   if(changed){try{localStorage.setItem(BADGE_KEY,JSON.stringify(got));}catch(e){}}
   syncShownBadges();
   if(document.getElementById('badgeOverlay')&&document.getElementById('badgeOverlay').style.display==='flex')renderBadges();renderBadgeSide();
