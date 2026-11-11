@@ -4363,7 +4363,7 @@ async function showPointsHistory(pid,box){box.innerHTML='<p class="muted">Loadin
   try{r=await fbReq('GET','plog/'+pid,null,{admin:true,query:'?orderBy=%22$key%22&limitToLast=300'});}catch(e){box.innerHTML='<p class="muted">Couldn’t load the history ('+esc(e.message)+'). The database rules may need updating.</p>';return;}
   let ml=null;try{ml=await fbReq('GET','mlog/'+pid,null,{admin:true});}catch(e){}
   const rows=Object.values(r||{}).filter(x=>x&&x.t).concat(Object.values(ml||{}).filter(x=>x&&x.t).map(x=>({t:x.t,n:x.n,mg:x.name}))).sort((a,b)=>a.t-b.t);if(!rows.length){box.innerHTML='<p class="muted">No points saved since the history started.</p>';return;}
-  const MD={mc:'multiple choice',ty:'typed',dr:'declension/conj.',ma:'matching',se:'sentences'};let exT=0;rows.forEach(x=>{if(x.ex)exT+=x.ex;});
+  const MD={mc:'multiple choice',ty:'typed',dr:'declension/conj.',ma:'matching',se:'sentences'};let exT=0,mgT=0,mgN=0;rows.forEach(x=>{if(x.ex)exT+=x.ex;if(x.mg!=null){mgT+=+x.n||0;mgN++;}});
   const tot=rows.reduce((a,x)=>a+(+x.n||0),0),days={},byMode={};rows.forEach(x=>{const d=new Date(x.t).toLocaleDateString();days[d]=(days[d]||0)+(+x.n||0);
     if(x.a){const m=byMode[x.md]=byMode[x.md]||{a:0,w:0,ps:0,pn:0};m.a+=x.a;m.w+=x.w||0;if(x.pc){m.ps+=x.pc*x.a;m.pn+=x.a;}}});
   // suspicious: lots of answers at under a second each (an autoclicker), especially multiple choice
@@ -4371,7 +4371,7 @@ async function showPointsHistory(pid,box){box.innerHTML='<p class="muted">Loadin
   // most ⭐ an honest save could hold for its answers: 1 per vocab / matching answer, 2 per declension, up to 25 per sentence (+ a little for bonuses and leftovers)
   const allow=x=>{const a=+x.a||0,dr=+x.dr||0,se=+x.se||0;return (a-dr-se)+2*dr+25*se+12;},OV=new Set();{let credit=0;rows.forEach(x=>{if(x.mg||x.t<1794352873563){credit=0;return;}const used=x.n-(x.ex||0);credit+=allow(x)-12;if(used>credit+12)OV.add(x);credit=Math.max(0,credit-used);});}   // answers' ⭐ can arrive a few saves later
   const over=x=>OV.has(x);let nOver=OV.size;
-  let h='<p style="margin:6px 0"><b>'+rows.length+'</b> saves, <b>'+tot.toLocaleString()+'</b> points since the history started'+(exT?' (<b>'+exT.toLocaleString()+'</b> from exams)':'')+'. '+Object.entries(days).slice(-7).map(([d,n])=>esc(d)+': '+n.toLocaleString()).join(' · ')+'</p>';
+  let h='<p style="margin:6px 0"><b>'+rows.length+'</b> saves, <b>'+tot.toLocaleString()+'</b> points since the history started'+(exT?' (<b>'+exT.toLocaleString()+'</b> from exams)':'')+(mgN?' (<b>'+mgT.toLocaleString()+'</b> from '+mgN+' merged account'+(mgN===1?'':'s')+')':'')+'. '+Object.entries(days).slice(-7).map(([d,n])=>esc(d)+': '+n.toLocaleString()).join(' · ')+'</p>';
   const modes=Object.entries(byMode).filter(([k])=>MD[k]);if(nOver)h+='<p style="margin:4px 0;color:var(--red,#e07a6a)"><b>⚠ '+nOver+' save'+(nOver===1?'':'s')+' with far more ⭐ than their answers can give</b> (not from an exam or merge). That’s what points typed into the browser console look like.</p>';if(modes.length)h+='<p style="margin:4px 0 8px;font-size:13px">'+modes.map(([k,m])=>'<b>'+MD[k]+'</b>: '+m.a+' answers, '+Math.round((m.a-m.w)/m.a*100)+'% right'+(m.pn?', '+(m.ps/m.pn/10).toFixed(1)+' s each':'')).join(' · ')+'</p>';
   h+='<div style="max-height:280px;overflow-y:auto"><table class="nh-table"><tr><th>When</th><th>Points</th><th>Answers</th><th>Mode</th><th>Pace</th></tr>';
   rows.slice().reverse().forEach((x,i,arr)=>{const prev=arr[i+1],gap=prev?(x.t-prev.t)/1000:null,rate=gap&&!x.mg?(x.n-(x.ex||0))/gap:null,ov=over(x),fast=(rate!=null&&rate>2.5&&x.t<1794352873563)||sus(x)||ov;   // newer saves: the server itself limits the speed
@@ -6270,8 +6270,9 @@ async function acctSubmit(){if(acctMode==='chpass'||acctMode==='chemail')return 
 // src's points (total + today/week/month), secret badges, premium, stats and progress are added to tgt, then src is deleted.
 // The server only allows it because src itself first says "merge me into tgt" (mto/src), and tgt adds exactly src's
 // points in the same save that deletes src, so nothing can be counted twice.
-function mergeErr(e){const m=String(e&&e.message||'');return /HTTP 40[13]/.test(m)?'the database rules need updating (ask the admin).':/same/.test(m)?'that’s the account you’re already using.':'check your internet and try again.';}
+function mergeErr(e){const m=String(e&&e.message||'');return /once a day/.test(m)?'you can only merge one account a day. Try again tomorrow.':/HTTP 40[13]/.test(m)?'the database rules need updating (ask the admin).':/same/.test(m)?'that’s the account you’re already using.':'check your internet and try again.';}
 async function mergeAccounts(tgt,src){const T=tgt.uid,S=src.uid;if(!T||!S||T===S)throw new Error('same account');const as=a=>({tok:a.idToken});
+  {const p0=await fbReq('GET','players/'+T,null,as(tgt)).catch(()=>null);if(p0&&p0.mgt&&Date.now()-p0.mgt<86400000)throw new Error('once a day');}
   await fbReq('PUT','mto/'+S,T,as(src));MTO[S]=T;
   const [pS,gotS,oldS,premS,progS]=await Promise.all([fbReq('GET','players/'+S,null,as(src)),fbReq('GET','sx/got/'+S,null,as(src)).catch(()=>null),fbReq('GET','sx/old/'+S,null,as(src)).catch(()=>null),fbReq('GET','prem/'+S,null,as(src)).catch(()=>null),fbReq('GET','progress/'+S,null,as(src)).catch(()=>null)]);
   await fbReq('PUT','mfrom/'+T,S,as(tgt));
@@ -6280,6 +6281,8 @@ async function mergeAccounts(tgt,src){const T=tgt.uid,S=src.uid;if(!T||!S||T===S
   if(oldS){try{if(!(await fbReq('GET','sx/old/'+T,null,as(tgt))))await fbReq('PUT','sx/old/'+T,oldS,as(tgt));}catch(e){}}
   if(premS){try{if(!(await fbReq('GET','prem/'+T,null,as(tgt))))await fbReq('PUT','prem/'+T,{c:'merge',t:{'.sv':'timestamp'}},as(tgt));}catch(e){}}
   if(pS&&typeof pS.total==='number'){const pT=await fbReq('GET','players/'+T,null,as(tgt)),P='players/'+T+'/',body={};
+    if(pT&&pT.mgt&&Date.now()-pT.mgt<86400000)throw new Error('once a day');   // the server allows one merge a day
+    body[P+'mgt']={'.sv':'timestamp'};
     if(!pT){body[P+'name']=pS.name;['av','color','font','fx','bd'].forEach(k=>{if(pS[k]!=null)body[P+k]=pS[k];});}
     body[P+'total']=((pT&&pT.total)||0)+pS.total;
     ['d','w','m'].forEach(x=>Object.entries(pS[x]||{}).forEach(([k,v])=>{if(typeof v==='number')body[P+x+'/'+k]=((pT&&pT[x]&&pT[x][k])||0)+v;}));
