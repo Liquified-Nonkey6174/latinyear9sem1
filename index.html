@@ -4137,7 +4137,7 @@ async function lbSaveName(raw){const name=lbCleanName(raw);{const blk=await sxNa
   if(prev!==name)logName(pid,name,prev===null?'join':'self',false,prev);
   lbPlayers[pid]={...(lbPlayers[pid]||{total:0}),name};
   lbMe={pid,name};lbEditing=false;saveLbMe();renderLbProfile();lbUpdatePoints();renderLb();renderChat();if(!cloudPulled)cloudPull();}
-async function lbLeave(){if(!lbMe||!confirm('Leave the leaderboard and chat? Your name and points will be removed. Your chat messages will show as “(left)”.'))return;
+async function lbLeave(){if(lbMe&&((lbPlayers[lbMe.pid]||{}).total||0)<0){alert('You can’t leave the leaderboard while your score is below zero.');return;}if(!lbMe||!confirm('Leave the leaderboard and chat? Your name and points will be removed. Your chat messages will show as “(left)”.'))return;
   const pid=lbMe.pid;try{await fbReq('DELETE','players/'+pid);}catch(e){renderLbProfile('Couldn’t reach the server. Try again.',true);return;}
   lbMe=null;lbPending=0;saveLbMe();renderLbProfile();lbUpdatePoints();renderLb();}
 
