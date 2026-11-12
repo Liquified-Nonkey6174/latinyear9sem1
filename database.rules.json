@@ -154,7 +154,8 @@
         "$k": {
           ".write": "auth != null && auth.uid === $uid && !data.exists()",
           ".validate": "$k.matches(/^[a-z0-9]{6,24}$/) && newData.hasChildren(['n', 't']) && newData.child('n').isNumber() && newData.child('n').val() % 1 === 0 && newData.child('n').val() >= 1 && newData.child('n').val() <= 300 && newData.child('t').val() === now"
-        }
+        },
+        ".read": "auth != null && auth.uid === $uid"
       }
     },
     "progress": {

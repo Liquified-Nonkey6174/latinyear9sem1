@@ -771,7 +771,7 @@ body:has(.overlay[style*="display: flex"]) .side-fab,body:has(#bReveal[style*="d
         <button class="btn-primary" style="font-size:12px;padding:6px 16px" onclick="saveDesc()">Save</button>
         <button class="btn-secondary" style="font-size:12px;padding:6px 14px" onclick="cancelDescEdit()">Cancel</button>
       </div>
-      <div style="margin-top:8px"><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="annEdit()">📢 Edit announcement</button><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="rulesCheck()" title="Find out whether the rules published in Firebase are up to date">🔍 Check database rules</button><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="claimsOpen()" title="Badges players' devices say they had before the server took over">📝 Badge claims</button><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="sxCheck()" title="Why isn't a secret badge unlocking?">🔎 Secret badge check</button><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="premList()" title="Who has premium, and how they got it">👑 Premium list</button><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="contactEdit()" title="The email non-members are told to contact for a member tag">✉ Contact email</button><button class="btn-secondary" id="asStudentBtn" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="toggleAsStudent()" title="See the leaderboard, chat and Online now exactly as a student does">👁 View as a student</button><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="apprByName()" title="Let a player be seen by everyone on the leaderboard and in chat">✔ Approve player</button><label class="btn-secondary" style="font-size:12px;padding:6px 14px;cursor:pointer;display:inline-block">🔒 Upload secret badge answers<input type="file" accept=".json" style="display:none" onchange="if(this.files[0])sxUpload(this.files[0]);this.value=''"></label></div>
+      <div style="margin-top:8px"><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="annEdit()">📢 Edit announcement</button><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="rulesCheck()" title="Find out whether the rules published in Firebase are up to date">🔍 Check database rules</button><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" id="claimsBtn" onclick="claimsOpen()" title="Badges players' apps say they had before badges moved to the server">📝 Badge claims</button><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="sxCheck()" title="Why isn't a secret badge unlocking?">🔎 Secret badge check</button><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="premList()" title="Who has premium, and how they got it">👑 Premium list</button><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="contactEdit()" title="The email non-members are told to contact for a member tag">✉ Contact email</button><button class="btn-secondary" id="asStudentBtn" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="toggleAsStudent()" title="See the leaderboard, chat and Online now exactly as a student does">👁 View as a student</button><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="apprByName()" title="Let a player be seen by everyone on the leaderboard and in chat">✔ Approve player</button><label class="btn-secondary" style="font-size:12px;padding:6px 14px;cursor:pointer;display:inline-block">🔒 Upload secret badge answers<input type="file" accept=".json" style="display:none" onchange="if(this.files[0])sxUpload(this.files[0]);this.value=''"></label></div>
     </div>
   </div>
   <div class="settings-row"><button class="settings-btn" onclick="showSettings()">⚙ Settings</button> <button class="settings-btn" id="acctBtn" onclick="acctHub()" title="Sign in, or use your account on other devices">👤 Account</button> <button class="settings-btn" onclick="openBadges()">🏅 Badges <span id="badgeBtnCount" style="opacity:.7;font-size:12px"></span><span class="bf-dot" id="badgeBtnDot" title="New in the badge feed"></span></button></div>
@@ -3672,7 +3672,7 @@ async function checkAdminAuth(){
   try{
     const a=authFrom(await authPost('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword',{email:u,password:p,returnSecureToken:true}));
     if(a.uid!==ADMIN_UID){err.textContent='That account isn’t the admin.';return;}
-    adminAuth=a;isAdmin=true;hideAdminModal();startDescEdit();setTimeout(()=>atagLoad(),0);setTimeout(()=>{try{srvAdminSetup();}catch(e){}},1500);setTimeout(()=>{chatPurgeHidden().catch(()=>{});sxAdminTidy().catch(()=>{});},4000);
+    adminAuth=a;isAdmin=true;hideAdminModal();startDescEdit();setTimeout(()=>atagLoad(true),0);setTimeout(()=>{try{srvAdminSetup();}catch(e){}},1500);setTimeout(()=>{chatPurgeHidden().catch(()=>{});sxAdminTidy().catch(()=>{});claimsPeek();duelsTidy(true);},4000);
     renderLb();renderChat();
   }catch(e){err.textContent=/TOO_MANY/.test(e.message)?'Too many attempts. Wait a few minutes and try again.':/INVALID|EMAIL|PASSWORD|USER_DISABLED/.test(e.message)?'Incorrect email or password.':'Couldn’t reach the server. Check your internet.';}
   finally{btn.disabled=false;}
@@ -4109,7 +4109,7 @@ function startAttempt(){quizNoPoints=false;const n=isDrill?drillQs.length:quizWo
   const sig=quizSig();st.c[sig]=(st.c[sig]||0)+1;try{localStorage.setItem(ATTEMPTS_KEY,JSON.stringify(st));}catch(e){}
   if(st.c[sig]>=3){quizNoPoints=true;if(lbMe)toast('You’ve done this short quiz 3 times today, so it won’t earn leaderboard points now.');}}
 async function lbUnconfCheck(){let u;try{u=JSON.parse(localStorage.getItem('latin_lb_unconf')||'null');}catch(e){}if(!u||!lbMe||u.pid!==lbMe.pid)return;
-  try{const lk=await fbReq('GET','players/'+u.pid+'/lk');localStorage.removeItem('latin_lb_unconf');if(lk!==u.lk&&+u.n>0){lbPending+=Math.round(+u.n);lbUpdatePoints();if(!lbFlushTimer)lbFlushTimer=setTimeout(()=>lbFlush(),3000);}}catch(e){}}
+  try{const lg=await fbReq('GET','plog/'+u.pid+'/'+u.lk);localStorage.removeItem('latin_lb_unconf');if(lg==null&&+u.n>0){lbPending+=Math.round(+u.n);lbUpdatePoints();if(!lbFlushTimer)lbFlushTimer=setTimeout(()=>lbFlush(),3000);}}catch(e){}}
 setTimeout(()=>{lbUnconfCheck();},4000);
 function lbCount(n){try{badgeCheckSoon();}catch(e){}n=Math.round(+n||1);if(n<1||!lbMe)return;   // whole stars only (the server refuses anything else)
   if(quizNoPoints){const pill=document.getElementById('pointsPill');if(pill){pill.textContent='⭐ no points: quiz repeated';pill.classList.add('dim');clearTimeout(ptsNoteTimer);ptsNoteTimer=setTimeout(()=>{pill.classList.remove('dim');lbUpdatePoints();},1400);}return;}
@@ -4130,12 +4130,12 @@ async function lbFlush(keepalive){clearTimeout(lbFlushTimer);lbFlushTimer=null;i
   const body={[P+'total']:inc,[P+'lt']:{'.sv':'timestamp'},[P+'lk']:lk,['plog/'+lbMe.pid+'/'+lk]:(()=>{const S=ansStats,md=['mc','ty','dr','ma','se'].sort((x,y)=>(S[y]||0)-(S[x]||0))[0];const e={n,t:{'.sv':'timestamp'},a:S.a,w:S.w};if(S.a)e.md=md;if(S.dr)e.dr=S.dr;if(S.se)e.se=S.se;if(exN){e.ex=exN;e.es=lbExamInfo.s;e.ed=lbExamInfo.d;}if(S.pn)e.pc=Math.round(S.ps/S.pn/100);ansStats={a:0,w:0,mc:0,ty:0,dr:0,ma:0,se:0,ps:0,pn:0};return e;})()};['d','w','m'].forEach(x=>{body[P+x+'/'+k[x]]=inc;if(mine&&mine[x])Object.keys(mine[x]).forEach(old=>{if(old<k[x])body[P+x+'/'+old]=null;});});
   lbInFlightBase=(mine&&mine.total)||0;lbInFlight=n;lbPending-=n;
   if(lbPending>0){if(keepalive){try{window.storage.set(LB_PENDING_KEY,String(lbPending));lbExamKeep();}catch(e){}lbPending=0;}else if(!lbFlushTimer)lbFlushTimer=setTimeout(()=>lbFlush(),30000);}
-  try{if(!keepalive&&(await fbReq('GET','players/'+lbMe.pid+'/name'))==null){lbInFlight=0;lbRemoved();return;}
+  try{
     try{localStorage.setItem('latin_lb_unconf',JSON.stringify({pid:lbMe.pid,lk,n}));}catch(x){}
     const t0=Date.now(),r=await fbReq('PATCH','',body,{keepalive});lbInFlight=0;try{localStorage.removeItem('latin_lb_unconf');}catch(x){}
     const lt=r&&(r[P+'lt']||(r.players&&r.players[lbMe.pid]&&r.players[lbMe.pid].lt));if(typeof lt==='number')srvSkew=lt-Math.round((t0+Date.now())/2);
     lbLastOk=typeof lt==='number'?lt:srvNow();lbCap=300;lbConfirmed=lbInFlightBase+n;lbConfirmedAt=Date.now();}
-  catch(e){lbInFlight=0;lbPending+=n;lbExamPend+=exN;try{localStorage.removeItem('latin_lb_unconf');}catch(x){}lbCap=Math.max(1,Math.floor(n/2));   // refused (usually too many at once): send less next time
+  catch(e){if(!keepalive){try{if((await fbReq('GET','players/'+lbMe.pid+'/name'))==null){lbInFlight=0;lbRemoved();return;}}catch(x){}}lbInFlight=0;lbPending+=n;lbExamPend+=exN;try{localStorage.removeItem('latin_lb_unconf');}catch(x){}lbCap=Math.max(1,Math.floor(n/2));   // refused (usually too many at once): send less next time
     clearTimeout(lbFlushTimer);lbFlushTimer=setTimeout(()=>lbFlush(),6000);}
   lbUpdatePoints();}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')lbFlush(true);});
@@ -4403,7 +4403,7 @@ function memberPopup(){if(memberShown||isAdmin||(lbMe&&isPublic(lbMe.pid)))retur
   document.getElementById('memberOverlay').style.display='flex';}
 async function contactEdit(){const v=prompt('Contact email shown to non-members (“Email … to get a member tag”). Leave empty to remove:',CONTACT);if(v===null)return;const t=v.trim().slice(0,100);
   try{await fbReq(t?'PUT':'DELETE','contact',t||null,{admin:true});CONTACT=t;toast(t?'Contact email saved.':'Contact email removed.');}catch(e){alert('Couldn’t save ('+e.message+').'+(/40[13]/.test(e.message)?'\n\nPublish the latest database rules first.':''));}}
-var ATAG={},atagLoaded=false;async function atagLoad(){const was=JSON.stringify([ATAG,APPR]);try{const [t,a]=await Promise.all([fbReq('GET','atag',null,isAdmin?{admin:true}:{}),fbReq('GET','appr',null,isAdmin?{admin:true}:{}).catch(()=>undefined)]);ATAG=t||{};atagLoaded=true;if(a!==undefined)APPR=a||{};}catch(e){return;}
+var ATAG={},atagLoaded=false,atagAt=0;async function atagLoad(force){if(!force&&!isAdmin&&atagLoaded&&Date.now()-atagAt<180000)return;atagAt=Date.now();const was=JSON.stringify([ATAG,APPR]);try{const [t,a]=await Promise.all([fbReq('GET','atag',null,isAdmin?{admin:true}:{}),fbReq('GET','appr',null,isAdmin?{admin:true}:{}).catch(()=>undefined)]);ATAG=t||{};atagLoaded=true;if(a!==undefined)APPR=a||{};}catch(e){return;}
   if(!memberShown){try{const c=await fbReq('GET','contact');if(typeof c==='string')CONTACT=c;}catch(e){}setTimeout(memberPopup,800);}if(JSON.stringify([ATAG,APPR])!==was){try{badgeCheckSoon();renderLb();renderChat();renderOnline();updChatInput();}catch(e){}}try{renderLb();renderChat();renderBadgeFeed();}catch(e){}}
 // admin: set a player's 🔥 daily streak. Streaks live on each device, so the server holds the number and each device applies it once.
 function agoText(t){t=+t;if(!t)return 'some time ago';const m=Math.round((Date.now()-t)/60000);return m<1?'just now':m<60?m+' min ago':m<1440?Math.round(m/60)+' h ago':new Date(t).toLocaleDateString();}
@@ -4905,7 +4905,7 @@ async function sxUpload(file){let cfg;try{cfg=JSON.parse(await file.text());if(!
     for(const [h,id] of Object.entries(all))if(ids.has(id)&&!(h in want))del['sx/key/'+h]=null;if(Object.keys(del).length)await patch(del);
     const miss=new Set();Object.entries(want).forEach(([h,id])=>{if(id&&all[h]!==id)miss.add(id);});missing=cfg.filter(b=>miss.has(b.id)).map(b=>b.name);}catch(e){missing=['(couldn’t check: '+e.message+')'];}
   alert(bad.length||missing.length?'Uploaded '+ok.length+' of '+cfg.length+' secret badges.'+(bad.length?'\n\nThese failed:\n'+bad.join('\n'):'')+(missing.length?'\n\nNot fully on the server:\n'+missing.join('\n'):'')+'\n\nPress Upload again to retry.':'All '+cfg.length+' secret badges uploaded and checked.');}
-setTimeout(()=>{sxArt();sxSync();},1500);setInterval(()=>{try{sxSync();}catch(e){}},60000);
+setTimeout(()=>{sxArt();sxSync();},1500);setInterval(()=>{if(document.visibilityState==='visible')try{sxSync();}catch(e){}},180000);
 // Special section (not counted in the badge totals): Arcana counts your secret badges; Omnia / Omnia Maxima need every main badge.
 const META_BADGES=[
  {id:'arcana',icon:'🗝️',name:'Arcana',lat:'secrets',desc:'Counts the secret badges you have found. No limit.',meta:'count',lv:[1]},
@@ -5200,14 +5200,14 @@ function renderParse(){const a=document.getElementById('readArea');if(!parseQ)ne
 function pickParse(i){if(!parseQ||parseQ.picked!=null)return;parseQ.picked=i;const ok=parseQ.opts[i]===parseAnswer(parseQ.t);parseScore.n++;badgeAnswer(ok);if(ok){parseScore.r++;quizNoPoints=false;lbCount();dailyTick();}playTone(ok);renderParse();}
 
 let pollBusy=false;
-async function pollShared(){if(pollBusy)return;pollBusy=true;
+var premAt=0;async function pollShared(){if(pollBusy)return;pollBusy=true;
   try{atagLoad();}catch(e){}
   try{const [d,c,mu,lh]=await Promise.all([fbReq('GET','duels').catch(()=>undefined),fbReq('GET','challenge').catch(()=>undefined),fbReq('GET','mute').catch(()=>undefined),fbReq('GET','lbhide').catch(()=>undefined)]);
     const setsKey=()=>[...mutedSet].sort().join()+'|'+[...lbHidden].sort().join();const before=setsKey();
     if(mu!==undefined)mutedSet=new Set(Object.keys(mu||{}));if(lh!==undefined)lbHidden=new Set(Object.keys(lh||{}));
     if(setsKey()!==before){renderLb();renderChat();try{renderOnline();}catch(e){}}
-    if(lbMe){const pr=await fbReq('GET','prem/'+lbMe.pid).catch(()=>undefined);if(pr!==undefined&&!!pr!==premMe){premMe=!!pr;renderLbProfile();if(premMe)sxPremClaim();if(document.getElementById('lookOverlay').style.display==='flex')renderLook();}}
-    if(d!==undefined){duelsObj=safeKeys(d);updDuelBtn();if(document.getElementById('duelInboxOverlay').style.display==='flex')renderDuelInbox();}
+    if(lbMe&&Date.now()-premAt>300000){premAt=Date.now();const pr=await fbReq('GET','prem/'+lbMe.pid).catch(()=>undefined);if(pr!==undefined&&!!pr!==premMe){premMe=!!pr;renderLbProfile();if(premMe)sxPremClaim();if(document.getElementById('lookOverlay').style.display==='flex')renderLook();}}
+    if(d!==undefined){duelsObj=safeKeys(d);duelsTidy();updDuelBtn();if(document.getElementById('duelInboxOverlay').style.display==='flex')renderDuelInbox();}
     if(c!==undefined){classChal=c&&c.target?c:null;renderClassChallenge();}}
   finally{pollBusy=false;}}
 // ── HEAD-TO-HEAD CHALLENGES ──────────────────────────────────────────────────
@@ -5256,6 +5256,9 @@ function renderDuelInbox(){const box=document.getElementById('duelInbox');if(!bo
   h+=sec('Waiting for them',wait,d=>'<div class="dl-row"><span>vs <b>'+esc(opName(d))+'</b> · you scored '+d.res[me].s+'/'+d.qs.length+'</span>'+(d.from===me?'<button class="lb-link muted" onclick="deleteDuel(\''+d.id+'\')">Cancel</button>':'')+'</div>');
   h+=sec('Finished',done,d=>{const w=duelWinner(d),a=d.res[me],b=d.res[d.from===me?d.to:d.from];return '<div class="dl-row"><span>'+(w===me?'🏆 You beat ':w?'You lost to ':'Draw with ')+'<b>'+esc(opName(d))+'</b> · '+a.s+'–'+b.s+' ('+(duelMs(d,me)/1000).toFixed(1)+'s vs '+(duelMs(d,d.from===me?d.to:d.from)/1000).toFixed(1)+'s)</span><button class="lb-link muted" onclick="deleteDuel(\''+d.id+'\')">Clear</button></div>';});
   box.innerHTML=h;}
+let _dtAt=0;async function duelsTidy(all){if(Date.now()-_dtAt<600000&&!all)return;_dtAt=Date.now();const old=Date.now()-30*864e5,body={};
+  Object.entries(duelsObj||{}).forEach(([id,d])=>{if(!d||!(+d.t<old))return;const done=d.res&&d.res[d.from]&&d.res[d.to];const mine=lbMe&&(d.from===lbMe.pid||d.to===lbMe.pid);if((all&&isAdmin)||(mine&&done))body['duels/'+id]=null;});
+  const ks=Object.keys(body);if(!ks.length)return;try{if(all&&isAdmin)await fbReq('PATCH','',body,{admin:true});else for(const k of ks)await fbReq('DELETE',k);ks.forEach(k=>delete duelsObj[k.slice(6)]);}catch(e){}}
 async function deleteDuel(id){try{await fbReq('DELETE','duels/'+id);delete duelsObj[id];pollShared();}catch(e){}renderDuelInbox();updDuelBtn();}
 function startDuel(id){const d=duelsObj[id];if(!d)return;const qs=d.qs.map(q=>({w:wordByKey(q.k),d:q.d})).filter(q=>q.w);duelGame={id,qs,i:0,score:0,t0:Date.now(),fb:null};
   // the server notes the moment you first open it; restarting doesn't reset your time
@@ -5293,7 +5296,7 @@ loadLbMe().then(()=>{
   // Challenges and the class challenge are checked every 15s (and after your own actions) rather than kept
   // as live connections: browsers allow only ~6 connections per site across ALL tabs, so live streams are
   // kept to two per tab (leaderboard + chat).
-  pollShared();setInterval(()=>{if(document.visibilityState==='visible')pollShared();},15000);
+  pollShared();setInterval(()=>{if(document.visibilityState==='visible')pollShared();},45000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')pollShared();});
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')pollShared();});
   fbStream('chat','orderBy=%22$key%22&limitToLast=100',(path,data,isPatch)=>{chatObj=safeKeys(applyAt(chatObj,path,data,isPatch));chatLoaded=true;
     chatMsgs=Object.entries(chatObj).map(([id,m])=>({id,...m})).sort((a,b)=>a.id<b.id?-1:1);renderChat();},
@@ -6313,7 +6316,7 @@ function openQuizForms(){const w=currentCardWord();if(!w)return;if(!answered&&!(
 /* ---------- export / import ---------- */
 let pendingBackup=null;
 function backupMsg(t,ok){const el=document.getElementById('backupMsg');if(!el)return;el.textContent=t||'';el.style.color=ok===false?'var(--red)':ok?'var(--green)':'var(--text3)';}
-function buildBackup(){return{app:'latin-trainer',version:1,exported:new Date().toISOString(),badges:bjson(BADGE_KEY),badgeStats:bstat(),accuracy:accData(),theme:currentTheme,sr:Object.fromEntries(Object.entries(srData).filter(([k,v])=>v&&v.seen>0)),stats:statsData,custom:customWords,starred:starred,pins:badgePins(),daily:dailyData(),stories:storyDone()};}
+function buildBackup(){return{app:'latin-trainer',version:1,exported:new Date().toISOString(),badges:bjson(BADGE_KEY),badgeStats:bstat(),accuracy:accData(),theme:currentTheme,sr:Object.fromEntries(Object.entries(srData).filter(([k,v])=>v&&v.seen>0)),stats:statsData,custom:customWords,starred:starred,pins:badgePins(),daily:dailyData(),stories:storyDone(),met:[...dailyMetSet()]};}
 function exportProgress(){const text=JSON.stringify(buildBackup());const name='latin-trainer-progress-'+new Date().toISOString().slice(0,10)+'.json';
   try{const blob=new Blob([text],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);backupMsg('Exported “'+name+'”. Keep it somewhere safe.',true);}
   catch(e){const ta=document.getElementById('backupText');if(ta){ta.value=text;document.getElementById('backupDetails').open=true;}backupMsg('Download blocked here — copy the text below instead.',false);}}
@@ -6337,6 +6340,7 @@ function cleanBackup(o){if(!o||o.app!=='latin-trainer'||typeof o.sr!=='object'||
   clean.badgeStats={};if(isObj(o.badgeStats))Object.entries(o.badgeStats).forEach(([k,v])=>{if(!okKey(k))return;if(typeof v==='number'&&isFinite(v))clean.badgeStats[k]=v;else if(Array.isArray(v))clean.badgeStats[k]=v.filter(x=>(typeof x==='string'&&okKey(x))||(typeof x==='number'&&isFinite(x))).slice(0,500);});
   clean.accuracy={};if(isObj(o.accuracy))Object.entries(o.accuracy).forEach(([k,v])=>{if(okKey(k)&&v&&isFinite(v.s)&&isFinite(v.c))clean.accuracy[k]={s:+v.s,c:Math.min(+v.c,+v.s),...(v.t?{t:+v.t}:{})};});
   clean.pins=Array.isArray(o.pins)?o.pins.filter(x=>typeof x==='string'&&/^[a-z0-9]{2,20}$/.test(x)).slice(0,MAX_PINS):null;
+  clean.met=Array.isArray(o.met)?o.met.filter(x=>typeof x==='string'&&/^\d{4}-\d\d-\d\d$/.test(x)).slice(-4000):[];
   clean.daily={};if(isObj(o.daily))Object.entries(o.daily).forEach(([k,v])=>{if(/^\d{4}-\d\d-\d\d$/.test(k)&&isFinite(v))clean.daily[k]=+v;});
   clean.stories={};if(isObj(o.stories))Object.entries(o.stories).forEach(([k,v])=>{const st=STORIES.find(x=>x.id===k);if(st&&isFinite(v)&&+v>0)clean.stories[k]=Math.min(Math.round(+v),st.lines.length);});
   // sign-in details are never taken from a backup (old backups may still carry one: it is ignored)
@@ -6376,6 +6380,7 @@ function mergeExtras(b,replace,sum){const L=k=>{try{return JSON.parse(localStora
   if(b.badgeStats){const cur=replace?{}:(L(BSTAT_KEY)||{});Object.entries(b.badgeStats).forEach(([k,v])=>{const c=cur[k];if(Array.isArray(v))cur[k]=[...new Set([...(Array.isArray(c)?c:[]),...v])];else if(typeof v==='number')cur[k]=typeof c==='number'?(sum&&MERGE_SUM_STATS.has(k)?c+v:Math.max(c,v)):v;});S(BSTAT_KEY,cur);_bstat=null;}
   if(b.accuracy){const cur=replace?{}:(L(ACC_KEY)||{});Object.entries(b.accuracy).forEach(([k,v])=>{const c=cur[k];if(sum&&c)cur[k]={...c,...v,s:(c.s||0)+(v.s||0),c:(c.c||0)+(v.c||0),t:Math.max(c.t||0,v.t||0)};else if(!c||v.s>c.s)cur[k]=v;});S(ACC_KEY,cur);}
   if(b.pins&&(replace||!badgePins().length))S(PIN_KEY,b.pins);
+  if(b.met&&b.met.length){const m=replace?new Set():dailyMetSet();b.met.forEach(x=>m.add(x));S(DAILY_MET_KEY,[...m].sort().slice(-4000));}
   if(b.daily){const cur=replace?{}:dailyData();Object.entries(b.daily).forEach(([k,v])=>{cur[k]=sum&&typeof v==='number'?(cur[k]||0)+v:Math.max(cur[k]||0,v);});S(DAILY_KEY,cur);}
   if(b.stories){const cur=replace?{}:storyDone();Object.assign(cur,b.stories);S(STORY_DONE_KEY,cur);}}
 
@@ -6992,16 +6997,26 @@ function srvMode(){if(SRV.frozen){try{localStorage.setItem('latin_srv_frozen','1
 function srvClaim(got,lv){try{if(!lbMe)return;const claim={};BADGES.forEach(bd=>{if(bd.secret||bd.id==='rank'||bd.id==='chester')return;let v=0;try{v=bd.stat();}catch(e){}
       const old=Math.max(got[bd.id]?+got[bd.id].l||0:0,badgeLevel(bd,Math.max(0,v-(+bstat()['base_'+bd.id]||0)))),L=Math.min(old,bd.lv.length);if(L>(lv[bd.id]||0))claim[bd.id]=L;});
     ['fereomnia','omnia','omniamax','inscriptus'].forEach(id=>{if(got[id]&&+got[id].l>(lv[id]||0))claim[id]=1;});
-    const key=JSON.stringify(claim);if(!Object.keys(claim).length||localStorage.getItem('latin_bclaim_sent')===key)return;
-    fbReq('PUT','bclaim/'+lbMe.pid,{...claim,t:{'.sv':'timestamp'}}).then(()=>{try{localStorage.setItem('latin_bclaim_sent',key);}catch(e){}}).catch(()=>{});}catch(e){}}
+    // once per account on this device: after you approve or reject it, it never comes back
+    const done='latin_bclaim_done_'+lbMe.pid;if(localStorage.getItem(done))return;if(!Object.keys(claim).length){localStorage.setItem(done,'none');return;}
+    fbReq('PUT','bclaim/'+lbMe.pid,{...claim,t:{'.sv':'timestamp'}}).then(()=>{try{localStorage.setItem(done,'sent');}catch(e){}}).catch(()=>{});}catch(e){}}
 async function claimsOpen(){let r;try{r=(await fbReq('GET','bclaim',null,{admin:true}))||{};}catch(e){alert('Couldn’t load the claims ('+e.message+'). Publish the latest database rules first.');return;}
-  const box=document.getElementById('claimsBody'),ids=Object.keys(r);
-  box.innerHTML=ids.length?'<p class="acct-note">These players’ devices show badges that weren’t in the frozen record (their device may not have synced before the freeze). Approve to add them; reject if they look faked.</p>'+ids.map(pid=>{const c=r[pid]||{},p=lbPlayers[pid]||{};const list=Object.entries(c).filter(([k])=>k!=='t').map(([id,l])=>{const b=badgeById(id);return b?esc(b.lv.length>1?badgeTierName(b,+l):b.name):esc(id);}).join(', ');
-    return '<div class="cl-row" data-pid="'+esc(pid)+'"><div><b>'+esc(p.name||'(not on the leaderboard)')+'</b>'+((ATAG||{})[pid]?' <span class="atag">'+esc(ATAG[pid])+'</span>':'')+'<br><span class="muted" style="font-size:12px">'+list+'</span></div><div class="cl-btns"><button class="btn-primary" data-act="ok">Approve</button><button class="btn-secondary" data-act="no">Reject</button></div></div>';}).join(''):'<p class="acct-note">No badge claims waiting.</p>';
-  box.querySelectorAll('.cl-row button').forEach(bt=>bt.onclick=async()=>{const row=bt.closest('.cl-row'),pid=row.dataset.pid,c=r[pid]||{};bt.disabled=true;
-    try{if(bt.dataset.act==='ok'){const cur=(await fbReq('GET','blegacy/'+pid,null,{admin:true}))||{};Object.entries(c).forEach(([id,l])=>{if(id!=='t')cur[id]=Math.max(+cur[id]||0,+l||0);});await fbReq('PUT','blegacy/'+pid,cur,{admin:true});SRV.at[pid]=0;}
-      await fbReq('DELETE','bclaim/'+pid,null,{admin:true});row.remove();toast(bt.dataset.act==='ok'?'Approved.':'Rejected.');}catch(e){bt.disabled=false;toast('Couldn’t save ('+e.message+').');}});
-  document.querySelector('#claimsOverlay .ann-head').textContent='📝 Badge claims';document.getElementById('claimsOverlay').style.display='flex';}
+  document.querySelector('#claimsOverlay .ann-head').textContent='📝 Badge claims';const box=document.getElementById('claimsBody'),ids=Object.keys(r);
+  const intro='<p class="acct-note">When badges moved to the server, each player’s badges were copied into a server record. Players whose app hadn’t synced yet could be missed, so their app sends the badges it still has here, once. <b>Approve</b> adds them to their record; <b>Reject</b> if they look made up (e.g. lots of top levels with few ⭐). Either way that claim won’t come back.</p>';
+  if(!ids.length){box.innerHTML=intro+'<p class="acct-note"><b>No claims waiting.</b></p>';document.getElementById('claimsOverlay').style.display='flex';claimsCount(0);return;}
+  box.innerHTML=intro+'<p class="muted">Loading '+ids.length+'…</p>';document.getElementById('claimsOverlay').style.display='flex';
+  await Promise.all(ids.map(pid=>srvFetchP(pid).catch(()=>{})));
+  const rows=ids.map(pid=>{const c=r[pid]||{},p=lbPlayers[pid]||{},lv=(()=>{try{return srvLevels(pid);}catch(e){return {};}})();
+    const list=Object.entries(c).filter(([k])=>k!=='t').map(([id,l])=>{const b=badgeById(id);if(!b)return esc(id);const nm=x=>b.lv.length>1?badgeTierName(b,x):b.name;return '<b>'+esc(nm(+l))+'</b>'+(lv[id]?' <span class="muted">(record has '+esc(nm(lv[id]))+')</span>':'');}).join(', ');
+    return '<div class="cl-row" data-pid="'+esc(pid)+'"><div><b>'+esc(p.name||'(not on the leaderboard)')+'</b>'+((ATAG||{})[pid]?' <span class="atag">'+esc(ATAG[pid])+'</span>':'')+' <span class="muted" style="font-size:12px">· '+(+p.total||0).toLocaleString()+' ⭐ · '+agoText(c.t)+'</span><br><span style="font-size:12px">'+list+'</span></div><div class="cl-btns"><button class="btn-primary" data-act="ok">Approve</button><button class="btn-secondary" data-act="no">Reject</button></div></div>';}).join('');
+  box.innerHTML=intro+'<div class="cl-btns" style="margin:4px 0 8px"><button class="btn-primary" id="clAllOk">Approve all ('+ids.length+')</button><button class="btn-secondary" id="clAllNo">Reject all</button></div>'+rows;
+  const act=async(pid,ok)=>{const c=r[pid]||{};if(ok){const cur=(await fbReq('GET','blegacy/'+pid,null,{admin:true}))||{};Object.entries(c).forEach(([id,l])=>{if(id!=='t')cur[id]=Math.max(+cur[id]||0,+l||0);});await fbReq('PUT','blegacy/'+pid,cur,{admin:true});SRV.at[pid]=0;}
+    await fbReq('DELETE','bclaim/'+pid,null,{admin:true});delete r[pid];const row=box.querySelector('.cl-row[data-pid="'+CSS.escape(pid)+'"]');if(row)row.remove();claimsCount(Object.keys(r).length);};
+  box.querySelectorAll('.cl-row button').forEach(bt=>bt.onclick=async()=>{bt.disabled=true;try{await act(bt.closest('.cl-row').dataset.pid,bt.dataset.act==='ok');toast(bt.dataset.act==='ok'?'Approved.':'Rejected.');}catch(e){bt.disabled=false;toast('Couldn’t save ('+e.message+').');}});
+  const all=ok=>async()=>{if(!confirm((ok?'Approve':'Reject')+' all '+Object.keys(r).length+' claims?'))return;for(const pid of Object.keys(r)){try{await act(pid,ok);}catch(e){}}toast('Done.');};
+  document.getElementById('clAllOk').onclick=all(true);document.getElementById('clAllNo').onclick=all(false);}
+function claimsCount(n){const b=document.getElementById('claimsBtn');if(b)b.textContent='📝 Badge claims'+(n?' ('+n+')':'');}
+async function claimsPeek(){if(!isAdmin)return;try{const r=await fbReq('GET','bclaim',null,{admin:true,query:'?shallow=true'});claimsCount(Object.keys(r||{}).length);}catch(e){}}
 // hidden messages are deleted from the server rather than hidden on screen, so nobody can download them
 async function chatPurge(test){const all=(await fbReq('GET','chat',null,{admin:true}))||{};const body={};Object.entries(all).forEach(([k,m])=>{if(m&&test(m.pid))body['chat/'+k]=null;});
   if(Object.keys(body).length)await fbReq('PATCH','',body,{admin:true});return Object.keys(body).length;}
