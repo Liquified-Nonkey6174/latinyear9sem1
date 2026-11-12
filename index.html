@@ -6832,7 +6832,9 @@ function toggleLatinUI(){setLatinUI(!latinUI);if(latinUI){sxTry('s|latin|1');toa
 {const go=()=>{clearTimeout(window._cuT);window._cuT=setTimeout(sxInfo,150);};window.addEventListener('scroll',go,{passive:true});window.addEventListener('touchend',()=>setTimeout(sxInfo,400),{passive:true});window.addEventListener('resize',go);if(window.visualViewport)visualViewport.addEventListener('resize',go);setInterval(()=>{const v=document.getElementById('infoView');if(v&&v.style.display!=='none')sxInfo();},1500);}
 
 /* ---------- EXAM: a 100-mark paper from the main word list ---------- */
-const EXAM_KEY='latin_exam_draft',EXAM_HIST='latin_exam_hist',EXAM_STAR_X=5;   // ⭐ per mark: a perfect paper ≈ what the same questions earn in practice
+const EXAM_KEY='latin_exam_draft',EXAM_HIST='latin_exam_hist',EXAM_STAR_X=5;   // (no longer used for ⭐: see exStarVal)
+// ⭐ a question is worth = what the same question earns in practice (1 for a word or phrase, the sentence's points for a sentence)
+function exStarVal(q){if(!q.sd)return 1;const sv=[mode,difficulty];try{mode=q.sec==='le'?'le':'el';difficulty=wordCount(q.sd.latin)>9?'insane':'hard';return sentPoints(q.sd);}catch(e){return 2;}finally{mode=sv[0];difficulty=sv[1];}}
 const EXAM_SECS=[
   {id:'voc',title:'Vocabulary',sub:'Give one English meaning of each Latin word.',n:20,pts:.5},
   {id:'le',title:'Latin → English sentences',sub:'Translate each sentence into English.',n:13,pts:2},
@@ -6942,7 +6944,7 @@ function openExam(){showView('examView');if(!exam){try{const d=JSON.parse(localS
 function exIntro(){exam=null;clearInterval(exTick);const h=exHist(),best=h.length?Math.max(...h.map(x=>x.s)):null;
   document.getElementById('examWrap').innerHTML='<div class="ex-head"><div><div class="ex-title">📝 Exam</div><div class="ex-meta">100 marks · words from the main word list only</div></div><button class="quiz-menu-btn" onclick="exClose()">Menu</button></div>'
    +'<div class="ex-card"><table class="ex-plan">'+EXAM_SECS.map((s,i)=>'<tr><td>'+(i+1)+'</td><td>'+esc(s.title)+'</td><td>'+s.n+' × '+exFmt(s.pts)+'</td><td><b>'+exFmt(s.n*s.pts)+'</b></td></tr>').join('')+'<tr class="ex-tot"><td></td><td>Total</td><td></td><td><b>100</b></td></tr></table>'
-   +'<p class="ex-note">Every mistake — a wrong ending, a spelling slip, a missing or extra word, or words in the wrong order — costs ½ mark. A question can’t go below 0. Answers are marked when you submit, and you earn '+EXAM_STAR_X+' ⭐ for every mark (answers given in under half a second earn no ⭐).</p>'
+   +'<p class="ex-note">Every mistake — a wrong ending, a spelling slip, a missing or extra word, or words in the wrong order — costs ½ mark. A question can’t go below 0. Answers are marked when you submit, and each question earns the same ⭐ it would in practice, in proportion to its marks (answers given in under half a second earn no ⭐).</p>'
    +(h.length?'<p class="ex-note">Best so far: <b>'+exFmt(best)+'/100</b> · last: '+exFmt(h[0].s)+'/100 ('+h.length+' taken)</p><p class="ex-note" style="margin-top:-6px">Recent scores: '+h.slice(0,15).map(x=>'<span title="'+esc(new Date(x.t).toLocaleString())+'">'+exFmt(x.s)+'</span>').join(' · ')+'</p>':'')
    +'<div class="res-btns"><button class="btn-primary" onclick="exStart()">Start exam</button></div></div>';}
 function exStart(){const qs=exBuild();exam={qs,ans:{},start:Date.now()};exSave();exRender();window.scrollTo(0,0);}
@@ -6975,9 +6977,9 @@ function exSubmit(){if(!exam||exam.res)return;const blank=exam.qs.filter((q,i)=>
   if(blank&&!confirm(blank+' question'+(blank===1?' is':'s are')+' blank. Submit anyway?'))return;
   const marks={},sec={};let total=0;exam.qs.forEach((q,i)=>{let r;try{r=exGrade(q,exam.ans[i]);}catch(e){r={got:0,max:EXAM_SECS.find(s=>s.id===q.sec).pts,right:q.show||''};}marks[i]=r;sec[q.sec]=(sec[q.sec]||0)+r.got;total+=r.got;});
   total=Math.round(total*2)/2;const secs=Math.round((Date.now()-exam.start)/1000);
-  // ⭐ = EXAM_STAR_X × the marks, counting only answers typed at least half a second after the paper appeared
-  const tm=exam.tm||{};let starMarks=0,fast=0;exam.qs.forEach((q,i)=>{const r=marks[i];if(!r||!r.got)return;if(tm[i]!=null&&tm[i]>=500)starMarks+=r.got;else fast++;});
-  let stars=0;if(typeof lbMe!=='undefined'&&lbMe){stars=Math.round(starMarks*EXAM_STAR_X);if(stars>0){const s=quizNoPoints;quizNoPoints=false;try{lbCount(stars);lbExamPend+=stars;lbExamInfo={s:total,d:secs};}finally{quizNoPoints=s;}}}
+  // ⭐ = each question's practice value × the share of its marks you got, counting only answers typed at least half a second after the paper appeared
+  const tm=exam.tm||{};let starMarks=0,fast=0;exam.qs.forEach((q,i)=>{const r=marks[i];if(!r||!r.got)return;const mx=r.max||(EXAM_SECS.find(s=>s.id===q.sec)||{}).pts||1;if(tm[i]!=null&&tm[i]>=500)starMarks+=exStarVal(q)*Math.min(1,r.got/mx);else fast++;});
+  let stars=0;if(typeof lbMe!=='undefined'&&lbMe){stars=Math.round(starMarks);if(stars>0){const s=quizNoPoints;quizNoPoints=false;try{lbCount(stars);lbExamPend+=stars;lbExamInfo={s:total,d:secs};}finally{quizNoPoints=s;}}}
   exam.res={marks,sec,total,secs,stars,fast};try{localStorage.removeItem(EXAM_KEY);const h=exHist();h.unshift({t:Date.now(),s:total,secs});localStorage.setItem(EXAM_HIST,JSON.stringify(h.slice(0,30)));sxTry('x|'+total);[...new Set(h.slice(1).map(x=>x.s))].forEach(p=>{if(p!==total)sxTry('xp|'+Math.min(p,total)+','+Math.max(p,total));});}catch(e){}
   exRender();window.scrollTo(0,0);}
 
