@@ -4486,6 +4486,8 @@ async function adminBadges(pid,box){box.innerHTML='<p class="muted">Loading…</
   try{keys=(await fbReq('GET','sx/key',null,{admin:true}))||{};}catch(e){}
   try{sgot=(await fbReq('GET','sx/got/'+pid,null,{admin:true}))||{};}catch(e){}try{sold=(await fbReq('GET','sx/old/'+pid,null,{admin:true}))||'';}catch(e){}
   const hOf={};Object.entries(keys).forEach(([h,id])=>{(hOf[id]=hOf[id]||[]).push(h);});
+  // the luck badge has no answer key: find it from its details
+  try{const c=JSON.parse(await fbReq('GET','sx/cfg/'+SX_LUCK,null,{admin:true}));if(c&&c.id&&!(hOf[c.id]||[]).includes(SX_LUCK))(hOf[c.id]=hOf[c.id]||[]).push(SX_LUCK);}catch(e){}
   for(const id of SX_IDS){const h=(hOf[id]||[])[0];if(sxCfg[id])SN[id]=sxCfg[id].name;else if(h){try{const c=JSON.parse(await fbReq('GET','sx/cfg/'+h,null,{admin:true}));if(c&&c.name)SN[id]=c.name;}catch(e){}}}
   const hasS=id=>(hOf[id]||[]).some(h=>sgot[h])||String(sold).split(',').includes(id);
   const have=(prog&&prog.badges)||{},p=lbPlayers[pid]||{},shown=Object.fromEntries(shownBadges(p));
@@ -4788,7 +4790,7 @@ const ROMAN=['I','II','III','IV','V','VI','VII'];
 // hidden answer, and only then lets that player read the badge's name, description and art.
 const SX_LEGACY_N=16;   // the first 16 ids existed before secret badges moved online
 const SX_PREM='1f552369e71116f84f55522c4dd56b8b';
-const SX_IDS=["ssvnj", "s49gm", "s4xmr", "s5szq", "sc5fe", "sdcuc", "szhg2", "s6zrc", "scqbh", "sgady", "sc784", "swt4g", "sr66c", "s6xum", "sp6ju", "suzqc", "sk7wq", "sh3wd", "sv9ke"],SX_LUCK='c409b3e4bcac1ee8203d86fc13fd6e37',SX_CACHE='latin_sx',SX_OLDNAMES={"a68feff1": "ssvnj", "9b8a8f72": "s49gm", "b6c52459": "s4xmr", "1f86cf2f": "s5szq", "d49dd484": "sc5fe", "dd920cc1": "sdcuc", "6d83c105": "szhg2", "f1c1e166": "s6zrc", "88fe7e2a": "scqbh", "70d14112": "sgady", "8d8fc94b": "sc784", "eb31a16d": "swt4g", "eaa5f88a": "sr66c", "8b16fee1": "s6xum", "c4ce7952": "sp6ju", "e5094ede": "suzqc"};
+const SX_IDS=["ssvnj", "s49gm", "s4xmr", "s5szq", "sc5fe", "sdcuc", "szhg2", "s6zrc", "scqbh", "sgady", "sc784", "swt4g", "sr66c", "s6xum", "sp6ju", "suzqc", "sk7wq", "sh3wd", "sv9ke", "sc6g7", "socre"],SX_LUCK='c409b3e4bcac1ee8203d86fc13fd6e37',SX_CACHE='latin_sx',SX_OLDNAMES={"a68feff1": "ssvnj", "9b8a8f72": "s49gm", "b6c52459": "s4xmr", "1f86cf2f": "s5szq", "d49dd484": "sc5fe", "dd920cc1": "sdcuc", "6d83c105": "szhg2", "f1c1e166": "s6zrc", "88fe7e2a": "scqbh", "70d14112": "sgady", "8d8fc94b": "sc784", "eb31a16d": "swt4g", "eaa5f88a": "sr66c", "8b16fee1": "s6xum", "c4ce7952": "sp6ju", "e5094ede": "suzqc"};
 function _fnv(t){let h=0x811c9dc5;t=String(t);for(let i=0;i<t.length;i++){h^=t.charCodeAt(i);h=Math.imul(h,0x01000193)>>>0;}return ('0000000'+h.toString(16)).slice(-8);}
 let sxCfg=(()=>{try{return JSON.parse(localStorage.getItem(SX_CACHE)||'{}')||{};}catch(e){return {};}})();
 const sxTried=new Set();let sxLastRoll=0;
@@ -4834,11 +4836,11 @@ async function sxUpload(file){let cfg;try{cfg=JSON.parse(await file.text());if(!
     try{const pub=JSON.stringify({id:b.id,icon:b.icon,name:b.name,lat:b.lat,desc:b.desc,sym:b.sym,en:b.en,...(b.block?{block:b.block}:{})});
       await put('sx/legacy/'+b.id,pub);
       if(b.premium)await put('sx/cfg/'+SX_PREM,pub);
-      if(b.luck)await put('sx/cfg/'+SX_LUCK,pub);
+      if(b.luck){await put('sx/cfg/'+SX_LUCK,pub);await put('sx/key/'+SX_LUCK,b.id);}   // listed so the admin can give/remove it (players still can't claim it with this)
       else for(const k of b.keys){const h=await sxHash(k);await put('sx/key/'+h,b.id);await put('sx/cfg/'+h,pub);}
       ok.push(b.name);}catch(e){bad.push(b.name+' ('+e.message+')');}}
   // old answer codes for these badges stop working (players who already have the badge keep it and its details)
-  try{const keep=new Set();for(const b of cfg)for(const k of (b.keys||[]))keep.add(await sxHash(k));const ids=new Set(cfg.map(b=>b.id));const all=(await fbReq('GET','sx/key',null,{admin:true}))||{};
+  try{const keep=new Set();for(const b of cfg){for(const k of (b.keys||[]))keep.add(await sxHash(k));if(b.luck)keep.add(SX_LUCK);if(b.premium)keep.add(SX_PREM);}const ids=new Set(cfg.map(b=>b.id));const all=(await fbReq('GET','sx/key',null,{admin:true}))||{};
     for(const [h,id] of Object.entries(all))if(ids.has(id)&&!keep.has(h)){try{await fbReq('DELETE','sx/key/'+h,null,{admin:true});}catch(e){}}}catch(e){}
   alert(bad.length?'Uploaded '+ok.length+' of '+cfg.length+' secret badges.\n\nThese failed — press Upload again to retry them:\n'+bad.join('\n'):'All '+cfg.length+' secret badges uploaded.');}
 setTimeout(()=>{sxArt();sxSync();},1500);setInterval(()=>{try{sxSync();}catch(e){}},60000);
@@ -6750,6 +6752,7 @@ function setLatinUI(on){latinUI=!!on;try{localStorage.setItem('latin_ui_latine',
   else{if(_latObs)_latObs.disconnect();_latDone.forEach(([n,raw,ph])=>{n._lat=0;if(ph)n.placeholder=raw;else if(n.isConnected)n.nodeValue=raw;});_latDone=[];}}
 function toggleLatinUI(){setLatinUI(!latinUI);if(latinUI){sxTry('s|latin|1');toast('Salve! Nunc omnia Latine. (Click “English” to switch back.)');}}
 (function(){const h=document.querySelector('h1');const em=h&&h.querySelector('em');if(em){em.style.cursor='pointer';em.title='';em.addEventListener('click',e=>{e.stopPropagation();toggleLatinUI();});}
+  if(h){let n=0,last=0;h.addEventListener('click',()=>{const t=Date.now();n=t-last<1500?n+1:1;last=t;if(n<=9)sxTry('s|tc|'+n);});}
   try{if(localStorage.getItem('latin_ui_latine')==='1')setTimeout(()=>setLatinUI(true),300);}catch(e){}})();
 {const go=()=>{clearTimeout(window._cuT);window._cuT=setTimeout(sxInfo,150);};window.addEventListener('scroll',go,{passive:true});window.addEventListener('touchend',()=>setTimeout(sxInfo,400),{passive:true});window.addEventListener('resize',go);if(window.visualViewport)visualViewport.addEventListener('resize',go);setInterval(()=>{const v=document.getElementById('infoView');if(v&&v.style.display!=='none')sxInfo();},1500);}
 
