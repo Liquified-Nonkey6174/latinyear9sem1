@@ -6833,9 +6833,9 @@ function toggleLatinUI(){setLatinUI(!latinUI);if(latinUI){sxTry('s|latin|1');toa
 
 /* ---------- EXAM: a 100-mark paper from the main word list ---------- */
 const EXAM_KEY='latin_exam_draft',EXAM_HIST='latin_exam_hist',EXAM_STAR_X=5;   // (no longer used for ⭐: see exStarVal)
-// ⭐ a question is worth: a set amount for words and phrases, and what the sentence earns in practice for a sentence
-const EXAM_Q_STARS={voc:1.5,vp:3.5,ngc:5,ap:6};   // per question, all right: vocab 30, verb phrases 35, number/gender/case 40, adjective+noun 48
-function exStarVal(q){if(!q.sd)return EXAM_Q_STARS[q.sec]||1;const sv=[mode,difficulty];try{mode=q.sec==='le'?'le':'el';difficulty=wordCount(q.sd.latin)>9?'insane':'hard';return sentPoints(q.sd);}catch(e){return 2;}finally{mode=sv[0];difficulty=sv[1];}}
+// ⭐ a question is worth: a set amount per section (the same every paper)
+const EXAM_Q_STARS={voc:1.5,vp:3.5,ngc:5,ap:6,le:9,el:16};   // per question, all right: vocab 30, verb phrases 35, number/gender/case 40, adjective+noun 48, Latin→English 117, English→Latin 160 (430 in all)
+function exStarVal(q){if(EXAM_Q_STARS[q.sec])return EXAM_Q_STARS[q.sec];if(!q.sd)return 1;const sv=[mode,difficulty];try{mode=q.sec==='le'?'le':'el';difficulty=wordCount(q.sd.latin)>9?'insane':'hard';return sentPoints(q.sd);}catch(e){return 2;}finally{mode=sv[0];difficulty=sv[1];}}
 const EXAM_SECS=[
   {id:'voc',title:'Vocabulary',sub:'Give one English meaning of each Latin word.',n:20,pts:.5},
   {id:'le',title:'Latin → English sentences',sub:'Translate each sentence into English.',n:13,pts:2},
@@ -6945,7 +6945,7 @@ function openExam(){showView('examView');if(!exam){try{const d=JSON.parse(localS
 function exIntro(){exam=null;clearInterval(exTick);const h=exHist(),best=h.length?Math.max(...h.map(x=>x.s)):null;
   document.getElementById('examWrap').innerHTML='<div class="ex-head"><div><div class="ex-title">📝 Exam</div><div class="ex-meta">100 marks · words from the main word list only</div></div><button class="quiz-menu-btn" onclick="exClose()">Menu</button></div>'
    +'<div class="ex-card"><table class="ex-plan">'+EXAM_SECS.map((s,i)=>'<tr><td>'+(i+1)+'</td><td>'+esc(s.title)+'</td><td>'+s.n+' × '+exFmt(s.pts)+'</td><td><b>'+exFmt(s.n*s.pts)+'</b></td></tr>').join('')+'<tr class="ex-tot"><td></td><td>Total</td><td></td><td><b>100</b></td></tr></table>'
-   +'<p class="ex-note">Every mistake — a wrong ending, a spelling slip, a missing or extra word, or words in the wrong order — costs ½ mark. A question can’t go below 0. Answers are marked when you submit, and each question earns ⭐ in proportion to its marks (a full paper is worth about 400 ⭐) (answers given in under half a second earn no ⭐).</p>'
+   +'<p class="ex-note">Every mistake — a wrong ending, a spelling slip, a missing or extra word, or words in the wrong order — costs ½ mark. A question can’t go below 0. Answers are marked when you submit, and each question earns ⭐ in proportion to its marks (a full paper is worth 430 ⭐) (answers given in under half a second earn no ⭐).</p>'
    +(h.length?'<p class="ex-note">Best so far: <b>'+exFmt(best)+'/100</b> · last: '+exFmt(h[0].s)+'/100 ('+h.length+' taken)</p><p class="ex-note" style="margin-top:-6px">Recent scores: '+h.slice(0,15).map(x=>'<span title="'+esc(new Date(x.t).toLocaleString())+'">'+exFmt(x.s)+'</span>').join(' · ')+'</p>':'')
    +'<div class="res-btns"><button class="btn-primary" onclick="exStart()">Start exam</button></div></div>';}
 function exStart(){const qs=exBuild();exam={qs,ans:{},start:Date.now()};exSave();exRender();window.scrollTo(0,0);}
