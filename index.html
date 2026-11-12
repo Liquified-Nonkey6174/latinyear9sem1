@@ -4523,13 +4523,15 @@ async function adminBadges(pid,box){box.innerHTML='<p class="muted">Loading…</
   // the luck badge has no answer key: find it from its details
   try{const c=JSON.parse(await fbReq('GET','sx/cfg/'+SX_LUCK,null,{admin:true}));if(c&&c.id&&!(hOf[c.id]||[]).includes(SX_LUCK))(hOf[c.id]=hOf[c.id]||[]).push(SX_LUCK);}catch(e){}
   for(const id of SX_IDS){const h=(hOf[id]||[])[0];if(sxCfg[id])SN[id]=sxCfg[id].name;else if(h){try{const c=JSON.parse(await fbReq('GET','sx/cfg/'+h,null,{admin:true}));if(c&&c.name)SN[id]=c.name;}catch(e){}}}
-  const hasS=id=>(hOf[id]||[]).some(h=>sgot[h])||String(sold).split(',').includes(id);
+  // entries stored under older answer codes still count: find their badge from their details
+  const gotOf={};for(const h of Object.keys(sgot)){let id=keys[h];if(!id){try{const c=await fbReq('GET','sx/cfg/'+h,null,{admin:true});const o=typeof c==='string'?JSON.parse(c):c;id=o&&o.id;}catch(e){}}if(id)(gotOf[id]=gotOf[id]||[]).push(h);}
+  const hasS=id=>!!(gotOf[id]||[]).length||String(sold).split(',').includes(id);
   const have=(prog&&prog.badges)||{},p=lbPlayers[pid]||{},shown=Object.fromEntries(shownBadges(p));
   const list=[...BADGES.filter(b=>!b.secret),...META_BADGES.filter(b=>b.meta!=='count'),...BADGES.filter(b=>b.secret)];
   const rows=list.map(bd=>{const sec=!!bd.secret,cur=sec?(hasS(bd.id)?1:0):SL?Math.min(SL[bd.id]||0,bd.lv.length):(have[bd.id]?have[bd.id].l:(shown[bd.id]||0)),max=bd.lv.length,nm=sec?'🔒 '+(SN[bd.id]||bd.id):bd.name,o=gr[bd.id];
     const opts=['<option value="">—</option>','<option value="0">✖ remove</option>'].concat(Array.from({length:max},(_,i)=>'<option value="'+(i+1)+'">'+(max>1?'give level '+(i+1):'✔ give')+'</option>'));
     const last=o?' <span class="muted" style="font-size:11px">('+(+o.l?'given':'removed')+' '+new Date(o.t).toLocaleDateString()+')</span>':'';
-    const st=sec?((hOf[bd.id]||[]).map(h=>sgot[h]).filter(x=>typeof x==='number')[0]):null,when=sec&&cur?(st?'<br><span class="muted" style="font-size:11px">'+new Date(st).toLocaleString([], {day:'numeric',month:'short',hour:'numeric',minute:'2-digit'})+'</span>':'<br><span class="muted" style="font-size:11px">old (registered)</span>'):'';
+    const st=sec?((gotOf[bd.id]||[]).map(h=>sgot[h]).filter(x=>typeof x==='number')[0]):null,when=sec&&cur?(st?'<br><span class="muted" style="font-size:11px">'+new Date(st).toLocaleString([], {day:'numeric',month:'short',hour:'numeric',minute:'2-digit'})+'</span>':'<br><span class="muted" style="font-size:11px">old (registered)</span>'):'';
     return '<tr><td>'+esc(nm)+last+'</td><td>'+(cur?(max>1?'level '+cur:'✔'):'<span class="muted">–</span>')+when+'</td><td><select data-b="'+bd.id+'"'+(sec&&!(hOf[bd.id]||[]).length?' disabled title="Upload the secret badge answers first"':'')+'>'+opts.join('')+'</select></td></tr>';}).join('');
   // several secret badges within a few minutes is what triggering them by hand (or by script) looks like
   const ts=Object.values(sgot).filter(x=>typeof x==='number').sort((a,b)=>a-b);let burst=0;ts.forEach((t,i)=>{let n=0;for(let j=i;j<ts.length&&ts[j]-t<=600000;j++)n++;burst=Math.max(burst,n);});
@@ -4537,8 +4539,8 @@ async function adminBadges(pid,box){box.innerHTML='<p class="muted">Loading…</
   box.innerHTML=(burst>=3?'<p style="margin:6px 0;color:var(--red,#e07a6a)"><b>⚠ '+burst+' secret badges within 10 minutes</b>, which is what getting them by hand from the browser console looks like. You can remove them below.</p>':'')+(oldN>=8?'<p style="margin:6px 0;color:var(--red,#e07a6a)"><b>⚠ '+oldN+' “old” secret badges registered.</b> Registering old badges was open to anyone until now; a long list is suspicious.</p>':'')+'<p style="margin:6px 0">'+(SL?'Checked by the server (frozen badges + server-recorded progress + your actions).':prog?'From their last cloud save.':'No cloud save yet: showing the badges on their name only.')+' Changes reach them the next time their app checks.</p><div style="max-height:320px;overflow-y:auto"><table class="nh-table"><tr><th>Badge</th><th>Has</th><th>Action</th></tr>'+rows+'</table></div><p class="muted" style="font-size:11.5px">✖ remove takes the badge away; they can earn it again, but only with new progress from now on. Give sets it to that level; normal earning carries on from there.</p>';
   box.querySelectorAll('select[data-b]').forEach(sel=>sel.onchange=async()=>{const id=sel.dataset.b,v=sel.value;if(v==='')return;const bd=badgeById(id),L=+v;sel.disabled=true;
     try{if(bd&&bd.secret){const hs=hOf[id]||[];
-        if(L)await fbReq('PUT','sx/got/'+pid+'/'+hs[0],{'.sv':'timestamp'},{admin:true});
-        else{for(const h of hs)if(sgot[h])await fbReq('DELETE','sx/got/'+pid+'/'+h,null,{admin:true});const ol=String(sold||'').split(',').filter(Boolean);if(ol.includes(id)){const nl=ol.filter(x=>x!==id).join(',');await fbReq(nl?'PUT':'DELETE','sx/old/'+pid,nl||null,{admin:true});}}}
+        if(L){await fbReq('PUT','sx/got/'+pid+'/'+hs[0],{'.sv':'timestamp'},{admin:true});await fbReq('DELETE','sx/rm/'+pid+'/'+id,null,{admin:true}).catch(()=>{});}
+        else{for(const h of new Set([...hs,...(gotOf[id]||[])]))if(sgot[h])await fbReq('DELETE','sx/got/'+pid+'/'+h,null,{admin:true});await fbReq('PUT','sx/rm/'+pid+'/'+id,{'.sv':'timestamp'},{admin:true});const ol=String(sold||'').split(',').filter(Boolean);if(ol.includes(id)){const nl=ol.filter(x=>x!==id).join(',');await fbReq(nl?'PUT':'DELETE','sx/old/'+pid,nl||null,{admin:true});}}}
       let base=null;if(bd&&!bd.secret&&SRV.frozen){try{await srvFetchP(pid);base=srvBase(pid)[id]||0;}catch(e){}}   // removed / lowered badges come back only with progress beyond this
       await fbReq('PUT','bgrant/'+pid+'/'+id,base==null?{l:L,t:{'.sv':'timestamp'}}:{l:L,t:{'.sv':'timestamp'},base},{admin:true});SRV.at[pid]=0;toast('Saved: '+(L?'given':'removed')+'.');adminBadges(pid,box);}
     catch(e){toast('Couldn’t save: '+(/40[13]/.test(e.message)?'the database rules need updating.':e.message));sel.disabled=false;}});}
@@ -4852,7 +4854,8 @@ async function sxTry(c){try{if(!c)return null;const h=await sxHash(c);const know
 var sxLog=[];function sxLogAdd(c,r){if(/^a\|/.test(c))c='a|(an answer)';sxLog.unshift({c,r,t:Date.now()});if(sxLog.length>40)sxLog.length=40;}
 const APP_VER='2026-11-12c';
 async function sxAdminTidy(){const got=(await fbReq('GET','sx/got/'+ADMIN_UID,null,{admin:true}))||{},keys=(await fbReq('GET','sx/key',null,{admin:true}))||{};const del={};
-  Object.keys(got).forEach(h=>{if(!keys[h]&&h!==SX_LUCK&&h!==SX_PREM)del['sx/got/'+ADMIN_UID+'/'+h]=null;});if(Object.keys(del).length)await fbReq('PATCH','',del,{admin:true});}
+  for(const h of Object.keys(got)){if(keys[h]||h===SX_LUCK||h===SX_PREM)continue;let c=null;try{c=await fbReq('GET','sx/cfg/'+h,null,{admin:true});}catch(e){continue;}if(c==null)del['sx/got/'+ADMIN_UID+'/'+h]=null;}
+  if(Object.keys(del).length)await fbReq('PATCH','',del,{admin:true});}
 async function sxCheck(){const out=[],row=(ok,t)=>out.push('<div style="margin:4px 0">'+(ok?'✅':'❌')+' '+t+'</div>');
   row(true,'Page version: <b>'+APP_VER+'</b> (if this isn’t the newest, refresh with Ctrl+Shift+R)');
   let keys={};try{keys=(await fbReq('GET','sx/key',null,{admin:true}))||{};}catch(e){row(false,'Couldn’t read the answer codes: '+esc(e.message));}
@@ -4865,10 +4868,11 @@ async function sxCheck(){const out=[],row=(ok,t)=>out.push('<div style="margin:4
   out.push('<div style="margin-top:10px"><b>Last tries on this device</b></div>'+(sxLog.length?sxLog.slice(0,15).map(x=>'<div class="muted" style="font-size:12px">'+new Date(x.t).toLocaleTimeString()+' · '+esc(x.c)+' → '+esc(x.r)+'</div>').join(''):'<div class="muted" style="font-size:12px">None yet. Try the badge, then press the check again.</div>'));
   document.getElementById('claimsBody').innerHTML=out.join('');document.querySelector('#claimsOverlay .ann-head').textContent='🔎 Secret badge check';document.getElementById('claimsOverlay').style.display='flex';}
 var sxServer=null;   // ids of secret badges the server has a record of (null = not checked yet)
-async function sxSync(){try{await playerToken();const got=await fbReq('GET','sx/got/'+playerAuth.uid);const ids=new Set();if(got)for(const h of Object.keys(got)){let c=Object.values(sxCfg).find(x=>x.h===h);if(!c)c=sxLearn(h,await fbReq('GET','sx/cfg/'+h));if(c&&c.id)ids.add(c.id);}
-    try{const o=await fbReq('GET','sx/old/'+playerAuth.uid);if(typeof o==='string')o.split(',').forEach(x=>ids.add(x));}catch(e){}Object.entries(sxRecent).forEach(([id,t])=>{if(Date.now()-t<120000)ids.add(id);});sxServer=ids;
+var sxRM=null;async function sxSync(){try{await playerToken();const got=await fbReq('GET','sx/got/'+playerAuth.uid);const ids=new Set();let full=true;if(got)for(const h of Object.keys(got)){try{let c=Object.values(sxCfg).find(x=>x.h===h);if(!c)c=sxLearn(h,await fbReq('GET','sx/cfg/'+h));if(c&&c.id)ids.add(c.id);}catch(e){full=false;}}
+    try{const o=await fbReq('GET','sx/old/'+playerAuth.uid);if(typeof o==='string')o.split(',').forEach(x=>ids.add(x));}catch(e){full=false;}Object.entries(sxRecent).forEach(([id,t])=>{if(Date.now()-t<120000)ids.add(id);});sxServer=ids;
+    try{sxRM=(await fbReq('GET','sx/rm/'+playerAuth.uid))||{};}catch(e){}
     // forget details of badges the server no longer has for this account (e.g. removed by the admin), so they can be earned again properly
-    let pr=false;Object.keys(sxCfg).forEach(id=>{if(!ids.has(id)){delete sxCfg[id];pr=true;}});if(pr){try{localStorage.setItem(SX_CACHE,JSON.stringify(sxCfg));}catch(e){}}}catch(e){}
+    let pr=false;if(full&&lbMe&&lbMe.pid===playerAuth.uid)Object.keys(sxCfg).forEach(id=>{if(!ids.has(id)&&sxRM&&sxRM[id]){delete sxCfg[id];pr=true;}});if(pr){try{localStorage.setItem(SX_CACHE,JSON.stringify(sxCfg));}catch(e){}}}catch(e){}
   // secret badges earned before they moved online: register them once (max 15), then load their details
   try{badgeCheck();const uid=playerAuth.uid,g=bjson(BADGE_KEY);let old=await fbReq('GET','sx/old/'+uid);
     if(typeof old!=='string'){const mine=SX_IDS.slice(0,SX_LEGACY_N).filter(id=>g[id]&&!(sxCfg[id]&&sxCfg[id].h));if(mine.length&&mine.length<SX_LEGACY_N){try{await fbReq('PUT','sx/old/'+uid,mine.join(','));old=mine.join(',');}catch(e){}}}
@@ -5063,7 +5067,8 @@ function badgeCheck(){secretWipe();try{verLoad();}catch(e){}const got=bjson(BADG
   if(lbMe&&lbPlayers[lbMe.pid]){const rb=badgeById('rank'),mx=badgeLevel(rb,Math.max(0,+lbPlayers[lbMe.pid].total||0)),base=+b['base_rank']||0,lim=badgeLevel(rb,Math.max(0,(+lbPlayers[lbMe.pid].total||0)-base));
     const cap=BGRANT&&BGRANT.rank&&+BGRANT.rank.l?Math.max(lim,+BGRANT.rank.l):mx;if(got.rank&&got.rank.l>cap){if(cap>0)got.rank.l=cap;else delete got.rank;changed=true;}}
   if(atagLoaded&&got.socius&&!(lbMe&&(ATAG||{})[lbMe.pid])&&!(BGRANT&&BGRANT.socius&&+BGRANT.socius.l)){delete got.socius;changed=true;}
-  if(sxServer){BADGES.forEach(bd=>{if(bd.secret&&got[bd.id]&&!sxServer.has(bd.id)&&!(BGRANT&&BGRANT[bd.id]&&+BGRANT[bd.id].l)){delete got[bd.id];changed=true;}});}
+  // a secret badge only leaves this device when the admin removed it (after it was earned); a failed or partial server check never wipes them
+  if(sxRM){BADGES.forEach(bd=>{if(bd.secret&&got[bd.id]&&sxRM[bd.id]&&!(sxServer&&sxServer.has(bd.id))&&(+got[bd.id].t||0)<=+sxRM[bd.id]){delete got[bd.id];changed=true;}});}
   if(changed){try{localStorage.setItem(BADGE_KEY,JSON.stringify(got));}catch(e){}}
   syncShownBadges();
   if(document.getElementById('badgeOverlay')&&document.getElementById('badgeOverlay').style.display==='flex')renderBadges();renderBadgeSide();

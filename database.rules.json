@@ -121,6 +121,15 @@
           ".write": "auth != null && auth.uid === $uid",
           ".validate": "newData.isNumber() && newData.val() === now && (!data.exists() || now - data.val() >= 3000)"
         }
+      },
+      "rm": {
+        "$uid": {
+          ".read": "auth != null && (auth.uid === $uid || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2')",
+          "$id": {
+            ".write": "auth != null && auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2'",
+            ".validate": "newData.isNumber() && newData.val() === now && $id.matches(/^s[a-z0-9]{4}$/)"
+          }
+        }
       }
     },
     "bfeed": {
