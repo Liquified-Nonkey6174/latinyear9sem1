@@ -4402,6 +4402,19 @@ async function contactEdit(){const v=prompt('Contact email shown to non-members 
   try{await fbReq(t?'PUT':'DELETE','contact',t||null,{admin:true});CONTACT=t;toast(t?'Contact email saved.':'Contact email removed.');}catch(e){alert('Couldn’t save ('+e.message+').'+(/40[13]/.test(e.message)?'\n\nPublish the latest database rules first.':''));}}
 var ATAG={},atagLoaded=false;async function atagLoad(){const was=JSON.stringify([ATAG,APPR]);try{const [t,a]=await Promise.all([fbReq('GET','atag',null,isAdmin?{admin:true}:{}),fbReq('GET','appr',null,isAdmin?{admin:true}:{}).catch(()=>undefined)]);ATAG=t||{};atagLoaded=true;if(a!==undefined)APPR=a||{};}catch(e){return;}
   if(!memberShown){try{const c=await fbReq('GET','contact');if(typeof c==='string')CONTACT=c;}catch(e){}setTimeout(memberPopup,800);}if(JSON.stringify([ATAG,APPR])!==was){try{badgeCheckSoon();renderLb();renderChat();renderOnline();updChatInput();}catch(e){}}try{renderLb();renderChat();renderBadgeFeed();}catch(e){}}
+// admin: set a player's 🔥 daily streak. Streaks live on each device, so the server holds the number and each device applies it once.
+async function streakEdit(pid,name,btn){let cur=null;try{cur=await fbReq('GET','sset/'+pid,null,{admin:true});}catch(e){alert('Couldn’t load ('+e.message+'). Publish the latest database rules first.');return;}
+  const v=prompt('Daily goal streak for '+name+' (days in a row).'+(cur?'\nLast set to '+cur.n+' on '+new Date(cur.t).toLocaleString()+'.':'')+'\nIt shows on their devices the next time they open the site; reaching today’s goal then adds 1.',cur?cur.n:'');if(v===null)return;
+  const n=Math.round(+v);if(!(n>=0&&n<=3650)){alert('Enter a whole number from 0 to 3650.');return;}
+  try{await fbReq('PUT','sset/'+pid,{n,t:{'.sv':'timestamp'}},{admin:true});toast('Streak for '+name+' set to '+n+'.');if(btn)btn.textContent='🔥 Streak set: '+n;if(lbMe&&pid===lbMe.pid)streakApply();}catch(e){alert('Couldn’t save: '+e.message);}}
+async function streakApply(){if(!lbMe)return;let r;try{r=await fbReq('GET','sset/'+lbMe.pid);}catch(e){return;}if(!r||!(+r.t))return;
+  const done=+localStorage.getItem('latin_sset_t')||0;if(+r.t<=done)return;const n=Math.max(0,Math.round(+r.n||0)),d=dailyData(),m=dailyMetSet(),g=SET.goal||1;
+  const today=dayKeyOffset(0),todayOk=(d[today]||0)>=g||m.has(today),from=todayOk?0:1;   // the streak shown right away is exactly n
+  for(let i=from;i<from+n;i++)m.add(dayKeyOffset(i));const br=dayKeyOffset(from+n);m.delete(br);if((d[br]||0)>=g)d[br]=g-1;   // the day before the streak is a gap
+  if(n===0&&todayOk){m.delete(today);if((d[today]||0)>=g)d[today]=g-1;}
+  try{localStorage.setItem(DAILY_MET_KEY,JSON.stringify([...m].sort().slice(-4000)));localStorage.setItem(DAILY_KEY,JSON.stringify(d));localStorage.setItem('latin_sset_t',String(r.t));}catch(e){}
+  try{const b=bstat();b.bestStreak=Math.max(b.bestStreak||0,dailyStreak());bsave();}catch(e){}renderDaily();toast('🔥 Your streak was set to '+dailyStreak()+' day'+(dailyStreak()===1?'':'s')+' by the admin.');}
+setTimeout(()=>{streakApply();},5000);
 async function atagEdit(pid,name){const v=prompt('Member tag for '+name+' (everyone sees it, e.g. their real name). Members count for the challenge, Rival, Popularis and Echo badges. Leave empty to remove:',ATAG[pid]||'');if(v===null)return;const t=v.trim().slice(0,40);
   try{await fbReq(t?'PUT':'DELETE','atag/'+pid,t||null,{admin:true});if(t)ATAG[pid]=t;else delete ATAG[pid];toast(t?'Tag saved.':'Tag removed.');try{renderLb();renderChat();}catch(e){}openPlayerCard(pid);}
   catch(e){alert('Couldn’t save the tag ('+e.message+').'+(/40[13]/.test(e.message)?'\n\nPublish the latest database rules first.':''));}}
@@ -4532,6 +4545,7 @@ function openPlayerCard(pid){const p=lbPlayers[pid];if(!p)return;const k=lbKeys(
     const ap=document.createElement('button');ap.className='btn-secondary';ap.style.margin='0 0 8px 6px';const setAp=()=>{ap.textContent=APPR[pid]?'✔ Approved (unapprove)':(ATAG[pid]?'✔ Public (member tag)':'Approve (show to everyone)');ap.disabled=!APPR[pid]&&!!ATAG[pid];};setAp();
     ap.onclick=async()=>{ap.disabled=true;try{await apprSet(pid,!APPR[pid]);}catch(e){toast('Couldn’t change it: '+e.message);}setAp();ap.disabled=false;setAp();};box.insertBefore(ap,hist);
     const tg=document.createElement('button');tg.className='btn-secondary';tg.style.margin='0 0 8px 6px';tg.textContent=ATAG[pid]?'🏷 Member tag: '+ATAG[pid]:'🏷 Add member tag';tg.title='Shown under their name to everyone. Members count for badges that involve other players.';tg.onclick=()=>atagEdit(pid,p.name);box.insertBefore(tg,hist);
+    const sk=document.createElement('button');sk.className='btn-secondary';sk.style.margin='0 0 8px 6px';sk.textContent='🔥 Set streak';sk.title='Set their daily goal streak (applies on their devices next time they open the site)';sk.onclick=()=>streakEdit(pid,p.name,sk);box.insertBefore(sk,hist);
     let locked=false;const setLk=()=>{lk.textContent=locked?'🔒 Name locked (unlock)':'Lock name';lk.title=locked?'They can’t change their own name. Click to allow it again.':'Stop them changing their own name (you can still rename them).';lk.disabled=false;};
     fbReq('GET','nlock/'+pid,null,{admin:true}).then(v=>{locked=v===true;setLk();}).catch(()=>{lk.textContent='Lock name (unavailable)';});
     lk.onclick=async()=>{lk.disabled=true;try{await fbReq(locked?'DELETE':'PUT','nlock/'+pid,locked?null:true,{admin:true});locked=!locked;}catch(e){alert('Couldn’t save: '+e.message);}setLk();};
@@ -4644,9 +4658,9 @@ function dayKeyOffset(n){const t=new Date(srvNow());t.setDate(t.getDate()-n);ret
 // days the goal was reached, remembered as they happen, so changing the goal later doesn't break a streak
 const DAILY_MET_KEY='latin_daily_met';
 function dailyMetSet(){try{const a=JSON.parse(localStorage.getItem(DAILY_MET_KEY)||'[]');return new Set(Array.isArray(a)?a.filter(x=>typeof x==='string'&&/^\d{4}-\d\d-\d\d$/.test(x)):[]);}catch(e){return new Set();}}
-function dailyMet(k){const m=dailyMetSet();if(m.has(k))return;m.add(k);try{localStorage.setItem(DAILY_MET_KEY,JSON.stringify([...m].sort().slice(-400)));}catch(e){}}
+function dailyMet(k){const m=dailyMetSet();if(m.has(k))return;m.add(k);try{localStorage.setItem(DAILY_MET_KEY,JSON.stringify([...m].sort().slice(-4000)));}catch(e){}}
 function dailyStreak(){const d=dailyData(),g=SET.goal||1,m=dailyMetSet(),ok=k=>(d[k]||0)>=g||m.has(k);let n=0,i=ok(dayKeyOffset(0))?0:1;for(;;i++){if(ok(dayKeyOffset(i)))n++;else break;}return n;}
-function renderDaily(){const box=document.getElementById('dailyGoal');if(!box)return;if(SET.goal){const d=dailyData(),m=dailyMetSet();const add=Object.keys(d).filter(k=>/^\d{4}-\d\d-\d\d$/.test(k)&&d[k]>=SET.goal&&!m.has(k));if(add.length){add.forEach(k=>m.add(k));try{localStorage.setItem(DAILY_MET_KEY,JSON.stringify([...m].sort().slice(-400)));}catch(e){}}}let rv='';try{rv=reviseLine();}catch(e){}if(!SET.goal){box.style.display=rv?'':'none';box.className='dg';box.innerHTML=rv;return;}
+function renderDaily(){const box=document.getElementById('dailyGoal');if(!box)return;if(SET.goal){const d=dailyData(),m=dailyMetSet();const add=Object.keys(d).filter(k=>/^\d{4}-\d\d-\d\d$/.test(k)&&d[k]>=SET.goal&&!m.has(k));if(add.length){add.forEach(k=>m.add(k));try{localStorage.setItem(DAILY_MET_KEY,JSON.stringify([...m].sort().slice(-4000)));}catch(e){}}}let rv='';try{rv=reviseLine();}catch(e){}if(!SET.goal){box.style.display=rv?'':'none';box.className='dg';box.innerHTML=rv;return;}
   const today=dailyData()[lbKeys().d]||0,g=SET.goal,st=dailyStreak(),pct=Math.min(100,Math.round(today/g*100));box.style.display='';
   box.className='dg'+(today>=g?' done':'');box.innerHTML='<div class="dg-top"><span>'+(today>=g?'✓ Daily goal reached':'Daily goal')+'</span><span>'+today+' / '+g+'</span></div><div class="dg-bar"><div style="width:'+pct+'%"></div></div><div class="dg-sub">'+(st?'🔥 '+st+'-day streak':'Reach your goal to start a streak 🔥')+'</div>'+rv;}
 

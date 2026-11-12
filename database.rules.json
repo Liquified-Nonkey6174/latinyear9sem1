@@ -548,6 +548,22 @@
           ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 20 && $b.matches(/^[a-z]{2,20}$/)"
         }
       }
+    },
+    "sset": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2')",
+        ".write": "auth != null && auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2'",
+        ".validate": "newData.hasChildren(['n', 't'])",
+        "n": {
+          ".validate": "newData.isNumber() && newData.val() % 1 === 0 && newData.val() >= 0 && newData.val() <= 3650"
+        },
+        "t": {
+          ".validate": "newData.val() === now"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
     }
   }
 }
