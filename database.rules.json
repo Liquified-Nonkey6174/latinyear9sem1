@@ -550,7 +550,7 @@
       ".read": "auth != null && auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2'",
       "$uid": {
         ".read": "auth != null && (auth.uid === $uid || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2')",
-        ".write": "auth != null && (auth.uid === $uid || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2')",
+        ".write": "auth != null && auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2'",
         "t": {
           ".validate": "newData.val() === now"
         },
