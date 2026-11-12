@@ -4080,7 +4080,9 @@ async function loadLbMe(){try{const r=await window.storage.get(LB_KEY),a=await w
     if(r&&r.value){const v=JSON.parse(r.value);if(v&&v.pid&&v.name&&auth&&auth.uid===v.pid)lbMe=v;}
     const pend=await window.storage.get(LB_PENDING_KEY);if(pend&&+pend.value>0){window.storage.delete(LB_PENDING_KEY);try{const x=JSON.parse(localStorage.getItem('latin_lb_pending_ex')||'null');localStorage.removeItem('latin_lb_pending_ex');if(x&&lbMe&&x.n>0){lbExamPend+=Math.min(x.n,+pend.value);lbExamInfo=x.i;}}catch(e){}if(lbMe){lbPending+=+pend.value;lbFlushTimer=setTimeout(()=>lbFlush(),3000);}}
   }catch(e){}renderLbProfile();lbUpdatePoints();}
-function lbKeys(d){d=d||new Date();const p=n=>String(n).padStart(2,'0');const day=d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate());
+var srvSkew=0;   // server clock minus this device's clock (learnt from each points save)
+function srvNow(){return Date.now()+srvSkew;}
+function lbKeys(d){d=d||new Date(srvNow());const p=n=>String(n).padStart(2,'0');const day=d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate());
   const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));const dn=t.getUTCDay()||7;t.setUTCDate(t.getUTCDate()+4-dn);const y=t.getUTCFullYear();const wk=Math.ceil(((t-Date.UTC(y,0,1))/86400000+1)/7);
   return{d:day,w:y+'-W'+p(wk),m:day.slice(0,7)};}
 function lbCleanName(n){return String(n||'').replace(/\s+/g,' ').trim();}
@@ -4089,7 +4091,10 @@ function lbNameError(n){if(n.length<2||n.length>30)return 'Names must be 2–30 
 // Points: one per correct answer, counted locally and sent in batches.
 function lbMyPoints(){if(!lbMe)return 0;const me=lbPlayers[lbMe.pid],server=(me&&me.total)||0;
   // While a batch is being sent, don't let the shown total dip or double-count before the server confirms it.
-  if(lbInFlight&&server<lbInFlightBase+lbInFlight)return lbInFlightBase+lbInFlight+lbPending;return server+lbPending;}
+  if(lbInFlight&&server<lbInFlightBase+lbInFlight)return lbInFlightBase+lbInFlight+lbPending;
+  // just saved, but the live update hasn't arrived yet: show what the server has confirmed
+  if(lbConfirmed&&server<lbConfirmed&&Date.now()-lbConfirmedAt<20000)return lbConfirmed+lbPending;return server+lbPending;}
+var lbConfirmed=0,lbConfirmedAt=0,lbCap=300;
 function lbUpdatePoints(bump){const pill=document.getElementById('pointsPill');const pts=lbMyPoints().toLocaleString();
   if(pill){pill.style.display=lbMe?'':'none';pill.textContent='⭐ '+pts;if(bump){pill.classList.remove('bump');void pill.offsetWidth;pill.classList.add('bump');}}
   const sp=document.getElementById('lbMyPts');if(sp)sp.textContent=pts;updChatInput();badgeCheckSoon();}
@@ -4100,6 +4105,9 @@ function startAttempt(){quizNoPoints=false;const n=isDrill?drillQs.length:quizWo
   const d=lbKeys().d;let st;try{st=JSON.parse(localStorage.getItem(ATTEMPTS_KEY)||'null');}catch(e){}if(!st||st.d!==d)st={d,c:{}};
   const sig=quizSig();st.c[sig]=(st.c[sig]||0)+1;try{localStorage.setItem(ATTEMPTS_KEY,JSON.stringify(st));}catch(e){}
   if(st.c[sig]>=3){quizNoPoints=true;if(lbMe)toast('You’ve done this short quiz 3 times today, so it won’t earn leaderboard points now.');}}
+async function lbUnconfCheck(){let u;try{u=JSON.parse(localStorage.getItem('latin_lb_unconf')||'null');}catch(e){}if(!u||!lbMe||u.pid!==lbMe.pid)return;
+  try{const lk=await fbReq('GET','players/'+u.pid+'/lk');localStorage.removeItem('latin_lb_unconf');if(lk!==u.lk&&+u.n>0){lbPending+=Math.round(+u.n);lbUpdatePoints();if(!lbFlushTimer)lbFlushTimer=setTimeout(()=>lbFlush(),3000);}}catch(e){}}
+setTimeout(()=>{lbUnconfCheck();},4000);
 function lbCount(n){try{badgeCheckSoon();}catch(e){}n=Math.round(+n||1);if(n<1||!lbMe)return;   // whole stars only (the server refuses anything else)
   if(quizNoPoints){const pill=document.getElementById('pointsPill');if(pill){pill.textContent='⭐ no points: quiz repeated';pill.classList.add('dim');clearTimeout(ptsNoteTimer);ptsNoteTimer=setTimeout(()=>{pill.classList.remove('dim');lbUpdatePoints();},1400);}return;}
   lbPending+=n;lbUpdatePoints(true);renderLb();if(!lbFlushTimer)lbFlushTimer=setTimeout(()=>lbFlush(),8000);}
@@ -4111,17 +4119,21 @@ async function lbFlush(keepalive){clearTimeout(lbFlushTimer);lbFlushTimer=null;i
   // Leaving the page with an expired sign-in: keep the count for next time instead of losing it.
   if(keepalive&&!authFresh(playerAuth)){try{window.storage.set(LB_PENDING_KEY,String(lbPending));lbExamKeep();}catch(e){}lbPending=0;return;}
   // the server allows at most 300 per save and about 1 a second since the last one, so a big award (an exam) goes up in safe chunks
-  const mine=lbPlayers[lbMe.pid];if(!lbLastOk)lbLastOk=(mine&&mine.lt)||0;const allow=lbLastOk?Math.max(1,Math.min(300,4+Math.floor((Date.now()-lbLastOk)/1050))):20;   // an account's first save: at most 25
+  const mine=lbPlayers[lbMe.pid];if(!lbLastOk)lbLastOk=(mine&&mine.lt)||0;const allow=Math.min(lbCap,lbLastOk?Math.max(1,Math.min(300,4+Math.floor((srvNow()-lbLastOk)/1050))):20);   // an account's first save: at most 25
   const n=Math.min(lbPending,allow),k=lbKeys(),inc={'.sv':{increment:n}};
   const exN=Math.min(lbExamPend,n);lbExamPend-=exN;   // ⭐ from an exam are labelled so the admin's points history doesn't flag them
   const lk=Date.now().toString(36)+Math.random().toString(36).slice(2,7),P='players/'+lbMe.pid+'/';
   // the server checks points can't go up faster than people can earn them, and that every save is logged (plog) for the admin
-  const body={[P+'total']:inc,[P+'lt']:{'.sv':'timestamp'},[P+'lk']:lk,['plog/'+lbMe.pid+'/'+lk]:(()=>{const S=ansStats,md=['mc','ty','dr','ma','se'].sort((x,y)=>(S[y]||0)-(S[x]||0))[0];const e={n,t:{'.sv':'timestamp'},a:S.a,w:S.w};if(S.a)e.md=md;if(S.dr)e.dr=S.dr;if(S.se)e.se=S.se;if(exN){e.ex=exN;e.es=lbExamInfo.s;e.ed=lbExamInfo.d;}if(S.pn)e.pc=Math.round(S.ps/S.pn/100);ansStats={a:0,w:0,mc:0,ty:0,dr:0,ma:0,se:0,ps:0,pn:0};return e;})()};['d','w','m'].forEach(x=>{body[P+x+'/'+k[x]]=inc;if(mine&&mine[x])Object.keys(mine[x]).forEach(old=>{if(old!==k[x])body[P+x+'/'+old]=null;});});
+  const body={[P+'total']:inc,[P+'lt']:{'.sv':'timestamp'},[P+'lk']:lk,['plog/'+lbMe.pid+'/'+lk]:(()=>{const S=ansStats,md=['mc','ty','dr','ma','se'].sort((x,y)=>(S[y]||0)-(S[x]||0))[0];const e={n,t:{'.sv':'timestamp'},a:S.a,w:S.w};if(S.a)e.md=md;if(S.dr)e.dr=S.dr;if(S.se)e.se=S.se;if(exN){e.ex=exN;e.es=lbExamInfo.s;e.ed=lbExamInfo.d;}if(S.pn)e.pc=Math.round(S.ps/S.pn/100);ansStats={a:0,w:0,mc:0,ty:0,dr:0,ma:0,se:0,ps:0,pn:0};return e;})()};['d','w','m'].forEach(x=>{body[P+x+'/'+k[x]]=inc;if(mine&&mine[x])Object.keys(mine[x]).forEach(old=>{if(old<k[x])body[P+x+'/'+old]=null;});});
   lbInFlightBase=(mine&&mine.total)||0;lbInFlight=n;lbPending-=n;
   if(lbPending>0){if(keepalive){try{window.storage.set(LB_PENDING_KEY,String(lbPending));lbExamKeep();}catch(e){}lbPending=0;}else if(!lbFlushTimer)lbFlushTimer=setTimeout(()=>lbFlush(),30000);}
   try{if(!keepalive&&(await fbReq('GET','players/'+lbMe.pid+'/name'))==null){lbInFlight=0;lbRemoved();return;}
-    await fbReq('PATCH','',body,{keepalive});lbInFlight=0;lbLastOk=Date.now();}
-  catch(e){lbInFlight=0;lbPending+=n;lbExamPend+=exN;if(!lbFlushTimer)lbFlushTimer=setTimeout(()=>lbFlush(),30000);}
+    try{localStorage.setItem('latin_lb_unconf',JSON.stringify({pid:lbMe.pid,lk,n}));}catch(x){}
+    const t0=Date.now(),r=await fbReq('PATCH','',body,{keepalive});lbInFlight=0;try{localStorage.removeItem('latin_lb_unconf');}catch(x){}
+    const lt=r&&(r[P+'lt']||(r.players&&r.players[lbMe.pid]&&r.players[lbMe.pid].lt));if(typeof lt==='number')srvSkew=lt-Math.round((t0+Date.now())/2);
+    lbLastOk=typeof lt==='number'?lt:srvNow();lbCap=300;lbConfirmed=lbInFlightBase+n;lbConfirmedAt=Date.now();}
+  catch(e){lbInFlight=0;lbPending+=n;lbExamPend+=exN;try{localStorage.removeItem('latin_lb_unconf');}catch(x){}lbCap=Math.max(1,Math.floor(n/2));   // refused (usually too many at once): send less next time
+    clearTimeout(lbFlushTimer);lbFlushTimer=setTimeout(()=>lbFlush(),6000);}
   lbUpdatePoints();}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')lbFlush(true);});
 window.addEventListener('pagehide',()=>lbFlush(true));
@@ -4182,7 +4194,7 @@ function setChatMuted(m){chatMuted=false;}
 async function lbSaveName(raw){const name=lbCleanName(raw);{const blk=await sxName(name,lbMe&&lbMe.name);if(blk){renderLbProfile(blk,true);return;}}const err=lbNameError(name);if(err){renderLbProfile(err,true);return;}
   if(!lbMe&&!isAdmin&&!(await verifyReady())){verifyOpen(name);return;}   // joining needs an email you can receive (keeps bots out)
   let pid;const prev=lbMe?lbMe.name:null;   // remember it now: the live stream may update lbMe.name while we wait
-  try{await playerToken();pid=playerAuth.uid;await fbReq('PATCH','players/'+pid,lbMe?{name}:{name,total:0});}catch(e){
+  try{await playerToken();pid=playerAuth.uid;const exists=lbMe?true:(await fbReq('GET','players/'+pid+'/total'))!=null;await fbReq('PATCH','players/'+pid,exists?{name}:{name,total:0});}catch(e){
     if(lbMe&&/HTTP 40[13]/.test(e.message)){lbEditing=false;renderLbProfile('The admin has turned off name changes for you.',true);return;}
     renderLbProfile('Couldn’t reach the server. Check your internet and try again.',true);return;}
   if(prev!==name)logName(pid,name,prev===null?'join':'self',false,prev);
@@ -4363,7 +4375,7 @@ function nameEl(pid,name){pid=pidMain(pid);const p=lbPlayers[pid]||{};const s=do
 // ── WHO'S ONLINE: each open copy checks in about once a minute (online/{uid} = server time) and checks out when hidden.
 // Online = checked in during the last 2½ minutes. Only players on the leaderboard (and not hidden) are shown.
 let ONLINE={},onlineBeatAt=0;
-async function onlineBeat(){if(!lbMe||document.visibilityState==='hidden')return onlineLoad();try{await fbReq('PUT','online/'+lbMe.pid,{'.sv':'timestamp'});onlineBeatAt=Date.now();}catch(e){}onlineLoad();}
+async function onlineBeat(){if(!lbMe||document.visibilityState==='hidden')return onlineLoad();try{const t0=Date.now(),st=await fbReq('PUT','online/'+lbMe.pid,{'.sv':'timestamp'});onlineBeatAt=Date.now();if(typeof st==='number')srvSkew=st-Math.round((t0+onlineBeatAt)/2);}catch(e){}onlineLoad();}
 async function onlineLoad(){try{ONLINE=(await fbReq('GET','online'))||{};}catch(e){return;}renderOnline();}
 function renderOnline(){const sec=document.getElementById('sideOnline'),list=document.getElementById('onlineList');if(!sec||!list)return;
   const vals=Object.values(ONLINE).filter(x=>typeof x==='number');if(!vals.length){sec.style.display='none';return;}
