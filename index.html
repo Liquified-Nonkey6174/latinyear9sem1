@@ -694,7 +694,8 @@ body:has(.overlay[style*="display: flex"]) .side-fab,body:has(#bReveal[style*="d
 .bf-dot{display:none;width:8px;height:8px;border-radius:50%;background:#ff5a5a;margin-left:5px;vertical-align:middle;box-shadow:0 0 6px rgba(255,90,90,.7)}.bf-dot.on{display:inline-block}
 .sf-list{display:flex;flex-direction:column;padding:2px 10px 10px;gap:0}.sf-row{display:flex;align-items:center;gap:8px;padding:3px 6px;border-radius:8px;cursor:pointer;font-size:12.5px}.sf-row:hover{background:var(--surface2)}.sf-art{flex:0 0 26px;line-height:0;display:flex;justify-content:center}.sf-art svg{width:24px;height:auto}.sf-txt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sf-t{font-size:11px;color:var(--text3);white-space:nowrap}
 .side-feed{flex:none}
-.side-online{flex:none}.on-list{display:flex;flex-wrap:wrap;gap:6px 12px;padding:2px 12px 10px;max-height:128px;overflow-y:auto}.on-p{display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-size:12.5px;max-width:100%}.on-p:hover{opacity:.8}.on-dot{flex:none;width:7px;height:7px;border-radius:50%;background:#3fbf6f;box-shadow:0 0 6px #3fbf6f}.on-list .pname.has-tag{flex-wrap:nowrap}.bpub-note{font-size:11.5px;color:var(--text3);margin:4px 2px 8px;line-height:1.4}
+.side-online{flex:none}.on-list{display:flex;flex-wrap:wrap;gap:6px 12px;padding:2px 12px 10px;max-height:128px;overflow-y:auto}.on-p{display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-size:12.5px;max-width:100%}.on-p:hover{opacity:.8}.on-dot{flex:none;width:7px;height:7px;border-radius:50%;background:#3fbf6f;box-shadow:0 0 6px #3fbf6f}.on-list .pname.has-tag{flex-wrap:nowrap}.cl-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--border)}.cl-btns{display:flex;gap:6px;flex:none}.cl-btns button{padding:5px 12px;font-size:12px}
+.bpub-note{font-size:11.5px;color:var(--text3);margin:4px 2px 8px;line-height:1.4}
 .on-hid{font-size:12px;color:var(--text3);font-style:italic;align-self:center}.on-sub{flex:0 0 100%;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin-top:4px}.on-hidden{opacity:.6}.on-hidden .on-dot{background:var(--text3);box-shadow:none}.on-why{font-size:10.5px;color:var(--text3);font-style:italic}.on-list .atag-row{flex:0 0 auto;display:inline-block}.on-list .atag{font-size:10px;padding:1px 6px}
 .bfeed-tabs{justify-content:center;margin:0 auto 12px;max-width:340px}.bfeed-list{display:flex;flex-direction:column;gap:6px}.bfeed-row{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:10px;background:var(--surface2,rgba(255,255,255,.03));border:1px solid var(--border,rgba(255,255,255,.08))}.bfeed-row.me{border-color:var(--accent,#e6b422)}.bfeed-art{flex:0 0 auto;line-height:0;width:34px;display:flex;justify-content:center}.bfeed-txt{flex:1;font-size:13.5px;text-align:left}.bfeed-t{font-size:11.5px;color:var(--text3);white-space:nowrap}.bfeed-empty{text-align:center;color:var(--text3);font-style:italic}
 .dg-rev{display:block;width:100%;margin-top:8px;padding:6px 10px;border-radius:8px;border:1px solid var(--accent,#e6b422);background:transparent;color:var(--accent,#e6b422);font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;text-align:center}.dg-rev:hover{background:rgba(230,180,34,.1)}.dg-rev.done{cursor:default;border-color:var(--border,rgba(255,255,255,.12));color:var(--text3)}
@@ -770,7 +771,7 @@ body:has(.overlay[style*="display: flex"]) .side-fab,body:has(#bReveal[style*="d
         <button class="btn-primary" style="font-size:12px;padding:6px 16px" onclick="saveDesc()">Save</button>
         <button class="btn-secondary" style="font-size:12px;padding:6px 14px" onclick="cancelDescEdit()">Cancel</button>
       </div>
-      <div style="margin-top:8px"><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="annEdit()">📢 Edit announcement</button><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="rulesCheck()" title="Find out whether the rules published in Firebase are up to date">🔍 Check database rules</button><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="premList()" title="Who has premium, and how they got it">👑 Premium list</button><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="contactEdit()" title="The email non-members are told to contact for a member tag">✉ Contact email</button><button class="btn-secondary" id="asStudentBtn" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="toggleAsStudent()" title="See the leaderboard, chat and Online now exactly as a student does">👁 View as a student</button><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="apprByName()" title="Let a player be seen by everyone on the leaderboard and in chat">✔ Approve player</button><label class="btn-secondary" style="font-size:12px;padding:6px 14px;cursor:pointer;display:inline-block">🔒 Upload secret badge answers<input type="file" accept=".json" style="display:none" onchange="if(this.files[0])sxUpload(this.files[0]);this.value=''"></label></div>
+      <div style="margin-top:8px"><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="annEdit()">📢 Edit announcement</button><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="rulesCheck()" title="Find out whether the rules published in Firebase are up to date">🔍 Check database rules</button><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="claimsOpen()" title="Badges players' devices say they had before the server took over">📝 Badge claims</button><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="premList()" title="Who has premium, and how they got it">👑 Premium list</button><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="contactEdit()" title="The email non-members are told to contact for a member tag">✉ Contact email</button><button class="btn-secondary" id="asStudentBtn" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="toggleAsStudent()" title="See the leaderboard, chat and Online now exactly as a student does">👁 View as a student</button><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="apprByName()" title="Let a player be seen by everyone on the leaderboard and in chat">✔ Approve player</button><label class="btn-secondary" style="font-size:12px;padding:6px 14px;cursor:pointer;display:inline-block">🔒 Upload secret badge answers<input type="file" accept=".json" style="display:none" onchange="if(this.files[0])sxUpload(this.files[0]);this.value=''"></label></div>
     </div>
   </div>
   <div class="settings-row"><button class="settings-btn" onclick="showSettings()">⚙ Settings</button> <button class="settings-btn" id="acctBtn" onclick="acctHub()" title="Sign in, or use your account on other devices">👤 Account</button> <button class="settings-btn" onclick="openBadges()">🏅 Badges <span id="badgeBtnCount" style="opacity:.7;font-size:12px"></span><span class="bf-dot" id="badgeBtnDot" title="New in the badge feed"></span></button></div>
@@ -2055,6 +2056,13 @@ body:has(.overlay[style*="display: flex"]) .side-fab,body:has(#bReveal[style*="d
     <div class="ann-body" id="verifyBody"></div>
     <div id="verifyMsg" class="backup-msg"></div>
     <div class="ann-btns" id="verifyBtns"></div>
+  </div>
+</div>
+<div id="claimsOverlay" class="overlay" style="display:none;z-index:126" onclick="closeOverlay('claimsOverlay')">
+  <div class="about-box ann-box" onclick="event.stopPropagation()" style="max-height:85vh;overflow-y:auto">
+    <button class="about-close" onclick="closeOverlay('claimsOverlay')">×</button>
+    <div class="ann-head">📝 Badge claims</div>
+    <div id="claimsBody"></div>
   </div>
 </div>
 <div id="memberOverlay" class="overlay" style="display:none;z-index:128" onclick="closeOverlay('memberOverlay')">
@@ -4963,12 +4971,16 @@ function badgeCheck(){secretWipe();try{verLoad();}catch(e){}const got=bjson(BADG
   // remember personal bests that the live data might forget
   b.bestDay=Math.max(b.bestDay||0,lbTodayPts());b.bestStreak=Math.max(b.bestStreak||0,dailyStreak());reactsTally();
   if(lbMe&&classChal&&+classChal.target&&isPublic(lbMe.pid)){const me=lbPlayers[lbMe.pid]||{};if(((me.w||{})[lbKeys().w]||0)>=500)b.civis=1;}bsave();
-  if(srvOn()){const lv=srvLevels(lbMe.pid);[...BADGES.filter(b=>!b.secret),...META_BADGES].forEach(bd=>{if(bd.meta==='count')return;const L=Math.min(lv[bd.id]||0,bd.lv.length),old=got[bd.id]?got[bd.id].l:0;
-      if(L!==old){if(L>old)fresh.push({bd,l:L,first:!old});if(L)got[bd.id]={l:L,t:got[bd.id]?got[bd.id].t:Date.now()};else delete got[bd.id];changed=true;}});}
-  if(!srvOn()&&bgApply(got))changed=true;
-  if(!srvOn())BADGES.forEach(bd=>{const v=badgeStatV(bd);const l=badgeLevel(bd,v);const old=got[bd.id]?got[bd.id].l:0;
+  // once the server keeps the badge records, never fall back to working them out on this device (that made badges
+  // flicker: vanish, then come back as "new" with a celebration). Until the server data has loaded, nothing changes.
+  const sm=srvMode();
+  if(sm&&srvOn()){const lv=srvLevels(lbMe.pid),silent=!srvSynced;if(silent)srvClaim(got,lv);
+    [...BADGES.filter(b=>!b.secret),...META_BADGES].forEach(bd=>{if(bd.meta==='count')return;const L=Math.min(lv[bd.id]||0,bd.lv.length),old=got[bd.id]?got[bd.id].l:0;
+      if(L!==old){if(L>old&&!silent)fresh.push({bd,l:L,first:!old});if(L)got[bd.id]={l:L,t:got[bd.id]?got[bd.id].t:Date.now()};else delete got[bd.id];changed=true;}});srvSynced=true;}
+  if(!sm&&bgApply(got))changed=true;
+  if(!sm)BADGES.forEach(bd=>{const v=badgeStatV(bd);const l=badgeLevel(bd,v);const old=got[bd.id]?got[bd.id].l:0;
     if(l>old){got[bd.id]={l,t:Date.now()};changed=true;fresh.push({bd,l,first:!old});}});
-  if(!srvOn())META_BADGES.forEach(bd=>{const v=metaValue(bd,got),old=got[bd.id]?got[bd.id].l:0;if(v>old){got[bd.id]={l:v,t:Date.now()};changed=true;if(bd.meta!=='count')fresh.push({bd,l:v,first:!old});else toast('🗝️ Arcana: '+v+' secret badge'+(v===1?'':'s')+' found!');}});
+  if(!sm)META_BADGES.forEach(bd=>{const v=metaValue(bd,got),old=got[bd.id]?got[bd.id].l:0;if(v>old){got[bd.id]={l:v,t:Date.now()};changed=true;if(bd.meta!=='count')fresh.push({bd,l:v,first:!old});else toast('🗝️ Arcana: '+v+' secret badge'+(v===1?'':'s')+' found!');}});
   // anything the server can check must match it: changes made only on this screen are undone
   if(lbMe&&lbPlayers[lbMe.pid]){const rb=badgeById('rank'),mx=badgeLevel(rb,Math.max(0,+lbPlayers[lbMe.pid].total||0)),base=+b['base_rank']||0,lim=badgeLevel(rb,Math.max(0,(+lbPlayers[lbMe.pid].total||0)-base));
     const cap=BGRANT&&BGRANT.rank&&+BGRANT.rank.l?Math.max(lim,+BGRANT.rank.l):mx;if(got.rank&&got.rank.l>cap){if(cap>0)got.rank.l=cap;else delete got.rank;changed=true;}}
@@ -6890,6 +6902,22 @@ let alogQ=[],alogBusy=false,alogLast=0,srvMeAt=0,srvExtrasBusy=false;
 async function srvLoadMe(){if(!playerAuth||!playerAuth.uid)return;const u=playerAuth.uid;
   try{const [a,w,ws,lg,fz]=await Promise.all([fbReq('GET','alog/'+u),fbReq('GET','aw/'+u),SRV.ws?Promise.resolve(SRV.ws):fbReq('GET','wset'),fbReq('GET','blegacy/'+u),fbReq('GET','blegacy/_done')]);
     SRV.me=a||{};SRV.aw=w||{};SRV.ws=ws||{};SRV.leg[u]=lg||{};SRV.frozen=!!fz;srvMeAt=Date.now();badgeCheckSoon();}catch(e){}}
+var srvSynced=false;
+function srvMode(){if(SRV.frozen){try{localStorage.setItem('latin_srv_frozen','1');}catch(e){}return true;}try{return localStorage.getItem('latin_srv_frozen')==='1';}catch(e){return false;}}
+// badges this device had (or its stats still show) that the frozen record missed: sent to the admin as a claim to approve
+function srvClaim(got,lv){try{if(!lbMe)return;const claim={};BADGES.forEach(bd=>{if(bd.secret||bd.id==='rank'||bd.id==='chester')return;let v=0;try{v=bd.stat();}catch(e){}
+      const old=Math.max(got[bd.id]?+got[bd.id].l||0:0,badgeLevel(bd,Math.max(0,v-(+bstat()['base_'+bd.id]||0)))),L=Math.min(old,bd.lv.length);if(L>(lv[bd.id]||0))claim[bd.id]=L;});
+    ['fereomnia','omnia','omniamax','inscriptus'].forEach(id=>{if(got[id]&&+got[id].l>(lv[id]||0))claim[id]=1;});
+    const key=JSON.stringify(claim);if(!Object.keys(claim).length||localStorage.getItem('latin_bclaim_sent')===key)return;
+    fbReq('PUT','bclaim/'+lbMe.pid,{...claim,t:{'.sv':'timestamp'}}).then(()=>{try{localStorage.setItem('latin_bclaim_sent',key);}catch(e){}}).catch(()=>{});}catch(e){}}
+async function claimsOpen(){let r;try{r=(await fbReq('GET','bclaim',null,{admin:true}))||{};}catch(e){alert('Couldn’t load the claims ('+e.message+'). Publish the latest database rules first.');return;}
+  const box=document.getElementById('claimsBody'),ids=Object.keys(r);
+  box.innerHTML=ids.length?'<p class="acct-note">These players’ devices show badges that weren’t in the frozen record (their device may not have synced before the freeze). Approve to add them; reject if they look faked.</p>'+ids.map(pid=>{const c=r[pid]||{},p=lbPlayers[pid]||{};const list=Object.entries(c).filter(([k])=>k!=='t').map(([id,l])=>{const b=badgeById(id);return b?esc(b.lv.length>1?badgeTierName(b,+l):b.name):esc(id);}).join(', ');
+    return '<div class="cl-row" data-pid="'+esc(pid)+'"><div><b>'+esc(p.name||'(not on the leaderboard)')+'</b>'+((ATAG||{})[pid]?' <span class="atag">'+esc(ATAG[pid])+'</span>':'')+'<br><span class="muted" style="font-size:12px">'+list+'</span></div><div class="cl-btns"><button class="btn-primary" data-act="ok">Approve</button><button class="btn-secondary" data-act="no">Reject</button></div></div>';}).join(''):'<p class="acct-note">No badge claims waiting.</p>';
+  box.querySelectorAll('.cl-row button').forEach(bt=>bt.onclick=async()=>{const row=bt.closest('.cl-row'),pid=row.dataset.pid,c=r[pid]||{};bt.disabled=true;
+    try{if(bt.dataset.act==='ok'){const cur=(await fbReq('GET','blegacy/'+pid,null,{admin:true}))||{};Object.entries(c).forEach(([id,l])=>{if(id!=='t')cur[id]=Math.max(+cur[id]||0,+l||0);});await fbReq('PUT','blegacy/'+pid,cur,{admin:true});SRV.at[pid]=0;}
+      await fbReq('DELETE','bclaim/'+pid,null,{admin:true});row.remove();toast(bt.dataset.act==='ok'?'Approved.':'Rejected.');}catch(e){bt.disabled=false;toast('Couldn’t save ('+e.message+').');}});
+  document.getElementById('claimsOverlay').style.display='flex';}
 function srvOn(){return !!(SRV.frozen&&lbMe&&playerAuth&&lbMe.pid===playerAuth.uid&&SRV.me&&SRV.ws&&lbPlayers[lbMe.pid]);}
 function alogAnswer(ok,w){if(!playerAuth||!lbMe)return;alogQ.push({ok:!!ok,k:akey(w)});if(alogQ.length>300)alogQ.shift();alogPump();}
 async function alogPump(){if(alogBusy||!alogQ.length)return;alogBusy=true;
