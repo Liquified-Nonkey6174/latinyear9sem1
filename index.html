@@ -4809,14 +4809,14 @@ const sxTried=new Set();let sxLastRoll=0;
 function sxNorm(t){return String(t||'').toLowerCase().replace(/[’']/g,'').replace(/[^a-z0-9 ]+/g,' ').replace(/\s+/g,' ').trim();}
 async function sxHash(c){const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('lt-sx-1|'+c));return [...new Uint8Array(d)].slice(0,16).map(b=>b.toString(16).padStart(2,'0')).join('');}
 function sxEntry(id){return {id,secret:true,lv:[1],get icon(){return (sxCfg[id]||{}).icon||'❔';},get name(){return (sxCfg[id]||{}).name||'Secret badge';},get lat(){return (sxCfg[id]||{}).lat||'';},
-  get desc(){return sxCfg[id]?sxCfg[id].desc:'Found before secret badges moved online. Earn it again to reveal what it is.';},stat:()=>sxCfg[id]?1:0};}
+  get desc(){return sxCfg[id]?sxCfg[id].desc:'Found before secret badges moved online. Earn it again to reveal what it is.';},stat:()=>sxCfg[id]&&sxServer&&sxServer.has(id)?1:0};}   // only once the server confirms it (a badge removed on the server can't come back from this device's memory)
 function sxArt(){const S=window.BADGE_SYMBOLS||{};SX_IDS.forEach(id=>{S[id]=sxCfg[id]&&sxCfg[id].sym||S.unknown;});}
 window._qE=id=>sxCfg[id]&&sxCfg[id].en;
 // a badge the server just accepted: count it as on the server straight away (the next sync confirms it)
-function sxGot(h,raw){const r=sxLearn(h,raw);if(r&&sxServer)sxServer.add(r.id);return r;}
+var sxRecent={};function sxGot(h,raw){const r=sxLearn(h,raw);if(r){sxRecent[r.id]=Date.now();if(sxServer)sxServer.add(r.id);}return r;}
 function sxLearn(h,raw){let c=raw;try{if(typeof raw==='string')c=JSON.parse(raw);}catch(e){return null;}if(!c||!c.id||!SX_IDS.includes(c.id))return null;
   sxCfg[c.id]={...c,h};try{localStorage.setItem(SX_CACHE,JSON.stringify(sxCfg));}catch(e){}sxArt();setTimeout(()=>{try{badgeCheck();}catch(e){}},0);return sxCfg[c.id];}
-async function sxTry(c){try{if(!c)return null;const h=await sxHash(c);const known=Object.values(sxCfg).find(x=>x.h===h);if(known)return known;if(sxTried.has(h))return null;sxTried.add(h);
+async function sxTry(c){try{if(!c)return null;const h=await sxHash(c);const known=Object.values(sxCfg).find(x=>x.h===h);if(known&&(!sxServer||sxServer.has(known.id)))return known;if(known)sxTried.delete(h);if(sxTried.has(h))return null;sxTried.add(h);
   await playerToken();if(playerAuth.uid===ADMIN_UID&&h!==SX_LUCK&&h!==SX_PREM){const k=await fbReq('GET','sx/key/'+h);if(!k){sxLogAdd(c,'no');return null;}}
   await fbReq('PUT','sx/got/'+playerAuth.uid+'/'+h,{'.sv':'timestamp'});sxLogAdd(c,'unlocked');return sxGot(h,await fbReq('GET','sx/cfg/'+h));}catch(e){sxLogAdd(c,/40[13]/.test(e.message)?'no':'error: '+e.message);return null;}}
 // last attempts on this device (only shown in the admin check, to find out why a badge didn't unlock)
@@ -4837,7 +4837,9 @@ async function sxCheck(){const out=[],row=(ok,t)=>out.push('<div style="margin:4
   document.getElementById('claimsBody').innerHTML=out.join('');document.querySelector('#claimsOverlay .ann-head').textContent='🔎 Secret badge check';document.getElementById('claimsOverlay').style.display='flex';}
 var sxServer=null;   // ids of secret badges the server has a record of (null = not checked yet)
 async function sxSync(){try{await playerToken();const got=await fbReq('GET','sx/got/'+playerAuth.uid);const ids=new Set();if(got)for(const h of Object.keys(got)){let c=Object.values(sxCfg).find(x=>x.h===h);if(!c)c=sxLearn(h,await fbReq('GET','sx/cfg/'+h));if(c&&c.id)ids.add(c.id);}
-    try{const o=await fbReq('GET','sx/old/'+playerAuth.uid);if(typeof o==='string')o.split(',').forEach(x=>ids.add(x));}catch(e){}sxServer=ids;}catch(e){}
+    try{const o=await fbReq('GET','sx/old/'+playerAuth.uid);if(typeof o==='string')o.split(',').forEach(x=>ids.add(x));}catch(e){}Object.entries(sxRecent).forEach(([id,t])=>{if(Date.now()-t<120000)ids.add(id);});sxServer=ids;
+    // forget details of badges the server no longer has for this account (e.g. removed by the admin), so they can be earned again properly
+    let pr=false;Object.keys(sxCfg).forEach(id=>{if(!ids.has(id)){delete sxCfg[id];pr=true;}});if(pr){try{localStorage.setItem(SX_CACHE,JSON.stringify(sxCfg));}catch(e){}}}catch(e){}
   // secret badges earned before they moved online: register them once (max 15), then load their details
   try{badgeCheck();const uid=playerAuth.uid,g=bjson(BADGE_KEY);let old=await fbReq('GET','sx/old/'+uid);
     if(typeof old!=='string'){const mine=SX_IDS.slice(0,SX_LEGACY_N).filter(id=>g[id]&&!(sxCfg[id]&&sxCfg[id].h));if(mine.length&&mine.length<SX_LEGACY_N){try{await fbReq('PUT','sx/old/'+uid,mine.join(','));old=mine.join(',');}catch(e){}}}
