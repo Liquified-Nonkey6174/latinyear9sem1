@@ -4829,20 +4829,20 @@ function sxMigStats(b){if(!b.z&&!Object.keys(b).some(k=>/^k\d+$/.test(k)))return
   if(Array.isArray(z.cs))b.infoRead=z.cs;if(Array.isArray(z.th))b.themes=[...new Set([...(b.themes||[]),...z.th])];delete b.z;Object.keys(b).forEach(k=>{if(/^k\d+$/.test(k))delete b[k];});return true;}
 // admin: upload the private answers file (never stored in the site)
 async function sxUpload(file){let cfg;try{cfg=JSON.parse(await file.text());if(!Array.isArray(cfg))throw new Error('not a list');}catch(e){alert('That isn’t the secret badge answers file ('+e.message+').');return;}
-  // each step is retried, and one failure doesn't stop the rest
-  const put=async(path,val)=>{let err;for(let a=0;a<3;a++){try{return await fbReq('PUT',path,val,{admin:true});}catch(e){err=e;if(/40[13]/.test(e.message)&&a===1)break;await new Promise(r=>setTimeout(r,800*(a+1)));}}throw err;};
-  const ok=[],bad=[];
-  for(let i=0;i<cfg.length;i++){const b=cfg[i];toast('Uploading secret badges… '+(i+1)+' / '+cfg.length);
-    try{const pub=JSON.stringify({id:b.id,icon:b.icon,name:b.name,lat:b.lat,desc:b.desc,sym:b.sym,en:b.en,...(b.block?{block:b.block}:{})});
-      await put('sx/legacy/'+b.id,pub);
-      if(b.premium)await put('sx/cfg/'+SX_PREM,pub);
-      if(b.luck){await put('sx/cfg/'+SX_LUCK,pub);await put('sx/key/'+SX_LUCK,b.id);}   // listed so the admin can give/remove it (players still can't claim it with this)
-      else for(const k of b.keys){const h=await sxHash(k);await put('sx/key/'+h,b.id);await put('sx/cfg/'+h,pub);}
-      ok.push(b.name);}catch(e){bad.push(b.name+' ('+e.message+')');}}
-  // old answer codes for these badges stop working (players who already have the badge keep it and its details)
-  try{const keep=new Set();for(const b of cfg){for(const k of (b.keys||[]))keep.add(await sxHash(k));if(b.luck)keep.add(SX_LUCK);if(b.premium)keep.add(SX_PREM);}const ids=new Set(cfg.map(b=>b.id));const all=(await fbReq('GET','sx/key',null,{admin:true}))||{};
-    for(const [h,id] of Object.entries(all))if(ids.has(id)&&!keep.has(h)){try{await fbReq('DELETE','sx/key/'+h,null,{admin:true});}catch(e){}}}catch(e){}
-  alert(bad.length?'Uploaded '+ok.length+' of '+cfg.length+' secret badges.\n\nThese failed — press Upload again to retry them:\n'+bad.join('\n'):'All '+cfg.length+' secret badges uploaded.');}
+  // one request per badge (all its answer codes together), retried; then the server is checked to make sure every code is there
+  const patch=async body=>{let err;for(let a=0;a<4;a++){try{return await fbReq('PATCH','',body,{admin:true});}catch(e){err=e;await new Promise(r=>setTimeout(r,800*(a+1)));}}throw err;};
+  const ok=[],bad=[],want={};
+  for(let i=0;i<cfg.length;i++){const b=cfg[i];toast('Uploading secret badges… '+(i+1)+' / '+cfg.length+' (keep this page open)');
+    try{const pub=JSON.stringify({id:b.id,icon:b.icon,name:b.name,lat:b.lat,desc:b.desc,sym:b.sym,en:b.en,...(b.block?{block:b.block}:{})});const body={['sx/legacy/'+b.id]:pub};
+      if(b.premium){body['sx/cfg/'+SX_PREM]=pub;}
+      if(b.luck){body['sx/cfg/'+SX_LUCK]=pub;body['sx/key/'+SX_LUCK]=b.id;want[SX_LUCK]=b.id;}   // listed so the admin can give/remove it (players still can't claim it with this)
+      else for(const k of (b.keys||[])){const h=await sxHash(k);body['sx/key/'+h]=b.id;body['sx/cfg/'+h]=pub;want[h]=b.id;}
+      await patch(body);ok.push(b.name);}catch(e){bad.push(b.name+' ('+e.message+')');}}
+  // old answer codes for these badges stop working (players who already have the badge keep it and its details); then check
+  let missing=[];try{if(cfg.some(b=>b.premium))want[SX_PREM]=want[SX_PREM]||null;const ids=new Set(cfg.map(b=>b.id));const all=(await fbReq('GET','sx/key',null,{admin:true}))||{};const del={};
+    for(const [h,id] of Object.entries(all))if(ids.has(id)&&!(h in want))del['sx/key/'+h]=null;if(Object.keys(del).length)await patch(del);
+    const miss=new Set();Object.entries(want).forEach(([h,id])=>{if(id&&all[h]!==id)miss.add(id);});missing=cfg.filter(b=>miss.has(b.id)).map(b=>b.name);}catch(e){missing=['(couldn’t check: '+e.message+')'];}
+  alert(bad.length||missing.length?'Uploaded '+ok.length+' of '+cfg.length+' secret badges.'+(bad.length?'\n\nThese failed:\n'+bad.join('\n'):'')+(missing.length?'\n\nNot fully on the server:\n'+missing.join('\n'):'')+'\n\nPress Upload again to retry.':'All '+cfg.length+' secret badges uploaded and checked.');}
 setTimeout(()=>{sxArt();sxSync();},1500);setInterval(()=>{try{sxSync();}catch(e){}},60000);
 // Special section (not counted in the badge totals): Arcana counts your secret badges; Omnia / Omnia Maxima need every main badge.
 const META_BADGES=[
@@ -6751,8 +6751,8 @@ function setLatinUI(on){latinUI=!!on;try{localStorage.setItem('latin_ui_latine',
   if(on){latTranslate(document.body);if(!_latObs){_latObs=new MutationObserver(ms=>{if(!latinUI)return;ms.forEach(m=>m.addedNodes.forEach(nd=>{if(nd.nodeType===1)latTranslate(nd);else if(nd.nodeType===3&&nd.parentElement)latTranslate(nd.parentElement);}));});}_latObs.observe(document.body,{childList:true,subtree:true});}
   else{if(_latObs)_latObs.disconnect();_latDone.forEach(([n,raw,ph])=>{n._lat=0;if(ph)n.placeholder=raw;else if(n.isConnected)n.nodeValue=raw;});_latDone=[];}}
 function toggleLatinUI(){setLatinUI(!latinUI);if(latinUI){sxTry('s|latin|1');toast('Salve! Nunc omnia Latine. (Click “English” to switch back.)');}}
-(function(){const h=document.querySelector('h1');const em=h&&h.querySelector('em');if(em){em.style.cursor='pointer';em.title='';em.addEventListener('click',e=>{e.stopPropagation();toggleLatinUI();});}
-  if(h){let n=0,last=0;h.addEventListener('click',()=>{const t=Date.now();n=t-last<1500?n+1:1;last=t;if(n<=9)sxTry('s|tc|'+n);});}
+(function(){const h=document.querySelector('h1');const em=h&&h.querySelector('em');if(em){em.style.cursor='pointer';em.title='';let n=0,last=0;em.addEventListener('click',e=>{e.stopPropagation();toggleLatinUI();const t=Date.now();n=t-last<1500?n+1:1;last=t;if(n<=9)sxTry('s|lc|'+n);});}
+
   try{if(localStorage.getItem('latin_ui_latine')==='1')setTimeout(()=>setLatinUI(true),300);}catch(e){}})();
 {const go=()=>{clearTimeout(window._cuT);window._cuT=setTimeout(sxInfo,150);};window.addEventListener('scroll',go,{passive:true});window.addEventListener('touchend',()=>setTimeout(sxInfo,400),{passive:true});window.addEventListener('resize',go);if(window.visualViewport)visualViewport.addEventListener('resize',go);setInterval(()=>{const v=document.getElementById('infoView');if(v&&v.style.display!=='none')sxInfo();},1500);}
 
