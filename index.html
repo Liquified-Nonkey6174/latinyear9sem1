@@ -4638,10 +4638,15 @@ function dailyData(){try{return JSON.parse(localStorage.getItem(DAILY_KEY)||'{}'
 function dailyTick(){const d=dailyData(),k=lbKeys().d;d[k]=(d[k]||0)+1;
   // keep ~60 days
   Object.keys(d).sort().slice(0,-60).forEach(x=>delete d[x]);try{localStorage.setItem(DAILY_KEY,JSON.stringify(d));}catch(e){}
+  if(SET.goal&&d[k]>=SET.goal)dailyMet(k);
   if(SET.goal&&d[k]===SET.goal)toast('🎉 Daily goal reached: '+SET.goal+' correct answers today!');renderDaily();}
-function dayKeyOffset(n){const t=new Date();t.setDate(t.getDate()-n);return lbKeys(t).d;}
-function dailyStreak(){const d=dailyData(),g=SET.goal||1;let n=0,i=(d[dayKeyOffset(0)]||0)>=g?0:1;for(;;i++){if((d[dayKeyOffset(i)]||0)>=g)n++;else break;}return n;}
-function renderDaily(){const box=document.getElementById('dailyGoal');if(!box)return;let rv='';try{rv=reviseLine();}catch(e){}if(!SET.goal){box.style.display=rv?'':'none';box.className='dg';box.innerHTML=rv;return;}
+function dayKeyOffset(n){const t=new Date(srvNow());t.setDate(t.getDate()-n);return lbKeys(t).d;}
+// days the goal was reached, remembered as they happen, so changing the goal later doesn't break a streak
+const DAILY_MET_KEY='latin_daily_met';
+function dailyMetSet(){try{const a=JSON.parse(localStorage.getItem(DAILY_MET_KEY)||'[]');return new Set(Array.isArray(a)?a.filter(x=>typeof x==='string'&&/^\d{4}-\d\d-\d\d$/.test(x)):[]);}catch(e){return new Set();}}
+function dailyMet(k){const m=dailyMetSet();if(m.has(k))return;m.add(k);try{localStorage.setItem(DAILY_MET_KEY,JSON.stringify([...m].sort().slice(-400)));}catch(e){}}
+function dailyStreak(){const d=dailyData(),g=SET.goal||1,m=dailyMetSet(),ok=k=>(d[k]||0)>=g||m.has(k);let n=0,i=ok(dayKeyOffset(0))?0:1;for(;;i++){if(ok(dayKeyOffset(i)))n++;else break;}return n;}
+function renderDaily(){const box=document.getElementById('dailyGoal');if(!box)return;if(SET.goal){const d=dailyData(),m=dailyMetSet();const add=Object.keys(d).filter(k=>/^\d{4}-\d\d-\d\d$/.test(k)&&d[k]>=SET.goal&&!m.has(k));if(add.length){add.forEach(k=>m.add(k));try{localStorage.setItem(DAILY_MET_KEY,JSON.stringify([...m].sort().slice(-400)));}catch(e){}}}let rv='';try{rv=reviseLine();}catch(e){}if(!SET.goal){box.style.display=rv?'':'none';box.className='dg';box.innerHTML=rv;return;}
   const today=dailyData()[lbKeys().d]||0,g=SET.goal,st=dailyStreak(),pct=Math.min(100,Math.round(today/g*100));box.style.display='';
   box.className='dg'+(today>=g?' done':'');box.innerHTML='<div class="dg-top"><span>'+(today>=g?'✓ Daily goal reached':'Daily goal')+'</span><span>'+today+' / '+g+'</span></div><div class="dg-bar"><div style="width:'+pct+'%"></div></div><div class="dg-sub">'+(st?'🔥 '+st+'-day streak':'Reach your goal to start a streak 🔥')+'</div>'+rv;}
 
