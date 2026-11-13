@@ -3477,7 +3477,10 @@ function enMeaningAlts(sd,eng){const clean=x=>String(x).replace(/\s*\([^)]*\)/g,
   const v3=x=>{try{return eV3({eng:[x]});}catch(e){return null;}},ing=x=>{try{return ePast({eng:[x]}).replace(/^was /,'');}catch(e){return null;}},pl=x=>{try{return ePl({lat:'',eng:[x]});}catch(e){return null;}};
   const pairs=[];
   // English tense variants of the verbs in the sentence (Latin present = "carries" or "is carrying"; imperfect = "was carrying" or "used to carry")
-  wordsOf('verbs').forEach(w=>{const ms=w.eng.map(clean).filter(Boolean);if(!ms.some(m=>vals.has(m)))return;ms.forEach(m=>{const g=ing(m),t3=v3(m);if(!g||/^be\b/.test(m))return;
+  // verbs that sound wrong as "was …ing" in English: the plain past is fine too ("was having" = "had")
+  const STAT={have:'had',owe:'owed',love:'loved',fear:'feared',see:'saw',hear:'heard',know:'knew',want:'wanted',believe:'believed',like:'liked',hate:'hated',trust:'trusted',wish:'wished',hold:'held'};
+  wordsOf('verbs').forEach(w=>{let ms=w.eng.map(clean).filter(Boolean);ms=[...new Set(ms.concat(ms.map(m=>m.split(' ')[0])))];   // "wage war": the sentence lists the verb as just "wage"
+    if(!ms.some(m=>vals.has(m)))return;ms.forEach(m=>{const g=ing(m),t3=v3(m);if(!g||/^be\b/.test(m))return;if(STAT[m])pairs.push(['was '+g,STAT[m]],['were '+g,STAT[m]]);
     if(t3)pairs.push([t3,'is '+g]);pairs.push(['was '+g,'used to '+m],['were '+g,'used to '+m],['you '+m,'you are '+g],['we '+m,'we are '+g],['they '+m,'they are '+g],['i '+m,'i am '+g]);});});
   allWordsFlat().forEach(w=>{if(!w.eng||w.eng.length<2)return;const e0=clean(w.eng[0]);if(!vals.has(e0))return;
     w.eng.slice(1).map(clean).forEach(m=>{if(!m||m===e0)return;pairs.push([e0,m]);if(w.catKey==='verbs'){pairs.push([v3(e0),v3(m)],[ing(e0),ing(m)]);}if(w.catKey==='nouns')pairs.push([pl(e0),pl(m)]);});});
@@ -6836,14 +6839,15 @@ function toggleLatinUI(){setLatinUI(!latinUI);if(latinUI){sxTry('s|latin|1');toa
 /* ---------- EXAM: a 100-mark paper from the main word list ---------- */
 const EXAM_KEY='latin_exam_draft',EXAM_HIST='latin_exam_hist',EXAM_STAR_X=5;   // (no longer used for ⭐: see exStarVal)
 // ⭐ a question is worth: a set amount per section (the same every paper)
-const EXAM_Q_STARS={voc:1.5,vp:3.5,ngc:5,ap:6,le:9,el:16};   // per question, all right: vocab 30, verb phrases 35, number/gender/case 40, adjective+noun 48, Latin→English 117, English→Latin 160 (430 in all)
-function exStarVal(q){if(EXAM_Q_STARS[q.sec])return EXAM_Q_STARS[q.sec];if(!q.sd)return 1;const sv=[mode,difficulty];try{mode=q.sec==='le'?'le':'el';difficulty=wordCount(q.sd.latin)>9?'insane':'hard';return sentPoints(q.sd);}catch(e){return 2;}finally{mode=sv[0];difficulty=sv[1];}}
+const EXAM_Q_STARS={voc:1.5,vp:3.5,ngc:5,ap:6,le:9,el:16};   // per question, all right: vocab 30, verb phrases 35, number/gender/case 40, adjective+noun 56 (4 plain × 6 + 4 with a preposition × 8), Latin→English 117, English→Latin 160 (438 in all)
+const EXAM_MIN_FOR_STARS=40,EXAM_LIMIT_S=3600;
+function exStarVal(q){if(q.sec==='ap'&&q.prep)return 8;if(EXAM_Q_STARS[q.sec])return EXAM_Q_STARS[q.sec];if(!q.sd)return 1;const sv=[mode,difficulty];try{mode=q.sec==='le'?'le':'el';difficulty=wordCount(q.sd.latin)>9?'insane':'hard';return sentPoints(q.sd);}catch(e){return 2;}finally{mode=sv[0];difficulty=sv[1];}}
 const EXAM_SECS=[
   {id:'voc',title:'Vocabulary',sub:'Give one English meaning of each Latin word.',n:20,pts:.5},
   {id:'le',title:'Latin → English sentences',sub:'Translate each sentence into English.',n:13,pts:2},
   {id:'ngc',title:'Number, gender and case',sub:'Write the number, gender and case of each noun as full words (e.g. singular, feminine, accusative). If the form could be more than one case, any correct one counts.',n:8,pts:1.5},
   {id:'vp',title:'Verb phrases',sub:'Translate each Latin phrase into English.',n:10,pts:1},
-  {id:'ap',title:'Adjective + noun phrases',sub:'Translate each phrase into Latin, in the case given (e.g. big lion · accusative → leonem magnum).',n:8,pts:1.5},
+  {id:'ap',title:'Adjective + noun phrases',sub:'Translate each phrase into Latin, in the case given (e.g. big lion · accusative → leonem magnum). Some start with a preposition and give no case: use the case that preposition takes (e.g. with the big lion → cum leone magno).',n:8,pts:1.5},
   {id:'el',title:'English → Latin sentences',sub:'Translate each sentence into Latin.',n:10,pts:3}];
 let exam=null,exSaveT=null,exTick=null;
 const exFmt=x=>(Math.round(x*2)/2).toString();
@@ -6888,12 +6892,14 @@ function exVP(){const vs=exVerbs(),out=[],used=new Set();const kinds=shuffle(['i
       if(!lat||!alts.length||alts.some(a=>/null|undefined/.test(a)))continue;used.add(w.lat);out.push({sec:'vp',prompt:lat,alts,show:alts[0]});break;}});
   return out;}
 function exAP(){const adjs=exMain().filter(w=>w.catKey==='adjectives'&&!EX_ADJ_SKIP.has(w.lat)&&!NUMBER_FORMS[w.lat]);const ns=exNouns(),out=[],used=new Set();
-  for(let tries=0;out.length<8&&tries<200;tries++){const n=rnd(ns),a=rnd(adjs);if(used.has(n.lat)||used.has(a.lat))continue;const num=EX_MASS.has(n.lat)||Math.random()<.5?'singular':'plural';
+  const preps=exMain().filter(w=>w.catKey==='prepositions'&&/^with (ablative|accusative)$/.test(w.subKey)),PV={ab:['ab','a'],ex:['ex','e']};let nPrep=0;
+  for(let tries=0;out.length<8&&tries<300;tries++){const n=rnd(ns),a=rnd(adjs);if(used.has(n.lat)||used.has(a.lat))continue;const pr=preps.length&&nPrep<4&&(out.length>=4||Math.random()<.5)?rnd(preps):null;const num=EX_MASS.has(n.lat)||Math.random()<.5?'singular':'plural';
     const aE=exMeanings(a)[0];if(!aE||/\s/.test(aE))continue;const nE0=String(n.eng[0]).replace(/\s*\([^)]*\)/g,'').trim();let nE;try{nE=num==='singular'?nE0:ePl(n);}catch(e){continue;}
     const nAlts=exNouns().filter(x=>x.eng.some(e=>String(e).replace(/\s*\([^)]*\)/g,'').trim()===nE0)),aAlts=adjs.filter(x=>exMeanings(x).includes(aE));
-    const cs=rnd(['nominative','accusative','accusative','genitive','dative','ablative']);
-    const alts=[];nAlts.forEach(nx=>aAlts.forEach(ax=>{const nf=declineN(nx,cs,num),af=declineA(ax,nx.gender,cs,num);if(nf&&af)alts.push(nf+' '+af);}));
-    if(!alts.length)continue;used.add(n.lat);used.add(a.lat);const pick=w=>({lat:w.lat,gen:w.gen||null,gender:w.gender,subKey:w.subKey,catKey:w.catKey});out.push({sec:'ap',prompt:aE+' '+nE+' · '+cs,cs,alts,show:alts[0],num,nw:nAlts.map(pick),aw:aAlts.map(pick)});}
+    const cs=pr?(pr.subKey==='with ablative'?'ablative':'accusative'):rnd(['nominative','accusative','accusative','genitive','dative','ablative']);
+    const alts=[];nAlts.forEach(nx=>aAlts.forEach(ax=>{const nf=declineN(nx,cs,num),af=declineA(ax,nx.gender,cs,num);if(nf&&af)(pr?(PV[pr.lat]||[pr.lat]):['']).forEach(pl=>alts.push((pl?pl+' ':'')+nf+' '+af));}));
+    if(!alts.length)continue;used.add(n.lat);used.add(a.lat);const pick=w=>({lat:w.lat,gen:w.gen||null,gender:w.gender,subKey:w.subKey,catKey:w.catKey});if(pr)nPrep++;out.push({sec:'ap',prompt:pr?String(pr.eng[0]).replace(/\s*\([^)]*\)/g,'')+' the '+aE+' '+nE:aE+' '+nE+' · '+cs,cs,alts,show:alts[0],num,nw:nAlts.map(pick),aw:aAlts.map(pick),...(pr?{prep:pr.lat}:{})});}
+  shuffle(out);
   return out;}
 function exBuild(){const qs=[];const seen=new Set();
   exVocab().slice(0,20).forEach(w=>qs.push({sec:'voc',prompt:fullLat(w),lat:w.lat,show:w.eng.join(', ')}));
@@ -6945,9 +6951,9 @@ function exSave(){clearTimeout(exSaveT);exSaveT=setTimeout(()=>{try{if(exam&&!ex
 function openExam(){showView('examView');if(!exam){try{const d=JSON.parse(localStorage.getItem(EXAM_KEY)||'null');if(d&&d.qs&&!d.res)exam=d;}catch(e){}}
   if(!exam||exam.res){exIntro();return;}exRender();}
 function exIntro(){exam=null;clearInterval(exTick);const h=exHist(),best=h.length?Math.max(...h.map(x=>x.s)):null;
-  document.getElementById('examWrap').innerHTML='<div class="ex-head"><div><div class="ex-title">📝 Exam</div><div class="ex-meta">100 marks · words from the main word list only</div></div><button class="quiz-menu-btn" onclick="exClose()">Menu</button></div>'
+  document.getElementById('examWrap').innerHTML='<div class="ex-head"><div><div class="ex-title">📝 Exam</div><div class="ex-meta">100 marks · 60 minutes · words from the main word list only</div></div><button class="quiz-menu-btn" onclick="exClose()">Menu</button></div>'
    +'<div class="ex-card"><table class="ex-plan">'+EXAM_SECS.map((s,i)=>'<tr><td>'+(i+1)+'</td><td>'+esc(s.title)+'</td><td>'+s.n+' × '+exFmt(s.pts)+'</td><td><b>'+exFmt(s.n*s.pts)+'</b></td></tr>').join('')+'<tr class="ex-tot"><td></td><td>Total</td><td></td><td><b>100</b></td></tr></table>'
-   +'<p class="ex-note">Every mistake — a wrong ending, a spelling slip, a missing or extra word, or words in the wrong order — costs ½ mark. A question can’t go below 0. Answers are marked when you submit, and each question earns ⭐ in proportion to its marks (a full paper is worth 430 ⭐) (answers given in under half a second earn no ⭐).</p>'
+   +'<p class="ex-note">Every mistake — a wrong ending, a spelling slip, a missing or extra word, or words in the wrong order — costs ½ mark. A question can’t go below 0. Answers are marked when you submit, and each question earns ⭐ in proportion to its marks (a full paper is worth 438 ⭐, and a paper needs at least '+EXAM_MIN_FOR_STARS+'/100 to earn any). You have 60 minutes: the paper is handed in automatically when time runs out (answers given in under half a second earn no ⭐).</p>'
    +(h.length?'<p class="ex-note">Best so far: <b>'+exFmt(best)+'/100</b> · last: '+exFmt(h[0].s)+'/100 ('+h.length+' taken)</p><p class="ex-note" style="margin-top:-6px">Recent scores: '+h.slice(0,15).map(x=>'<span title="'+esc(new Date(x.t).toLocaleString())+'">'+exFmt(x.s)+'</span>').join(' · ')+'</p>':'')
    +'<div class="res-btns"><button class="btn-primary" onclick="exStart()">Start exam</button></div></div>';}
 function exStart(){const qs=exBuild();exam={qs,ans:{},start:Date.now()};exSave();exRender();window.scrollTo(0,0);}
@@ -6955,7 +6961,7 @@ function exClose(){clearInterval(exTick);exSave();showView('selectorView');}
 function exInput(i,part,el){if(!exam||exam.res)return;if(part){exam.ans[i]=exam.ans[i]||{};exam.ans[i][part]=el.value;}else exam.ans[i]=el.value;exSave();}
 function exRender(){const W=document.getElementById('examWrap'),done=!!exam.res;let n=0,h='';
   h+='<div class="ex-head"><div><div class="ex-title">📝 Exam</div><div class="ex-meta">'+(done?'Marked · took '+Math.round(exam.res.secs/60)+' min':'<span id="exClock"></span> · answers save as you type')+'</div></div><button class="quiz-menu-btn" onclick="exClose()">Menu</button></div>';
-  if(done)h+='<div class="ex-card ex-score"><div class="res-score">'+exFmt(exam.res.total)+'<small>/100</small></div><div class="ex-secs">'+EXAM_SECS.map(s=>'<span>'+esc(s.title)+' <b>'+exFmt(exam.res.sec[s.id]||0)+'/'+exFmt(s.n*s.pts)+'</b></span>').join('')+'</div>'+(exam.res.stars?'<div class="ex-note">+'+exam.res.stars+' ⭐</div>':'')+(exam.res.fast?'<div class="ex-note">'+exam.res.fast+' answer'+(exam.res.fast===1?'':'s')+' earned no ⭐ (not typed in, or given within half a second of the paper appearing).</div>':'')+'</div>';
+  if(done)h+='<div class="ex-card ex-score"><div class="res-score">'+exFmt(exam.res.total)+'<small>/100</small></div><div class="ex-secs">'+EXAM_SECS.map(s=>'<span>'+esc(s.title)+' <b>'+exFmt(exam.res.sec[s.id]||0)+'/'+exFmt(s.n*s.pts)+'</b></span>').join('')+'</div>'+(exam.res.auto?'<div class="ex-note">⏱ Time ran out, so the paper was handed in as it was.</div>':'')+(exam.res.low?'<div class="ex-note">No ⭐ this time: a paper needs at least '+EXAM_MIN_FOR_STARS+'/100 to earn ⭐.</div>':'')+(exam.res.stars?'<div class="ex-note">+'+exam.res.stars+' ⭐</div>':'')+(exam.res.fast?'<div class="ex-note">'+exam.res.fast+' answer'+(exam.res.fast===1?'':'s')+' earned no ⭐ (not typed in, or given within half a second of the paper appearing).</div>':'')+'</div>';
   EXAM_SECS.forEach((s,si)=>{const qs=exam.qs.map((q,i)=>[q,i]).filter(([q])=>q.sec===s.id);if(!qs.length)return;
     h+='<div class="ex-card"><div class="exm-sec"><b>'+(si+1)+'. '+esc(s.title)+'</b><span>'+qs.length+' × '+exFmt(s.pts)+' = '+exFmt(qs.length*s.pts)+' marks'+(done?' · you got <b>'+exFmt(exam.res.sec[s.id]||0)+'</b>':'')+'</span></div><div class="ex-sub">'+esc(s.sub)+'</div>';
     qs.forEach(([q,i])=>{n++;const a=exam.ans[i];const r=done?exam.res.marks[i]:null;
@@ -6974,16 +6980,16 @@ function exRender(){const W=document.getElementById('examWrap'),done=!!exam.res;
   if(!W._exTyped){W._exTyped=1;W.addEventListener('input',e=>{const i=e.target&&e.target.dataset&&e.target.dataset.i;if(i==null||!e.isTrusted||!exam||exam.res)return;exam.tm=exam.tm||{};if(exam.tm[i]==null)exam.tm[i]=Date.now()-(exam.shown||exam.start);});}
   if(!done)exam.shown=Date.now();
   W.onkeydown=e=>{if(e.key!=='Enter'||e.shiftKey||e.isComposing||!e.target.classList||!e.target.classList.contains('ex-in'))return;e.preventDefault();
-    const ins=[...W.querySelectorAll('.ex-in:not([disabled])')],i=ins.indexOf(e.target),nx=ins[i+1];if(nx){nx.focus();nx.scrollIntoView({block:'center',behavior:'smooth'});}else{const sb=[...W.querySelectorAll('button')].find(b=>/Submit exam/.test(b.textContent));if(sb){sb.focus();sb.scrollIntoView({block:'center',behavior:'smooth'});}}};if(!done){const tk=()=>{const e=document.getElementById('exClock');if(!e){clearInterval(exTick);return;}const s=Math.floor((Date.now()-exam.start)/1000);e.textContent='⏱ '+Math.floor(s/60)+':'+String(s%60).padStart(2,'0');};tk();exTick=setInterval(tk,1000);}}
+    const ins=[...W.querySelectorAll('.ex-in:not([disabled])')],i=ins.indexOf(e.target),nx=ins[i+1];if(nx){nx.focus();nx.scrollIntoView({block:'center',behavior:'smooth'});}else{const sb=[...W.querySelectorAll('button')].find(b=>/Submit exam/.test(b.textContent));if(sb){sb.focus();sb.scrollIntoView({block:'center',behavior:'smooth'});}}};if(!done){const tk=()=>{const e=document.getElementById('exClock');if(!e){clearInterval(exTick);return;}const s=EXAM_LIMIT_S-Math.floor((Date.now()-exam.start)/1000);if(s<=0){clearInterval(exTick);e.textContent='⏱ 0:00';exSubmit(true);return;}e.textContent='⏱ '+Math.floor(s/60)+':'+String(s%60).padStart(2,'0')+' left';e.style.color=s<=300?'var(--red,#e07a6a)':'';if(s===300)toast('⏱ 5 minutes left');};tk();exTick=setInterval(tk,1000);}}
 function exQuit(){if(!confirm('Give up this exam? Your answers will be lost.'))return;try{localStorage.removeItem(EXAM_KEY);}catch(e){}exIntro();}
-function exSubmit(){if(!exam||exam.res)return;const blank=exam.qs.filter((q,i)=>{const a=exam.ans[i];return q.sec==='ngc'?!(a&&(a.n||a.g||a.c)):!String(a||'').trim();}).length;
-  if(blank&&!confirm(blank+' question'+(blank===1?' is':'s are')+' blank. Submit anyway?'))return;
+function exSubmit(auto){if(!exam||exam.res)return;const blank=exam.qs.filter((q,i)=>{const a=exam.ans[i];return q.sec==='ngc'?!(a&&(a.n||a.g||a.c)):!String(a||'').trim();}).length;
+  if(!auto&&blank&&!confirm(blank+' question'+(blank===1?' is':'s are')+' blank. Submit anyway?'))return;
   const marks={},sec={};let total=0;exam.qs.forEach((q,i)=>{let r;try{r=exGrade(q,exam.ans[i]);}catch(e){r={got:0,max:EXAM_SECS.find(s=>s.id===q.sec).pts,right:q.show||''};}marks[i]=r;sec[q.sec]=(sec[q.sec]||0)+r.got;total+=r.got;});
-  total=Math.round(total*2)/2;const secs=Math.round((Date.now()-exam.start)/1000);
+  total=Math.round(total*2)/2;const secs=Math.min(EXAM_LIMIT_S,Math.round((Date.now()-exam.start)/1000));
   // ⭐ = each question's practice value × the share of its marks you got, counting only answers typed at least half a second after the paper appeared
   const tm=exam.tm||{};let starMarks=0,fast=0;exam.qs.forEach((q,i)=>{const r=marks[i];if(!r||!r.got)return;const mx=r.max||(EXAM_SECS.find(s=>s.id===q.sec)||{}).pts||1;if(tm[i]!=null&&tm[i]>=500)starMarks+=exStarVal(q)*Math.min(1,r.got/mx);else fast++;});
-  let stars=0;if(typeof lbMe!=='undefined'&&lbMe){stars=Math.round(starMarks);if(stars>0){const s=quizNoPoints;quizNoPoints=false;try{lbCount(stars);lbExamPend+=stars;lbExamInfo={s:total,d:secs};}finally{quizNoPoints=s;}}}
-  exam.res={marks,sec,total,secs,stars,fast};try{localStorage.removeItem(EXAM_KEY);const h=exHist();h.unshift({t:Date.now(),s:total,secs});localStorage.setItem(EXAM_HIST,JSON.stringify(h.slice(0,30)));sxTry('x|'+total);[...new Set(h.slice(1).map(x=>x.s))].forEach(p=>{if(p!==total)sxTry('xp|'+Math.min(p,total)+','+Math.max(p,total));});}catch(e){}
+  const low=total<EXAM_MIN_FOR_STARS;let stars=0;if(typeof lbMe!=='undefined'&&lbMe&&!low){stars=Math.round(starMarks);if(stars>0){const s=quizNoPoints;quizNoPoints=false;try{lbCount(stars);lbExamPend+=stars;lbExamInfo={s:total,d:secs};}finally{quizNoPoints=s;}}}
+  exam.res={marks,sec,total,secs,stars,fast:low?0:fast,low:low&&!!lbMe,auto:!!auto};try{localStorage.removeItem(EXAM_KEY);const h=exHist();h.unshift({t:Date.now(),s:total,secs});localStorage.setItem(EXAM_HIST,JSON.stringify(h.slice(0,30)));sxTry('x|'+total);[...new Set(h.slice(1).map(x=>x.s))].forEach(p=>{if(p!==total)sxTry('xp|'+Math.min(p,total)+','+Math.max(p,total));});}catch(e){}
   exRender();window.scrollTo(0,0);}
 
 // ── SERVER BADGE RECORDS ─────────────────────────────────────────────────────
