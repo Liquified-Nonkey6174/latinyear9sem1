@@ -4091,7 +4091,7 @@ const fbUrl=path=>FB_ROOT+'/'+path+'.json';
 async function fbReq(method,path,body,opts){opts=opts||{};const tok=opts.tok||(opts.admin?await adminToken():await playerToken());
   if(!opts.admin&&!opts.tok&&lbMe&&lbMe.pid!==playerAuth.uid){lbMe=null;saveLbMe();renderLbProfile();}
   const q=opts.query||'';const r=await acFetch(fbUrl(path)+q+(q?'&':'?')+'auth='+encodeURIComponent(tok),{method,headers:body?{'Content-Type':'application/json'}:undefined,body:body?JSON.stringify(body):undefined,keepalive:!!opts.keepalive});if(!r.ok)throw new Error('HTTP '+r.status);
-  try{if(lbPubMode&&method!=='GET'&&!opts.tok){const hit=/^(players|atag|appr|lbhide)(\/|$)/.test(path)||(path===''&&body&&Object.keys(body).some(k=>/^(players|atag|appr|lbhide)\//.test(k)));if(hit){if(opts.admin)adminSoon();else{ownSoon();if(method==='DELETE'&&lbMe&&path==='players/'+lbMe.pid)fbReq('DELETE','pub/'+lbMe.pid).catch(()=>{});}}}}catch(e){}
+  try{if(lbPubMode&&method!=='GET'&&!opts.tok){const hit=/^(players|atag|appr|lbhide)(\/|$)/.test(path)||(path===''&&body&&Object.keys(body).some(k=>/^(players|atag|appr|lbhide)\//.test(k)));if(hit){if(opts.admin||amAdminUid())adminSoon();if(!opts.admin){ownSoon();if(method==='DELETE'&&lbMe&&path==='players/'+lbMe.pid)fbReq('DELETE','pub/'+lbMe.pid).catch(()=>{});}}}}catch(e){}
   return r.json();}
 
 // Live updates: Firebase pushes only what changed (put/patch events), instead of the page re-downloading.
@@ -4332,18 +4332,19 @@ async function lbAdminEdit(pid,name,cur){const per=lbPeriod,label=LB_PERIOD_NAME
 // the real one). The full player list is readable only by the admin, and each player can read their own entry.
 // If the database rules are older (no "pub" yet), the app falls back to reading the full list as before.
 var lbPubMode=false,lbPubData={},lbOwn,lbAll=null,_ownT=null,_admT=null;
+function amAdminUid(){return !!(isAdmin||(playerAuth&&playerAuth.uid===ADMIN_UID));}
 const PUB_F=['name','total','av','color','font','fx','bd','d','w','m'];
 function lbAfter(removedDirect){lbPlayersLoaded=true;
   if(lbMe&&lbPlayers[lbMe.pid]&&lbPlayers[lbMe.pid].name&&lbPlayers[lbMe.pid].name!==lbMe.name){lbMe.name=lbPlayers[lbMe.pid].name;saveLbMe();renderLbProfile();}
   if(lbMe&&!lbPlayers[lbMe.pid]&&removedDirect)lbRemoved();
   renderLb();renderChat();lbUpdatePoints();}
-function lbRebuild(){if(isAdmin&&lbAll)lbPlayers={...lbAll};else{lbPlayers={...lbPubData};if(lbMe){if(lbOwn)lbPlayers[lbMe.pid]=lbOwn;else if(lbOwn===null)delete lbPlayers[lbMe.pid];}}}
+function lbRebuild(){if(amAdminUid()&&lbAll)lbPlayers={...lbAll};else{lbPlayers={...lbPubData};if(lbMe){if(lbOwn)lbPlayers[lbMe.pid]=lbOwn;else if(lbOwn===null)delete lbPlayers[lbMe.pid];}}}
 async function lbStart(){let ok=null;for(let i=0;i<6&&ok===null;i++){try{await fbReq('GET','pub',null,{query:'?shallow=true'});ok=true;}catch(e){if(/HTTP 40[13]/.test(e.message))ok=false;else await new Promise(r=>setTimeout(r,1500*(i+1)));}}
   if(!ok){   // older rules: the whole list, as before
     fbStream('players','',(path,data,isPatch)=>{const wasLoaded=lbPlayersLoaded;lbPlayers=applyAt(lbPlayers,path,data,isPatch);lbAfter(lbMe&&(path==='/'+lbMe.pid||(path==='/'&&wasLoaded)));},lbStreamFail);return;}
   lbPubMode=true;await ownRefresh();
   fbStream('pub','',(path,data,isPatch)=>{lbPubData=applyAt(lbPubData,path,data,isPatch)||{};lbRebuild();lbAfter(false);},lbStreamFail);
-  if(isAdmin)adminPlayers();}
+  if(amAdminUid())adminPlayers();}
 // my own entry (the public copy may not include me, or may lag)
 async function ownRefresh(){if(!lbPubMode||!lbMe||!playerAuth||lbMe.pid!==playerAuth.uid)return;const had=!!lbOwn;let r;try{r=await fbReq('GET','players/'+lbMe.pid);}catch(e){return;}
   lbOwn=r&&r.name?r:null;lbRebuild();lbAfter(had&&!lbOwn);pubSync();}
@@ -4354,14 +4355,14 @@ async function pubSync(){try{if(!lbPubMode||!lbMe||!playerAuth||lbMe.pid!==playe
     if(!cur||JSON.stringify(sortDeep(o))!==JSON.stringify(sortDeep(pick(cur))))await fbReq('PUT','pub/'+u,o);}catch(e){}}
 function sortDeep(x){if(!x||typeof x!=='object')return x;const o={};Object.keys(x).sort().forEach(k=>o[k]=sortDeep(x[k]));return o;}
 // admin: sees everyone, and keeps the public copy right for all players (adds, updates, removes)
-async function adminPlayers(){if(!isAdmin||!lbPubMode)return;let all,pub,hid;try{const [t,ap]=await Promise.all([fbReq('GET','atag',null,{admin:true}),fbReq('GET','appr',null,{admin:true})]);ATAG=t||{};APPR=ap||{};}catch(e){return;}try{[all,pub,hid]=await Promise.all([fbReq('GET','players',null,{admin:true}),fbReq('GET','pub',null,{admin:true}),fbReq('GET','lbhide',null,{admin:true})]);}catch(e){return;}
+async function adminPlayers(){if(!amAdminUid()||!lbPubMode)return;const O=isAdmin?{admin:true}:{};let all,pub,hid;try{const [t,ap]=await Promise.all([fbReq('GET','atag',null,O),fbReq('GET','appr',null,O)]);ATAG=t||{};APPR=ap||{};}catch(e){return;}try{[all,pub,hid]=await Promise.all([fbReq('GET','players',null,O),fbReq('GET','pub',null,O),fbReq('GET','lbhide',null,O)]);}catch(e){return;}
   lbAll=all||{};pub=pub||{};hid=hid||{};lbRebuild();lbAfter(false);const body={};
   Object.entries(lbAll).forEach(([u,p])=>{const show=p&&p.name&&isPublic(u)&&!hid[u];if(!show){if(pub[u])body['pub/'+u]=null;return;}const o={};PUB_F.forEach(k=>{if(p[k]!=null)o[k]=p[k];});const c={};PUB_F.forEach(k=>{if(pub[u]&&pub[u][k]!=null)c[k]=pub[u][k];});
     if(JSON.stringify(sortDeep(o))!==JSON.stringify(sortDeep(c)))body['pub/'+u]=o;});
   Object.keys(pub).forEach(u=>{if(!lbAll[u])body['pub/'+u]=null;});
-  const ks=Object.keys(body);for(let i=0;i<ks.length;i+=40){const part={};ks.slice(i,i+40).forEach(k=>part[k]=body[k]);try{await fbReq('PATCH','',part,{admin:true});}catch(e){}}}
+  const ks=Object.keys(body);for(let i=0;i<ks.length;i+=40){const part={};ks.slice(i,i+40).forEach(k=>part[k]=body[k]);try{await fbReq('PATCH','',part,O);}catch(e){}}}
 function adminSoon(){clearTimeout(_admT);_admT=setTimeout(adminPlayers,600);}
-setInterval(()=>{if(document.visibilityState!=='visible'||!lbPubMode)return;if(isAdmin)adminPlayers();else ownRefresh();},45000);
+setInterval(()=>{if(document.visibilityState!=='visible'||!lbPubMode)return;if(amAdminUid())adminPlayers();else ownRefresh();},45000);
 function lbStreamFail(){if(!lbPlayersLoaded)document.getElementById('lbList').innerHTML='<div class="lb-empty">Couldn’t load the leaderboard. Check your internet connection.</div>';}
 
 // Looks: avatar + name colour, shown on the leaderboard and in chat
