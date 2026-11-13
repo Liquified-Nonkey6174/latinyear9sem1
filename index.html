@@ -3717,7 +3717,7 @@ async function checkAdminAuth(){
   try{
     const a=authFrom(await authPost('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword',{email:u,password:p,returnSecureToken:true}));
     if(a.uid!==ADMIN_UID){err.textContent='That account isn’t the admin.';return;}
-    adminAuth=a;isAdmin=true;hideAdminModal();startDescEdit();setTimeout(()=>atagLoad(true),0);setTimeout(()=>{try{srvAdminSetup();}catch(e){}},1500);setTimeout(()=>{chatPurgeHidden().catch(()=>{});sxAdminTidy().catch(()=>{});claimsClear();duelsTidy(true);},4000);
+    adminAuth=a;isAdmin=true;hideAdminModal();startDescEdit();setTimeout(()=>atagLoad(true).then(()=>adminPlayers()),0);setTimeout(()=>{try{srvAdminSetup();}catch(e){}},1500);setTimeout(()=>{chatPurgeHidden().catch(()=>{});sxAdminTidy().catch(()=>{});claimsClear();duelsTidy(true);},4000);
     renderLb();renderChat();
   }catch(e){err.textContent=/TOO_MANY/.test(e.message)?'Too many attempts. Wait a few minutes and try again.':/INVALID|EMAIL|PASSWORD|USER_DISABLED/.test(e.message)?'Incorrect email or password.':'Couldn’t reach the server. Check your internet.';}
   finally{btn.disabled=false;}
@@ -4090,7 +4090,9 @@ let lbPage=0,lbLastQ='',lbLimit=10,lbMe=null,lbPending=0,lbInFlight=0,lbInFlight
 const fbUrl=path=>FB_ROOT+'/'+path+'.json';
 async function fbReq(method,path,body,opts){opts=opts||{};const tok=opts.tok||(opts.admin?await adminToken():await playerToken());
   if(!opts.admin&&!opts.tok&&lbMe&&lbMe.pid!==playerAuth.uid){lbMe=null;saveLbMe();renderLbProfile();}
-  const q=opts.query||'';const r=await acFetch(fbUrl(path)+q+(q?'&':'?')+'auth='+encodeURIComponent(tok),{method,headers:body?{'Content-Type':'application/json'}:undefined,body:body?JSON.stringify(body):undefined,keepalive:!!opts.keepalive});if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}
+  const q=opts.query||'';const r=await acFetch(fbUrl(path)+q+(q?'&':'?')+'auth='+encodeURIComponent(tok),{method,headers:body?{'Content-Type':'application/json'}:undefined,body:body?JSON.stringify(body):undefined,keepalive:!!opts.keepalive});if(!r.ok)throw new Error('HTTP '+r.status);
+  try{if(lbPubMode&&method!=='GET'&&!opts.tok){const hit=/^(players|atag|appr|lbhide)(\/|$)/.test(path)||(path===''&&body&&Object.keys(body).some(k=>/^(players|atag|appr|lbhide)\//.test(k)));if(hit){if(opts.admin)adminSoon();else{ownSoon();if(method==='DELETE'&&lbMe&&path==='players/'+lbMe.pid)fbReq('DELETE','pub/'+lbMe.pid).catch(()=>{});}}}}catch(e){}
+  return r.json();}
 
 // Live updates: Firebase pushes only what changed (put/patch events), instead of the page re-downloading.
 function applyAt(root,path,data,isPatch){if(isPatch){Object.entries(data||{}).forEach(([k,v])=>{root=applyAt(root,path.replace(/\/$/,'')+'/'+k,v,false);});return root;}
@@ -4325,6 +4327,41 @@ async function lbAdminEdit(pid,name,cur){const per=lbPeriod,label=LB_PERIOD_NAME
   for(let j=order.length-2;j>=0;j--)val[order[j]]=Math.min(val[order[j]],val[order[j+1]]);   // smaller periods never exceed bigger ones
   const body={total:val.all,['d/'+k.d]:val.d,['w/'+k.w]:val.w,['m/'+k.m]:val.m};
   try{await fbReq('PATCH','players/'+pid,body,{admin:true});toast('Saved: '+name+' → '+n.toLocaleString()+' ('+label+').');}catch(e){alert('Couldn’t save '+name+'’s score ('+e.message+').'+(/40[13]/.test(e.message)?'\n\nYour live database rules are probably out of date (old rules don’t allow negative scores). Press “🔍 Check database rules”.':''));}}
+// ── Who can see whom ──
+// Everyone reads the public leaderboard ("pub": members and approved players only, each entry checked by the server against
+// the real one). The full player list is readable only by the admin, and each player can read their own entry.
+// If the database rules are older (no "pub" yet), the app falls back to reading the full list as before.
+var lbPubMode=false,lbPubData={},lbOwn,lbAll=null,_ownT=null,_admT=null;
+const PUB_F=['name','total','av','color','font','fx','bd','d','w','m'];
+function lbAfter(removedDirect){lbPlayersLoaded=true;
+  if(lbMe&&lbPlayers[lbMe.pid]&&lbPlayers[lbMe.pid].name&&lbPlayers[lbMe.pid].name!==lbMe.name){lbMe.name=lbPlayers[lbMe.pid].name;saveLbMe();renderLbProfile();}
+  if(lbMe&&!lbPlayers[lbMe.pid]&&removedDirect)lbRemoved();
+  renderLb();renderChat();lbUpdatePoints();}
+function lbRebuild(){if(isAdmin&&lbAll)lbPlayers={...lbAll};else{lbPlayers={...lbPubData};if(lbMe){if(lbOwn)lbPlayers[lbMe.pid]=lbOwn;else if(lbOwn===null)delete lbPlayers[lbMe.pid];}}}
+async function lbStart(){let ok=null;for(let i=0;i<6&&ok===null;i++){try{await fbReq('GET','pub',null,{query:'?shallow=true'});ok=true;}catch(e){if(/HTTP 40[13]/.test(e.message))ok=false;else await new Promise(r=>setTimeout(r,1500*(i+1)));}}
+  if(!ok){   // older rules: the whole list, as before
+    fbStream('players','',(path,data,isPatch)=>{const wasLoaded=lbPlayersLoaded;lbPlayers=applyAt(lbPlayers,path,data,isPatch);lbAfter(lbMe&&(path==='/'+lbMe.pid||(path==='/'&&wasLoaded)));},lbStreamFail);return;}
+  lbPubMode=true;await ownRefresh();
+  fbStream('pub','',(path,data,isPatch)=>{lbPubData=applyAt(lbPubData,path,data,isPatch)||{};lbRebuild();lbAfter(false);},lbStreamFail);
+  if(isAdmin)adminPlayers();}
+// my own entry (the public copy may not include me, or may lag)
+async function ownRefresh(){if(!lbPubMode||!lbMe||!playerAuth||lbMe.pid!==playerAuth.uid)return;const had=!!lbOwn;let r;try{r=await fbReq('GET','players/'+lbMe.pid);}catch(e){return;}
+  lbOwn=r&&r.name?r:null;lbRebuild();lbAfter(had&&!lbOwn);pubSync();}
+function ownSoon(){clearTimeout(_ownT);_ownT=setTimeout(ownRefresh,350);}
+// keep my line on the public leaderboard the same as my real entry (the server refuses anything that differs)
+async function pubSync(){try{if(!lbPubMode||!lbMe||!playerAuth||lbMe.pid!==playerAuth.uid||!atagLoaded)return;const u=lbMe.pid,cur=lbPubData[u],show=!!lbOwn&&isPublic(u)&&!lbHidden.has(u);
+    if(!show){if(cur)await fbReq('DELETE','pub/'+u);return;}const pick=x=>{const y={};PUB_F.forEach(k=>{if(x&&x[k]!=null)y[k]=x[k];});return y;},o=pick(lbOwn);
+    if(!cur||JSON.stringify(sortDeep(o))!==JSON.stringify(sortDeep(pick(cur))))await fbReq('PUT','pub/'+u,o);}catch(e){}}
+function sortDeep(x){if(!x||typeof x!=='object')return x;const o={};Object.keys(x).sort().forEach(k=>o[k]=sortDeep(x[k]));return o;}
+// admin: sees everyone, and keeps the public copy right for all players (adds, updates, removes)
+async function adminPlayers(){if(!isAdmin||!lbPubMode)return;let all,pub,hid;try{const [t,ap]=await Promise.all([fbReq('GET','atag',null,{admin:true}),fbReq('GET','appr',null,{admin:true})]);ATAG=t||{};APPR=ap||{};}catch(e){return;}try{[all,pub,hid]=await Promise.all([fbReq('GET','players',null,{admin:true}),fbReq('GET','pub',null,{admin:true}),fbReq('GET','lbhide',null,{admin:true})]);}catch(e){return;}
+  lbAll=all||{};pub=pub||{};hid=hid||{};lbRebuild();lbAfter(false);const body={};
+  Object.entries(lbAll).forEach(([u,p])=>{const show=p&&p.name&&isPublic(u)&&!hid[u];if(!show){if(pub[u])body['pub/'+u]=null;return;}const o={};PUB_F.forEach(k=>{if(p[k]!=null)o[k]=p[k];});const c={};PUB_F.forEach(k=>{if(pub[u]&&pub[u][k]!=null)c[k]=pub[u][k];});
+    if(JSON.stringify(sortDeep(o))!==JSON.stringify(sortDeep(c)))body['pub/'+u]=o;});
+  Object.keys(pub).forEach(u=>{if(!lbAll[u])body['pub/'+u]=null;});
+  const ks=Object.keys(body);for(let i=0;i<ks.length;i+=40){const part={};ks.slice(i,i+40).forEach(k=>part[k]=body[k]);try{await fbReq('PATCH','',part,{admin:true});}catch(e){}}}
+function adminSoon(){clearTimeout(_admT);_admT=setTimeout(adminPlayers,600);}
+setInterval(()=>{if(document.visibilityState!=='visible'||!lbPubMode)return;if(isAdmin)adminPlayers();else ownRefresh();},45000);
 function lbStreamFail(){if(!lbPlayersLoaded)document.getElementById('lbList').innerHTML='<div class="lb-empty">Couldn’t load the leaderboard. Check your internet connection.</div>';}
 
 // Looks: avatar + name colour, shown on the leaderboard and in chat
@@ -4449,7 +4486,7 @@ function memberPopup(){if(memberShown||isAdmin||(lbMe&&isPublic(lbMe.pid)))retur
 async function contactEdit(){const v=prompt('Contact email shown to non-members (“Email … to get a member tag”). Leave empty to remove:',CONTACT);if(v===null)return;const t=v.trim().slice(0,100);
   try{await fbReq(t?'PUT':'DELETE','contact',t||null,{admin:true});CONTACT=t;toast(t?'Contact email saved.':'Contact email removed.');}catch(e){alert('Couldn’t save ('+e.message+').'+(/40[13]/.test(e.message)?'\n\nPublish the latest database rules first.':''));}}
 var ATAG={},atagLoaded=false,atagAt=0;async function atagLoad(force){if(!force&&!isAdmin&&atagLoaded&&Date.now()-atagAt<180000)return;atagAt=Date.now();const was=JSON.stringify([ATAG,APPR]);try{const [t,a]=await Promise.all([fbReq('GET','atag',null,isAdmin?{admin:true}:{}),fbReq('GET','appr',null,isAdmin?{admin:true}:{}).catch(()=>undefined)]);ATAG=t||{};atagLoaded=true;if(a!==undefined)APPR=a||{};}catch(e){return;}
-  if(!memberShown){try{const c=await fbReq('GET','contact');if(typeof c==='string')CONTACT=c;}catch(e){}setTimeout(memberPopup,800);}if(JSON.stringify([ATAG,APPR])!==was){try{badgeCheckSoon();renderLb();renderChat();renderOnline();updChatInput();}catch(e){}}try{renderLb();renderChat();renderBadgeFeed();}catch(e){}}
+  if(!memberShown){try{const c=await fbReq('GET','contact');if(typeof c==='string')CONTACT=c;}catch(e){}setTimeout(memberPopup,800);}if(JSON.stringify([ATAG,APPR])!==was){try{pubSync();}catch(e){}try{badgeCheckSoon();renderLb();renderChat();renderOnline();updChatInput();}catch(e){}}try{renderLb();renderChat();renderBadgeFeed();}catch(e){}}
 // admin: set a player's 🔥 daily streak. Streaks live on each device, so the server holds the number and each device applies it once.
 function agoText(t){t=+t;if(!t)return 'some time ago';const m=Math.round((Date.now()-t)/60000);return m<1?'just now':m<60?m+' min ago':m<1440?Math.round(m/60)+' h ago':new Date(t).toLocaleDateString();}
 async function streakEdit(pid,name,btn){let cur=null;try{cur=await fbReq('GET','sset/'+pid,null,{admin:true});}catch(e){alert('Couldn’t load ('+e.message+'). Publish the latest database rules first.');return;}
@@ -5349,11 +5386,7 @@ async function duelCheck(){const g=duelGame;if(!g||g.fb)return;const inp=documen
 
 loadLbMe().then(()=>{
   setTimeout(()=>{renderCloud();cloudPull();},1500);   // cloud save code is in a later <script>
-  fbStream('players','',(path,data,isPatch)=>{const wasLoaded=lbPlayersLoaded;lbPlayers=applyAt(lbPlayers,path,data,isPatch);lbPlayersLoaded=true;
-    if(lbMe&&lbPlayers[lbMe.pid]&&lbPlayers[lbMe.pid].name&&lbPlayers[lbMe.pid].name!==lbMe.name){lbMe.name=lbPlayers[lbMe.pid].name;saveLbMe();renderLbProfile();}
-    // Only trust a removal the server tells us about directly (not a first load that may predate joining).
-    if(lbMe&&!lbPlayers[lbMe.pid]&&(path==='/'+lbMe.pid||(path==='/'&&wasLoaded)))lbRemoved();
-    renderLb();renderChat();lbUpdatePoints();},lbStreamFail);
+  lbStart();
   // Challenges and the class challenge are checked every 15s (and after your own actions) rather than kept
   // as live connections: browsers allow only ~6 connections per site across ALL tabs, so live streams are
   // kept to two per tab (leaderboard + chat).
