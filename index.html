@@ -4813,6 +4813,7 @@ const S={
  scriptor:'<path d="M66 24 C50 30 40 44 36 66 L34 76 M36 66 C48 60 58 50 66 24 M44 52 L54 44 M40 60 L49 54"/><path d="M30 78 H62"/>',
  gradus:'<path d="M50 24 l7.6 15.4 17 2.5 -12.3 12 2.9 16.9 -15.2 -8 -15.2 8 2.9 -16.9 -12.3 -12 17 -2.5z"/>',
  gradus4:'<path d="M50 24 L70 42 L50 78 L30 42 Z M30 42 H70 M42 42 L50 78 L58 42 M40 24 H60 M40 24 L36 42 M60 24 L64 42 M50 24 L44 42 M50 24 L56 42"/>',
+ diesingens:'<circle cx="50" cy="50" r="15"/><path d="M50 20 V29 M50 71 V80 M20 50 H29 M71 50 H80 M28.8 28.8 L35.2 35.2 M64.8 64.8 L71.2 71.2 M28.8 71.2 L35.2 64.8 M64.8 35.2 L71.2 28.8"/><circle cx="50" cy="50" r="7"/>',
  diesmagnus:'<circle cx="50" cy="50" r="12"/><path d="M50 24 V30 M50 70 V76 M24 50 H30 M70 50 H76 M31.6 31.6 L35.8 35.8 M64.2 64.2 L68.4 68.4 M31.6 68.4 L35.8 64.2 M64.2 35.8 L68.4 31.6"/>',
  constans:'<path d="M50 22 C58 34 68 42 66 58 C65 70 57 78 50 78 C43 78 35 70 34 58 C33 48 40 42 42 34 C45 42 48 44 50 44 C52 38 51 30 50 22 Z M50 78 C45 76 42 70 44 63 C46 57 50 56 50 50 C54 56 58 60 57 66 C56 73 53 77 50 78"/>',
  matutinus:'<path d="M28 64 H72 M36 64 a14 14 0 0 1 28 0 M50 36 V42 M33 45 L37 49 M67 45 L63 49 M24 56 H30 M70 56 H76 M34 72 H66 M40 78 H60"/>',
@@ -4842,20 +4843,20 @@ root.BADGE_SYMBOLS=S;
 
 // Badge art v2: shaped medallions (shape per family), enamel colour per badge, metal rim per level,
 // engraved symbol, laurel when maxed, bold ribbon with the level numeral.
+function romanN(n){n=Math.floor(+n||0);if(n<1)return '';if(n>3999)return n.toLocaleString();let r='';[[1000,'M'],[900,'CM'],[500,'D'],[400,'CD'],[100,'C'],[90,'XC'],[50,'L'],[40,'XL'],[10,'X'],[9,'IX'],[5,'V'],[4,'IV'],[1,'I']].forEach(([v,t])=>{while(n>=v){r+=t;n-=v;}});return r;}
 (function(root){
-const ROMAN=['I','II','III','IV','V','VI','VII'];
 // rim metals: [light, mid, dark, ribbon text]
 const METALS={bronze:['#ffd2a1','#c07a3a','#5e3110','#2a1406'],silver:['#ffffff','#bfc8d2','#59626c','#1c2228'],gold:['#fff4b8','#e6b422','#7a4f00','#2b1c00'],
   diamond:['#f0fdff','#86e0ff','#1f6a99','#062236'],obsidian:['#fbf0ff','#d08cff','#7b2cbf','#1a0b2e'],rainbow:['#ffffff','#ff7ad9','#5b2a86','#2b1c00'],royal:['#fff0b8','#d9ae4c','#6b4a10','#2b1c00'],locked:['#a5a5a5','#727272','#3a3a3a','#1c1c1c']};
 // enamel (face) colours per badge: [light, dark]
 const ENAMEL={inscriptus:['#2f6f8a','#0f2a38'],salve:['#3f7a5a','#163a27'],primus:['#8a2d2d','#3c0f0f'],scriptor:['#2f5a8a','#0f2440'],gradus:['#7a1f2b','#2e0710'],
-  diesmagnus:['#b5651d','#4a2306'],constans:['#a33a17','#3d1205'],matutinus:['#c27a3a','#4d2a0c'],nocturnus:['#28336e','#0b1030'],
+  diesmagnus:['#b5651d','#4a2306'],diesingens:['#d98a14','#5a2a00'],constans:['#a33a17','#3d1205'],matutinus:['#c27a3a','#4d2a0c'],nocturnus:['#28336e','#0b1030'],
   sineerrore:['#1f6b6b','#072a2a'],perfectus:['#5c2a7a','#220b33'],lexicon:['#9a6a24','#3a2408'],lexiconmagnus:['#5f8f2a','#1d3a08'],
   doctus:['#1f7fc0','#05284a'],doctissimus:['#6a3ad0','#1a0750'],gladiator:['#6b1f1f','#2a0707'],victor:['#2a6b3a','#0b2a13'],
   invictus:['#2a3f6b','#0b152a'],rival:['#6b4a1f','#2a1a07'],popularis:['#8a2a55','#350a20'],socius:['#b07a1f','#3d2605'],civis:['#6b1f2a','#2a070d'],
   arcana:['#4b1d6e','#1f0b33'],fereomnia:['#4b1d6e','#1f0b33'],
   omnia:['#4b1d6e','#1f0b33'],omniamax:['#4b1d6e','#1f0b33']};
-const SHAPE={gradus:'burst',diesmagnus:'hex',constans:'hex',matutinus:'hex',nocturnus:'hex',sineerrore:'oct',perfectus:'oct',
+const SHAPE={gradus:'burst',diesmagnus:'hex',diesingens:'burst',constans:'hex',matutinus:'hex',nocturnus:'hex',sineerrore:'oct',perfectus:'oct',
   lexicon:'shield',lexiconmagnus:'shield',doctus:'shield',doctissimus:'shield',gladiator:'shield',victor:'shield',invictus:'shield',rival:'shield',
   popularis:'rosette',civis:'rosette',salve:'rosette',scriptor:'rosette',primus:'circle'};
 function metalFor(level,max,o){if(o.locked)return 'locked';if(o.grand>=4)return 'diamond';if(o.rainbow)return 'rainbow';if(o.meta)return 'royal';if(o.secret)return 'obsidian';
@@ -4902,7 +4903,7 @@ function badgeArt(id,level,max,o){o=o||{};if(id==='rank')id='gradus';if(id==='om
   if(gr>=3){const sp=(x,y,r)=>'<path d="M'+x+' '+(y-r)+' Q'+x+' '+y+' '+(x+r)+' '+y+' Q'+x+' '+y+' '+x+' '+(y+r)+' Q'+x+' '+y+' '+(x-r)+' '+y+' Q'+x+' '+y+' '+x+' '+(y-r)+'Z" fill="#fff" opacity=".95"/>';svg+=sp(86,30,4.5)+sp(14,62,3.5)+(gr>=4?sp(84,80,3.5)+sp(16,24,3):'');}
   if(o.secret&&!o.locked){const sp=(x,y,r)=>'<path d="M'+x+' '+(y-r)+' Q'+x+' '+y+' '+(x+r)+' '+y+' Q'+x+' '+y+' '+x+' '+(y+r)+' Q'+x+' '+y+' '+(x-r)+' '+y+' Q'+x+' '+y+' '+x+' '+(y-r)+'Z" fill="#fff" opacity=".9"/>';svg+=sp(80,16,5)+sp(17,30,3.5)+sp(84,72,3);}
   const small=size<=44;   // leaderboard size: make the numbers even bigger
-  if(ribbon){const rn=ROMAN[level-1]||String(level);const fs=small?(rn.length>2?27:31):(rn.length>2?22:25);
+  if(ribbon){const rn=romanN(level);const fs=small?(rn.length>4?21:rn.length>2?27:31):(rn.length>4?17:rn.length>2?22:25);
     svg+='<path d="M10 84 L90 84 L83 99 L90 114 L10 114 L17 99 Z" fill="url(#'+k+'r)" stroke="'+m[2]+'" stroke-width="1.4" filter="url(#'+k+'s)"/>'
      +'<text x="50" y="'+(small?110:108)+'" text-anchor="middle" font-family="Georgia,\'Times New Roman\',serif" font-size="'+fs+'" font-weight="900" fill="#fff" stroke="#120a02" stroke-width="'+(small?5:4)+'" stroke-linejoin="round" paint-order="stroke" letter-spacing="'+(small?0:1)+'">'+rn+'</text>';}
   if(o.count!=null){const cs=String(o.count),r=small?29:19,fs2=small?(cs.length>2?26:cs.length>1?34:42):(cs.length>2?15:24);
@@ -4916,7 +4917,6 @@ const GRAND={lexicon:1,lexiconmagnus:2,doctus:3,doctissimus:4};
 
 // ── BADGES / ACHIEVEMENTS (stored in this browser) ───────────────────────────
 const BADGE_KEY='latin_badges',BSTAT_KEY='latin_badge_stats';
-const ROMAN=['I','II','III','IV','V','VI','VII'];
 // ── SECRET BADGES: checked by the server ─────────────────────────────────────
 // The site never contains what the secret badges are or how to get them. It only reports ordinary events
 // (a chat message, a typed answer, a counter going up) as one-way hashes; Firebase accepts the ones that match a
@@ -4958,7 +4958,7 @@ async function sxCheck(){const out=[],row=(ok,t)=>out.push('<div style="margin:4
   try{const L=SRV.me||{},on=srvOn();out.push('<div style="margin-top:10px"><b>Badge records for this device’s account</b></div>');
     row(on,on?'Server badge records are loaded':'Server badge records are <b>not</b> loaded (frozen '+!!SRV.frozen+', records '+!!SRV.me+', word list '+!!SRV.ws+', on leaderboard '+!!(lbMe&&lbPlayers[lbMe.pid])+')');
     row(!alogStat.fail,'Answers sent to the server this visit: '+alogStat.ok+' saved, '+alogStat.fail+' refused, '+alogQ.length+' waiting'+(alogStat.last?' · last error '+esc(alogStat.last):''));
-    if(on){const lv=srvLevels(lbMe.pid);out.push('<table style="font-size:12px;width:100%;margin-top:4px"><tr><th style="text-align:left">Badge</th><th>This device</th><th>Server</th><th>Level</th></tr>'+BADGES.filter(b=>!b.secret&&!['salve','socius','rank'].includes(b.id)).map(b=>{let dv=0;try{dv=b.stat();}catch(e){}const sv=srvProg(b),bad=dv>sv;return '<tr'+(bad?' style="color:var(--red,#e07a6a)"':'')+'><td>'+esc(b.name)+'</td><td style="text-align:center">'+dv+'</td><td style="text-align:center">'+sv+'</td><td style="text-align:center">'+(lv[b.id]||0)+'/'+b.lv.length+'</td></tr>';}).join('')+'</table><div class="muted" style="font-size:11.5px">Red = this device counts more than the server has. Words you already knew are sent to the server automatically, a few at a time, while you play.</div>');}}catch(e){}
+    if(on){const lv=srvLevels(lbMe.pid);out.push('<table style="font-size:12px;width:100%;margin-top:4px"><tr><th style="text-align:left">Badge</th><th>This device</th><th>Server</th><th>Level</th></tr>'+BADGES.filter(b=>!b.secret&&!['salve','socius','rank'].includes(b.id)).map(b=>{let dv=0;try{dv=b.stat();}catch(e){}const sv=srvProg(b),bad=dv>sv;return '<tr'+(bad?' style="color:var(--red,#e07a6a)"':'')+'><td>'+esc(b.name)+'</td><td style="text-align:center">'+dv+'</td><td style="text-align:center">'+sv+'</td><td style="text-align:center">'+(lv[b.id]||0)+(b.inf?'':'/'+b.lv.length)+'</td></tr>';}).join('')+'</table><div class="muted" style="font-size:11.5px">Red = this device counts more than the server has. Words you already knew are sent to the server automatically, a few at a time, while you play.</div>');}}catch(e){}
   out.push('<div style="margin-top:10px"><b>Last tries on this device</b></div>'+(sxLog.length?sxLog.slice(0,15).map(x=>'<div class="muted" style="font-size:12px">'+new Date(x.t).toLocaleTimeString()+' · '+esc(x.c)+' → '+esc(x.r)+'</div>').join(''):'<div class="muted" style="font-size:12px">None yet. Try the badge, then press the check again.</div>'));
   document.getElementById('claimsBody').innerHTML=out.join('');document.querySelector('#claimsOverlay .ann-head').textContent='🔎 Badge check';document.getElementById('claimsOverlay').style.display='flex';}
 var sxServer=null;   // ids of secret badges the server has a record of (null = not checked yet)
@@ -5012,7 +5012,7 @@ const META_BADGES=[
  {id:'omniamax',icon:'👑',name:'Omnia Maxima',lat:'everything, to the max',desc:'Get every badge in the main section to its top level.',meta:'max',lv:[1]},
  {id:'chester',icon:'🎩',name:'Be Chester',lat:'esto Chester',desc:'Only for the one and only \u2011Chester\u2011.',meta:'name',lv:[1]},
  {id:'inscriptus',icon:'📧',name:'Inscriptus',lat:'enrolled',desc:'Save your account with an email (👤 Account → Save with email). Doesn’t count towards Omnia.',meta:'acct',lv:[1]}];
-function metaValue(bd,got){if(bd.meta==='acct')return typeof cloudInfo==='function'&&cloudInfo().email?1:0;if(bd.meta==='name')return lbMe&&lbMe.name==='-Chester-'?1:0;if(bd.meta==='count')return BADGES.filter(b=>b.secret&&got[b.id]).length;if(bd.meta==='public')return BADGES.filter(b=>!b.secret).every(b=>got[b.id])?1:0;if(bd.meta==='all')return BADGES.every(b=>got[b.id])?1:0;return BADGES.every(b=>got[b.id]&&got[b.id].l>=b.lv.length)?1:0;}
+function metaValue(bd,got){if(bd.meta==='acct')return typeof cloudInfo==='function'&&cloudInfo().email?1:0;if(bd.meta==='name')return lbMe&&lbMe.name==='-Chester-'?1:0;if(bd.meta==='count')return BADGES.filter(b=>b.secret&&got[b.id]).length;if(bd.meta==='public')return BADGES.filter(b=>!b.secret&&!b.inf).every(b=>got[b.id])?1:0;if(bd.meta==='all')return BADGES.filter(b=>!b.inf).every(b=>got[b.id])?1:0;return BADGES.filter(b=>!b.inf).every(b=>got[b.id]&&got[b.id].l>=b.lv.length)?1:0;}
 const METAL=['bronze','silver','gold','diamond'];
 function tierMetal(l,n){const f=l/n;return f>=1?'diamond':f>=.6?'gold':f>=.3?'silver':'bronze';}   // ranks: bronze → silver → gold → diamond at the top
 // lv: thresholds for tiered badges; stat(): current value. secret: hidden until earned.
@@ -5023,6 +5023,7 @@ const BADGES=[
  {id:'rank',icon:'⭐',name:'Centurio',desc:'Earn ⭐ in total: Centurio 100, Tribunus 200, Legatus 500, Praefectus 1,000, Imperator 2,000, Consul 5,000, Optimus 10,000.',unit:'⭐',stat:()=>lbMe&&lbPlayers[lbMe.pid]?Math.max(0,+lbPlayers[lbMe.pid].total||0):0,lv:[100,200,500,1000,2000,5000,10000],
   tiers:[{name:'Centurio',icon:'⭐'},{name:'Tribunus',icon:'⭐'},{name:'Legatus',icon:'⭐'},{name:'Praefectus',icon:'⭐'},{name:'Imperator',icon:'⭐'},{name:'Consul',icon:'⭐'},{name:'Optimus',icon:'💎'}]},
  {id:'diesmagnus',icon:'☀️',name:'Dies Magnus',lat:'big day',desc:'Earn lots of ⭐ in a single day.',unit:'⭐ in a day',stat:()=>Math.max(bstat().bestDay||0,lbTodayPts()),lv:[50,100,200,300,500,750,1000]},
+ {id:'diesingens',icon:'🌞',name:'Dies Ingens',lat:'huge day',desc:'Earn a huge number of ⭐ in a single day. Every 10,000 ⭐ is a new level, with no limit. Doesn’t count towards Omnia, Fere Omnia or Omnia Maxima.',unit:'⭐ in a day',inf:true,stat:()=>Math.max(bstat().bestDay||0,lbTodayPts()),lv:Array.from({length:2000},(_,i)=>(i+1)*10000)},
  {id:'constans',icon:'🔥',name:'Constans',lat:'steady',desc:'Keep your 🔥 streak going: reach your daily goal several days in a row (or earn 20+ ⭐ a day).',unit:'day streak',stat:()=>Math.max(bstat().bestStreak||0,dailyStreak()),lv:[1,3,5,7,10,20,30]},
  {id:'matutinus',icon:'🌅',name:'Matutinus',lat:'early riser',desc:'Get a question right before 8 am.',stat:()=>bstat().early||0,lv:[1]},
  {id:'nocturnus',icon:'🦉',name:'Nocturnus',lat:'night owl',desc:'Get a question right after 8 pm.',stat:()=>bstat().late||0,lv:[1]},
@@ -5064,7 +5065,7 @@ function reactsTally(){if(!lbMe||!chatLoaded)return;const b=bstat(),cur={};Objec
   const ks=Object.keys(b.rxSeen);if(ks.length>400)ks.sort().slice(0,ks.length-400).forEach(k=>delete b.rxSeen[k]);}
 function reactsReceived(){if(!lbMe)return 0;let n=0;Object.values(chatObj||{}).forEach(m=>{if(!m||m.pid!==lbMe.pid||!m.rx)return;Object.values(m.rx).forEach(u=>{n+=Object.keys(u||{}).filter(x=>x!==lbMe.pid&&isVer(x)).length;});});return n;}
 function badgeLevel(bd,v){let l=0;bd.lv.forEach((t,i)=>{if(v>=t)l=i+1;});return l;}
-function badgeTierName(bd,l){if(bd.tiers)return bd.tiers[Math.max(0,l-1)].name+' '+ROMAN[Math.max(0,l-1)];return bd.lv.length>1?bd.name+' '+ROMAN[l-1]:bd.name;}
+function badgeTierName(bd,l){if(bd.tiers)return bd.tiers[Math.max(0,l-1)].name+' '+romanN(Math.max(1,l));return bd.lv.length>1?bd.name+' '+romanN(l):bd.name;}
 // ── BADGE FEED: everyone's new badges (secret ones only say "their nth secret badge") ──
 function badgeFeedPost(fresh,nSecret){if(!lbMe||!isPublic(lbMe.pid))return;let secretK=nSecret-fresh.filter(f=>f.bd.secret&&f.first).length;
   fresh.slice(0,4).forEach(f=>{const e=f.bd.secret?(f.first?{pid:lbMe.pid,b:'?',k:++secretK}:null):{pid:lbMe.pid,b:f.bd.id,l:f.l};if(e)fbReq('POST','bfeed',{...e,t:{'.sv':'timestamp'}}).catch(()=>{});});}
@@ -5112,7 +5113,7 @@ function revealNext(){const ov=document.getElementById('bReveal');if(!ov)return;
 setTimeout(()=>loadBadgeFeed(true),2500);setInterval(()=>{if(document.visibilityState==='visible')loadBadgeFeed(true);},90000);
 function setBadgeTab(t){bfeedTab=t;document.getElementById('bTabMine').classList.toggle('active',t==='mine');document.getElementById('bTabFeed').classList.toggle('active',t==='feed');
   document.getElementById('badgeMine').style.display=t==='mine'?'':'none';document.getElementById('badgeFeed').style.display=t==='feed'?'':'none';if(t==='feed')loadBadgeFeed();}
-function bdArt(bd,l,size,extra){return badgeArt(bd.id,l,bd.lv?bd.lv.length:1,Object.assign({secret:!!bd.secret,meta:!!bd.meta,size},extra||{}));}
+function bdArt(bd,l,size,extra){return badgeArt(bd.id,l,bd.inf?7:bd.lv?bd.lv.length:1,Object.assign({secret:!!bd.secret,meta:!!bd.meta,size},extra||{}));}
 function bdIcon(bd,l){return bd.tiers?bd.tiers[Math.max(0,(l||1)-1)].icon:bd.icon;}
 // the old separate points badges (centurio, legatus, imperator, optimus) became levels of one badge
 // older versions: separate rank badges, then 'gradus' with 4 levels (100/1k/10k/100k). Both become 'rank' (7 levels).
@@ -5172,16 +5173,16 @@ let badgeFilter='all';try{badgeFilter=localStorage.getItem('latin_bfilter')||'al
 function setBadgeFilter(f){badgeFilter=f;try{localStorage.setItem('latin_bfilter',f);}catch(e){}renderBadges();}
 function badgeShown(l,max){return badgeFilter==='all'||(badgeFilter==='none'&&!l)||(badgeFilter==='got'&&l>0)||(badgeFilter==='unmax'&&l>0&&l<max);}
 function renderBadges(){document.querySelectorAll('#badgeSort button').forEach(b=>b.classList.toggle('on',b.dataset.f===badgeFilter));const g=document.getElementById('badgeGrid');if(!g)return;const sc=g.closest('.badge-scroll'),keep=sc?sc.scrollTop:0,bx=g.closest('.badge-box'),keepB=bx?bx.scrollTop:0;requestAnimationFrame(()=>{if(sc)sc.scrollTop=keep;if(bx)bx.scrollTop=keepB;});const got=bjson(BADGE_KEY);let earned=0,total=0;g.innerHTML='';
-  BADGES.forEach(bd=>{const e=got[bd.id],l=e?e.l:0;total+=bd.lv.length;earned+=l;if(!badgeShown(l,bd.lv.length))return;if(bd.secret&&!l){const c=document.createElement('div');c.className='badge-card locked';c.innerHTML='<div class="bd-art">'+badgeArt('unknown',0,1,{secret:true,size:74})+'</div><div class="bd-name">Secret badge</div><div class="bd-desc">Keep exploring…</div>';g.appendChild(c);return;}
+  BADGES.forEach(bd=>{const e=got[bd.id],l=e?e.l:0;total+=bd.inf?l+1:bd.lv.length;earned+=l;if(!badgeShown(l,bd.lv.length))return;if(bd.secret&&!l){const c=document.createElement('div');c.className='badge-card locked';c.innerHTML='<div class="bd-art">'+badgeArt('unknown',0,1,{secret:true,size:74})+'</div><div class="bd-name">Secret badge</div><div class="bd-desc">Keep exploring…</div>';g.appendChild(c);return;}
     const v=badgeStatV(bd);const next=bd.lv[l];const c=document.createElement('div');c.className='badge-card'+(l?' earned':' locked')+(bd.tiers?(l?' m-'+tierMetal(l,bd.lv.length):''):l?' lvl'+Math.min(l,7):'')+(GRAND[bd.id]?' grand'+GRAND[bd.id]:'');
     let prog='';if(next!=null){if(bd.id.startsWith('lex')||bd.id.startsWith('doct'))prog=lexProgress(bd.id==='lexicon'||bd.id==='doctus'?'main':'all',bd.id.startsWith('lex')?'seen':'correct');else if(bd.lv.length>1||next>1)prog=Math.min(v,next).toLocaleString()+' / '+next.toLocaleString()+(bd.unit?' '+bd.unit:'');}
     c.innerHTML='<div class="bd-art">'+bdArt(bd,l,74,{locked:!l})+'</div><div class="bd-name">'+esc(l?badgeTierName(bd,l):bd.name)+'</div>'+(bd.lat?'<div class="bd-lat">'+esc(bd.lat)+'</div>':'')
-      +'<div class="bd-desc">'+esc(bd.desc)+(bd.lv.length>1&&!bd.tiers?' Levels: '+bd.lv.map(x=>x.toLocaleString()).join(' · ')+'.':'')+'</div>'+(prog?'<div class="bd-prog">'+(l?'Next: ':'')+prog+'</div>':'')+(e?'<div class="bd-date">'+new Date(e.t).toLocaleDateString()+'</div>':'');
+      +'<div class="bd-desc">'+esc(bd.desc)+(bd.lv.length>1&&!bd.tiers?' Levels: '+(bd.inf?bd.lv.slice(0,3).map(x=>x.toLocaleString()).join(' · ')+' · … (no limit)':bd.lv.map(x=>x.toLocaleString()).join(' · '))+'.':'')+'</div>'+(prog?'<div class="bd-prog">'+(l?'Next: ':'')+prog+'</div>':'')+(e?'<div class="bd-date">'+new Date(e.t).toLocaleDateString()+'</div>':'');
     if(l&&lbMe){const pinned=badgePins().includes(bd.id);const pb=document.createElement('button');pb.className='bd-pin'+(pinned?' on':'');pb.textContent=pinned?'📌 Shown':'📌 Show';pb.title=pinned?'Shown next to your name on the leaderboard. Click to hide.':'Show next to your name on the leaderboard (up to 6).';pb.onclick=()=>toggleBadgePin(bd.id);c.appendChild(pb);if(pinned)c.classList.add('pinned');}
     g.appendChild(c);});
   const sh=document.createElement('div');sh.className='badge-sec-h';sh.textContent='Special (not counted)';g.appendChild(sh);let metaN=0;
   META_BADGES.forEach(bd=>{const e=got[bd.id],l=e?e.l:0,v=metaValue(bd,got);const c=document.createElement('div');const on=bd.meta==='count'?v>0:!!l;if(!badgeShown(on?1:0,1))return;metaN++;c.className='badge-card meta'+(on?' earned':' locked');
-    let prog='';if(bd.meta==='count'||bd.meta==='name'||bd.meta==='acct')prog='';else{const pool=bd.meta==='public'?BADGES.filter(b=>!b.secret):BADGES,need=pool.length,have=bd.meta==='max'?pool.filter(b=>got[b.id]&&got[b.id].l>=b.lv.length).length:pool.filter(b=>got[b.id]).length;prog=have+' / '+need+' badges'+(bd.meta==='max'?' maxed':'');}
+    let prog='';if(bd.meta==='count'||bd.meta==='name'||bd.meta==='acct')prog='';else{const pool=(bd.meta==='public'?BADGES.filter(b=>!b.secret):BADGES).filter(b=>!b.inf),need=pool.length,have=bd.meta==='max'?pool.filter(b=>got[b.id]&&got[b.id].l>=b.lv.length).length:pool.filter(b=>got[b.id]).length;prog=have+' / '+need+' badges'+(bd.meta==='max'?' maxed':'');}
     c.innerHTML='<div class="bd-art">'+badgeArt(bd.id,1,1,{meta:true,size:74,locked:!on,count:bd.meta==='count'?v:null})+'</div><div class="bd-name">'+esc(bd.name)+'</div><div class="bd-lat">'+esc(bd.lat)+'</div><div class="bd-desc">'+esc(bd.desc)+'</div>'+(prog&&!l?'<div class="bd-prog">'+prog+'</div>':'')+(e&&bd.meta!=='count'?'<div class="bd-date">'+new Date(e.t).toLocaleDateString()+'</div>':'');
     if(on&&lbMe){const pinned=badgePins().includes(bd.id);const pb=document.createElement('button');pb.className='bd-pin'+(pinned?' on':'');pb.textContent=pinned?'📌 Shown':'📌 Show';pb.onclick=()=>toggleBadgePin(bd.id);c.appendChild(pb);if(pinned)c.classList.add('pinned');}
     g.appendChild(c);});
@@ -5237,9 +5238,9 @@ setTimeout(()=>{[['checkAnswer','answerInput'],['checkDrill','answerInput'],['ch
 // Progress towards each badge's next level (for the side panel)
 function badgeProgress(bd){const got=bjson(BADGE_KEY),l=got[bd.id]?got[bd.id].l:0;if(l>=bd.lv.length||bd.secret)return null;let v=0,next=bd.lv[l];try{v=bd.stat();}catch(e){}
   if(bd.id.startsWith('lex')||bd.id.startsWith('doct')){const [a,b]=lexProgress(bd.id==='lexicon'||bd.id==='doctus'?'main':'all',bd.id.startsWith('lex')?'seen':'correct').split(' / ').map(Number);v=a;next=b;}
-  const name=bd.tiers?bd.tiers[l].name+' '+ROMAN[l]:bd.lv.length>1?bd.name+' '+ROMAN[l]:bd.name;
+  const name=bd.tiers?bd.tiers[l].name+' '+romanN(l+1):bd.lv.length>1?bd.name+' '+romanN(l+1):bd.name;
   return {bd,v:Math.min(v,next),next,frac:next?Math.min(1,v/next):0,name};}
-function renderBadgeSide(){const box=document.getElementById('badgeSide');const got=bjson(BADGE_KEY);let earned=0,total=0;BADGES.forEach(bd=>{total+=bd.lv.length;earned+=got[bd.id]?got[bd.id].l:0;});
+function renderBadgeSide(){const box=document.getElementById('badgeSide');const got=bjson(BADGE_KEY);let earned=0,total=0;BADGES.forEach(bd=>{const l=got[bd.id]?got[bd.id].l:0;total+=bd.inf?l+1:bd.lv.length;earned+=l;});
   const bc=document.getElementById('badgeBtnCount');if(bc)bc.textContent=earned+'/'+total;const sc=document.getElementById('badgeStatsCount');if(sc)sc.textContent='('+earned+' / '+total+')';
   if(!box)return;const list=BADGES.map(badgeProgress).filter(x=>x&&x.next>0).sort((a,b)=>b.frac-a.frac).slice(0,5);
   box.innerHTML='<div class="side-h"><span>🏅 Next badges</span><span class="side-sub">'+earned+' / '+total+'</span></div><div class="bs-list">'
@@ -7179,7 +7180,7 @@ function constansOf(dd){let best=0,cur=0,prev=null;Object.keys(dd||{}).sort().fo
 function duelRuns(dr){let w=0,run=0,best=0;Object.keys(dr||{}).sort().forEach(k=>{if(dr[k]==='w'){w++;run++;best=Math.max(best,run);}else run=0;});return {w,best};}
 function wsCounts(){let m=0,all=0;Object.values(SRV.ws||{}).forEach(t=>{if(t==='m'){m++;all++;}else if(t==='p')all++;});return {m,all};}
 // the numbers behind each badge, from one account's server log
-function srvNums(L,p,sk){const c=wsCounts(),dr=duelRuns(L.dr);return {salve:p&&p.name?1:0,primus:+L.c||0,scriptor:L.sc?1:0,rank:Math.max(0,+(p&&p.total)||0),diesmagnus:+L.bd||0,constans:Math.max(constansOf(L.dd),+(sk&&sk.mx)||0),
+function srvNums(L,p,sk){const c=wsCounts(),dr=duelRuns(L.dr);return {salve:p&&p.name?1:0,primus:+L.c||0,scriptor:L.sc?1:0,rank:Math.max(0,+(p&&p.total)||0),diesmagnus:+L.bd||0,diesingens:+L.bd||0,constans:Math.max(constansOf(L.dd),+(sk&&sk.mx)||0),
   matutinus:+L.e||0,nocturnus:+L.n||0,sineerrore:+L.best||0,perfectus:(+L.best||0)>=50?1:0,
   lexicon:c.m&&(+L.nsm||0)>=c.m?1:0,lexiconmagnus:c.all&&(+L.ns||0)>=c.all?1:0,doctus:c.m&&(+L.nkm||0)>=c.m?1:0,doctissimus:c.all&&(+L.nk||0)>=c.all?1:0,
   gladiator:dr.w,victor:dr.w,invictus:dr.best,rival:Object.keys(L.rv||{}).length,popularis:+L.nrx||0,civis:L.civ?1:0};}
@@ -7193,7 +7194,7 @@ function srvBase(pid){const me=lbMe&&pid===lbMe.pid,p=lbPlayers[pid],ids=[pid,..
   res.rank=badgeLevel(badgeById('rank'),Math.max(0,+(p&&p.total)||0));res.salve=p&&p.name?1:0;res.socius=(ATAG||{})[pid]?1:0;res.chester=p&&p.name==='-Chester-'?1:0;return res;}
 function srvLevels(pid){const me=lbMe&&pid===lbMe.pid,res=srvBase(pid),gr=me?(BGRANT||{}):(SRV.gr[pid]||{});
   Object.entries(gr).forEach(([id,o])=>{const b=badgeById(id);if(!b||b.secret||!o||b.meta==='count'||id==='chester')return;const L=Math.min(+o.l||0,b.lv.length),base=o.base==null?Infinity:+o.base,raw=res[id]||0;res[id]=raw>base?Math.max(raw,L):L;});
-  const ns=BADGES.filter(b=>!b.secret),sc=me?(sxServer?sxServer.size:BADGES.filter(b=>b.secret&&bjson(BADGE_KEY)[b.id]).length):(sxCountOf(pid)||0),all=sc>=SX_IDS.length;
+  const ns=BADGES.filter(b=>!b.secret&&!b.inf),sc=me?(sxServer?sxServer.size:BADGES.filter(b=>b.secret&&bjson(BADGE_KEY)[b.id]).length):(sxCountOf(pid)||0),all=sc>=SX_IDS.length;
   const got=ns.every(b=>(res[b.id]||0)>=1),max=ns.every(b=>(res[b.id]||0)>=b.lv.length);
   res.fereomnia=Math.max(got?1:0,res.leg_fereomnia||0);res.omnia=Math.max(got&&all?1:0,res.leg_omnia||0);res.omniamax=Math.max(max&&all?1:0,res.leg_omniamax||0);res.arcana=sc;res.inscriptus=res.inscriptus||0;
   ['fereomnia','omnia','omniamax','inscriptus'].forEach(id=>{const o=gr[id];if(o){const L=+o.l||0,base=o.base==null?Infinity:+o.base;res[id]=res[id]>base?Math.max(res[id],L):L;}});return res;}
