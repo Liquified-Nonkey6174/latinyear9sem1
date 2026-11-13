@@ -23,7 +23,7 @@
       ".validate": "newData.isString() && newData.val().length <= 2000"
     },
     "players": {
-      ".read": "auth != null",
+      ".read": "auth != null && auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2'",
       "$uid": {
         ".write": "auth != null && ((auth.uid === $uid && (newData.exists() || !data.child('total').isNumber() || data.child('total').val() >= 0) && (data.exists() || !newData.exists() || auth.token.email_verified === true || (root.child('mfrom').child($uid).isString() && root.child('mto').child(root.child('mfrom').child($uid).val()).val() === $uid))) || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2' || (!newData.exists() && root.child('mto').child($uid).val() === auth.uid && data.child('total').val() >= 0))",
         ".validate": "newData.hasChildren(['name', 'total'])",
@@ -74,7 +74,8 @@
         },
         "$other": {
           ".validate": false
-        }
+        },
+        ".read": "auth != null && (auth.uid === $uid || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2')"
       }
     },
     "sx": {
@@ -600,6 +601,52 @@
         },
         "t": {
           ".validate": "newData.val() === now"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "pub": {
+      ".read": "auth != null",
+      "$uid": {
+        ".write": "auth != null && (auth.uid === $uid || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2')",
+        ".validate": "newData.hasChildren(['name', 'total']) && (auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2' || ((root.child('atag').child($uid).exists() || root.child('appr').child($uid).exists()) && !root.child('lbhide').child($uid).exists()))",
+        "name": {
+          ".validate": "auth != null && (auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2' || newData.val() === root.child('players').child($uid).child('name').val())"
+        },
+        "total": {
+          ".validate": "auth != null && (auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2' || newData.val() === root.child('players').child($uid).child('total').val())"
+        },
+        "av": {
+          ".validate": "auth != null && (auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2' || newData.val() === root.child('players').child($uid).child('av').val())"
+        },
+        "color": {
+          ".validate": "auth != null && (auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2' || newData.val() === root.child('players').child($uid).child('color').val())"
+        },
+        "font": {
+          ".validate": "auth != null && (auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2' || newData.val() === root.child('players').child($uid).child('font').val())"
+        },
+        "fx": {
+          ".validate": "auth != null && (auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2' || newData.val() === root.child('players').child($uid).child('fx').val())"
+        },
+        "bd": {
+          ".validate": "auth != null && (auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2' || newData.val() === root.child('players').child($uid).child('bd').val())"
+        },
+        "d": {
+          "$k": {
+            ".validate": "auth != null && (auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2' || newData.val() === root.child('players').child($uid).child('d').child($k).val())"
+          }
+        },
+        "w": {
+          "$k": {
+            ".validate": "auth != null && (auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2' || newData.val() === root.child('players').child($uid).child('w').child($k).val())"
+          }
+        },
+        "m": {
+          "$k": {
+            ".validate": "auth != null && (auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2' || newData.val() === root.child('players').child($uid).child('m').child($k).val())"
+          }
         },
         "$other": {
           ".validate": false
