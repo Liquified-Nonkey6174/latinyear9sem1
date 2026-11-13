@@ -6596,7 +6596,9 @@ function knownForms(){if(_known)return _known;const s=new Set();const add=f=>{if
   Object.values(PRONOUN_FORMS).forEach(add);_known=s;return s;}
 function nearMiss(typed,cands,latin){const na=x=>latin?nrmT(x):nrmT(x).replace(/\b(the|a|an)\b/g,' ').replace(/\s+/g,' ').trim();const t=na(typed).split(' ');if(!t[0])return false;
   // word order doesn't matter (like the main check): take out the words that match exactly, then the 1–2 left over must be small typos of each other
-  const close=(x,y)=>{const L=Math.max(x.length,y.length);const lim=L>=9?2:L>=5?1:0;return lim&&dmg(x,y)<=lim&&!(latin&&knownForms().has(x));};
+  // in Latin the ending is the grammar: if the two words only differ in their last few letters, it's a wrong ending, not a typo
+  const endErr=(x,y)=>{let cp=0;while(cp<x.length&&cp<y.length&&x[cp]===y[cp])cp++;return cp>=Math.max(3,Math.min(x.length,y.length)-3);};
+  const close=(x,y)=>{const L=Math.max(x.length,y.length);const lim=L>=9?2:L>=5?1:0;return lim&&dmg(x,y)<=lim&&!(latin&&(knownForms().has(x)||endErr(x,y)));};
   for(const c of cands){if(!c)continue;const cc=na(c).split(' ');if(cc.length!==t.length)continue;const left=cc.slice(),extra=[];
     t.forEach(w=>{const i=left.indexOf(w);if(i>=0)left.splice(i,1);else extra.push(w);});
     if(!extra.length||extra.length>2)continue;
