@@ -771,7 +771,7 @@ body:has(.overlay[style*="display: flex"]) .side-fab,body:has(#bReveal[style*="d
         <button class="btn-primary" style="font-size:12px;padding:6px 16px" onclick="saveDesc()">Save</button>
         <button class="btn-secondary" style="font-size:12px;padding:6px 14px" onclick="cancelDescEdit()">Cancel</button>
       </div>
-      <div style="margin-top:8px"><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="annEdit()">📢 Edit announcement</button><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="rulesCheck()" title="Find out whether the rules published in Firebase are up to date">🔍 Check database rules</button><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="sxCheck()" title="Why isn't a secret badge unlocking?">🔎 Secret badge check</button><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="premList()" title="Who has premium, and how they got it">👑 Premium list</button><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="contactEdit()" title="The email non-members are told to contact for a member tag">✉ Contact email</button><button class="btn-secondary" id="asStudentBtn" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="toggleAsStudent()" title="See the leaderboard, chat and Online now exactly as a student does">👁 View as a student</button><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="apprByName()" title="Let a player be seen by everyone on the leaderboard and in chat">✔ Approve player</button><label class="btn-secondary" style="font-size:12px;padding:6px 14px;cursor:pointer;display:inline-block">🔒 Upload secret badge answers<input type="file" accept=".json" style="display:none" onchange="if(this.files[0])sxUpload(this.files[0]);this.value=''"></label></div>
+      <div style="margin-top:8px"><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="annEdit()">📢 Edit announcement</button><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="rulesCheck()" title="Find out whether the rules published in Firebase are up to date">🔍 Check database rules</button><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="sxCheck()" title="Why isn't a secret badge unlocking?">🔎 Badge check</button><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="premList()" title="Who has premium, and how they got it">👑 Premium list</button><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="contactEdit()" title="The email non-members are told to contact for a member tag">✉ Contact email</button><button class="btn-secondary" id="asStudentBtn" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="toggleAsStudent()" title="See the leaderboard, chat and Online now exactly as a student does">👁 View as a student</button><button class="btn-secondary" style="font-size:12px;padding:6px 14px;margin-right:6px" onclick="apprByName()" title="Let a player be seen by everyone on the leaderboard and in chat">✔ Approve player</button><label class="btn-secondary" style="font-size:12px;padding:6px 14px;cursor:pointer;display:inline-block">🔒 Upload secret badge answers<input type="file" accept=".json" style="display:none" onchange="if(this.files[0])sxUpload(this.files[0]);this.value=''"></label></div>
     </div>
   </div>
   <div class="settings-row"><button class="settings-btn" onclick="showSettings()">⚙ Settings</button> <button class="settings-btn" id="acctBtn" onclick="acctHub()" title="Sign in, or use your account on other devices">👤 Account</button> <button class="settings-btn" onclick="openBadges()">🏅 Badges <span id="badgeBtnCount" style="opacity:.7;font-size:12px"></span><span class="bf-dot" id="badgeBtnDot" title="New in the badge feed"></span></button></div>
@@ -4414,18 +4414,25 @@ async function streakEdit(pid,name,btn){let cur=null;try{cur=await fbReq('GET','
   let now=null;try{now=await fbReq('GET','strk/'+pid,null,{admin:true});}catch(e){}
   const v=prompt('Daily goal streak for '+name+' (days in a row).'+(now&&typeof now.n==='number'?'\nCurrent streak: '+now.n+' (reported '+agoText(now.t)+(now.g?', goal '+now.g+', '+(now.d||0)+' today':', no daily goal set')+').':'\nTheir device hasn’t reported a streak yet.')+(cur?'\nLast set to '+cur.n+' on '+new Date(cur.t).toLocaleString()+'.':'')+'\nIt shows on their devices the next time they open the site; reaching today’s goal then adds 1.',cur?cur.n:'');if(v===null)return;
   const n=Math.round(+v);if(!(n>=0&&n<=3650)){alert('Enter a whole number from 0 to 3650.');return;}
-  try{await fbReq('PUT','sset/'+pid,{n,t:{'.sv':'timestamp'}},{admin:true});toast('Streak for '+name+' set to '+n+'.');if(btn)btn.textContent='🔥 Streak: '+n+' (set, applies when they next open the site)';if(lbMe&&pid===lbMe.pid)streakApply();}catch(e){alert('Couldn’t save: '+e.message);}}
+  try{await fbReq('PUT','sset/'+pid,{n,t:{'.sv':'timestamp'}},{admin:true});await fbReq('PUT','strk/'+pid,{n,b:n,bt:Date.now()-864e5,mx:n,g:(now&&now.g)||0,d:0,t:{'.sv':'timestamp'}},{admin:true}).catch(()=>{});if(lbMe&&pid===lbMe.pid)strkSrv=undefined;toast('Streak for '+name+' set to '+n+'.');if(btn)btn.textContent='🔥 Streak: '+n+' (set, applies when they next open the site)';if(lbMe&&pid===lbMe.pid)streakApply();}catch(e){alert('Couldn’t save: '+e.message);}}
 // tell the server this device's streak (only the admin can read it)
-let _strkBusy=false;function streakReport(n,g,today){if(!lbMe||!playerAuth||lbMe.pid!==playerAuth.uid||_strkBusy)return;const sig=lbMe.pid+'|'+n+'|'+g+'|'+lbKeys().d+'|'+(today>=g?1:0);
-  try{if(localStorage.getItem('latin_strk_sent')===sig)return;}catch(e){}_strkBusy=true;
-  fbReq('PUT','strk/'+lbMe.pid,{n,g:g||0,d:Math.min(+today||0,100000),t:{'.sv':'timestamp'}}).then(()=>{try{localStorage.setItem('latin_strk_sent',sig);}catch(e){}}).catch(()=>{}).finally(()=>{_strkBusy=false;});}
+// Tell the server this device's streak. The server only lets it grow by one a day from its starting point, so Constans can rely on it.
+let _strkBusy=false,_strkWait=0;var strkSrv;   // undefined = not loaded yet, null = nothing on the server
+function streakReport(n,g,today){if(!lbMe||!playerAuth||lbMe.pid!==playerAuth.uid||_strkBusy||Date.now()<_strkWait)return;const u=lbMe.pid,sig=u+'|'+n+'|'+g+'|'+lbKeys().d+'|'+(today>=g?1:0);
+  try{if(localStorage.getItem('latin_strk_sent')===sig&&strkSrv!==undefined)return;}catch(e){}_strkBusy=true;
+  (async()=>{try{if(strkSrv===undefined)strkSrv=(await fbReq('GET','strk/'+u))||null;const cur=strkSrv,sv={'.sv':'timestamp'};let nn=n,b,bt;
+      if(cur&&cur.b!=null&&cur.bt){const cap=Math.floor(+cur.b+1+(srvNow()-cur.bt)/864e5);if(n<=1){b=n;bt=sv;}else{nn=Math.min(n,cap);b=cur.b;bt=cur.bt;}}else{b=n;bt=sv;}
+      const put=x=>fbReq('PUT','strk/'+u,{n:x.n,b:x.b,bt:x.bt,mx:Math.max(+(cur&&cur.mx)||0,x.n),g:g||0,d:Math.min(+today||0,100000),t:sv});
+      let r;try{r=await put({n:nn,b,bt});}catch(e){if(!(cur&&cur.b!=null)&&nn>1)r=await put({n:1,b:1,bt:sv});else throw e;}   // too late to bring an old streak across: start from 1
+      if(r&&typeof r.n==='number'){strkSrv=r;try{localStorage.setItem('latin_strk_sent',sig);}catch(e){}badgeCheckSoon();}}
+    catch(e){_strkWait=Date.now()+60000;strkSrv=undefined;}finally{_strkBusy=false;}})();}
 async function streakApply(){if(!lbMe)return;let r;try{r=await fbReq('GET','sset/'+lbMe.pid);}catch(e){return;}if(!r||!(+r.t))return;
   const done=+localStorage.getItem('latin_sset_t')||0;if(+r.t<=done)return;const n=Math.max(0,Math.round(+r.n||0)),d=dailyData(),m=dailyMetSet(),g=SET.goal||1;
   const today=dayKeyOffset(0),todayOk=(d[today]||0)>=g||m.has(today),from=todayOk?0:1;   // the streak shown right away is exactly n
   for(let i=from;i<from+n;i++)m.add(dayKeyOffset(i));const br=dayKeyOffset(from+n);m.delete(br);if((d[br]||0)>=g)d[br]=g-1;   // the day before the streak is a gap
   if(n===0&&todayOk){m.delete(today);if((d[today]||0)>=g)d[today]=g-1;}
   try{localStorage.setItem(DAILY_MET_KEY,JSON.stringify([...m].sort().slice(-4000)));localStorage.setItem(DAILY_KEY,JSON.stringify(d));localStorage.setItem('latin_sset_t',String(r.t));}catch(e){}
-  try{const b=bstat();b.bestStreak=Math.max(b.bestStreak||0,dailyStreak());bsave();}catch(e){}renderDaily();toast('🔥 Your streak was set to '+dailyStreak()+' day'+(dailyStreak()===1?'':'s')+' by the admin.');}
+  strkSrv=undefined;_strkWait=0;try{const b=bstat();b.bestStreak=Math.max(b.bestStreak||0,dailyStreak());bsave();}catch(e){}renderDaily();toast('🔥 Your streak was set to '+dailyStreak()+' day'+(dailyStreak()===1?'':'s')+' by the admin.');}
 setTimeout(()=>{streakApply();},5000);
 async function atagEdit(pid,name){const v=prompt('Member tag for '+name+' (everyone sees it, e.g. their real name). Members count for the challenge, Rival, Popularis and Echo badges. Leave empty to remove:',ATAG[pid]||'');if(v===null)return;const t=v.trim().slice(0,40);
   try{await fbReq(t?'PUT':'DELETE','atag/'+pid,t||null,{admin:true});if(t)ATAG[pid]=t;else delete ATAG[pid];toast(t?'Tag saved.':'Tag removed.');try{renderLb();renderChat();}catch(e){}openPlayerCard(pid);}
@@ -4868,8 +4875,12 @@ async function sxCheck(){const out=[],row=(ok,t)=>out.push('<div style="margin:4
   const u=playerAuth&&playerAuth.uid;row(!!u,'This device plays as '+(lbMe?'<b>'+esc(lbMe.name)+'</b>':'(not on the leaderboard)')+(u?'':' — not signed in'));
   if(u){const mem=u===ADMIN_UID||(ATAG||{})[u]||APPR[u]===true;row(!!mem,mem?'That account can unlock secret badges (member, approved or admin)':'That account has <b>no member tag or approval</b>, so the server won’t let it unlock secret badges');
     if(lbMe&&lbMe.pid!==u)row(false,'The leaderboard name and the signed-in account don’t match');}
+  try{const L=SRV.me||{},on=srvOn();out.push('<div style="margin-top:10px"><b>Badge records for this device’s account</b></div>');
+    row(on,on?'Server badge records are loaded':'Server badge records are <b>not</b> loaded (frozen '+!!SRV.frozen+', records '+!!SRV.me+', word list '+!!SRV.ws+', on leaderboard '+!!(lbMe&&lbPlayers[lbMe.pid])+')');
+    row(!alogStat.fail,'Answers sent to the server this visit: '+alogStat.ok+' saved, '+alogStat.fail+' refused, '+alogQ.length+' waiting'+(alogStat.last?' · last error '+esc(alogStat.last):''));
+    if(on){const lv=srvLevels(lbMe.pid);out.push('<table style="font-size:12px;width:100%;margin-top:4px"><tr><th style="text-align:left">Badge</th><th>This device</th><th>Server</th><th>Level</th></tr>'+BADGES.filter(b=>!b.secret&&!['salve','socius','rank'].includes(b.id)).map(b=>{let dv=0;try{dv=b.stat();}catch(e){}const sv=srvProg(b),bad=dv>sv;return '<tr'+(bad?' style="color:var(--red,#e07a6a)"':'')+'><td>'+esc(b.name)+'</td><td style="text-align:center">'+dv+'</td><td style="text-align:center">'+sv+'</td><td style="text-align:center">'+(lv[b.id]||0)+'/'+b.lv.length+'</td></tr>';}).join('')+'</table><div class="muted" style="font-size:11.5px">Red = this device counts more than the server has. Words you already knew are sent to the server automatically, a few at a time, while you play.</div>');}}catch(e){}
   out.push('<div style="margin-top:10px"><b>Last tries on this device</b></div>'+(sxLog.length?sxLog.slice(0,15).map(x=>'<div class="muted" style="font-size:12px">'+new Date(x.t).toLocaleTimeString()+' · '+esc(x.c)+' → '+esc(x.r)+'</div>').join(''):'<div class="muted" style="font-size:12px">None yet. Try the badge, then press the check again.</div>'));
-  document.getElementById('claimsBody').innerHTML=out.join('');document.querySelector('#claimsOverlay .ann-head').textContent='🔎 Secret badge check';document.getElementById('claimsOverlay').style.display='flex';}
+  document.getElementById('claimsBody').innerHTML=out.join('');document.querySelector('#claimsOverlay .ann-head').textContent='🔎 Badge check';document.getElementById('claimsOverlay').style.display='flex';}
 var sxServer=null;   // ids of secret badges the server has a record of (null = not checked yet)
 var sxRM=null;async function sxSync(){try{await playerToken();const got=await fbReq('GET','sx/got/'+playerAuth.uid);const ids=new Set();let full=true;if(got)for(const h of Object.keys(got)){try{let c=Object.values(sxCfg).find(x=>x.h===h);if(!c)c=sxLearn(h,await fbReq('GET','sx/cfg/'+h));if(c&&c.id)ids.add(c.id);}catch(e){full=false;}}
     try{const o=await fbReq('GET','sx/old/'+playerAuth.uid);if(typeof o==='string')o.split(',').forEach(x=>ids.add(x));}catch(e){full=false;}Object.entries(sxRecent).forEach(([id,t])=>{if(Date.now()-t<120000)ids.add(id);});sxServer=ids;
@@ -4932,7 +4943,7 @@ const BADGES=[
  {id:'rank',icon:'⭐',name:'Centurio',desc:'Earn ⭐ in total: Centurio 100, Tribunus 200, Legatus 500, Praefectus 1,000, Imperator 2,000, Consul 5,000, Optimus 10,000.',unit:'⭐',stat:()=>lbMe&&lbPlayers[lbMe.pid]?Math.max(0,+lbPlayers[lbMe.pid].total||0):0,lv:[100,200,500,1000,2000,5000,10000],
   tiers:[{name:'Centurio',icon:'⭐'},{name:'Tribunus',icon:'⭐'},{name:'Legatus',icon:'⭐'},{name:'Praefectus',icon:'⭐'},{name:'Imperator',icon:'⭐'},{name:'Consul',icon:'⭐'},{name:'Optimus',icon:'💎'}]},
  {id:'diesmagnus',icon:'☀️',name:'Dies Magnus',lat:'big day',desc:'Earn lots of ⭐ in a single day.',unit:'⭐ in a day',stat:()=>Math.max(bstat().bestDay||0,lbTodayPts()),lv:[50,100,200,300,500,750,1000]},
- {id:'constans',icon:'🔥',name:'Constans',lat:'steady',desc:'Earn 20+ ⭐ on several days in a row.',unit:'day streak',stat:()=>Math.max(bstat().bestStreak||0,dailyStreak()),lv:[1,3,5,7,10,20,30]},
+ {id:'constans',icon:'🔥',name:'Constans',lat:'steady',desc:'Keep your 🔥 streak going: reach your daily goal several days in a row (or earn 20+ ⭐ a day).',unit:'day streak',stat:()=>Math.max(bstat().bestStreak||0,dailyStreak()),lv:[1,3,5,7,10,20,30]},
  {id:'matutinus',icon:'🌅',name:'Matutinus',lat:'early riser',desc:'Get a question right before 8 am.',stat:()=>bstat().early||0,lv:[1]},
  {id:'nocturnus',icon:'🦉',name:'Nocturnus',lat:'night owl',desc:'Get a question right after 8 pm.',stat:()=>bstat().late||0,lv:[1]},
  {id:'sineerrore',icon:'🎯',name:'Sine Errore',lat:'without error',desc:'Get questions right in a row (any type).',unit:'in a row',stat:()=>bstat().bestRun||0,lv:[10,20,30,50,100,200,300]},
@@ -5265,7 +5276,7 @@ function renderDuelInbox(){const box=document.getElementById('duelInbox');if(!bo
   h+=sec('Finished',done,d=>{const w=duelWinner(d),a=d.res[me],b=d.res[d.from===me?d.to:d.from];return '<div class="dl-row"><span>'+(w===me?'🏆 You beat ':w?'You lost to ':'Draw with ')+'<b>'+esc(opName(d))+'</b> · '+a.s+'–'+b.s+' ('+(duelMs(d,me)/1000).toFixed(1)+'s vs '+(duelMs(d,d.from===me?d.to:d.from)/1000).toFixed(1)+'s)</span><button class="lb-link muted" onclick="deleteDuel(\''+d.id+'\')">Clear</button></div>';});
   box.innerHTML=h;}
 let _dtAt=0;async function duelsTidy(all){if(Date.now()-_dtAt<600000&&!all)return;_dtAt=Date.now();const old=Date.now()-30*864e5,body={};
-  Object.entries(duelsObj||{}).forEach(([id,d])=>{if(!d||!(+d.t<old))return;const done=d.res&&d.res[d.from]&&d.res[d.to];const mine=lbMe&&(d.from===lbMe.pid||d.to===lbMe.pid);if((all&&isAdmin)||(mine&&done))body['duels/'+id]=null;});
+  Object.entries(duelsObj||{}).forEach(([id,d])=>{if(!d||!(+d.t<old))return;const done=d.res&&d.res[d.from]&&d.res[d.to];const mine=lbMe&&(d.from===lbMe.pid||d.to===lbMe.pid);const rec=!srvMode()||(SRV.me&&SRV.me.dr&&SRV.me.dr[id]);if((all&&isAdmin&&+d.t<old-60*864e5)||(mine&&done&&rec))body['duels/'+id]=null;});
   const ks=Object.keys(body);if(!ks.length)return;try{if(all&&isAdmin)await fbReq('PATCH','',body,{admin:true});else for(const k of ks)await fbReq('DELETE',k);ks.forEach(k=>delete duelsObj[k.slice(6)]);}catch(e){}}
 async function deleteDuel(id){try{await fbReq('DELETE','duels/'+id);delete duelsObj[id];pollShared();}catch(e){}renderDuelInbox();updDuelBtn();}
 function startDuel(id){const d=duelsObj[id];if(!d)return;const qs=d.qs.map(q=>({w:wordByKey(q.k),d:q.d})).filter(q=>q.w);duelGame={id,qs,i:0,score:0,t0:Date.now(),fb:null};
@@ -7000,10 +7011,24 @@ function exSubmit(auto){if(!exam||exam.res)return;const blank=exam.qs.filter((q,
 // the admin's give / remove actions. Nothing a player changes on their own screen counts.
 const akey=w=>w?String(wKey(w)).replace(/[.$#\[\]\/]/g,'_').slice(0,120):'_';
 var SRV={me:null,aw:null,ws:null,frozen:false,leg:{},log:{},gr:{},at:{}};
-let alogQ=[],alogBusy=false,alogLast=0,srvMeAt=0,srvExtrasBusy=false;
+let alogQ=[],alogBusy=false,alogLast=0,srvMeAt=0,srvExtrasBusy=false,alogStat={ok:0,fail:0,last:''};
+try{const q=JSON.parse(localStorage.getItem('latin_alog_q')||'[]');if(Array.isArray(q))alogQ=q.filter(x=>x&&typeof x.k==='string').slice(-300);}catch(e){}
+function alogKeep(){try{localStorage.setItem('latin_alog_q',JSON.stringify(alogQ.slice(-300)));}catch(e){}}
+setTimeout(()=>{if(alogQ.length)alogPump();},6000);
+// Words this device already knows (from before the server kept records) are sent to the server a few at a time, at the same
+// one-per-half-second pace as real answers, so Lexicon / Doctus don't make you see every word again. Only while your current
+// run of right answers is 0, and each batch ends on a "seen only" entry, so it never adds to (or breaks) a real run.
+function alogBackfill(){try{if(!srvOn()||alogQ.length||alogBusy||(bstat().run||0)>0)return;const ws=SRV.ws||{},AW=SRV.aw||{},acc=accData(),known=[],seen=[];
+    lexWords('all').forEach(w=>{const k=akey(w),key=wKey(w),a=acc[key],r=srData[key];if(!ws[k]||ws[k]==='x')return;const c=(a&&a.c>0)||(r&&r.correct>0),sn=c||(a&&a.s>0)||(r&&r.seen>0);
+      if(c&&!(AW.k&&AW.k[k]))known.push(k);else if(sn&&!(AW.s&&AW.s[k]))seen.push(k);});
+    if(!known.length&&!seen.length)return;const out=[];let run=0;known.slice(0,32).forEach(k=>{out.push({ok:true,k,bf:1});if(++run>=6){out.push({ok:false,k:seen.length?seen.shift():k,bf:1});run=0;}});
+    seen.slice(0,out.length?4:30).forEach(k=>out.push({ok:false,k,bf:1}));if(out.length&&out[out.length-1].ok)out.push({ok:false,k:out[out.length-1].k,bf:1});
+    alogQ.push(...out);alogKeep();alogPump();}catch(e){}}
+setInterval(()=>{if(document.visibilityState==='visible')alogBackfill();},20000);
 async function srvLoadMe(){if(!playerAuth||!playerAuth.uid)return;const u=playerAuth.uid;
   try{const [a,w,ws,lg,fz]=await Promise.all([fbReq('GET','alog/'+u),fbReq('GET','aw/'+u),SRV.ws?Promise.resolve(SRV.ws):fbReq('GET','wset'),fbReq('GET','blegacy/'+u),fbReq('GET','blegacy/_done')]);
-    SRV.me=a||{};SRV.aw=w||{};SRV.ws=ws||{};SRV.leg[u]=lg||{};SRV.frozen=!!fz;srvMeAt=Date.now();badgeCheckSoon();}catch(e){}}
+    SRV.me=a||{};SRV.aw=w||{};SRV.ws=ws||{};SRV.leg[u]=lg||{};SRV.frozen=!!fz;srvMeAt=Date.now();badgeCheckSoon();}catch(e){}
+  try{if(lbMe&&lbMe.pid===u&&!_strkBusy)strkSrv=(await fbReq('GET','strk/'+u))||null;badgeCheckSoon();}catch(e){}}
 var srvSynced=false;
 // server badge records only exist for players on the leaderboard: anyone else (not joined, or signed in as a different
 // account) keeps earning badges on their device, as before. Nobody else sees those, since other players' badges come from the server.
@@ -7041,18 +7066,18 @@ async function chatPurge(test){const all=(await fbReq('GET','chat',null,{admin:t
 async function chatPurgeHidden(){if(!isAdmin)return;const [mu,at,ap]=await Promise.all([fbReq('GET','mute',null,{admin:true}),fbReq('GET','atag',null,{admin:true}),fbReq('GET','appr',null,{admin:true})]);
   return chatPurge(p=>p!==ADMIN_UID&&((mu||{})[p]===true||!((at||{})[p]||(ap||{})[p]===true)));}
 function srvOn(){return !!(SRV.frozen&&lbMe&&playerAuth&&lbMe.pid===playerAuth.uid&&SRV.me&&SRV.ws&&lbPlayers[lbMe.pid]);}
-function alogAnswer(ok,w){if(!playerAuth||!lbMe)return;alogQ.push({ok:!!ok,k:akey(w)});if(alogQ.length>300)alogQ.shift();alogPump();}
+function alogAnswer(ok,w){if(!playerAuth||!lbMe)return;alogQ.push({ok:!!ok,k:akey(w)});if(alogQ.length>300)alogQ.shift();alogKeep();alogPump();}
 async function alogPump(){if(alogBusy||!alogQ.length)return;alogBusy=true;
   try{if(!SRV.me)await srvLoadMe();if(!SRV.me)return;
     while(alogQ.length){const wait=520-(Date.now()-alogLast);if(wait>0)await new Promise(r=>setTimeout(r,wait));const q=alogQ[0];
-      let ok=await alogSend(q,true);if(!ok){await srvLoadMe();ok=await alogSend(q,false);}alogQ.shift();alogLast=Date.now();}}
+      let ok=await alogSend(q,!q.bf);if(!ok){await new Promise(r=>setTimeout(r,700));await srvLoadMe();ok=await alogSend(q,false);}if(ok)alogStat.ok++;else alogStat.fail++;alogQ.shift();alogKeep();alogLast=Date.now();}}
   finally{alogBusy=false;}}
 async function alogSend(q,withTime){const u=playerAuth.uid,L=SRV.me||{},AW=SRV.aw||{},ws=SRV.ws||{};let k=q.k;if(!ws[k])k='_';if(!ws[k])return true;   // word list not on the server yet
   const n=x=>+L[x]||0,ci=q.ok,sNew=!(AW.s&&AW.s[k]),kNew=!(AW.k&&AW.k[k]),t=ws[k],run=ci?n('run')+1:0;
   const v={a:n('a')+1,c:n('c')+(ci?1:0),run,best:Math.max(n('best'),run),lw:k,ns:n('ns')+(t!=='x'&&sNew?1:0),nsm:n('nsm')+(t==='m'&&sNew?1:0),nk:n('nk')+(ci&&t!=='x'&&kNew?1:0),nkm:n('nkm')+(ci&&t==='m'&&kNew?1:0),e:n('e'),n:n('n')};
   if(withTime&&ci){const now=Date.now(),h10=(now+36e6)%864e5,h11=(now+396e5)%864e5;if(h10<288e5||h11<288e5)v.e++;if(h10>=72e6||h11>=72e6)v.n++;}
   const P='alog/'+u+'/',body={};Object.entries(v).forEach(([x,y])=>{body[P+x]=y;});body[P+'lt']={'.sv':'timestamp'};body['aw/'+u+'/s/'+k]=true;if(ci)body['aw/'+u+'/k/'+k]=true;
-  try{await fbReq('PATCH','',body);Object.assign(L,v);SRV.me=L;AW.s=AW.s||{};AW.s[k]=true;if(ci){AW.k=AW.k||{};AW.k[k]=true;}SRV.aw=AW;badgeCheckSoon();return true;}catch(e){return false;}}
+  try{await fbReq('PATCH','',body);alogStat.last='';Object.assign(L,v);SRV.me=L;AW.s=AW.s||{};AW.s[k]=true;if(ci){AW.k=AW.k||{};AW.k[k]=true;}SRV.aw=AW;badgeCheckSoon();return true;}catch(e){alogStat.last=new Date().toLocaleTimeString()+' '+e.message;return false;}}
 async function srvPut(path,val){try{await fbReq('PUT','alog/'+playerAuth.uid+'/'+path,val);return true;}catch(e){return false;}}
 // records that come from other server data: best day, days with 20+ ⭐, chat, email, class challenge, challenges, reactions
 async function srvExtras(){if(srvExtrasBusy||!lbMe||!SRV.me||!playerAuth||lbMe.pid!==playerAuth.uid)return;srvExtrasBusy=true;
@@ -7060,6 +7085,7 @@ async function srvExtras(){if(srvExtrasBusy||!lbMe||!SRV.me||!playerAuth||lbMe.p
     if(dv>(+L.bd||0)){try{await fbReq('PATCH','alog/'+u,{bd:dv,bdk:k.d});L.bd=dv;L.bdk=k.d;}catch(e){}}
     if(dv>=20&&!(L.dd&&L.dd[k.d])&&await srvPut('dd/'+k.d,true)){L.dd=L.dd||{};L.dd[k.d]=true;}
     if(!L.ins&&tokVerified()&&await srvPut('ins',true))L.ins=true;
+    if(!L.sc){const mine=Object.entries(chatObj||{}).find(([id,m])=>m&&m.pid===u);if(mine&&await srvPut('sc',mine[0]))L.sc=mine[0];}
     if(!L.civ&&classChal&&+classChal.target&&((me.w||{})[k.w]||0)>=500&&await srvPut('civ',k.w))L.civ=k.w;
     for(const [id,d] of Object.entries(duelsObj||{})){if(!d||(d.from!==u&&d.to!==u))continue;const op=d.from===u?d.to:d.from;if(!mem(op))continue;
       if(d.from===u&&!(L.rv&&L.rv[op])&&await srvPut('rv/'+op,id)){L.rv=L.rv||{};L.rv[op]=id;}
@@ -7072,13 +7098,15 @@ function constansOf(dd){let best=0,cur=0,prev=null;Object.keys(dd||{}).sort().fo
 function duelRuns(dr){let w=0,run=0,best=0;Object.keys(dr||{}).sort().forEach(k=>{if(dr[k]==='w'){w++;run++;best=Math.max(best,run);}else run=0;});return {w,best};}
 function wsCounts(){let m=0,all=0;Object.values(SRV.ws||{}).forEach(t=>{if(t==='m'){m++;all++;}else if(t==='p')all++;});return {m,all};}
 // the numbers behind each badge, from one account's server log
-function srvNums(L,p){const c=wsCounts(),dr=duelRuns(L.dr);return {salve:p&&p.name?1:0,primus:+L.c||0,scriptor:L.sc?1:0,rank:Math.max(0,+(p&&p.total)||0),diesmagnus:+L.bd||0,constans:constansOf(L.dd),
+function srvNums(L,p,sk){const c=wsCounts(),dr=duelRuns(L.dr);return {salve:p&&p.name?1:0,primus:+L.c||0,scriptor:L.sc?1:0,rank:Math.max(0,+(p&&p.total)||0),diesmagnus:+L.bd||0,constans:Math.max(constansOf(L.dd),+(sk&&sk.mx)||0),
   matutinus:+L.e||0,nocturnus:+L.n||0,sineerrore:+L.best||0,perfectus:(+L.best||0)>=50?1:0,
   lexicon:c.m&&(+L.nsm||0)>=c.m?1:0,lexiconmagnus:c.all&&(+L.ns||0)>=c.all?1:0,doctus:c.m&&(+L.nkm||0)>=c.m?1:0,doctissimus:c.all&&(+L.nk||0)>=c.all?1:0,
   gladiator:dr.w,victor:dr.w,invictus:dr.best,rival:Object.keys(L.rv||{}).length,popularis:+L.nrx||0,civis:L.civ?1:0};}
 // levels before the admin's actions (frozen badges + server-checked progress, over this account and any merged into it)
 function srvBase(pid){const me=lbMe&&pid===lbMe.pid,p=lbPlayers[pid],ids=[pid,...Object.keys(MTO||{}).filter(s=>MTO[s]===pid)],res={};
-  ids.forEach((u,i)=>{const L=me&&i===0?(SRV.me||{}):(SRV.log[u]||{}),nums=srvNums(L,p),leg=SRV.leg[u]||{};
+  ids.forEach((u,i)=>{const L=me&&i===0?(SRV.me||{}):(SRV.log[u]||{}),leg=SRV.leg[u]||{},nums=srvNums(L,p,me&&i===0?strkSrv:(SRV.sk||{})[u]);
+    // reactions are counted from when the server records began, on top of the level you already had
+    {const pb=badgeById('popularis'),pl=Math.min(+leg.popularis||0,pb.lv.length);if(pl)nums.popularis+=pb.lv[pl-1];}
     BADGES.forEach(b=>{if(b.secret)return;const lv=badgeLevel(b,nums[b.id]||0);res[b.id]=Math.max(res[b.id]||0,lv,b.id==='rank'?0:Math.min(+leg[b.id]||0,b.lv.length));});
     ['fereomnia','omnia','omniamax','inscriptus'].forEach(id=>{res['leg_'+id]=Math.max(res['leg_'+id]||0,+leg[id]||0);});if(L.ins)res.inscriptus=1;});
   res.rank=badgeLevel(badgeById('rank'),Math.max(0,+(p&&p.total)||0));res.salve=p&&p.name?1:0;res.socius=(ATAG||{})[pid]?1:0;res.chester=p&&p.name==='-Chester-'?1:0;return res;}
@@ -7095,11 +7123,13 @@ const srvPromises={};
 function srvFetchP(pid){if(srvPromises[pid])return srvPromises[pid];srvPend.add(pid);
   const ids=[pid,...Object.keys(MTO||{}).filter(s=>MTO[s]===pid)];
   return srvPromises[pid]=(async()=>{try{if(!SRV.ws)SRV.ws=(await fbReq('GET','wset'))||{};if(!SRV.frozen)SRV.frozen=!!(await fbReq('GET','blegacy/_done'));
-    await Promise.all(ids.map(async u=>{const [a,l]=await Promise.all([fbReq('GET','alog/'+u).catch(()=>null),fbReq('GET','blegacy/'+u).catch(()=>null)]);SRV.log[u]=a||{};SRV.leg[u]=l||{};}));
+    await Promise.all(ids.map(async u=>{const [a,l,k]=await Promise.all([fbReq('GET','alog/'+u).catch(()=>null),fbReq('GET','blegacy/'+u).catch(()=>null),fbReq('GET','strk/'+u).catch(()=>null)]);SRV.log[u]=a||{};SRV.leg[u]=l||{};(SRV.sk=SRV.sk||{})[u]=k||null;}));
     SRV.gr[pid]=(await fbReq('GET','bgrant/'+pid).catch(()=>null))||{};SRV.at[pid]=Date.now();}catch(e){}
     srvPend.delete(pid);delete srvPromises[pid];try{renderLb();renderChat();renderFeedBits();renderBadgeFeed();}catch(e){}})();}
 // numbers shown under each badge ("Next: 12 / 20") come from the server too
-function srvProg(bd){const L=SRV.me||{},p=lbPlayers[lbMe.pid];return (srvNums(L,p)[bd.id])||0;}
+function srvProg(bd){const L=SRV.me||{},p=lbPlayers[lbMe.pid];let v=(srvNums(L,p,strkSrv)[bd.id])||0;
+  // you already reached the number for the level you hold (earned before the server records began), so progress starts from there
+  const lg=Math.min(+((SRV.leg[lbMe.pid]||{})[bd.id])||0,bd.lv.length);if(lg&&bd.lv.length>1&&bd.id!=='rank'){const th=bd.lv[lg-1];v=bd.id==='popularis'?v+th:Math.max(v,th);}return v;}
 // admin: freeze everyone's current badges (once), and keep the server's word list in step with the app
 async function srvAdminSetup(){if(!isAdmin)return;try{
     const want={'_':'x'};lexWords('main').forEach(w=>{want[akey(w)]='m';});lexWords('all').forEach(w=>{const k=akey(w);if(!want[k])want[k]='p';});
