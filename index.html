@@ -4924,7 +4924,7 @@ function badgeArt(id,level,max,o){o=o||{};if(id==='rank')id='gradus';if(id==='om
    +'<path d="'+shapeD(shape,31)+'" fill="url(#'+k+'f)"/>'
    +'<path d="'+shapeD(shape,31)+'" fill="none" stroke="'+m[0]+'" stroke-opacity=".35" stroke-width=".8"/>'
    +'<ellipse cx="42" cy="35" rx="17" ry="7" fill="#fff" opacity=".08"/>';
-  svg+='<g transform="translate(50 50) scale(.54) translate(-50 -50)" fill="none" stroke="'+ink+'" stroke-width="3.8" stroke-linecap="round" stroke-linejoin="round" filter="url(#'+k+'s)">'
+  svg+='<g transform="translate(50 50) scale('+(({diesingens:.74,augustus:.78})[id]||.54)+') translate(-50 -50)" fill="none" stroke="'+ink+'" stroke-width="3.8" stroke-linecap="round" stroke-linejoin="round" filter="url(#'+k+'s)">'
    +sym.replace(/class="f"/g,'fill="'+ink+'" stroke="none"').replace(/class="t"/g,'fill="'+ink+'" stroke="none"')+'</g>';
   if(gr>=2){const st=(cx,cy,r)=>{let d='';for(let i=0;i<10;i++){const rr=i%2?r*.45:r,a=(-90+i*36)*Math.PI/180;d+=(i?'L':'M')+(cx+rr*Math.cos(a)).toFixed(2)+' '+(cy+rr*Math.sin(a)).toFixed(2);}return '<path d="'+d+'Z" fill="url(#'+k+'r)" stroke="'+m[2]+'" stroke-width="1" stroke-linejoin="round" filter="url(#'+k+'s)"/>';};
     svg+=gr>=4?st(31,9,6.5)+st(69,9,6.5)+st(50,3,9.5):st(50,4,gr>=3?9:7.5);}
@@ -5051,9 +5051,9 @@ const BADGES=[
  {id:'salve',icon:'👋',name:'Salve!',desc:'Join the leaderboard.',stat:()=>lbMe?1:0,lv:[1]},
  {id:'primus',icon:'🥇',name:'Primus Gradus',lat:'first step',desc:'Get your first correct answer.',stat:()=>bstat().correct||0,lv:[1]},
  {id:'scriptor',icon:'✍️',name:'Scriptor',lat:'writer',desc:'Send your first chat message.',stat:()=>bstat().chat||0,lv:[1]},
- {id:'rank',icon:'⭐',name:'Centurio',desc:'Ranks for your total ⭐: Centurio 100, Tribunus 200, Legatus 500, Praefectus 1,000, Imperator 2,000, Consul 5,000, Optimus 10,000.',unit:'⭐',stat:()=>lbMe&&lbPlayers[lbMe.pid]?Math.max(0,+lbPlayers[lbMe.pid].total||0):0,lv:[100,200,500,1000,2000,5000,10000],
+ {id:'rank',icon:'⭐',name:'Centurio',desc:'Ranks for your total ⭐: Centurio 100, Tribunus 200, Legatus 300, Praefectus 500, Imperator 1,000, Consul 2,000, Optimus 5,000. After that, Augustus.',unit:'⭐',stat:()=>lbMe&&lbPlayers[lbMe.pid]?Math.max(0,+lbPlayers[lbMe.pid].total||0):0,lv:[100,200,300,500,1000,2000,5000],
   tiers:[{name:'Centurio',icon:'⭐'},{name:'Tribunus',icon:'⭐'},{name:'Legatus',icon:'⭐'},{name:'Praefectus',icon:'⭐'},{name:'Imperator',icon:'⭐'},{name:'Consul',icon:'⭐'},{name:'Optimus',icon:'💎'}]},
- {id:'augustus',icon:'🦅',name:'Augustus',lat:'the revered one',desc:'Carries on after Optimus: a new level for every 10,000 ⭐ in total.',unit:'⭐',inf:true,stat:()=>lbMe&&lbPlayers[lbMe.pid]?Math.max(0,+lbPlayers[lbMe.pid].total||0):0,lv:Array.from({length:5000},(_,i)=>(i+1)*10000)},
+ {id:'augustus',icon:'🦅',name:'Augustus',lat:'the revered one',desc:'Carries on after Optimus: a new level for every 5,000 ⭐ in total.',unit:'⭐',inf:true,stat:()=>lbMe&&lbPlayers[lbMe.pid]?Math.max(0,+lbPlayers[lbMe.pid].total||0):0,lv:Array.from({length:5000},(_,i)=>(i+1)*5000)},
  {id:'diesmagnus',icon:'☀️',name:'Dies Magnus',lat:'big day',desc:'Earn lots of ⭐ in a single day.',unit:'⭐ in a day',stat:()=>Math.max(bstat().bestDay||0,lbTodayPts()),lv:[50,100,200,300,500,750,1000]},
  {id:'diesingens',icon:'🌞',name:'Dies Ingens',lat:'huge day',desc:'A new level for every 1,000 ⭐ earned in a single day.',unit:'⭐ in a day',inf:true,stat:()=>Math.max(bstat().bestDay||0,lbTodayPts()),lv:Array.from({length:5000},(_,i)=>(i+1)*1000)},
  {id:'constans',icon:'🔥',name:'Constans',lat:'steady',desc:'Keep your 🔥 streak going: reach your daily goal several days in a row (or earn 20+ ⭐ a day).',unit:'day streak',stat:()=>Math.max(bstat().bestStreak||0,dailyStreak()),lv:[1,3,5,7,10,20,30]},
@@ -5149,8 +5149,8 @@ function bdArt(bd,l,size,extra){return badgeArt(bd.id,l,bd.inf?7:bd.lv?bd.lv.len
 function bdIcon(bd,l){return bd.tiers?bd.tiers[Math.max(0,(l||1)-1)].icon:bd.icon;}
 // the old separate points badges (centurio, legatus, imperator, optimus) became levels of one badge
 // older versions: separate rank badges, then 'gradus' with 4 levels (100/1k/10k/100k). Both become 'rank' (7 levels).
-const OLD_RANK={centurio:1,legatus:4,imperator:7,optimus:7,gradus:0};   // old thresholds 100 / 1,000 / 10,000 / 100,000
-function oldRankLv(id,l){return id==='gradus'?[0,1,4,7,7][Math.max(1,Math.min(4,+l||1))]:OLD_RANK[id];}
+const OLD_RANK={centurio:1,legatus:5,imperator:7,optimus:7,gradus:0};   // old thresholds 100 / 1,000 / 10,000 / 100,000
+function oldRankLv(id,l){return id==='gradus'?[0,1,5,7,7][Math.max(1,Math.min(4,+l||1))]:OLD_RANK[id];}
 let _bTimer=null;function badgeCheckSoon(){if(_bTimer)return;_bTimer=setTimeout(()=>{_bTimer=null;badgeCheck();},200);}
 // keep badges up to date without waiting for the next answer (points arriving, reactions on your messages, streaks…)
 setInterval(()=>{if(document.visibilityState==='visible')try{badgeCheck();}catch(e){}},8000);
