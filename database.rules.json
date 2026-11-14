@@ -379,7 +379,7 @@
         ".read": "auth != null",
         ".write": "auth != null && auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2'",
         "$b": {
-          ".validate": "newData.hasChildren(['l', 't']) && newData.child('l').isNumber() && newData.child('l').val() >= 0 && newData.child('l').val() <= 20"
+          ".validate": "newData.hasChildren(['l', 't']) && newData.child('l').isNumber() && newData.child('l').val() >= 0 && newData.child('l').val() <= 100000 && newData.child('l').val() % 1 === 0"
         }
       }
     },
