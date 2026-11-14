@@ -777,7 +777,7 @@ body:has(.overlay[style*="display: flex"]) .side-fab,body:has(#bReveal[style*="d
     <h1><em>Latin</em> Trainer</h1>
     <p class="sub">Vocabularium Latinum</p>
     <div style="margin-top:6px">
-      <span id="descText" class="desc-text"></span><button id="descEditBtn" class="desc-edit-btn" onclick="handleDescEdit()" title="Edit description">✎</button>
+      <span id="descText" class="desc-text"></span><button id="descEditBtn" class="desc-edit-btn" onclick="startDescEdit()" title="Edit description" style="display:none">✎</button>
     </div>
     <div id="descEditState" style="display:none;margin-top:8px">
       <textarea id="descEditArea" class="desc-ta" placeholder="Enter a description…"></textarea><br>
@@ -2199,26 +2199,6 @@ body:has(.overlay[style*="display: flex"]) .side-fab,body:has(#bReveal[style*="d
     <button class="about-close" onclick="hideThemePicker()">×</button>
     <div class="about-title">Theme</div>
     <div class="theme-picker" id="themePicker"></div>
-  </div>
-</div>
-
-<!-- ADMIN MODAL -->
-<div id="adminModal" class="overlay" style="display:none" onclick="hideAdminModal()">
-  <div class="about-box" style="text-align:left;max-width:320px" onclick="event.stopPropagation()">
-    <button class="about-close" onclick="hideAdminModal()">×</button>
-    <div class="about-title" style="text-align:center;margin-bottom:1.25rem">Admin login</div>
-    <div style="display:flex;flex-direction:column;gap:10px">
-      <div>
-        <div style="font-size:12px;color:var(--text3);margin-bottom:4px">Email</div>
-        <input id="adminUser" type="email" autocomplete="username" onkeydown="if(event.key==='Enter')checkAdminAuth()" style="width:100%;padding:8px 12px;border-radius:var(--rs);border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-family:var(--sans);font-size:13px;outline:none"/>
-      </div>
-      <div>
-        <div style="font-size:12px;color:var(--text3);margin-bottom:4px">Password</div>
-        <input id="adminPass" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')checkAdminAuth()" style="width:100%;padding:8px 12px;border-radius:var(--rs);border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-family:var(--sans);font-size:13px;outline:none"/>
-      </div>
-      <div id="adminErr" style="font-size:12px;color:var(--red);min-height:16px"></div>
-      <button class="btn-primary" id="adminLoginBtn" onclick="checkAdminAuth()">Login</button>
-    </div>
   </div>
 </div>
 
@@ -3728,31 +3708,11 @@ async function loadDescription(){
   }catch(e){}
 }
 
-function handleDescEdit(){
-  if(isAdmin){startDescEdit();return;}
-  const m=document.getElementById('adminModal');
-  m.style.display='flex';
-  document.getElementById('adminUser').value='';
-  document.getElementById('adminPass').value='';
-  document.getElementById('adminErr').textContent='';
-  document.getElementById('adminLoginBtn').disabled=false;
-  setTimeout(()=>document.getElementById('adminUser').focus(),50);
-}
-function hideAdminModal(){document.getElementById('adminModal').style.display='none';}
-async function checkAdminAuth(){
-  const u=document.getElementById('adminUser').value.trim();
-  const p=document.getElementById('adminPass').value;
-  const err=document.getElementById('adminErr'),btn=document.getElementById('adminLoginBtn');
-  if(!u||!p){err.textContent='Enter your email and password.';return;}
-  err.textContent='';btn.disabled=true;
-  try{
-    const a=authFrom(await authPost('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword',{email:u,password:p,returnSecureToken:true}));
-    if(a.uid!==ADMIN_UID){err.textContent='That account isn’t the admin.';return;}
-    adminAuth=a;isAdmin=true;hideAdminModal();startDescEdit();setTimeout(()=>atagLoad(true).then(()=>adminPlayers()),0);setTimeout(()=>{try{srvAdminSetup();}catch(e){}},1500);setTimeout(()=>{chatPurgeHidden().catch(()=>{});sxAdminTidy().catch(()=>{});claimsClear();duelsTidy(true);},4000);
-    renderLb();renderChat();
-  }catch(e){err.textContent=/TOO_MANY/.test(e.message)?'Too many attempts. Wait a few minutes and try again.':/INVALID|EMAIL|PASSWORD|USER_DISABLED/.test(e.message)?'Incorrect email or password.':'Couldn’t reach the server. Check your internet.';}
-  finally{btn.disabled=false;}
-}
+// Admin mode is switched on only from admin.html (after its password check). The main site has no admin login.
+function adminStart(a){if(!a||a.uid!==ADMIN_UID)return false;adminAuth=a;isAdmin=true;startDescEdit();
+  setTimeout(()=>atagLoad(true).then(()=>adminPlayers()),0);setTimeout(()=>{try{srvAdminSetup();}catch(e){}},1500);
+  setTimeout(()=>{chatPurgeHidden().catch(()=>{});sxAdminTidy().catch(()=>{});claimsClear();duelsTidy(true);bfeedTidy();},4000);
+  renderLb();renderChat();return true;}
 function startDescEdit(){
   document.getElementById('descText').style.display='none';
   document.getElementById('descEditBtn').style.display='none';
@@ -3771,7 +3731,7 @@ async function saveDesc(){
 }
 function cancelDescEdit(){
   document.getElementById('descText').style.display='';
-  document.getElementById('descEditBtn').style.display='';
+  document.getElementById('descEditBtn').style.display=isAdmin?'':'none';
   document.getElementById('descEditState').style.display='none';
 }
 
@@ -4623,7 +4583,7 @@ async function showPointsHistory(pid,box){box.innerHTML='<p class="muted">Loadin
 // admin: see a player's badges (from their cloud save) and give / take them away. An override sets the badge to exactly
 // that level (0 = removed) until it's set back to "auto"; the player's app applies it next time it checks.
 // which version of database.rules.json is live? Each check is a harmless read that only works with a given update.
-async function rulesCheck(){const T=[['Secret badges: admin give / take away (11 Nov)','sx/key'],['Member tags (11 Nov)','atag'],['Account merging (10 Nov)','mlog'],['Points history + negative scores (9 Nov)','plog']];const out=[];let ok=0;
+async function rulesCheck(){const T=[['Admin page password (14 Nov)','avault'],['Public leaderboard (13 Nov)','pub'],['Secret badges: admin give / take away (11 Nov)','sx/key'],['Member tags (11 Nov)','atag'],['Account merging (10 Nov)','mlog'],['Points history + negative scores (9 Nov)','plog']];const out=[];let ok=0;
   for(const [label,path] of T){let r;try{await fbReq('GET',path,null,{admin:true,query:'?shallow=true'});r=true;ok++;}catch(e){r=/40[13]/.test(e.message)?false:null;}out.push((r?'✔ ':r===false?'✖ ':'? ')+label);}
   alert((ok===T.length?'✔ Your live database rules are up to date.':'✖ Your live database rules are OLD. Publish the latest database.rules.json (Firebase → Realtime Database → Rules → paste it all → Publish).')+'\n\n'+out.join('\n')+(out.some(x=>x[0]==='?')?'\n\n? = couldn’t check (offline?)':''));}
 async function premList(){let r;try{r=(await fbReq('GET','prem',null,{admin:true}))||{};}catch(e){alert('Couldn’t load it ('+e.message+').');return;}

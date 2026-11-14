@@ -607,6 +607,11 @@
         }
       }
     },
+    "avault": {
+      ".read": true,
+      ".write": "auth != null && auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2'",
+      ".validate": "newData.hasChildren(['s', 'iv', 'c', 'it']) && newData.child('c').isString() && newData.child('c').val().length <= 4000"
+    },
     "pub": {
       ".read": "auth != null",
       "$uid": {
