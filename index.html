@@ -422,6 +422,10 @@ input[type=range]{flex:1;accent-color:var(--accent)}
 .chat-form{display:flex;gap:6px;padding:10px 14px;border-top:1px solid var(--border)}
 .chat-m{position:relative;border-radius:6px;padding:2px 4px;margin:0 -4px;transition:background .3s}
 .chat-m.flash{background:var(--accent-bg)}
+.chat-at{color:var(--accent);font-weight:600;cursor:pointer;border-radius:4px;padding:0 2px;background:color-mix(in srgb,var(--accent) 12%,transparent)}.chat-at.me{color:#fff;background:color-mix(in srgb,var(--accent) 55%,transparent)}
+.chat-m.ping{background:color-mix(in srgb,var(--accent) 10%,transparent);box-shadow:inset 3px 0 0 var(--accent)}
+.chat-form{position:relative}.at-menu{position:absolute;left:14px;right:14px;bottom:calc(100% - 4px);background:var(--surface);border:1px solid var(--border2);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.35);padding:4px;z-index:30;display:none;max-height:220px;overflow:auto}
+.at-item{display:flex;gap:8px;align-items:baseline;width:100%;text-align:left;background:none;border:0;border-radius:7px;padding:6px 8px;color:var(--text);font:inherit;font-size:13px;cursor:pointer}.at-item b{color:var(--accent)}.at-item span{color:var(--text3);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.at-item.on,.at-item:hover{background:var(--surface2)}
 .dt-term{display:block;font-size:9px;color:var(--text3);letter-spacing:.04em;text-transform:none}
 .dt-pair{display:flex;flex-direction:column;white-space:normal;max-width:96px;line-height:1.25}body.terms .dt-pair{flex-direction:column-reverse}body.terms .dt-term{font-size:inherit;color:inherit;letter-spacing:inherit}body.terms .dt-word{display:block;font-size:9px;color:var(--text3)}
 .chat-edited{font-size:10px;color:var(--text3);font-style:italic}
@@ -4266,7 +4270,7 @@ const lbVisible=pid=>(!lbHidden.has(pid)&&lbEnough(pid)&&isPublic(pid))||seesPid
 const CHAT_MIN_PTS=0;
 function updChatInput(){const ci=document.getElementById('chatInput'),cs=document.getElementById('chatSend');if(!ci)return;const pts=lbMyPoints(),short=!!lbMe&&pts<CHAT_MIN_PTS;
   const unappr=!!lbMe&&!isPublic(lbMe.pid);ci.disabled=cs.disabled=!lbMe||chatMuted||short||unappr;
-  ci.placeholder=!lbMe?'Join above to chat':chatMuted?'The admin has blocked you from sending messages':short?'Earn '+CHAT_MIN_PTS+' ⭐ to unlock chat ('+(CHAT_MIN_PTS-pts)+' to go)':unappr?'Chat unlocks once the admin approves you':'Message everyone…';}
+  ci.placeholder=!lbMe?'Join above to chat':chatMuted?'The admin has blocked you from sending messages':short?'Earn '+CHAT_MIN_PTS+' ⭐ to unlock chat ('+(CHAT_MIN_PTS-pts)+' to go)':unappr?'Chat unlocks once the admin approves you':'Message everyone… (type @ to mention someone)';}
 function setChatMuted(m){chatMuted=false;}
 async function lbSaveName(raw){const name=lbCleanName(raw);{const blk=await sxName(name,lbMe&&lbMe.name);if(blk){renderLbProfile(blk,true);return;}}const err=lbNameError(name);if(err){renderLbProfile(err,true);return;}
   if(!lbMe&&!isAdmin&&!(await verifyReady())){verifyOpen(name);return;}   // joining needs an email you can receive (keeps bots out)
@@ -4725,11 +4729,38 @@ async function toggleReact(id,k){if(!lbMe)return;if(!isPublic(lbMe.pid)){toast('
 // Chat
 function chatTime(t){if(!t)return '';const d=new Date(t),now=new Date();const hm=d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});return d.toDateString()===now.toDateString()?hm:d.toLocaleDateString([],{day:'numeric',month:'short'})+' '+hm;}
 let chatLoaded=false;
-function renderChat(){const list=document.getElementById('chatList');if(!list||!chatLoaded)return;const atBottom=list.scrollHeight-list.scrollTop-list.clientHeight<40;list.innerHTML='';
+// ── @mentions: @ + a member tag. Tags can have spaces, so the longest tag that fits wins.
+const AT_SEEN_KEY='latin_at_seen';let atSeen=(()=>{let v=0;try{v=+localStorage.getItem(AT_SEEN_KEY)||0;if(!v){v=Date.now()-60000;localStorage.setItem(AT_SEEN_KEY,String(v));}}catch(e){v=Date.now()-60000;}return v;})(),atNew=[];
+function atTags(){const out=[];Object.entries(ATAG||{}).forEach(([pid,t])=>{if(typeof t!=='string'||!t.trim()||!chatVisible(pid)||!lbPlayers[pidMain(pid)])return;out.push({pid,tag:t.trim()});});return out.sort((a,b)=>b.tag.length-a.tag.length);}
+function myTag(){const t=lbMe&&(ATAG||{})[lbMe.pid];return typeof t==='string'&&t.trim()?t.trim().toLowerCase():null;}
+// writes the message into el (as text, never HTML); mentions become highlighted spans. Returns true if it mentions me.
+function chatFillText(el,text){const tags=atTags(),me=myTag();let i=0,last=0,hit=false;const low=text.toLowerCase();
+  while((i=text.indexOf('@',i))>=0){const prev=i?text[i-1]:' ';let m=null;if(!/[A-Za-z0-9]/.test(prev))for(const t of tags){const L=t.tag.length;if(low.startsWith(t.tag.toLowerCase(),i+1)&&!/[A-Za-z0-9]/.test(text[i+1+L]||' ')){m=t;break;}}
+    if(!m){i++;continue;}if(i>last)el.appendChild(document.createTextNode(text.slice(last,i)));const sp=document.createElement('span');const mine=me&&m.tag.toLowerCase()===me;if(mine)hit=true;
+    sp.className='chat-at'+(mine?' me':'');sp.textContent='@'+m.tag;sp.title=lbName(m.pid);sp.onclick=()=>openPlayerCard(m.pid);el.appendChild(sp);i+=1+m.tag.length;last=i;}
+  if(last<text.length)el.appendChild(document.createTextNode(text.slice(last)));return hit;}
+function atNotify(){if(!atNew.length)return;const mx=Math.max(...atNew.map(m=>+m.t||0));const list=atNew;atNew=[];atSeen=Math.max(atSeen,mx);try{localStorage.setItem(AT_SEEN_KEY,String(atSeen));}catch(e){}
+  const m=list[list.length-1];toast('💬 '+lbName(m.pid)+' mentioned you: '+chatSnippet(m.text));try{playTone&&playTone(true);}catch(e){}}
+// autocomplete while typing @…
+let atMenu=null,atSel=0,atItems=[];
+function atQuery(){const inp=document.getElementById('chatInput');if(!inp)return null;const pos=inp.selectionStart||0,before=inp.value.slice(0,pos),k=before.lastIndexOf('@');if(k<0)return null;if(k>0&&/[A-Za-z0-9]/.test(before[k-1]))return null;const q=before.slice(k+1);if(q.length>40||/^\s/.test(q))return null;return {k,q,pos};}
+function atClose(){if(atMenu)atMenu.style.display='none';atItems=[];}
+function atUpdate(){const a=atQuery();if(!a||!lbMe){atClose();return;}const q=a.q.toLowerCase();
+  atItems=atTags().filter(t=>t.pid!==lbMe.pid&&(t.tag.toLowerCase().startsWith(q)||(q.length>=2&&(t.tag.toLowerCase().includes(q)||String(lbName(t.pid)).toLowerCase().includes(q))))).sort((x,y)=>(y.tag.toLowerCase().startsWith(q)-x.tag.toLowerCase().startsWith(q))||x.tag.localeCompare(y.tag)).slice(0,6);
+  if(!atItems.length){atClose();return;}if(!atMenu){atMenu=document.createElement('div');atMenu.className='at-menu';document.querySelector('.chat-form').appendChild(atMenu);}
+  atSel=Math.min(atSel,atItems.length-1);atMenu.innerHTML='';atItems.forEach((t,i)=>{const b=document.createElement('button');b.type='button';b.className='at-item'+(i===atSel?' on':'');const tg=document.createElement('b');tg.textContent='@'+t.tag;const nm=document.createElement('span');nm.textContent=lbName(t.pid);b.append(tg,nm);
+    b.onmousedown=e=>{e.preventDefault();atPick(i);};atMenu.appendChild(b);});atMenu.style.display='block';}
+function atPick(i){const t=atItems[i],a=atQuery(),inp=document.getElementById('chatInput');if(!t||!a)return;const ins='@'+t.tag+' ';inp.value=(inp.value.slice(0,a.k)+ins+inp.value.slice(a.pos)).slice(0,300);const c=Math.min(a.k+ins.length,inp.value.length);inp.setSelectionRange(c,c);inp.focus();atClose();}
+(function(){const go=()=>{const inp=document.getElementById('chatInput');if(!inp)return setTimeout(go,300);
+  inp.addEventListener('input',()=>{atSel=0;atUpdate();});inp.addEventListener('click',atUpdate);inp.addEventListener('blur',()=>setTimeout(atClose,150));
+  inp.addEventListener('keydown',e=>{if(!atItems.length||!atMenu||atMenu.style.display==='none')return;
+    if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();atSel=(atSel+(e.key==='ArrowDown'?1:atItems.length-1))%atItems.length;atUpdate();}
+    else if(e.key==='Enter'||e.key==='Tab'){e.preventDefault();atPick(atSel);}else if(e.key==='Escape'){e.preventDefault();atClose();}});};go();})();
+function renderChat(){const list=document.getElementById('chatList');if(!list||!chatLoaded)return;const atBottom=list.scrollHeight-list.scrollTop-list.clientHeight<40;list.innerHTML='';atNew=[];
   if(!chatMsgs.length){list.innerHTML='<div class="lb-empty">No messages yet. Say salve!</div>';return;}
   chatMsgs.forEach(m=>{if(!m||typeof m.text!=='string'||!chatVisible(m.pid))return;const el=document.createElement('div');el.className='chat-m'+(lbMe&&m.pid===lbMe.pid?' me':'');if(isAdmin&&mutedSet.has(m.pid)){el.style.opacity='.55';el.title='Hidden from everyone else';}
     const who=document.createElement('span');who.className='chat-who';who.appendChild(nameEl(m.pid,lbName(m.pid)));
-    const tx=document.createElement('span');tx.textContent=m.text;
+    const tx=document.createElement('span');const pinged=chatFillText(tx,m.text);if(pinged&&lbMe&&m.pid!==lbMe.pid){el.classList.add('ping');if(+m.t>atSeen)atNew.push(m);}
     const tm=document.createElement('span');tm.className='chat-time';tm.textContent=chatTime(m.t);
     el.id='cm_'+m.id;
     // A reply shows a short quote of the message it answers (click it to jump there).
@@ -4747,7 +4778,7 @@ function renderChat(){const list=document.getElementById('chatList');if(!list||!
     if(isAdmin){const ed=document.createElement('button');ed.className='lb-act';ed.title='Edit message';ed.textContent='✎';ed.onclick=()=>adminEditMsg(m.id);el.appendChild(ed);}
     if(isAdmin){const d=document.createElement('button');d.className='lb-act del';d.title='Delete message';d.textContent='×';d.onclick=async()=>{try{await fbReq('DELETE','chat/'+m.id,null,{admin:true});}catch(e){alert('Couldn’t delete: '+e.message);}};el.appendChild(d);}
     list.appendChild(el);});
-  if(atBottom||list.dataset.first!=='1'){list.scrollTop=list.scrollHeight;list.dataset.first='1';}}
+  if(atBottom||list.dataset.first!=='1'){list.scrollTop=list.scrollHeight;list.dataset.first='1';}atNotify();}
 async function sendChat(){const inp=document.getElementById('chatInput'),err=document.getElementById('chatErr');const text=inp.value.replace(/\s+/g,' ').trim();err.textContent='';
   if(!lbMe||!text)return;if(Date.now()-chatLastSend<3000){err.textContent='Slow down a little!';return;}
   if(lbMyPoints()<CHAT_MIN_PTS){err.textContent='Earn '+CHAT_MIN_PTS+' ⭐ to unlock chat.';return;}
