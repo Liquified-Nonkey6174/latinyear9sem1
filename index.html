@@ -5056,7 +5056,7 @@ const BADGES=[
  {id:'augustus',icon:'🦅',name:'Augustus',lat:'the revered one',desc:'Carries on after Optimus: a new level for every 5,000 ⭐ in total.',unit:'⭐',inf:true,stat:()=>lbMe&&lbPlayers[lbMe.pid]?Math.max(0,+lbPlayers[lbMe.pid].total||0):0,lv:Array.from({length:5000},(_,i)=>(i+1)*5000)},
  {id:'diesmagnus',icon:'☀️',name:'Dies Magnus',lat:'big day',desc:'Earn lots of ⭐ in a single day.',unit:'⭐ in a day',stat:()=>Math.max(bstat().bestDay||0,lbTodayPts()),lv:[50,100,200,300,500,750,1000]},
  {id:'diesingens',icon:'🌞',name:'Dies Ingens',lat:'huge day',desc:'A new level for every 1,000 ⭐ earned in a single day.',unit:'⭐ in a day',inf:true,stat:()=>Math.max(bstat().bestDay||0,lbTodayPts()),lv:Array.from({length:5000},(_,i)=>(i+1)*1000)},
- {id:'constans',icon:'🔥',name:'Constans',lat:'steady',desc:'Keep your 🔥 streak going: reach your daily goal several days in a row (or earn 20+ ⭐ a day).',unit:'day streak',stat:()=>Math.max(bstat().bestStreak||0,dailyStreak()),lv:[1,3,5,7,10,20,30]},
+ {id:'constans',icon:'🔥',name:'Constans',lat:'steady',desc:'Keep your 🔥 streak going: reach your daily goal several days in a row (or earn 20+ ⭐ a day).',unit:'day streak',stat:()=>Math.max(bstat().bestStreak||0,dailyStreak()),lv:[1,2,3,5,7,10,14]},
  {id:'matutinus',icon:'🌅',name:'Matutinus',lat:'early riser',desc:'Get a question right before 8 am.',stat:()=>bstat().early||0,lv:[1]},
  {id:'nocturnus',icon:'🦉',name:'Nocturnus',lat:'night owl',desc:'Get a question right after 8 pm.',stat:()=>bstat().late||0,lv:[1]},
  {id:'sineerrore',icon:'🎯',name:'Sine Errore',lat:'without error',desc:'Get questions right in a row (any type).',unit:'in a row',stat:()=>bstat().bestRun||0,lv:[10,20,30,50,100,200,300]},
