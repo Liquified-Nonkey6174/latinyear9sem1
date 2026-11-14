@@ -4375,7 +4375,7 @@ async function lbStart(){let ok=null;for(let i=0;i<6&&ok===null;i++){try{await f
     fbStream('players','',(path,data,isPatch)=>{const wasLoaded=lbPlayersLoaded;lbPlayers=applyAt(lbPlayers,path,data,isPatch);lbAfter(lbMe&&(path==='/'+lbMe.pid||(path==='/'&&wasLoaded)));},lbStreamFail);return;}
   lbPubMode=true;await ownRefresh();
   fbStream('pub','',(path,data,isPatch)=>{lbPubData=applyAt(lbPubData,path,data,isPatch)||{};lbRebuild();lbAfter(false);},lbStreamFail);
-  if(amAdminUid())adminPlayers();}
+  if(amAdminUid()){adminPlayers();setTimeout(bfeedTidy,5000);}}
 // my own entry (the public copy may not include me, or may lag)
 async function ownRefresh(){if(!lbPubMode||!lbMe||!playerAuth||lbMe.pid!==playerAuth.uid)return;const had=!!lbOwn;let r;try{r=await fbReq('GET','players/'+lbMe.pid);}catch(e){return;}
   lbOwn=r&&r.name?r:null;lbRebuild();lbAfter(had&&!lbOwn);pubSync();}
@@ -5136,7 +5136,18 @@ function badgeLevel(bd,v){let l=0;bd.lv.forEach((t,i)=>{if(v>=t)l=i+1;});return 
 function badgeTierName(bd,l){if(bd.tiers)return bd.tiers[Math.max(0,l-1)].name+' '+romanN(Math.max(1,l));return bd.lv.length>1?bd.name+' '+romanN(l):bd.name;}
 // ── BADGE FEED: everyone's new badges (secret ones only say "their nth secret badge") ──
 function badgeFeedPost(fresh,nSecret){if(!lbMe||!isPublic(lbMe.pid))return;let secretK=nSecret-fresh.filter(f=>f.bd.secret&&f.first).length;
-  fresh.slice(0,4).forEach(f=>{const e=f.bd.secret?(f.first?{pid:lbMe.pid,b:'?',k:++secretK}:null):{pid:lbMe.pid,b:f.bd.id,l:f.l};if(e)fbReq('POST','bfeed',{...e,t:{'.sv':'timestamp'}}).catch(()=>{});});}
+  let posted={};try{posted=JSON.parse(localStorage.getItem('latin_bfeed_posted')||'{}')||{};}catch(e){}
+  fresh.slice(0,4).forEach(f=>{const e=f.bd.secret?(f.first?{pid:lbMe.pid,b:'?',k:++secretK}:null):{pid:lbMe.pid,b:f.bd.id,l:f.l};if(!e)return;
+    // never announce the same badge level twice from this device (a level that drops and comes back isn't news)
+    const key=lbMe.pid+'|'+e.b+'|'+(e.b==='?'?e.k:'');if(e.b!=='?'&&(+posted[key]||0)>=e.l)return;if(e.b==='?'&&posted[key])return;posted[key]=e.b==='?'?1:e.l;
+    fbReq('POST','bfeed',{...e,t:{'.sv':'timestamp'}}).catch(()=>{});});
+  try{localStorage.setItem('latin_bfeed_posted',JSON.stringify(posted));}catch(e){}}
+// the same player + badge + level shown once (the earliest)
+function bfeedDedupe(list){const seen=new Set(),out=[];list.slice().sort((a,b)=>(a.t||0)-(b.t||0)).forEach(v=>{const k=v.pid+'|'+v.b+'|'+(v.b==='?'?v.k:v.l);if(seen.has(k))return;seen.add(k);out.push(v);});return out.sort((a,b)=>(b.t||0)-(a.t||0));}
+// admin: delete repeated feed entries from the database
+async function bfeedTidy(){if(!amAdminUid())return;const O=isAdmin?{admin:true}:{};try{const r=await fbReq('GET','bfeed',null,{...O,query:'?orderBy=%22$key%22&limitToLast=400'});const all=Object.entries(safeKeys(r)).map(([id,v])=>({id,...v})).filter(v=>v&&v.pid&&v.b);
+  const keep=new Set(bfeedDedupe(all).map(v=>v.id)),body={};all.forEach(v=>{if(!keep.has(v.id))body['bfeed/'+v.id]=null;});const ks=Object.keys(body);
+  for(let i=0;i<ks.length;i+=100){const part={};ks.slice(i,i+100).forEach(k=>part[k]=null);await fbReq('PATCH','',part,O);}return ks.length;}catch(e){return 0;}}
 let bfeed=[],bfeedTab='mine',bfeedAt=0;
 function badgeFeedText(e){if(!lbPlayers[e.pid]&&MTO[e.pid])e={...e,pid:pidMain(e.pid)};const name=(lbPlayers[e.pid]&&lbPlayers[e.pid].name)||'Someone';
   if(e.b==='?')return {name,what:'found their '+ordinal(+e.k||1)+' secret badge',art:badgeArt('unknown',0,1,{secret:true,size:30})};
@@ -5144,7 +5155,7 @@ function badgeFeedText(e){if(!lbPlayers[e.pid]&&MTO[e.pid])e={...e,pid:pidMain(e
   const bd=BADGES.find(x=>x.id===e.b)||META_BADGES.find(x=>x.id===e.b);if(!bd)return null;
   const l=+e.l||1,nm=bd.meta?bd.name:badgeTierName(bd,l);return {name,what:(l>1&&!bd.meta?'reached ':'earned ')+nm,art:bd.meta?badgeArt(bd.id,1,1,{meta:true,size:30}):bdArt(bd,l,30)};}
 async function loadBadgeFeed(force){if(!force&&Date.now()-bfeedAt<20000)return renderBadgeFeed();const box=document.getElementById('bfeedList');if(box&&!bfeed.length)box.innerHTML='<p class="bfeed-empty">Loading…</p>';
-  try{const r=await fbReq('GET','bfeed',null,{query:'?orderBy=%22$key%22&limitToLast=80'});bfeed=Object.entries(safeKeys(r)).map(([id,v])=>({id,...v})).filter(v=>v&&v.pid&&v.b).sort((a,b)=>(b.t||0)-(a.t||0));bfeedAt=Date.now();}
+  try{const r=await fbReq('GET','bfeed',null,{query:'?orderBy=%22$key%22&limitToLast=200'});bfeed=bfeedDedupe(Object.entries(safeKeys(r)).map(([id,v])=>({id,...v})).filter(v=>v&&v.pid&&v.b)).slice(0,80);bfeedAt=Date.now();}
   catch(e){if(box)box.innerHTML='<p class="bfeed-empty">Couldn’t load the badge feed'+(/40[13]/.test(e.message)?' (the database rules need updating).':'. Check your internet.')+'</p>';return;}renderBadgeFeed();}
 const BF_SEEN='latin_bfeed_seen';
 function bfeedSeen(){try{return +localStorage.getItem(BF_SEEN)||0;}catch(e){return 0;}}
@@ -5227,7 +5238,7 @@ function badgeCheck(){secretWipe();try{verLoad();}catch(e){}const got=bjson(BADG
   if(sm)META_BADGES.forEach(bd=>{if(bd.meta!=='count')return;const v=metaValue(bd,got),old=got[bd.id]?got[bd.id].l:0;if(v!==old){if(v)got[bd.id]={l:v,t:got[bd.id]?got[bd.id].t:Date.now()};else delete got[bd.id];changed=true;if(v>old)toast('🗝️ Arcana: '+v+' secret badge'+(v===1?'':'s')+' found!');}});
   if(!sm)META_BADGES.forEach(bd=>{const v=metaValue(bd,got),old=got[bd.id]?got[bd.id].l:0;if(v>old){got[bd.id]={l:v,t:Date.now()};changed=true;if(bd.meta!=='count')fresh.push({bd,l:v,first:!old});else toast('🗝️ Arcana: '+v+' secret badge'+(v===1?'':'s')+' found!');}});
   // anything the server can check must match it: changes made only on this screen are undone
-  if(lbMe&&lbPlayers[lbMe.pid]){const rb=badgeById('rank'),mx=badgeLevel(rb,Math.max(0,+lbPlayers[lbMe.pid].total||0)),base=+b['base_rank']||0,lim=badgeLevel(rb,Math.max(0,(+lbPlayers[lbMe.pid].total||0)-base));
+  if(!(sm&&srvOn())&&lbMe&&lbPlayers[lbMe.pid]){const rb=badgeById('rank'),mx=badgeLevel(rb,Math.max(0,+lbPlayers[lbMe.pid].total||0)),base=+b['base_rank']||0,lim=badgeLevel(rb,Math.max(0,(+lbPlayers[lbMe.pid].total||0)-base));
     const cap=BGRANT&&BGRANT.rank&&+BGRANT.rank.l?Math.max(lim,+BGRANT.rank.l):mx;if(got.rank&&got.rank.l>cap){if(cap>0)got.rank.l=cap;else delete got.rank;changed=true;}}
   if(atagLoaded&&got.socius&&!(lbMe&&(ATAG||{})[lbMe.pid])&&!(BGRANT&&BGRANT.socius&&+BGRANT.socius.l)){delete got.socius;changed=true;}
   // a secret badge only leaves this device when the admin removed it (after it was earned); a failed or partial server check never wipes them
