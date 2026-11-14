@@ -705,6 +705,13 @@ body:has(.overlay[style*="display: flex"]) .side-fab,body:has(#bReveal[style*="d
 .badge-card.earned.grand1,.badge-card.earned.grand2{border-color:rgba(230,180,34,.55)}
 .badge-card.earned.grand3{border-color:#e6b422;box-shadow:0 0 0 1px rgba(230,180,34,.35),0 0 18px rgba(255,213,74,.35);background:linear-gradient(180deg,rgba(255,213,74,.10),transparent 70%)}
 .badge-card.earned.grand4{border-color:#8fe6ff;box-shadow:0 0 0 1px rgba(143,230,255,.4),0 0 22px rgba(143,230,255,.4),0 0 40px rgba(168,107,255,.25);background:linear-gradient(180deg,rgba(143,230,255,.12),rgba(168,107,255,.08) 60%,transparent)}
+.ba-spin{animation:baSpin 22s linear infinite;transform-origin:50px 50px;transform-box:view-box}.ba-spin.slow{animation-duration:40s;animation-direction:reverse}@keyframes baSpin{to{transform:rotate(360deg)}}
+.badge-card.legend{position:relative;overflow:hidden}.badge-card.legend.locked{border-color:rgba(224,176,48,.35)}
+.badge-card.earned.legend-sun{border-color:#ffb020;box-shadow:0 0 0 1px rgba(255,176,32,.5),0 0 26px rgba(255,130,0,.4);background:radial-gradient(circle at 50% 20%,rgba(255,170,30,.22),transparent 68%),var(--surface)}
+.badge-card.earned.legend-imp{border-color:#e0b030;box-shadow:0 0 0 1px rgba(224,176,48,.5),0 0 26px rgba(194,24,91,.4);background:radial-gradient(circle at 50% 20%,rgba(194,24,91,.25),transparent 68%),var(--surface)}
+.badge-card.earned.legend-sun .bd-name{background:linear-gradient(90deg,#fff1a8,#ffb020,#ff6a00,#ffb020,#fff1a8);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:epFlow 4s linear infinite;font-size:15px}
+.badge-card.earned.legend-imp .bd-name{background:linear-gradient(90deg,#fff1b8,#e0b030,#ff5c8a,#e0b030,#fff1b8);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:epFlow 4s linear infinite;font-size:15px}
+.badge-card.earned.legend::before{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.14) 48%,transparent 60%);transform:translateX(-100%);animation:epShine 4.5s ease-in-out infinite;pointer-events:none}
 .badge-card.earned.grand3 .bd-name{color:#ffd54a}.badge-card.earned.grand4 .bd-name{background:linear-gradient(90deg,#bff3ff,#d6b8ff);-webkit-background-clip:text;background-clip:text;color:transparent}@keyframes baHue{to{filter:hue-rotate(360deg)}}
 .badge-card.locked .bd-art{filter:none;opacity:1}
 .lb-name.has-chips{flex-direction:column;align-items:flex-start;gap:3px;padding:5px 0 7px;margin:-3px 0 -5px}
@@ -4831,7 +4838,7 @@ const S={
  scriptor:'<path d="M66 24 C50 30 40 44 36 66 L34 76 M36 66 C48 60 58 50 66 24 M44 52 L54 44 M40 60 L49 54"/><path d="M30 78 H62"/>',
  gradus:'<path d="M50 24 l7.6 15.4 17 2.5 -12.3 12 2.9 16.9 -15.2 -8 -15.2 8 2.9 -16.9 -12.3 -12 17 -2.5z"/>',
  gradus4:'<path d="M50 24 L70 42 L50 78 L30 42 Z M30 42 H70 M42 42 L50 78 L58 42 M40 24 H60 M40 24 L36 42 M60 24 L64 42 M50 24 L44 42 M50 24 L56 42"/>',
- augustus:'<path d="M50 30 L56 42 L70 38 L62 50 L72 60 L58 60 L50 72 L42 60 L28 60 L38 50 L30 38 L44 42 Z"/><circle cx="50" cy="52" r="5"/>',
+ augustus:'<path class="f" d="M50 38 C44 33 34 30 18 32 C24 36 28 39 31 43 C25 43 21 46 19 50 C27 48 33 48 38 50 C33 52 30 55 29 59 C36 55 42 54 46 55 Z"/><path class="f" d="M50 38 C56 33 66 30 82 32 C76 36 72 39 69 43 C75 43 79 46 81 50 C73 48 67 48 62 50 C67 52 70 55 71 59 C64 55 58 54 54 55 Z"/><path class="f" d="M45 40 C45 34 47 30 50 28 C53 30 55 34 55 40 L56 58 L60 70 L50 66 L40 70 L44 58 Z"/><circle class="f" cx="50" cy="25" r="5"/><path d="M50 25 L57 27"/>',
  diesingens:'<circle cx="50" cy="50" r="15"/><path d="M50 20 V29 M50 71 V80 M20 50 H29 M71 50 H80 M28.8 28.8 L35.2 35.2 M64.8 64.8 L71.2 71.2 M28.8 71.2 L35.2 64.8 M64.8 35.2 L71.2 28.8"/><circle cx="50" cy="50" r="7"/>',
  diesmagnus:'<circle cx="50" cy="50" r="12"/><path d="M50 24 V30 M50 70 V76 M24 50 H30 M70 50 H76 M31.6 31.6 L35.8 35.8 M64.2 64.2 L68.4 68.4 M31.6 68.4 L35.8 64.2 M64.2 35.8 L68.4 31.6"/>',
  constans:'<path d="M50 22 C58 34 68 42 66 58 C65 70 57 78 50 78 C43 78 35 70 34 58 C33 48 40 42 42 34 C45 42 48 44 50 44 C52 38 51 30 50 22 Z M50 78 C45 76 42 70 44 63 C46 57 50 56 50 50 C54 56 58 60 57 66 C56 73 53 77 50 78"/>',
@@ -4866,10 +4873,10 @@ function romanN(n){n=Math.floor(+n||0);if(n<1)return '';if(n>3999)return n.toLoc
 (function(root){
 // rim metals: [light, mid, dark, ribbon text]
 const METALS={bronze:['#ffd2a1','#c07a3a','#5e3110','#2a1406'],silver:['#ffffff','#bfc8d2','#59626c','#1c2228'],gold:['#fff4b8','#e6b422','#7a4f00','#2b1c00'],
-  diamond:['#f0fdff','#86e0ff','#1f6a99','#062236'],obsidian:['#fbf0ff','#d08cff','#7b2cbf','#1a0b2e'],rainbow:['#ffffff','#ff7ad9','#5b2a86','#2b1c00'],royal:['#fff0b8','#d9ae4c','#6b4a10','#2b1c00'],locked:['#a5a5a5','#727272','#3a3a3a','#1c1c1c']};
+  diamond:['#f0fdff','#86e0ff','#1f6a99','#062236'],obsidian:['#fbf0ff','#d08cff','#7b2cbf','#1a0b2e'],rainbow:['#ffffff','#ff7ad9','#5b2a86','#2b1c00'],royal:['#fff0b8','#d9ae4c','#6b4a10','#2b1c00'],solar:['#fff7c4','#ffb020','#b33c00','#2b1000'],imperial:['#fff1b8','#e0b030','#6e0b26','#1a0006'],locked:['#a5a5a5','#727272','#3a3a3a','#1c1c1c']};
 // enamel (face) colours per badge: [light, dark]
 const ENAMEL={inscriptus:['#2f6f8a','#0f2a38'],salve:['#3f7a5a','#163a27'],primus:['#8a2d2d','#3c0f0f'],scriptor:['#2f5a8a','#0f2440'],gradus:['#7a1f2b','#2e0710'],
-  diesmagnus:['#b5651d','#4a2306'],diesingens:['#d98a14','#5a2a00'],augustus:['#7a1f2b','#2a0509'],constans:['#a33a17','#3d1205'],matutinus:['#c27a3a','#4d2a0c'],nocturnus:['#28336e','#0b1030'],
+  diesmagnus:['#b5651d','#4a2306'],diesingens:['#ff9a1f','#7a2200'],augustus:['#8a1538','#2a0420'],constans:['#a33a17','#3d1205'],matutinus:['#c27a3a','#4d2a0c'],nocturnus:['#28336e','#0b1030'],
   sineerrore:['#1f6b6b','#072a2a'],perfectus:['#5c2a7a','#220b33'],lexicon:['#9a6a24','#3a2408'],lexiconmagnus:['#5f8f2a','#1d3a08'],
   doctus:['#1f7fc0','#05284a'],doctissimus:['#6a3ad0','#1a0750'],gladiator:['#6b1f1f','#2a0707'],victor:['#2a6b3a','#0b2a13'],
   invictus:['#2a3f6b','#0b152a'],rival:['#6b4a1f','#2a1a07'],popularis:['#8a2a55','#350a20'],socius:['#b07a1f','#3d2605'],civis:['#6b1f2a','#2a070d'],
@@ -4878,7 +4885,7 @@ const ENAMEL={inscriptus:['#2f6f8a','#0f2a38'],salve:['#3f7a5a','#163a27'],primu
 const SHAPE={gradus:'burst',diesmagnus:'hex',diesingens:'burst',augustus:'shield',constans:'hex',matutinus:'hex',nocturnus:'hex',sineerrore:'oct',perfectus:'oct',
   lexicon:'shield',lexiconmagnus:'shield',doctus:'shield',doctissimus:'shield',gladiator:'shield',victor:'shield',invictus:'shield',rival:'shield',
   popularis:'rosette',civis:'rosette',salve:'rosette',scriptor:'rosette',primus:'circle'};
-function metalFor(level,max,o){if(o.locked)return 'locked';if(o.grand>=4)return 'diamond';if(o.rainbow)return 'rainbow';if(o.meta)return 'royal';if(o.secret)return 'obsidian';
+function metalFor(level,max,o){if(o.locked)return 'locked';if(o.legend)return o.legend;if(o.grand>=4)return 'diamond';if(o.rainbow)return 'rainbow';if(o.meta)return 'royal';if(o.secret)return 'obsidian';
   if(max<=1)return 'gold';const f=level/max;return f>=1?'diamond':f>=.6?'gold':f>=.3?'silver':'bronze';}
 const S=root.BADGE_SYMBOLS||{};
 function poly(n,r,rot){let d='';for(let i=0;i<n;i++){const a=(rot+i*360/n)*Math.PI/180;d+=(i?'L':'M')+(50+r*Math.cos(a)).toFixed(2)+' '+(50+r*Math.sin(a)).toFixed(2);}return d+'Z';}
@@ -4895,12 +4902,12 @@ function laurel(c,dark){let s='';for(const side of [-1,1]){for(let i=0;i<7;i++){
   let rot=(108+i*19)+90-25;if(side>0)rot=180-rot;const rx=8.5-i*.3,ry=4-i*.15;
   s+='<ellipse cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" rx="'+rx.toFixed(1)+'" ry="'+ry.toFixed(1)+'" transform="rotate('+rot.toFixed(0)+' '+x.toFixed(1)+' '+y.toFixed(1)+')" fill="'+c+'" stroke="'+dark+'" stroke-width=".5"/>';}}return s;}
 let uid=0;
-function badgeArt(id,level,max,o){o=o||{};if(id==='rank')id='gradus';if(id==='omniamax'){id='omnia';o={...o,rainbow:true};}const gr=o.locked?0:(GRAND[id]||0);if(gr)o={...o,grand:gr};const mk=metalFor(level,max,o),m=METALS[mk];const k='ba'+(++uid);const size=o.size||96;
+function badgeArt(id,level,max,o){o=o||{};if(id==='rank')id='gradus';if(id==='omniamax'){id='omnia';o={...o,rainbow:true};}const gr=o.locked?0:(GRAND[id]||0);if(gr)o={...o,grand:gr};const LG={diesingens:'solar',augustus:'imperial'}[id];if(LG&&!o.locked)o={...o,legend:LG};const mk=metalFor(level,max,o),m=METALS[mk];const k='ba'+(++uid);const size=o.size||96;
   const shape=o.secret?'diamond':o.meta?'rosette':(SHAPE[id]||'circle');
   let en=ENAMEL[id]||(root._qE&&root._qE(id))||['#3a3a3a','#141414'];if(o.locked)en=['#3a3a3a','#1a1a1a'];
   const ink=o.locked?'#8d8d8d':m[0];
   const sym=(id==='gradus'&&max>1&&level>=max)?S.gradus4:(S[id]||'<circle cx="50" cy="50" r="18"/>');
-  const wreath=!o.locked&&!o.secret&&(o.meta||gr||(level>=max&&max>1));
+  const wreath=!o.locked&&!o.secret&&(o.meta||gr||o.legend||(level>=max&&max>1));
   const ribbon=max>1&&level>0&&!o.meta&&!o.locked;
   const rb=mk==='rainbow';
   let svg='<svg viewBox="0 0 100 '+(ribbon?118:104)+'" width="'+size+'" height="'+Math.round(size*(ribbon?1.18:1.04))+'" overflow="visible" xmlns="http://www.w3.org/2000/svg" class="badge-art">'
@@ -4908,6 +4915,8 @@ function badgeArt(id,level,max,o){o=o||{};if(id==='rank')id='gradus';if(id==='om
    +'<radialGradient id="'+k+'f" cx=".35" cy=".3" r=".85"><stop offset="0" stop-color="'+en[0]+'"/><stop offset="1" stop-color="'+en[1]+'"/></radialGradient>'
    +'<filter id="'+k+'s" x="-25%" y="-25%" width="150%" height="150%"><feDropShadow dx="0" dy="1.4" stdDeviation="1.3" flood-color="#000" flood-opacity=".6"/></filter><filter id="'+k+'g" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="3"/></filter></defs>';
   if(gr>=3){const hc=gr>=4?'#8fe6ff':'#ffd54a';svg+='<g class="ba-pulse">'+(gr>=4?'<path d="'+starPath(16,56,40)+'" fill="'+hc+'" opacity=".35"/>':'')+'<path d="'+shapeD(shape,45)+'" fill="'+hc+'" opacity=".5" filter="url(#'+k+'g)"/></g>';}
+  if(o.legend==='solar')svg+='<g class="ba-pulse"><path d="'+shapeD(shape,46)+'" fill="#ff8a00" opacity=".55" filter="url(#'+k+'g)"/></g><g class="ba-spin"><path d="'+starPath(16,58,38)+'" fill="#ffc23a" opacity=".42"/><path d="'+starPath(8,62,30)+'" fill="#ff7a00" opacity=".3"/></g>';
+  if(o.legend==='imperial')svg+='<g class="ba-pulse"><path d="'+shapeD(shape,46)+'" fill="#c2185b" opacity=".55" filter="url(#'+k+'g)"/></g><g class="ba-spin slow"><path d="'+starPath(24,57,46)+'" fill="#e0b030" opacity=".35"/></g>';
   svg+=rb?'<g class="ba-rainbow">':'';if(wreath)svg+=laurel('url(#'+k+'r)',m[2]);
   if(o.secret&&!o.locked)svg+='<path d="'+shapeD(shape,41)+'" fill="#c77dff" opacity=".35" filter="url(#'+k+'g)"/>';
   svg+='<path d="'+shapeD(shape,38)+'" fill="url(#'+k+'r)" filter="url(#'+k+'s)"/>'+(rb?'</g>':'')
@@ -4920,6 +4929,9 @@ function badgeArt(id,level,max,o){o=o||{};if(id==='rank')id='gradus';if(id==='om
   if(gr>=2){const st=(cx,cy,r)=>{let d='';for(let i=0;i<10;i++){const rr=i%2?r*.45:r,a=(-90+i*36)*Math.PI/180;d+=(i?'L':'M')+(cx+rr*Math.cos(a)).toFixed(2)+' '+(cy+rr*Math.sin(a)).toFixed(2);}return '<path d="'+d+'Z" fill="url(#'+k+'r)" stroke="'+m[2]+'" stroke-width="1" stroke-linejoin="round" filter="url(#'+k+'s)"/>';};
     svg+=gr>=4?st(31,9,6.5)+st(69,9,6.5)+st(50,3,9.5):st(50,4,gr>=3?9:7.5);}
   if(gr>=3){const sp=(x,y,r)=>'<path d="M'+x+' '+(y-r)+' Q'+x+' '+y+' '+(x+r)+' '+y+' Q'+x+' '+y+' '+x+' '+(y+r)+' Q'+x+' '+y+' '+(x-r)+' '+y+' Q'+x+' '+y+' '+x+' '+(y-r)+'Z" fill="#fff" opacity=".95"/>';svg+=sp(86,30,4.5)+sp(14,62,3.5)+(gr>=4?sp(84,80,3.5)+sp(16,24,3):'');}
+  if(o.legend){const st=(cx,cy,r)=>{let d='';for(let i=0;i<10;i++){const rr=i%2?r*.45:r,a=(-90+i*36)*Math.PI/180;d+=(i?'L':'M')+(cx+rr*Math.cos(a)).toFixed(2)+' '+(cy+rr*Math.sin(a)).toFixed(2);}return '<path d="'+d+'Z" fill="url(#'+k+'r)" stroke="'+m[2]+'" stroke-width="1" stroke-linejoin="round" filter="url(#'+k+'s)"/>';};
+    const sp=(x,y,r)=>'<path d="M'+x+' '+(y-r)+' Q'+x+' '+y+' '+(x+r)+' '+y+' Q'+x+' '+y+' '+x+' '+(y+r)+' Q'+x+' '+y+' '+(x-r)+' '+y+' Q'+x+' '+y+' '+x+' '+(y-r)+'Z" fill="#fff" opacity=".95"/>';
+    svg+=o.legend==='imperial'?st(31,8,6)+st(69,8,6)+st(50,2,9.5):'';svg+='<g class="ba-pulse">'+sp(87,28,4.5)+sp(13,60,3.5)+sp(84,78,3)+'</g>';}
   if(o.secret&&!o.locked){const sp=(x,y,r)=>'<path d="M'+x+' '+(y-r)+' Q'+x+' '+y+' '+(x+r)+' '+y+' Q'+x+' '+y+' '+x+' '+(y+r)+' Q'+x+' '+y+' '+(x-r)+' '+y+' Q'+x+' '+y+' '+x+' '+(y-r)+'Z" fill="#fff" opacity=".9"/>';svg+=sp(80,16,5)+sp(17,30,3.5)+sp(84,72,3);}
   const small=size<=44;   // leaderboard size: make the numbers even bigger
   if(ribbon){const rn=romanN(level);const fs=small?(rn.length>4?21:rn.length>2?27:31):(rn.length>4?17:rn.length>2?22:25);
@@ -5192,10 +5204,10 @@ function badgeCheck(){secretWipe();try{verLoad();}catch(e){}const got=bjson(BADG
 let badgeFilter='all';try{badgeFilter=localStorage.getItem('latin_bfilter')||'all';}catch(e){}
 function setBadgeFilter(f){badgeFilter=f;try{localStorage.setItem('latin_bfilter',f);}catch(e){}renderBadges();}
 function badgeShown(l,max){return badgeFilter==='all'||(badgeFilter==='none'&&!l)||(badgeFilter==='got'&&l>0)||(badgeFilter==='unmax'&&l>0&&l<max);}
-const BADGE_GROUPS=[['⭐','Points',['rank','augustus','diesmagnus','diesingens']],['🔥','Every day',['constans','matutinus','nocturnus']],['🎯','Accuracy',['primus','sineerrore','perfectus']],
-  ['📚','Words',['lexicon','lexiconmagnus','doctus','doctissimus']],['⚔️','Challenges',['gladiator','victor','invictus','rival']],['💬','Leaderboard & chat',['salve','scriptor','popularis','civis','socius']]];
+const BADGE_GROUPS=[['⭐','Points',['rank','augustus','diesmagnus','diesingens']],['🔥','Every day',['matutinus','nocturnus','constans']],['🎯','Accuracy',['primus','perfectus','sineerrore']],
+  ['📚','Words',['lexicon','lexiconmagnus','doctus','doctissimus']],['⚔️','Challenges',['gladiator','rival','invictus','victor']],['💬','Leaderboard & chat',['salve','scriptor','socius','civis','popularis']]];
 function badgePinBtn(c,id){if(!lbMe)return;const pinned=badgePins().includes(id);const pb=document.createElement('button');pb.className='bd-pin'+(pinned?' on':'');pb.textContent=pinned?'📌 Shown':'📌 Show';pb.title=pinned?'Shown next to your name on the leaderboard. Click to hide.':'Show next to your name on the leaderboard (up to 6).';pb.onclick=()=>toggleBadgePin(id);c.appendChild(pb);if(pinned)c.classList.add('pinned');}
-function badgeCard(bd,got){const e=got[bd.id],l=e?e.l:0,v=badgeStatV(bd),next=bd.lv[l];const c=document.createElement('div');c.className='badge-card'+(l?' earned':' locked')+(bd.tiers?(l?' m-'+tierMetal(l,bd.lv.length):''):l?' lvl'+Math.min(l,7):'')+(GRAND[bd.id]?' grand'+GRAND[bd.id]:'')+(bd.secret?' secret':'');
+function badgeCard(bd,got){const e=got[bd.id],l=e?e.l:0,v=badgeStatV(bd),next=bd.lv[l];const c=document.createElement('div');c.className='badge-card'+(l?' earned':' locked')+(bd.tiers?(l?' m-'+tierMetal(l,bd.lv.length):''):l?' lvl'+Math.min(l,7):'')+(GRAND[bd.id]?' grand'+GRAND[bd.id]:'')+(bd.secret?' secret':'')+(bd.id==='diesingens'?' legend legend-sun':bd.id==='augustus'?' legend legend-imp':'');
   let prog='';if(next!=null&&!bd.secret){if(bd.id.startsWith('lex')||bd.id.startsWith('doct'))prog=lexProgress(bd.id==='lexicon'||bd.id==='doctus'?'main':'all',bd.id.startsWith('lex')?'seen':'correct');else if(bd.lv.length>1||next>1)prog=Math.min(v,next).toLocaleString()+' / '+next.toLocaleString()+(bd.unit?' '+bd.unit:'');}
   const lvls=bd.lv.length>1&&!bd.tiers?(bd.inf?bd.lv.slice(0,3).map(x=>x.toLocaleString()).join(' · ')+' · … no limit':bd.lv.map(x=>x.toLocaleString()).join(' · ')):'';
   const pct=prog&&next?Math.max(0,Math.min(100,Math.round(Math.min(v,next)/next*100))):0;
