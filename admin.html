@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Latin Trainer · Admin</title>
+<style>body{margin:0;background:#15171c;color:#cfd3da;font:15px system-ui,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh}</style>
+</head>
+<body>
+<div id="boot">Loading…</div>
+<!-- The admin page is the normal app plus the script below. Admin mode only turns on after the password check.
+     The password itself is not stored anywhere: it unlocks the admin login, which is kept encrypted in the database. -->
+<script type="text/plain" id="adminScript">
+(function(){
+const SS='lt_admin',ITER=600000,enc=new TextEncoder(),dec=new TextDecoder();
+const b64=u=>btoa(String.fromCharCode(...new Uint8Array(u))),unb64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+async function keyFor(pass,salt,it){const base=await crypto.subtle.importKey('raw',enc.encode(pass),'PBKDF2',false,['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:it,hash:'SHA-256'},base,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);}
+async function seal(obj,pass){const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12)),k=await keyFor(pass,salt,ITER);
+  const c=await crypto.subtle.encrypt({name:'AES-GCM',iv},k,enc.encode(JSON.stringify(obj)));return {s:b64(salt),iv:b64(iv),c:b64(c),it:ITER,v:1};}
+async function unseal(v,pass){const k=await keyFor(pass,unb64(v.s),+v.it||ITER);const p=await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(v.iv)},k,unb64(v.c));return JSON.parse(dec.decode(p));}
+const signIn=(email,password)=>authPost('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword',{email,password,returnSecureToken:true}).then(authFrom);
+function keep(a){try{sessionStorage.setItem(SS,JSON.stringify({uid:a.uid,refreshToken:a.refreshToken}));}catch(e){}}
+function go(a){if(!adminStart(a))return false;keep(a);gate.remove();bar();return true;}
+
+const css=document.createElement('style');css.textContent=`
+#admGate{position:fixed;inset:0;z-index:100000;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(8,9,12,.82);backdrop-filter:blur(10px)}
+#admGate .g-box{width:100%;max-width:340px;background:var(--surface,#1d2026);border:1px solid var(--border2,#333);border-radius:16px;padding:26px 22px;box-shadow:0 20px 60px rgba(0,0,0,.5);text-align:center}
+#admGate h1{font-family:var(--serif,Georgia,serif);font-weight:500;font-size:24px;margin:6px 0 4px;color:var(--text,#eee)}
+#admGate p{font-size:13px;color:var(--text3,#999);margin:0 0 16px;line-height:1.45}
+#admGate input{width:100%;box-sizing:border-box;margin:0 0 8px;padding:10px 12px;border-radius:10px;border:1px solid var(--border2,#333);background:var(--surface2,#25282f);color:var(--text,#eee);font:inherit;font-size:14px;outline:none}
+#admGate input:focus{border-color:var(--accent,#d4a24c)}
+#admGate button.go{width:100%;margin-top:4px}
+#admGate .err{min-height:18px;font-size:12.5px;color:var(--red,#e07a6a);margin:6px 0 2px}
+#admGate .lnk{background:none;border:0;color:var(--text3,#999);font-size:12px;cursor:pointer;text-decoration:underline;margin-top:10px}
+#admGate .lock{font-size:30px}
+#admBar{position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:9000;display:flex;gap:8px;align-items:center;background:var(--surface,#1d2026);border:1px solid var(--accent,#d4a24c);border-radius:999px;padding:5px 8px 5px 14px;font-size:12.5px;color:var(--accent,#d4a24c);box-shadow:0 6px 20px rgba(0,0,0,.35)}
+#admBar button{font-size:12px;padding:4px 10px;border-radius:999px}`;
+document.head.appendChild(css);
+document.title='Admin · '+document.title;
+
+const gate=document.createElement('div');gate.id='admGate';document.body.appendChild(gate);
+let vault=null;
+function view(mode,msg){const setup=mode==='setup';
+  gate.innerHTML='<div class="g-box"><div class="lock">'+(setup?'🛠️':'🔒')+'</div><h1>'+(setup?'Set up admin access':'Admin')+'</h1>'
+   +(setup?'<p>One time only. Enter the admin account’s email and Firebase password, then choose the password for this page. The login is stored encrypted: only this page’s password can unlock it.</p>'
+     +'<input id="gE" type="email" placeholder="Admin email" autocomplete="username"><input id="gP" type="password" placeholder="Firebase password" autocomplete="current-password">'
+     +'<input id="gN" type="password" placeholder="New admin page password" autocomplete="new-password"><input id="gN2" type="password" placeholder="Same password again" autocomplete="new-password">'
+    :'<p>Enter the admin password.</p><input id="gK" type="password" placeholder="Password" autocomplete="current-password">')
+   +'<div class="err" id="gErr">'+(msg?esc(msg):'')+'</div><button class="btn-primary go" id="gGo">'+(setup?'Save and enter':'Enter')+'</button>'
+   +(setup?(vault?'<button class="lnk" id="gBack">Back</button>':''):'<button class="lnk" id="gSet">Set up again / change password</button>')
+   +'<div><button class="lnk" id="gOut">Back to the site</button></div></div>';
+  const $=id=>document.getElementById(id),err=t=>{$('gErr').textContent=t;};
+  const enter=e=>{if(e.key==='Enter')$('gGo').click();};gate.querySelectorAll('input').forEach(i=>i.addEventListener('keydown',enter));
+  $('gOut').onclick=()=>{location.href='index.html';};if($('gSet'))$('gSet').onclick=()=>view('setup');if($('gBack'))$('gBack').onclick=()=>view('enter');
+  setTimeout(()=>{const f=gate.querySelector('input');if(f)f.focus();},50);
+  $('gGo').onclick=async()=>{const btn=$('gGo');btn.disabled=true;err('');
+    try{
+      if(!setup){const k=$('gK').value;if(!k){err('Enter the password.');return;}
+        let cred;try{cred=await unseal(vault,k);}catch(e){await new Promise(r=>setTimeout(r,1200));err('Wrong password.');$('gK').select();return;}
+        let a;try{a=await signIn(cred.e,cred.p);}catch(e){err(/INVALID|PASSWORD|EMAIL|USER/.test(e.message)?'The saved admin login no longer works (was the Firebase password changed?). Use “Set up again”.':'Couldn’t reach the server. Check your internet.');return;}
+        if(!go(a))err('The saved login isn’t the admin account. Use “Set up again”.');}
+      else{const e=$('gE').value.trim(),p=$('gP').value,n=$('gN').value,n2=$('gN2').value;
+        if(!e||!p||!n){err('Fill in every box.');return;}if(n!==n2){err('The two new passwords don’t match.');return;}if(n.length<6){err('Use at least 6 characters.');return;}
+        let a;try{a=await signIn(e,p);}catch(x){err(/TOO_MANY/.test(x.message)?'Too many attempts. Wait a few minutes.':/INVALID|PASSWORD|EMAIL|USER/.test(x.message)?'Incorrect email or Firebase password.':'Couldn’t reach the server. Check your internet.');return;}
+        if(a.uid!==ADMIN_UID){err('That account isn’t the admin.');return;}
+        const v=await seal({e,p},n);try{await fbReq('PUT','avault',v,{tok:a.idToken});}catch(x){err(/40[13]/.test(x.message)?'Saved login refused: publish the latest database rules first.':'Couldn’t save ('+x.message+').');return;}
+        vault=v;go(a);toast('✓ Admin page password saved.');}
+    }finally{if(document.getElementById('gGo'))btn.disabled=false;}};}
+function bar(){const b=document.createElement('div');b.id='admBar';b.innerHTML='🛡️ Admin mode <button class="btn-secondary" id="admOut">Log out</button>';document.body.appendChild(b);
+  document.getElementById('admOut').onclick=()=>{try{sessionStorage.removeItem(SS);}catch(e){}location.href='index.html';};}
+
+(async()=>{gate.innerHTML='<div class="g-box"><div class="lock">🔒</div><p>Loading…</p></div>';
+  // already unlocked in this tab
+  try{const s=JSON.parse(sessionStorage.getItem(SS)||'null');if(s&&s.refreshToken){const a=await refreshAuth(s);if(go(a))return;}}catch(e){try{sessionStorage.removeItem(SS);}catch(x){}}
+  for(let i=0;i<4;i++){try{vault=await fbReq('GET','avault');break;}catch(e){if(/40[13]/.test(e.message)){vault=null;break;}await new Promise(r=>setTimeout(r,1200*(i+1)));}}
+  view(vault&&vault.c?'enter':'setup',vault&&vault.c?'':'');})();
+})();
+</script>
+<script>
+(async()=>{const box=document.getElementById('boot');
+  try{const r=await fetch('index.html',{cache:'no-cache'});if(!r.ok)throw new Error('HTTP '+r.status);let h=await r.text();
+    const add='<script>'+document.getElementById('adminScript').textContent+'<\/script>',i=h.lastIndexOf('</body>');
+    h=i>=0?h.slice(0,i)+add+h.slice(i):h+add;document.open();document.write(h);document.close();}
+  catch(e){box.textContent='Couldn’t load the site ('+e.message+'). Check your internet and refresh.';}})();
+</script>
+</body>
+</html>
