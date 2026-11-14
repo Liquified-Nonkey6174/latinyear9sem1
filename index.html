@@ -3555,6 +3555,8 @@ function sentAlternatives(ca){const alts=[ca];if(!sentData)return alts;
   if(mode==='el'&&sentData.imps&&sentData.imps.length&&!/all of you/i.test(sentData.english)){let pl=ca;
     sentData.imps.forEach(({sg,pl:p})=>{pl=pl.replace(new RegExp('(^|[^A-Za-z])('+sg+')(?=[^A-Za-z]|$)','i'),(m,a,w)=>a+(w[0]===w[0].toUpperCase()?p[0].toUpperCase()+p.slice(1):p));});if(pl!==ca)alts.push(pl);}
   if(mode==='le'&&/, all of you!/i.test(ca))alts.push(ca.replace(/, all of you!/gi,'!'));
+  // "all of you" can also be said in Latin: Portate mensam, omnes! / vos omnes / omnes vos
+  if(mode==='el'&&/all of you/i.test(sentData.english||'')){alts.slice().forEach(x=>{const m=String(x).match(/^(.*?)([.!?]*)$/);if(!m)return;['omnes','vos omnes','omnes vos'].forEach(w=>{alts.push(m[1]+', '+w+(m[2]||'!'));alts.push(cap(w)+', '+m[1].charAt(0).toLowerCase()+m[1].slice(1)+(m[2]||'!'));});});}
   return alts;}
 function checkSentence(){if(answered)return;const ua=document.getElementById('sentInput').value.trim();if(!ua)return;answered=true;document.getElementById('sentCheckBtn').disabled=true;document.getElementById('sentInput').disabled=true;const ca=mode==='el'?sentData.latin:sentData.english;const alts=sentAlternatives(ca);const exact=alts.some(a=>checkWithSynonyms(ua,a));const ok=exact||nearMiss(ua,alts,mode==='el');const fb=document.getElementById('sentFb');badgeAnswer(ok);try{noteAnswer(ok);}catch(e){}if(ok){const pts=sentPoints();sentScore++;score++;quizNoPoints=false;if(tooFast())tooFastNote();else lbCount(pts);dailyTick();fb.className='sent-fb ok';fb.textContent='✓ Correct!'+(exact?'':' (check the spelling: '+ca+')')+(lbMe?'  +'+pts+' ⭐':'');}else{fb.className='sent-fb no';fb.textContent='✗ '+ca;}sentTotal++;updScorePill(sentScore);updPct();saveSessionSnapshot();document.getElementById('sentNext').style.display='block';afterAnswer(ok);}
 function skipSentence(){if(answered)return;answered=true;document.getElementById('sentCheckBtn').disabled=true;document.getElementById('sentInput').disabled=true;const ca=mode==='el'?sentData.latin:sentData.english;const fb=document.getElementById('sentFb');fb.className='sent-fb no';fb.textContent='→ '+ca;sentTotal++;updPct();saveSessionSnapshot();document.getElementById('sentNext').style.display='block';}
@@ -4963,7 +4965,10 @@ function badgeCheck(){secretWipe();try{verLoad();}catch(e){}const got=bjson(BADG
   if(changed){try{localStorage.setItem(BADGE_KEY,JSON.stringify(got));}catch(e){}}
   syncShownBadges();
   if(document.getElementById('badgeOverlay')&&document.getElementById('badgeOverlay').style.display==='flex')renderBadges();renderBadgeSide();
-  if(fresh.length){const nSecret=BADGES.filter(x=>x.secret&&got[x.id]).length;try{badgeFeedPost(fresh,nSecret);}catch(e){}try{badgeReveal(fresh);}catch(e){}}}
+  if(fresh.length){const nSecret=BADGES.filter(x=>x.secret&&got[x.id]).length;try{badgeFeedPost(fresh,nSecret);}catch(e){}
+    // celebrate each badge level once per device, even if a level drops for a moment and comes back
+    let shown={};try{shown=JSON.parse(localStorage.getItem('latin_revealed')||'{}')||{};}catch(e){}const nf=fresh.filter(f=>(+shown[f.bd.id]||0)<f.l);nf.forEach(f=>{shown[f.bd.id]=f.l;});
+    try{localStorage.setItem('latin_revealed',JSON.stringify(shown));}catch(e){}if(nf.length)try{badgeReveal(nf);}catch(e){}}}
 // sorter: all / unawarded / awarded / awarded but not maxed
 let badgeFilter='all';try{badgeFilter=localStorage.getItem('latin_bfilter')||'all';}catch(e){}
 function setBadgeFilter(f){badgeFilter=f;try{localStorage.setItem('latin_bfilter',f);}catch(e){}renderBadges();}
@@ -6937,7 +6942,7 @@ function srvClaim(got,lv){try{if(!lbMe)return;const claim={};BADGES.forEach(bd=>
     fbReq('PUT','bclaim/'+lbMe.pid,{...claim,t:{'.sv':'timestamp'}}).then(()=>{try{localStorage.setItem(done,'sent');}catch(e){}}).catch(()=>{});}catch(e){}}
 // badge claims are switched off: clear any that were waiting
 // hidden messages are deleted from the server rather than hidden on screen, so nobody can download them
-function srvOn(){return !!(SRV.frozen&&lbMe&&playerAuth&&lbMe.pid===playerAuth.uid&&SRV.me&&SRV.ws&&lbPlayers[lbMe.pid]);}
+function srvOn(){return !!(SRV.frozen&&lbMe&&playerAuth&&lbMe.pid===playerAuth.uid&&SRV.me&&SRV.ws&&lbPlayers[lbMe.pid]&&(!lbPubMode||lbOwn));}   // own points must be the real ones, not the public copy
 function alogAnswer(ok,w){if(!playerAuth||!lbMe)return;alogQ.push({ok:!!ok,k:akey(w)});if(alogQ.length>300)alogQ.shift();alogKeep();alogPump();}
 async function alogPump(){if(alogBusy||!alogQ.length)return;alogBusy=true;
   try{if(!SRV.me)await srvLoadMe();if(!SRV.me)return;
