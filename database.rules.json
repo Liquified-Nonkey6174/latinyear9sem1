@@ -1,5 +1,27 @@
 {
   "rules": {
+    "dqcfg": {
+      ".read": true,
+      ".write": "auth != null && auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2'",
+      ".validate": "newData.hasChildren(['open']) && newData.child('open').isBoolean()",
+      "title": {".validate": "newData.isString() && newData.val().length <= 80"},
+      "hint": {".validate": "newData.isString() && newData.val().length <= 400"},
+      "open": {".validate": "newData.isBoolean()"},
+      "$other": {".validate": false}
+    },
+    "dquote": {
+      ".read": "auth != null && auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2'",
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && ((auth.uid === $uid && newData.exists() && root.child('dqcfg').child('open').val() === true && root.child('players').child($uid).exists()) || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2')",
+        ".validate": "newData.hasChildren(['q', 't'])",
+        "q": {".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 500"},
+        "e": {".validate": "newData.isString() && newData.val().length <= 500"},
+        "n": {".validate": "newData.isString() && newData.val().length <= 30"},
+        "t": {".validate": "newData.val() === now"},
+        "$other": {".validate": false}
+      }
+    },
     "announce": {
       ".read": true,
       ".write": "auth != null && auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2'",

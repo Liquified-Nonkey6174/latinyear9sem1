@@ -289,6 +289,10 @@ async function srvAdminSetup(){if(!isAdmin)return;try{
   catch(e){toast('Couldn’t set up server badges ('+e.message+'). Publish the latest database rules, then log in again.');}}
 window.ADM=ADM;
 Object.assign(ADM,{
+  async dqList(){const [r,c]=await Promise.all([fbReq('GET','dquote',null,A).catch(()=>({})),fbReq('GET','dqcfg',null,A).catch(()=>null)]);
+    return {cfg:c||{open:false},list:Object.entries(r||{}).map(([pid,v])=>({pid,...v})).filter(x=>x&&x.q).sort((a,b)=>(a.t||0)-(b.t||0))};},
+  dqCfgSave(c){return fbReq('PUT','dqcfg',{open:!!c.open,title:String(c.title||'').slice(0,80),hint:String(c.hint||'').slice(0,400)},A);},
+  dqDelete(pid){return fbReq('DELETE','dquote/'+pid,null,A);},
   uid:ADMIN_UID,
   setAuth(a){adminAuth=a;},
   signIn(email,password){return authPost('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword',{email,password,returnSecureToken:true}).then(authFrom);},
@@ -368,9 +372,9 @@ const ago=t=>{t=+t;if(!t)return '';const m=Math.round((Date.now()-t)/60000);retu
 const online=pid=>{const t=D.online[pid];return typeof t==='number'&&Date.now()-t<150000;};
 
 // ── views ──
-const TABS=[['players','👥 Players'],['chat','💬 Chat'],['site','📢 Site'],['premium','👑 Premium'],['badges','🏅 Secret badges'],['tools','🛠️ Tools']];
+const TABS=[['players','👥 Players'],['chat','💬 Chat'],['site','📢 Site'],['quotes','✍ Submissions'],['premium','👑 Premium'],['badges','🏅 Secret badges'],['tools','🛠️ Tools']];
 function render(){$('adTabs').innerHTML='';TABS.forEach(([k,l])=>{const b=document.createElement('button');b.className='ad-tab'+(k===tab?' on':'');b.textContent=l;b.onclick=()=>{tab=k;render();};$('adTabs').appendChild(b);});
-  const v=$('view');v.innerHTML='';({players:vPlayers,chat:vChat,site:vSite,premium:vPremium,badges:vBadges,tools:vTools})[tab](v);}
+  const v=$('view');v.innerHTML='';({players:vPlayers,chat:vChat,site:vSite,quotes:vQuotes,premium:vPremium,badges:vBadges,tools:vTools})[tab](v);}
 
 function vPlayers(v){const ids=Object.keys(D.players).filter(pid=>D.players[pid]&&D.players[pid].name);
   const n=f=>ids.filter(f).length,isPub=pid=>pid===ADM.uid||!!D.atag[pid]||D.appr[pid]===true;
@@ -441,6 +445,22 @@ function vSite(v){const a=D.ann||{},c=D.challenge||{};
   $('ccS').onclick=async()=>{const n=Math.floor(+$('ccN').value);if(!(n>=0)){alert('Enter a whole number.');return;}try{await ADM.saveChallenge(n,$('ccT').value.trim());done(n?'✓ Challenge saved.':'✓ Challenge removed.');}catch(e){fail(e);}};
   $('ctS').onclick=async()=>{try{await ADM.saveContact($('ctE').value.trim().slice(0,100));done('✓ Contact email saved.');}catch(e){fail(e);}};}
 
+async function vQuotes(v){v.innerHTML='<div class="ad-card">Loading…</div>';const {cfg,list}=await ADM.dqList();
+  v.innerHTML='<div class="ad-card"><h2>✍ December quotes</h2><p class="hint">While open, players see a ✍ button next to 🏅 Badges and in the announcement. Each account can send one quote and change it until you close submissions. Only you can see them.</p>'
+   +'<div class="ad-row" style="margin-bottom:8px"><label style="display:flex;gap:6px;align-items:center;font-size:14px"><input type="checkbox" id="dqO"'+(cfg.open?' checked':'')+'> Submissions open</label></div>'
+   +'<input class="ad-in" id="dqT" maxlength="80" placeholder="Button name (default: December quote)" value="'+esc(cfg.title||'')+'" style="margin-bottom:8px;max-width:360px">'
+   +'<textarea class="ad-in" id="dqH" maxlength="400" placeholder="Instructions shown above the box (optional). **bold** works.">'+esc(cfg.hint||'')+'</textarea>'
+   +'<div class="ad-row" style="margin-top:8px"><button class="ad-btn pri sm" id="dqS">Save</button></div></div>'
+   +'<div class="ad-card"><div class="ad-row" style="margin-bottom:6px"><h2 style="margin:0">Submissions ('+list.length+')</h2>'+(list.length?'<button class="ad-btn sm" id="dqC" style="margin-left:auto">Copy all</button>':'')+'</div><div id="dqL"></div></div>';
+  $('dqS').onclick=async()=>{try{await ADM.dqCfgSave({open:$('dqO').checked,title:$('dqT').value.trim(),hint:$('dqH').value.trim()});toast($('dqO').checked?'✓ Saved. Submissions are open.':'✓ Saved. Submissions are closed.');}catch(e){alert('Couldn’t save ('+e.message+').'+(/40[13]/.test(e.message)?' Publish the latest database rules.':''));}};
+  const box=$('dqL');if(!list.length){box.innerHTML='<p class="hint" style="margin:0">No submissions yet.</p>';return;}
+  const tb=document.createElement('table');tb.className='ad-t';tb.innerHTML='<tr><th>Player</th><th>Quote</th><th class="ad-hide-sm">Sent</th><th></th></tr>';
+  list.forEach(x=>{const tr=document.createElement('tr');const who=document.createElement('td');who.appendChild(D.players[x.pid]?ADM.nameEl(x.pid):document.createTextNode(x.n||'(left)'));
+    const q=document.createElement('td');q.innerHTML='<div style="white-space:pre-wrap">'+esc(x.q)+'</div>'+(x.e?'<div style="color:var(--text3);font-size:12.5px;margin-top:3px">'+esc(x.e)+'</div>':'');
+    const t=document.createElement('td');t.className='ad-hide-sm';t.style.cssText='color:var(--text3);font-size:12px;white-space:nowrap';t.textContent=x.t?new Date(x.t).toLocaleString([], {day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}):'';
+    const d=document.createElement('td');const b=document.createElement('button');b.className='ad-btn sm bad';b.textContent='✕';b.title='Delete';b.onclick=async()=>{if(!confirm('Delete this submission? They can send a new one while submissions are open.'))return;await ADM.dqDelete(x.pid).catch(e=>alert(e.message));vQuotes(v);};d.appendChild(b);
+    tr.append(who,q,t,d);tb.appendChild(tr);});box.appendChild(tb);
+  $('dqC').onclick=async()=>{const txt=list.map(x=>((D.players[x.pid]||{}).name||x.n||'?')+(D.atag[x.pid]?' ('+D.atag[x.pid]+')':'')+': '+x.q+(x.e?' — '+x.e:'')).join('\n');try{await navigator.clipboard.writeText(txt);toast('✓ Copied '+list.length+' quotes.');}catch(e){prompt('Copy these:',txt);}};}
 async function vPremium(v){v.innerHTML='<div class="ad-grid"><div class="ad-card"><h2>🎟 Premium codes</h2><p class="hint">Players type a code to unlock premium. Each code has a number of uses.</p><div id="pcB"></div></div><div class="ad-card"><h2>👑 Who has premium</h2><div id="plB" class="ad-list">Loading…</div></div></div>';
   E.adminCodes($('pcB'));const l=await ADM.premiumList(),b=$('plB');if(!b)return;b.innerHTML=l.length?'':'Nobody has premium.';
   l.forEach(x=>{const d=document.createElement('div');d.style.cursor='pointer';d.innerHTML='<b>'+esc(x.name)+'</b>'+(x.tag?' <span class="pill g">'+esc(x.tag)+'</span>':'')+' <span style="color:var(--text3)">· '+esc(x.how)+(x.t?' · '+new Date(x.t).toLocaleDateString():'')+'</span>';d.onclick=()=>{if(D.players[x.pid])openPanel(x.pid);};b.appendChild(d);});}
