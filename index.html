@@ -4417,7 +4417,9 @@ function streakReport(n,g,today){if(!lbMe||!playerAuth||lbMe.pid!==playerAuth.ui
       if(r&&typeof r.n==='number'){strkSrv=r;try{localStorage.setItem('latin_strk_sent',sig);}catch(e){}badgeCheckSoon();}}
     catch(e){_strkWait=Date.now()+60000;strkSrv=undefined;}finally{_strkBusy=false;}})();}
 async function streakApply(){if(!lbMe)return;let r;try{r=await fbReq('GET','sset/'+lbMe.pid);}catch(e){return;}if(!r||!(+r.t))return;
-  const done=+localStorage.getItem('latin_sset_t')||0;if(+r.t<=done)return;const n=Math.max(0,Math.round(+r.n||0)),d=dailyData(),m=dailyMetSet(),g=SET.goal||1;
+  const done=+localStorage.getItem('latin_sset_t')||0;if(+r.t<=done)return;
+  // already used: a device reported a streak after this was set (a new browser or cleared data mustn't apply an old setting again)
+  try{const k=await fbReq('GET','strk/'+lbMe.pid);if(k&&+k.t>+r.t+120000){try{localStorage.setItem('latin_sset_t',String(r.t));}catch(e){}return;}}catch(e){}const n=Math.max(0,Math.round(+r.n||0)),d=dailyData(),m=dailyMetSet(),g=SET.goal||1;
   const today=dayKeyOffset(0),todayOk=(d[today]||0)>=g||m.has(today),from=todayOk?0:1;   // the streak shown right away is exactly n
   for(let i=from;i<from+n;i++)m.add(dayKeyOffset(i));const br=dayKeyOffset(from+n);m.delete(br);if((d[br]||0)>=g)d[br]=g-1;   // the day before the streak is a gap
   if(n===0&&todayOk){m.delete(today);if((d[today]||0)>=g)d[today]=g-1;}
