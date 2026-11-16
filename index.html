@@ -6493,14 +6493,21 @@ let verifyName='';
 function tokVerified(){try{const p=String(playerAuth&&playerAuth.idToken||'').split('.')[1];const j=JSON.parse(atob(p.replace(/-/g,'+').replace(/_/g,'/')+'==='.slice((p.length+3)%4)));return j.email_verified===true&&!/@latin-trainer\.app$/.test(j.email||'');}catch(e){return false;}}
 async function verifyReady(){try{await playerToken();}catch(e){return false;}if(tokVerified())return true;if(!tokEmail())return false;try{playerAuth=await refreshAuth(playerAuth);savePlayerAuth();}catch(e){}return tokVerified();}
 function verifyMsg(t,ok){const el=document.getElementById('verifyMsg');if(el){el.textContent=t||'';el.style.color=ok===false?'var(--red)':ok?'var(--green)':'var(--text3)';}}
-async function verifySend(){try{await playerToken();await authPost('https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode',{requestType:'VERIFY_EMAIL',idToken:playerAuth.idToken});verifyMsg('✓ Sent. Check your inbox (and junk folder).',true);}
+// sending the same email again and again makes school mail filters hold it back for longer, so: one email per 10 minutes
+// unless asked, "Send again" waits 2 minutes, and the box checks by itself whether the link has been clicked
+const VERIFY_SENT='latin_verify_sent';let _vfTimer=null,_vfBtnT=null;
+function verifyAgo(){try{return Date.now()-(+localStorage.getItem(VERIFY_SENT)||0);}catch(e){return 1e12;}}
+function verifyResendBtn(){const b=document.getElementById('verifyResend');if(!b)return;clearTimeout(_vfBtnT);const left=120000-verifyAgo();if(left>0){b.disabled=true;b.textContent='Send again (in '+Math.ceil(left/1000)+' s)';_vfBtnT=setTimeout(verifyResendBtn,1000);}else{b.disabled=false;b.textContent='Send the email again';}}
+function verifyWatch(){clearInterval(_vfTimer);_vfTimer=setInterval(async()=>{const o=document.getElementById('verifyOverlay');if(!o||o.style.display!=='flex'){clearInterval(_vfTimer);return;}if(await verifyReady()){clearInterval(_vfTimer);closeOverlay('verifyOverlay');toast('✓ Email verified.');if(verifyName&&!lbMe)lbSaveName(verifyName);}},15000);}
+async function verifySend(auto){if(auto&&verifyAgo()<600000){verifyMsg('We sent the email '+Math.max(1,Math.round(verifyAgo()/60000))+' min ago. It can take a while to arrive.',true);verifyResendBtn();return;}
+  try{await playerToken();await authPost('https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode',{requestType:'VERIFY_EMAIL',idToken:playerAuth.idToken});try{localStorage.setItem(VERIFY_SENT,String(Date.now()));}catch(e){}verifyMsg('✓ Sent. Check your inbox (and junk folder).',true);verifyResendBtn();}
   catch(e){verifyMsg(/TOO_MANY/.test(e.message)?'Too many emails. Wait a few minutes and try again.':'Couldn’t send it. Check your internet and try again.',false);}}
-function verifyOpen(name){if(name)verifyName=name;const e=tokEmail(),b=document.getElementById('verifyBody');
+function verifyOpen(name){if(name)verifyName=name;verifyMsg('');const e=tokEmail(),b=document.getElementById('verifyBody');
   if(!e){b.innerHTML='<p>To join the leaderboard you need an account with an <b>email you can receive</b>. This keeps bots and fake accounts out.</p><p>First save your account with your email. We’ll then send you a link to confirm it.</p>';
     document.getElementById('verifyBtns').innerHTML='<button class="btn-primary" onclick="closeOverlay(\'verifyOverlay\');acctOpen(\'create\')">Save with email</button><button class="lb-link" onclick="closeOverlay(\'verifyOverlay\');acctOpen(\'signin\')">I already have an account</button>';}
-  else{b.innerHTML='<p>We’ve sent a link to <b>'+esc(e)+'</b>. Open the email and click the link to confirm it’s yours, then come back and press <b>I’ve verified</b>.</p>';
-    document.getElementById('verifyBtns').innerHTML='<button class="btn-primary" onclick="verifyDone()">I’ve verified</button><button class="btn-secondary" onclick="verifySend()">Send the email again</button>';verifySend();}
-  verifyMsg('');document.getElementById('verifyOverlay').style.display='flex';}
+  else{b.innerHTML='<p>We’ve sent a link to <b>'+esc(e)+'</b>. Open the email and click the link to confirm it’s yours. This box notices by itself once you have (or press <b>I’ve verified</b>).</p><p class="muted" style="font-size:12.5px">School email can take up to 20–30 minutes to deliver it, and sometimes puts it in junk or quarantine. You can keep practising meanwhile (⭐ start counting once you’ve joined).</p>';
+    document.getElementById('verifyBtns').innerHTML='<button class="btn-primary" onclick="verifyDone()">I’ve verified</button><button class="btn-secondary" id="verifyResend" onclick="verifySend()">Send the email again</button>';verifySend(true);verifyWatch();}
+  document.getElementById('verifyOverlay').style.display='flex';}
 async function verifyDone(){verifyMsg('Checking…');if(await verifyReady()){closeOverlay('verifyOverlay');toast('✓ Email verified.');if(verifyName&&!lbMe)lbSaveName(verifyName);}else verifyMsg('Not verified yet. Click the link in the email first (check your junk folder).',false);}
 // change password / email: check the current password first (Firebase wants a recent sign-in for both)
 async function acctChange(){const I=cloudInfo(),cur=document.getElementById('acctPass').value,isPw=acctMode==='chpass';
