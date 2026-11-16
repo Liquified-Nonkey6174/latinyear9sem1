@@ -19,6 +19,14 @@ body.slate{--bg:#161616;--surface:#1c1c1d;--surface2:#232324;--surface3:#2a2a2c;
 body.parchment{--bg:#f2eadb;--surface:#faf5e8;--surface2:#e8e0cc;--surface3:#ddd4be;--border:#c8bea5;--border2:#b0a488;--text:#1c1808;--text2:#4a4028;--text3:#887860;--accent:#8a5018;--accent-dim:#a86820;--accent-bg:#f5e8d0;--green:#1a5828;--green-bg:#e0ede2;--green-bdr:#88c098;--red:#882020;--red-bg:#f2dede;--red-bdr:#c89090;--gold:#685010;--gold-bg:#f2e8c8;--gold-bdr:#c0a848}
 body.mist{--bg:#e9ecee;--surface:#f4f6f7;--surface2:#dfe4e7;--surface3:#d3d9dd;--border:#bfc7cd;--border2:#a2acb4;--text:#1c2125;--text2:#45505a;--text3:#75808a;--accent:#4d6f8c;--accent-dim:#6a8aa6;--accent-bg:#e2e9ef;--green:#1a6838;--green-bg:#ddf0e5;--green-bdr:#88c8a0;--red:#882828;--red-bg:#f0dede;--red-bdr:#c89898;--gold:#685818;--gold-bg:#f0e8d0;--gold-bdr:#c0a850}
 body.sepia{--bg:#1a1612;--surface:#221d18;--surface2:#2a241e;--surface3:#322b24;--border:#3d342b;--border2:#54483b;--text:#e6dccb;--text2:#a8977f;--text3:#75664f;--accent:#cfa46a;--accent-dim:#8f6c3e;--accent-bg:#2a2118;--green:#86b896;--green-bg:#141c17;--green-bdr:#2c4335;--red:#c98585;--red-bg:#1f1616;--red-bdr:#4a2b2b;--gold:#c9ab6a;--gold-bg:#1e1a12;--gold-bdr:#4a3e22}
+body.imperial{--bg:#160d1c;--surface:#1f1327;--surface2:#281931;--surface3:#30203b;--border:#3d2a4a;--border2:#553c66;--text:#efe6f2;--text2:#b39fbd;--text3:#7a6585;--accent:#d8b45a;--accent-dim:#9c7f3a;--accent-bg:#2a1d2a;--green:#8cc39a;--green-bg:#142018;--green-bdr:#2d4a36;--red:#e08a8a;--red-bg:#2a1418;--red-bdr:#5a2a32;--gold:#e0bd62;--gold-bg:#2a2012;--gold-bdr:#5a4522}
+body.marble{--bg:#eceae6;--surface:#f8f7f4;--surface2:#e3e0da;--surface3:#d8d4cc;--border:#c9c4ba;--border2:#a9a398;--text:#1e1d1b;--text2:#4c4943;--text3:#86817a;--accent:#7a5a2e;--accent-dim:#a07a44;--accent-bg:#f1eadf;--green:#1d5a33;--green-bg:#e1eee4;--green-bdr:#8fc29f;--red:#8c2626;--red-bg:#f3e1e1;--red-bdr:#cf9494;--gold:#6e5414;--gold-bg:#f1e9cf;--gold-bdr:#c4ad55}
+body.pompeii{--bg:#1a0d0b;--surface:#26120f;--surface2:#311813;--surface3:#3b1e18;--border:#4a2620;--border2:#66352b;--text:#f1e2d2;--text2:#c49e84;--text3:#86624f;--accent:#e0a447;--accent-dim:#a3742f;--accent-bg:#2e1a10;--green:#9cc48d;--green-bg:#17200f;--green-bdr:#36502b;--red:#ff8f7a;--red-bg:#33130f;--red-bdr:#6a2a20;--gold:#e8bb5a;--gold-bg:#2c2010;--gold-bdr:#5c4420}
+body.saturnalia{--bg:#0e1611;--surface:#142019;--surface2:#1a2920;--surface3:#203128;--border:#2a3f33;--border2:#3b5646;--text:#eaf0e6;--text2:#a7b8a6;--text3:#6b7f6c;--accent:#e2b85c;--accent-dim:#a3843f;--accent-bg:#1f2617;--green:#8fd19e;--green-bg:#122017;--green-bdr:#2c4a36;--red:#ec7d6e;--red-bg:#2a1512;--red-bdr:#5c2a24;--gold:#e8c060;--gold-bg:#262012;--gold-bdr:#564522}
+body.imperial{background-image:radial-gradient(ellipse at 50% -10%,rgba(216,180,90,.12),transparent 60%);background-attachment:fixed}
+body.marble{background-image:linear-gradient(115deg,transparent 40%,rgba(110,100,85,.045) 40.6%,transparent 41.8%),linear-gradient(160deg,transparent 62%,rgba(110,100,85,.04) 62.5%,transparent 63.6%),linear-gradient(35deg,transparent 75%,rgba(110,100,85,.035) 75.4%,transparent 76.2%),radial-gradient(ellipse at 20% 10%,rgba(255,255,255,.7),transparent 55%);background-attachment:fixed}
+body.pompeii{background-image:radial-gradient(ellipse at 50% 0,rgba(176,52,32,.22),transparent 60%),radial-gradient(ellipse at 50% 110%,rgba(224,164,71,.07),transparent 50%);background-attachment:fixed}
+body.saturnalia{background-image:radial-gradient(circle at 12% 18%,rgba(226,184,92,.10),transparent 22%),radial-gradient(circle at 88% 72%,rgba(236,125,110,.08),transparent 24%),radial-gradient(circle at 70% 12%,rgba(226,184,92,.06),transparent 18%);background-attachment:fixed}
 keyframes cinnaFloat{0%,100%{transform:translateY(0) rotate(0deg)}25%{transform:translateY(-8px) rotate(5deg)}50%{transform:translateY(-4px) rotate(-3deg)}75%{transform:translateY(-10px) rotate(4deg)}}
 
 
@@ -3127,6 +3135,10 @@ const THEMES=[
   {id:'violet',label:'Violet',bg:'#151318',surface:'#1c1920',accent:'#a99bc4'},
   {id:'slate',label:'Slate',bg:'#161616',surface:'#1c1c1d',accent:'#a8b4c0'},
   {id:'sepia',label:'Sepia',bg:'#1a1612',surface:'#221d18',accent:'#cfa46a'},
+  {id:'imperial',label:'Imperial',bg:'#160d1c',surface:'#281931',accent:'#d8b45a'},
+  {id:'marble',label:'Marble',bg:'#eceae6',surface:'#f8f7f4',accent:'#7a5a2e'},
+  {id:'pompeii',label:'Pompeii',bg:'#1a0d0b',surface:'#7a2418',accent:'#e0a447'},
+  {id:'saturnalia',label:'Saturnalia',bg:'#0e1611',surface:'#1a2920',accent:'#e2b85c'},
 ];
 let currentTheme='dark';
 // Swap only the theme class, keeping other body classes (e.g. settings like no-side, calm).
