@@ -715,6 +715,8 @@ body:has(.overlay[style*="display: flex"]) .side-fab,body:has(#bReveal[style*="d
 .badge-card.earned.legend-imp{border-color:#e0b030;box-shadow:0 0 0 1px rgba(224,176,48,.5),0 0 26px rgba(194,24,91,.4);background:radial-gradient(circle at 50% 20%,rgba(194,24,91,.25),transparent 68%),var(--surface)}
 .badge-card.earned.legend-eter{border-color:#6fd6ff;box-shadow:0 0 0 1px rgba(111,214,255,.5),0 0 26px rgba(63,120,255,.45);background:radial-gradient(circle at 50% 20%,rgba(63,140,255,.22),transparent 68%),var(--surface)}
 .badge-card.earned.legend-eter .bd-name{background:linear-gradient(90deg,#e6fbff,#6fd6ff,#9b6bff,#6fd6ff,#e6fbff);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:epFlow 4s linear infinite;font-size:15px}
+.badge-card.earned.legend-emer{border-color:#3fe0a8;box-shadow:0 0 0 1px rgba(63,224,168,.5),0 0 26px rgba(17,163,127,.45);background:radial-gradient(circle at 50% 20%,rgba(33,209,154,.2),transparent 68%),var(--surface)}
+.badge-card.earned.legend-emer .bd-name{background:linear-gradient(90deg,#eafff6,#3fe0a8,#e6c35a,#3fe0a8,#eafff6);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:epFlow 4s linear infinite;font-size:15px}
 .badge-card.earned.legend-sun .bd-name{background:linear-gradient(90deg,#fff1a8,#ffb020,#ff6a00,#ffb020,#fff1a8);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:epFlow 4s linear infinite;font-size:15px}
 .badge-card.earned.legend-imp .bd-name{background:linear-gradient(90deg,#fff1b8,#e0b030,#ff5c8a,#e0b030,#fff1b8);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:epFlow 4s linear infinite;font-size:15px}
 .badge-card.earned.legend::before{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.14) 48%,transparent 60%);transform:translateX(-100%);animation:epShine 4.5s ease-in-out infinite;pointer-events:none}
@@ -780,7 +782,7 @@ body:has(.overlay[style*="display: flex"]) .side-fab,body:has(#bReveal[style*="d
       <span id="descText" class="desc-text"></span>
     </div>
   </div>
-  <div class="settings-row"><button class="settings-btn" onclick="showSettings()">⚙ Settings</button> <button class="settings-btn" id="acctBtn" onclick="acctHub()" title="Sign in, or use your account on other devices">👤 Account</button> <button class="settings-btn" onclick="openBadges()">🏅 Badges <span id="badgeBtnCount" style="opacity:.7;font-size:12px"></span><span class="bf-dot" id="badgeBtnDot" title="New in the badge feed"></span></button></div>
+  <div class="settings-row"><button class="settings-btn" onclick="showSettings()">⚙ Settings</button> <button class="settings-btn" id="acctBtn" onclick="acctHub()" title="Sign in, or use your account on other devices">👤 Account</button> <button class="settings-btn" onclick="openBadges()">🏅 Badges <span id="badgeBtnCount" style="opacity:.7;font-size:12px"></span><span class="bf-dot" id="badgeBtnDot" title="New in the badge feed"></span></button> <button class="settings-btn" id="dqBtn" onclick="dqOpen()" style="display:none">✍ December quote</button></div>
   <div class="nav-tabs">
     <button class="nav-tab active" onclick="showMainTab('practice')">Practice</button>
     <button class="nav-tab" onclick="showMainTab('read')">Reading</button>
@@ -2106,7 +2108,18 @@ body:has(.overlay[style*="display: flex"]) .side-fab,body:has(#bReveal[style*="d
     <div class="ann-head">📢 <span id="annTitle">Announcement</span></div>
     <div class="ann-body" id="annBody"></div>
     <div class="ann-date" id="annDate"></div>
-    <div class="ann-btns"><button class="btn-primary" onclick="closeAnn()">Got it</button><button class="lb-link" onclick="annHide()">Don’t show again until there’s a new one</button></div>
+    <div class="ann-btns"><button class="btn-primary" id="annDq" onclick="closeAnn();dqOpen()" style="display:none">✍ Submit your quote</button><button class="btn-primary" onclick="closeAnn()">Got it</button><button class="lb-link" onclick="annHide()">Don’t show again until there’s a new one</button></div>
+  </div>
+</div>
+<div id="dqOverlay" class="overlay" style="display:none" onclick="closeOverlay('dqOverlay')">
+  <div class="about-box ann-box" onclick="event.stopPropagation()" style="text-align:left">
+    <button class="about-close" onclick="closeOverlay('dqOverlay')">×</button>
+    <div class="ann-head">✍ <span id="dqTitle">December quote</span></div>
+    <div class="ann-body" id="dqHint" style="margin-bottom:10px"></div>
+    <textarea id="dqQ" class="desc-ta" rows="4" maxlength="500" placeholder="Your quote" style="width:100%"></textarea>
+    <input id="dqE" class="lb-input" maxlength="500" placeholder="English translation or note (optional)" style="width:100%;margin-top:8px">
+    <div class="ann-btns"><button class="btn-primary" id="dqSave" onclick="dqSave()">Submit</button></div>
+    <div id="dqMsg" class="backup-msg"></div>
   </div>
 </div>
 <div id="helpOverlay" class="overlay" style="display:none" onclick="hideHelp()">
@@ -4417,6 +4430,29 @@ async function annLoad(force){let a=null;try{a=await fbReq('GET','announce');}ca
     document.getElementById('annTitle').textContent=annCur.title||'Announcement';document.getElementById('annBody').innerHTML=annFormat(annCur.text);
     document.getElementById('annDate').textContent=annCur.t?'Posted '+new Date(annCur.t).toLocaleDateString([], {day:'numeric',month:'short',year:'numeric'}):'';
     document.getElementById('annOverlay').style.display='flex';};show();}
+// ── DECEMBER QUOTES: one submission per account (it can be edited while submissions are open); only the admin sees them all ──
+let DQ=null;
+async function dqLoad(){try{DQ=await fbReq('GET','dqcfg');}catch(e){DQ=null;}const on=!!(DQ&&DQ.open);['dqBtn','annDq'].forEach(id=>{const b=document.getElementById(id);if(b)b.style.display=on?'':'none';});
+  const b=document.getElementById('dqBtn');if(b&&DQ&&DQ.title)b.textContent='✍ '+DQ.title;const a=document.getElementById('annDq');if(a&&DQ&&DQ.title)a.textContent='✍ '+DQ.title;}
+async function dqOpen(){await dqLoad();const msg=document.getElementById('dqMsg'),q=document.getElementById('dqQ'),e=document.getElementById('dqE'),sv=document.getElementById('dqSave');
+  document.getElementById('dqTitle').textContent=(DQ&&DQ.title)||'December quote';document.getElementById('dqHint').innerHTML=DQ&&DQ.hint?annFormat(DQ.hint):'Submit one quote. You can come back and change it until submissions close.';
+  msg.textContent='';msg.style.color='';q.value='';e.value='';document.getElementById('dqOverlay').style.display='flex';
+  if(!(DQ&&DQ.open)){msg.textContent='Submissions are closed.';q.disabled=e.disabled=sv.disabled=true;return;}
+  if(!lbMe){msg.textContent='Join the leaderboard first (with your name), so the admin knows whose quote it is.';q.disabled=e.disabled=sv.disabled=true;return;}
+  q.disabled=e.disabled=sv.disabled=false;sv.textContent='Submit';
+  try{const r=await fbReq('GET','dquote/'+lbMe.pid);if(r&&r.q){q.value=r.q;e.value=r.e||'';sv.textContent='Save changes';msg.textContent='✓ You submitted this on '+new Date(r.t).toLocaleDateString()+'. You can change it.';msg.style.color='var(--green)';}}catch(x){}
+  setTimeout(()=>q.focus(),50);}
+async function dqSave(){const q=document.getElementById('dqQ').value.trim(),e=document.getElementById('dqE').value.trim(),msg=document.getElementById('dqMsg'),sv=document.getElementById('dqSave');
+  if(!lbMe)return;if(!q){msg.textContent='Write your quote first.';msg.style.color='var(--red)';return;}sv.disabled=true;
+  try{await fbReq('PUT','dquote/'+lbMe.pid,{q:q.slice(0,500),e:e.slice(0,500),n:String(lbMe.name||'').slice(0,30),t:{'.sv':'timestamp'}});msg.textContent='✓ Submitted! You can change it until submissions close.';msg.style.color='var(--green)';sv.textContent='Save changes';}
+  catch(x){msg.textContent=/40[13]/.test(x.message)?'Couldn’t submit: submissions may have just closed.':'Couldn’t submit. Check your internet and try again.';msg.style.color='var(--red)';}
+  sv.disabled=false;}
+// no quote yet while submissions are open: the box pops up once each visit (after other pop-ups have closed)
+let dqNudged=false;
+async function dqNudge(){if(dqNudged||ENGINE)return;await dqLoad();if(!(DQ&&DQ.open)||!lbMe)return;let mine=null;try{mine=await fbReq('GET','dquote/'+lbMe.pid);}catch(e){return;}if(mine&&mine.q)return;
+  const show=()=>{if(dqNudged)return;const busy=(typeof tourSteps!=='undefined'&&tourSteps)||[...document.querySelectorAll('.overlay')].some(o=>o.style.display==='flex')||(typeof revealOn!=='undefined'&&revealOn);
+    if(busy){setTimeout(show,1500);return;}dqNudged=true;dqOpen();};show();}
+setTimeout(dqNudge,4000);setInterval(()=>{if(document.visibilityState==='visible')dqLoad();},300000);
 function closeAnn(){document.getElementById('annOverlay').style.display='none';}
 function annHide(){try{localStorage.setItem(ANN_HIDE,String((annCur&&annCur.t)||Date.now()));}catch(e){}closeAnn();}
 setTimeout(()=>annLoad(false),1800);
@@ -4622,6 +4658,7 @@ const S={
  constans:'<path d="M50 22 C58 34 68 42 66 58 C65 70 57 78 50 78 C43 78 35 70 34 58 C33 48 40 42 42 34 C45 42 48 44 50 44 C52 38 51 30 50 22 Z M50 78 C45 76 42 70 44 63 C46 57 50 56 50 50 C54 56 58 60 57 66 C56 73 53 77 50 78"/>',
  matutinus:'<path d="M28 64 H72 M36 64 a14 14 0 0 1 28 0 M50 36 V42 M33 45 L37 49 M67 45 L63 49 M24 56 H30 M70 56 H76 M34 72 H66 M40 78 H60"/>',
  nocturnus:'<path d="M58 26 a26 26 0 1 0 16 40 a20 20 0 1 1 -16 -40 Z"/><path d="M66 32 l1.6 3.4 3.6 .5 -2.6 2.5 .6 3.6 -3.2 -1.7 -3.2 1.7 .6 -3.6 -2.6 -2.5 3.6 -.5z" class="f"/>',
+ infallibilis:'<circle cx="48" cy="52" r="22"/><circle cx="48" cy="52" r="13"/><circle cx="48" cy="52" r="4" class="f"/><path d="M48 52 L74 26 M66 24 L74 26 L76 34"/>',
  sineerrore:'<circle cx="48" cy="52" r="22"/><circle cx="48" cy="52" r="13"/><circle cx="48" cy="52" r="4" class="f"/><path d="M48 52 L74 26 M66 24 L74 26 L76 34"/>',
  perfectus:'<path d="M62 32 C58 28 54 26 49 26 C36 26 28 36 28 50 C28 64 36 74 49 74 C54 74 58 72 62 68"/><path d="M68 40 l3 6 6 1 -4.5 4 1 6 -5.5 -3 -5.5 3 1 -6 -4.5 -4 6 -1z" class="f"/>',
  lexicon:'<path d="M50 34 C42 28 32 28 24 30 V72 C32 70 42 70 50 76 C58 70 68 70 76 72 V30 C68 28 58 28 50 34 Z M50 34 V76 M30 40 H44 M30 48 H44 M30 56 H44 M56 40 H70 M56 48 H70 M56 56 H70"/>',
@@ -4651,16 +4688,16 @@ function romanN(n){n=Math.floor(+n||0);if(n<1)return '';if(n>3999)return n.toLoc
 (function(root){
 // rim metals: [light, mid, dark, ribbon text]
 const METALS={bronze:['#ffd2a1','#c07a3a','#5e3110','#2a1406'],silver:['#ffffff','#bfc8d2','#59626c','#1c2228'],gold:['#fff4b8','#e6b422','#7a4f00','#2b1c00'],
-  diamond:['#f0fdff','#86e0ff','#1f6a99','#062236'],obsidian:['#fbf0ff','#d08cff','#7b2cbf','#1a0b2e'],rainbow:['#ffffff','#ff7ad9','#5b2a86','#2b1c00'],royal:['#fff0b8','#d9ae4c','#6b4a10','#2b1c00'],solar:['#fff7c4','#ffb020','#b33c00','#2b1000'],eternal:['#effcff','#6fd6ff','#2a3fae','#050a2a'],imperial:['#fff1b8','#e0b030','#6e0b26','#1a0006'],locked:['#a5a5a5','#727272','#3a3a3a','#1c1c1c']};
+  diamond:['#f0fdff','#86e0ff','#1f6a99','#062236'],obsidian:['#fbf0ff','#d08cff','#7b2cbf','#1a0b2e'],rainbow:['#ffffff','#ff7ad9','#5b2a86','#2b1c00'],royal:['#fff0b8','#d9ae4c','#6b4a10','#2b1c00'],solar:['#fff7c4','#ffb020','#b33c00','#2b1000'],eternal:['#effcff','#6fd6ff','#2a3fae','#050a2a'],emerald:['#eafff6','#3fe0a8','#0d6b52','#03231a'],imperial:['#fff1b8','#e0b030','#6e0b26','#1a0006'],locked:['#a5a5a5','#727272','#3a3a3a','#1c1c1c']};
 // enamel (face) colours per badge: [light, dark]
 const ENAMEL={inscriptus:['#2f6f8a','#0f2a38'],salve:['#3f7a5a','#163a27'],primus:['#8a2d2d','#3c0f0f'],scriptor:['#2f5a8a','#0f2440'],gradus:['#7a1f2b','#2e0710'],
-  diesmagnus:['#b5651d','#4a2306'],diesingens:['#ff9a1f','#7a2200'],perpetuus:['#3b6cf0','#0b1450'],augustus:['#8a1538','#2a0420'],constans:['#a33a17','#3d1205'],matutinus:['#c27a3a','#4d2a0c'],nocturnus:['#28336e','#0b1030'],
+  diesmagnus:['#b5651d','#4a2306'],diesingens:['#ff9a1f','#7a2200'],perpetuus:['#3b6cf0','#0b1450'],infallibilis:['#11a37f','#033a2c'],augustus:['#8a1538','#2a0420'],constans:['#a33a17','#3d1205'],matutinus:['#c27a3a','#4d2a0c'],nocturnus:['#28336e','#0b1030'],
   sineerrore:['#1f6b6b','#072a2a'],perfectus:['#5c2a7a','#220b33'],lexicon:['#9a6a24','#3a2408'],lexiconmagnus:['#5f8f2a','#1d3a08'],
   doctus:['#1f7fc0','#05284a'],doctissimus:['#6a3ad0','#1a0750'],gladiator:['#6b1f1f','#2a0707'],victor:['#2a6b3a','#0b2a13'],
   invictus:['#2a3f6b','#0b152a'],rival:['#6b4a1f','#2a1a07'],popularis:['#8a2a55','#350a20'],socius:['#b07a1f','#3d2605'],civis:['#6b1f2a','#2a070d'],
   arcana:['#4b1d6e','#1f0b33'],fereomnia:['#4b1d6e','#1f0b33'],
   omnia:['#4b1d6e','#1f0b33'],omniamax:['#4b1d6e','#1f0b33']};
-const SHAPE={gradus:'burst',diesmagnus:'hex',diesingens:'burst',perpetuus:'hex',augustus:'shield',constans:'hex',matutinus:'hex',nocturnus:'hex',sineerrore:'oct',perfectus:'oct',
+const SHAPE={gradus:'burst',diesmagnus:'hex',diesingens:'burst',perpetuus:'hex',infallibilis:'oct',augustus:'shield',constans:'hex',matutinus:'hex',nocturnus:'hex',sineerrore:'oct',perfectus:'oct',
   lexicon:'shield',lexiconmagnus:'shield',doctus:'shield',doctissimus:'shield',gladiator:'shield',victor:'shield',invictus:'shield',rival:'shield',
   popularis:'rosette',civis:'rosette',salve:'rosette',scriptor:'rosette',primus:'circle'};
 function metalFor(level,max,o){if(o.locked)return 'locked';if(o.legend)return o.legend;if(o.grand>=4)return 'diamond';if(o.rainbow)return 'rainbow';if(o.meta)return 'royal';if(o.secret)return 'obsidian';
@@ -4680,7 +4717,7 @@ function laurel(c,dark){let s='';for(const side of [-1,1]){for(let i=0;i<7;i++){
   let rot=(108+i*19)+90-25;if(side>0)rot=180-rot;const rx=8.5-i*.3,ry=4-i*.15;
   s+='<ellipse cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" rx="'+rx.toFixed(1)+'" ry="'+ry.toFixed(1)+'" transform="rotate('+rot.toFixed(0)+' '+x.toFixed(1)+' '+y.toFixed(1)+')" fill="'+c+'" stroke="'+dark+'" stroke-width=".5"/>';}}return s;}
 let uid=0;
-function badgeArt(id,level,max,o){o=o||{};if(id==='rank')id='gradus';if(id==='omniamax'){id='omnia';o={...o,rainbow:true};}const gr=o.locked?0:(GRAND[id]||0);if(gr)o={...o,grand:gr};const LG={diesingens:'solar',augustus:'imperial',perpetuus:'eternal'}[id];if(LG&&!o.locked)o={...o,legend:LG};const mk=metalFor(level,max,o),m=METALS[mk];const k='ba'+(++uid);const size=o.size||96;
+function badgeArt(id,level,max,o){o=o||{};if(id==='rank')id='gradus';if(id==='omniamax'){id='omnia';o={...o,rainbow:true};}const gr=o.locked?0:(GRAND[id]||0);if(gr)o={...o,grand:gr};const LG={diesingens:'solar',augustus:'imperial',perpetuus:'eternal',infallibilis:'emerald'}[id];if(LG&&!o.locked)o={...o,legend:LG};const mk=metalFor(level,max,o),m=METALS[mk];const k='ba'+(++uid);const size=o.size||96;
   const shape=o.secret?'diamond':o.meta?'rosette':(SHAPE[id]||'circle');
   let en=ENAMEL[id]||(root._qE&&root._qE(id))||['#3a3a3a','#141414'];if(o.locked)en=['#3a3a3a','#1a1a1a'];
   const ink=o.locked?'#8d8d8d':m[0];
@@ -4695,6 +4732,7 @@ function badgeArt(id,level,max,o){o=o||{};if(id==='rank')id='gradus';if(id==='om
   if(gr>=3){const hc=gr>=4?'#8fe6ff':'#ffd54a';svg+='<g class="ba-pulse">'+(gr>=4?'<path d="'+starPath(16,56,40)+'" fill="'+hc+'" opacity=".35"/>':'')+'<path d="'+shapeD(shape,45)+'" fill="'+hc+'" opacity=".5" filter="url(#'+k+'g)"/></g>';}
   if(o.legend==='solar')svg+='<g class="ba-pulse"><path d="'+shapeD(shape,46)+'" fill="#ff8a00" opacity=".55" filter="url(#'+k+'g)"/></g><g class="ba-spin"><path d="'+starPath(16,58,38)+'" fill="#ffc23a" opacity=".42"/><path d="'+starPath(8,62,30)+'" fill="#ff7a00" opacity=".3"/></g>';
   if(o.legend==='eternal')svg+='<g class="ba-pulse"><path d="'+shapeD(shape,46)+'" fill="#3fa9ff" opacity=".55" filter="url(#'+k+'g)"/></g><g class="ba-spin"><path d="'+starPath(14,58,40)+'" fill="#7fe0ff" opacity=".35"/></g><g class="ba-spin slow"><path d="'+starPath(7,60,34)+'" fill="#9b6bff" opacity=".3"/></g>';
+  if(o.legend==='emerald')svg+='<g class="ba-pulse"><path d="'+shapeD(shape,46)+'" fill="#21d19a" opacity=".5" filter="url(#'+k+'g)"/></g><g class="ba-spin"><path d="'+starPath(16,58,40)+'" fill="#7ff0c8" opacity=".32"/></g><g class="ba-spin slow"><path d="'+starPath(8,61,34)+'" fill="#e6c35a" opacity=".25"/></g>';
   if(o.legend==='imperial')svg+='<g class="ba-pulse"><path d="'+shapeD(shape,46)+'" fill="#c2185b" opacity=".55" filter="url(#'+k+'g)"/></g><g class="ba-spin slow"><path d="'+starPath(24,57,46)+'" fill="#e0b030" opacity=".35"/></g>';
   svg+=rb?'<g class="ba-rainbow">':'';if(wreath)svg+=laurel('url(#'+k+'r)',m[2]);
   if(o.secret&&!o.locked)svg+='<path d="'+shapeD(shape,41)+'" fill="#c77dff" opacity=".35" filter="url(#'+k+'g)"/>';
@@ -4703,7 +4741,7 @@ function badgeArt(id,level,max,o){o=o||{};if(id==='rank')id='gradus';if(id==='om
    +'<path d="'+shapeD(shape,31)+'" fill="url(#'+k+'f)"/>'
    +'<path d="'+shapeD(shape,31)+'" fill="none" stroke="'+m[0]+'" stroke-opacity=".35" stroke-width=".8"/>'
    +'<ellipse cx="42" cy="35" rx="17" ry="7" fill="#fff" opacity=".08"/>';
-  svg+='<g transform="translate(50 50) scale('+(({diesingens:.74,augustus:.78,perpetuus:.72})[id]||.54)+') translate(-50 -50)" fill="none" stroke="'+ink+'" stroke-width="3.8" stroke-linecap="round" stroke-linejoin="round" filter="url(#'+k+'s)">'
+  svg+='<g transform="translate(50 50) scale('+(({diesingens:.74,augustus:.78,perpetuus:.72,infallibilis:.74})[id]||.54)+') translate(-50 -50)" fill="none" stroke="'+ink+'" stroke-width="3.8" stroke-linecap="round" stroke-linejoin="round" filter="url(#'+k+'s)">'
    +sym.replace(/class="f"/g,'fill="'+ink+'" stroke="none"').replace(/class="t"/g,'fill="'+ink+'" stroke="none"')+'</g>';
   if(gr>=2){const st=(cx,cy,r)=>{let d='';for(let i=0;i<10;i++){const rr=i%2?r*.45:r,a=(-90+i*36)*Math.PI/180;d+=(i?'L':'M')+(cx+rr*Math.cos(a)).toFixed(2)+' '+(cy+rr*Math.sin(a)).toFixed(2);}return '<path d="'+d+'Z" fill="url(#'+k+'r)" stroke="'+m[2]+'" stroke-width="1" stroke-linejoin="round" filter="url(#'+k+'s)"/>';};
     svg+=gr>=4?st(31,9,6.5)+st(69,9,6.5)+st(50,3,9.5):st(50,4,gr>=3?9:7.5);}
@@ -4818,6 +4856,7 @@ const BADGES=[
  {id:'matutinus',icon:'🌅',name:'Matutinus',lat:'early riser',desc:'Get a question right before 8 am.',stat:()=>bstat().early||0,lv:[1]},
  {id:'nocturnus',icon:'🦉',name:'Nocturnus',lat:'night owl',desc:'Get a question right after 8 pm.',stat:()=>bstat().late||0,lv:[1]},
  {id:'sineerrore',icon:'🎯',name:'Sine Errore',lat:'without error',desc:'Get questions right in a row (any type).',unit:'in a row',stat:()=>bstat().bestRun||0,lv:[10,20,30,50,100,200,300]},
+ {id:'infallibilis',icon:'🎯',name:'Infallibilis',lat:'unerring',desc:'Carries on after Sine Errore VII: a new level for every 100 more right in a row.',unit:'in a row',inf:true,stat:()=>bstat().bestRun||0,lv:Array.from({length:5000},(_,i)=>300+i*100)},
  {id:'perfectus',icon:'💯',name:'Perfectus',desc:'Get 50 questions right in a row.',stat:()=>bstat().perfect||0,lv:[1]},
  {id:'lexicon',icon:'📖',name:'Lexicon',desc:'See every word in the main list (word packs not included). New words make it harder, but once earned it stays.',stat:()=>lexStat('main','seen'),lv:[1]},
  {id:'lexiconmagnus',icon:'📚',name:'Lexicon Magnum',lat:'great dictionary',desc:'See every word in the main list and all word packs.',stat:()=>lexStat('all','seen'),lv:[1]},
@@ -4973,10 +5012,10 @@ function badgeCheck(){secretWipe();try{verLoad();}catch(e){}const got=bjson(BADG
 let badgeFilter='all';try{badgeFilter=localStorage.getItem('latin_bfilter')||'all';}catch(e){}
 function setBadgeFilter(f){badgeFilter=f;try{localStorage.setItem('latin_bfilter',f);}catch(e){}renderBadges();}
 function badgeShown(l,max){return badgeFilter==='all'||(badgeFilter==='none'&&!l)||(badgeFilter==='got'&&l>0)||(badgeFilter==='unmax'&&l>0&&l<max);}
-const BADGE_GROUPS=[['⭐','Points',['rank','augustus','diesmagnus','diesingens']],['🔥','Every day',['matutinus','nocturnus','constans','perpetuus']],['🎯','Accuracy',['primus','perfectus','sineerrore']],
+const BADGE_GROUPS=[['⭐','Points',['rank','augustus','diesmagnus','diesingens']],['🔥','Every day',['matutinus','nocturnus','constans','perpetuus']],['🎯','Accuracy',['primus','perfectus','sineerrore','infallibilis']],
   ['📚','Words',['lexicon','lexiconmagnus','doctus','doctissimus']],['⚔️','Challenges',['gladiator','rival','invictus','victor']],['💬','Leaderboard & chat',['salve','scriptor','socius','civis','popularis']]];
 function badgePinBtn(c,id){if(!lbMe)return;const pinned=badgePins().includes(id);const pb=document.createElement('button');pb.className='bd-pin'+(pinned?' on':'');pb.textContent=pinned?'📌 Shown':'📌 Show';pb.title=pinned?'Shown next to your name on the leaderboard. Click to hide.':'Show next to your name on the leaderboard (up to 6).';pb.onclick=()=>toggleBadgePin(id);c.appendChild(pb);if(pinned)c.classList.add('pinned');}
-function badgeCard(bd,got){const e=got[bd.id],l=e?e.l:0,v=badgeStatV(bd),next=bd.lv[l];const c=document.createElement('div');c.className='badge-card'+(l?' earned':' locked')+(bd.tiers?(l?' m-'+tierMetal(l,bd.lv.length):''):l?' lvl'+Math.min(l,7):'')+(GRAND[bd.id]?' grand'+GRAND[bd.id]:'')+(bd.secret?' secret':'')+(bd.id==='diesingens'?' legend legend-sun':bd.id==='augustus'?' legend legend-imp':bd.id==='perpetuus'?' legend legend-eter':'');
+function badgeCard(bd,got){const e=got[bd.id],l=e?e.l:0,v=badgeStatV(bd),next=bd.lv[l];const c=document.createElement('div');c.className='badge-card'+(l?' earned':' locked')+(bd.tiers?(l?' m-'+tierMetal(l,bd.lv.length):''):l?' lvl'+Math.min(l,7):'')+(GRAND[bd.id]?' grand'+GRAND[bd.id]:'')+(bd.secret?' secret':'')+(bd.id==='diesingens'?' legend legend-sun':bd.id==='augustus'?' legend legend-imp':bd.id==='perpetuus'?' legend legend-eter':bd.id==='infallibilis'?' legend legend-emer':'');
   let prog='';if(next!=null&&!bd.secret){if(bd.id.startsWith('lex')||bd.id.startsWith('doct'))prog=lexProgress(bd.id==='lexicon'||bd.id==='doctus'?'main':'all',bd.id.startsWith('lex')?'seen':'correct');else if(bd.lv.length>1||next>1)prog=Math.min(v,next).toLocaleString()+' / '+next.toLocaleString()+(bd.unit?' '+bd.unit:'');}
   const lvls=bd.lv.length>1&&!bd.tiers?(bd.inf?bd.lv.slice(0,3).map(x=>x.toLocaleString()).join(' · ')+' · … no limit':bd.lv.map(x=>x.toLocaleString()).join(' · ')):'';
   const pct=prog&&next?Math.max(0,Math.min(100,Math.round(Math.min(v,next)/next*100))):0;
@@ -6976,7 +7015,7 @@ function duelRuns(dr){let w=0,run=0,best=0;Object.keys(dr||{}).sort().forEach(k=
 function wsCounts(){let m=0,all=0;Object.values(SRV.ws||{}).forEach(t=>{if(t==='m'){m++;all++;}else if(t==='p')all++;});return {m,all};}
 // the numbers behind each badge, from one account's server log
 function srvNums(L,p,sk){const c=wsCounts(),dr=duelRuns(L.dr);return {salve:p&&p.name?1:0,primus:+L.c||0,scriptor:L.sc?1:0,rank:Math.max(0,+(p&&p.total)||0),diesmagnus:+L.bd||0,diesingens:+L.bd||0,augustus:Math.max(0,+(p&&p.total)||0),constans:Math.max(constansOf(L.dd),+(sk&&sk.mx)||0),perpetuus:Math.max(constansOf(L.dd),+(sk&&sk.mx)||0),
-  matutinus:+L.e||0,nocturnus:+L.n||0,sineerrore:+L.best||0,perfectus:(+L.best||0)>=50?1:0,
+  matutinus:+L.e||0,nocturnus:+L.n||0,sineerrore:+L.best||0,infallibilis:+L.best||0,perfectus:(+L.best||0)>=50?1:0,
   lexicon:c.m&&(+L.nsm||0)>=c.m?1:0,lexiconmagnus:c.all&&(+L.ns||0)>=c.all?1:0,doctus:c.m&&(+L.nkm||0)>=c.m?1:0,doctissimus:c.all&&(+L.nk||0)>=c.all?1:0,
   gladiator:dr.w,victor:dr.w,invictus:dr.best,rival:Object.keys(L.rv||{}).length,popularis:+L.nrx||0,civis:L.civ?1:0};}
 // levels before the admin's actions (frozen badges + server-checked progress, over this account and any merged into it)
@@ -6989,7 +7028,7 @@ function srvBase(pid){const me=lbMe&&pid===lbMe.pid,p=lbPlayers[pid],ids=[pid,..
   res.rank=badgeLevel(badgeById('rank'),Math.max(0,+(p&&p.total)||0));res.augustus=badgeLevel(badgeById('augustus'),Math.max(0,+(p&&p.total)||0));res.salve=p&&p.name?1:0;res.socius=(ATAG||{})[pid]?1:0;res.chester=p&&p.name==='-Chester-'?1:0;return res;}
 function srvLevels(pid){const me=lbMe&&pid===lbMe.pid,res=srvBase(pid),gr=me?(BGRANT||{}):(SRV.gr[pid]||{});
   Object.entries(gr).forEach(([id,o])=>{const b=badgeById(id);if(!b||b.secret||!o||b.meta==='count'||id==='chester')return;const L=Math.min(+o.l||0,b.lv.length),base=o.base==null?Infinity:+o.base,raw=res[id]||0;res[id]=raw>base?Math.max(raw,L):L;});
-  [['diesmagnus','diesingens'],['constans','perpetuus']].forEach(([a,b])=>{const A=badgeById(a),B=badgeById(b);if((res[a]||0)>=A.lv.length)res[b]=Math.max(res[b]||0,badgeLevel(B,A.lv.slice(-1)[0]));});   // Dies Magnus VII = Dies Ingens I, Constans VII = Perpetuus I
+  [['diesmagnus','diesingens'],['constans','perpetuus'],['sineerrore','infallibilis']].forEach(([a,b])=>{const A=badgeById(a),B=badgeById(b);if((res[a]||0)>=A.lv.length)res[b]=Math.max(res[b]||0,badgeLevel(B,A.lv.slice(-1)[0]));});   // Dies Magnus VII = Dies Ingens I, Constans VII = Perpetuus I
   const ns=BADGES.filter(b=>!b.secret&&!b.inf),sc=me?(sxServer?sxServer.size:BADGES.filter(b=>b.secret&&bjson(BADGE_KEY)[b.id]).length):(sxCountOf(pid)||0),all=sc>=SX_IDS.length;
   const got=ns.every(b=>(res[b.id]||0)>=1),max=ns.every(b=>(res[b.id]||0)>=b.lv.length);
   res.fereomnia=Math.max(got?1:0,res.leg_fereomnia||0);res.omnia=Math.max(got&&all?1:0,res.leg_omnia||0);res.omniamax=Math.max(max&&all?1:0,res.leg_omniamax||0);res.arcana=sc;res.inscriptus=res.inscriptus||0;
@@ -7007,7 +7046,7 @@ function srvFetchP(pid){if(srvPromises[pid])return srvPromises[pid];srvPend.add(
 // numbers shown under each badge ("Next: 12 / 20") come from the server too
 function srvProg(bd){const L=SRV.me||{},p=lbPlayers[lbMe.pid];let v=(srvNums(L,p,strkSrv)[bd.id])||0;
   // you already reached the number for the level you hold (earned before the server records began), so progress starts from there
-  const lg=Math.min(+((SRV.leg[lbMe.pid]||{})[bd.id])||0,bd.lv.length);if(lg&&bd.lv.length>1&&bd.id!=='rank'){const th=bd.lv[lg-1];v=bd.id==='popularis'?v+th:Math.max(v,th);}if(bd.id==='diesingens')v=Math.max(v,srvProg(badgeById('diesmagnus')));if(bd.id==='perpetuus')v=Math.max(v,srvProg(badgeById('constans')));return v;}
+  const lg=Math.min(+((SRV.leg[lbMe.pid]||{})[bd.id])||0,bd.lv.length);if(lg&&bd.lv.length>1&&bd.id!=='rank'){const th=bd.lv[lg-1];v=bd.id==='popularis'?v+th:Math.max(v,th);}if(bd.id==='diesingens')v=Math.max(v,srvProg(badgeById('diesmagnus')));if(bd.id==='perpetuus')v=Math.max(v,srvProg(badgeById('constans')));if(bd.id==='infallibilis')v=Math.max(v,srvProg(badgeById('sineerrore')));return v;}
 // admin: freeze everyone's current badges (once), and keep the server's word list in step with the app
 setInterval(()=>{try{if(lbMe&&Date.now()-srvMeAt>120000)srvLoadMe();srvExtras();}catch(e){}},15000);setTimeout(()=>{try{srvLoadMe();}catch(e){}},2500);
 
