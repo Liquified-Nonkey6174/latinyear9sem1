@@ -136,6 +136,7 @@ const ADM={
   async chat(){let r={};try{r=(await fbReq('GET','chat',null,{...A,query:'?orderBy=%22$key%22&limitToLast=200'}))||{};}catch(e){}chatObj=safeKeys(r);return Object.entries(chatObj).map(([id,m])=>({id,...m})).filter(m=>m&&typeof m.text==='string').sort((a,b)=>(a.t||0)-(b.t||0));},
   async editMsg(id){await adminEditMsg(id);},
   async delMsg(id){await fbReq('DELETE','chat/'+id,null,A);},
+  async send(text){await fbReq('POST','chat',{pid:ADMIN_UID,text:String(text).replace(/\s+/g,' ').trim().slice(0,300),t:{'.sv':'timestamp'}},A);},
   // site content
   async saveDesc(text){const r=await acFetch(FB_DESC+'?auth='+encodeURIComponent(await adminToken()),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(text)});if(!r.ok)throw new Error('HTTP '+r.status);},
   async saveAnn(title,text){await fbReq('PUT','announce',{title,text,t:{'.sv':'timestamp'}},A);},
@@ -447,14 +448,17 @@ function openPanel(pid){panelPid=pid;const p=D.players[pid];const box=$('panel')
 function closePanel(){panelPid=null;$('panel').classList.add('ad-hide');$('panel').innerHTML='';}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&panelPid)closePanel();});
 
-async function vChat(v){v.innerHTML='<div class="ad-card"><div class="ad-row" style="margin-bottom:8px"><h2 style="margin:0">Chat</h2><span class="hint" style="margin:0">Last 200 messages, newest first. Faded = from a player whose chat is hidden.</span><button class="ad-btn sm" id="chR" style="margin-left:auto">↻</button></div><div id="chL">Loading…</div></div>';
+async function vChat(v){v.innerHTML='<div class="ad-card"><div class="ad-row" style="margin-bottom:8px"><h2 style="margin:0">Chat</h2><span class="hint" style="margin:0">Last 200 messages, newest first. Faded = from a player whose chat is hidden.</span><button class="ad-btn sm" id="chR" style="margin-left:auto">↻</button></div>'
+    +'<form id="chF" class="ad-row" style="margin-bottom:10px"><input class="ad-in" id="chT" maxlength="300" placeholder="Message everyone as '+esc(name(ADM.uid))+'… (@all notifies every player)" style="flex:1;min-width:200px"><button class="ad-btn pri sm">Send</button><button type="button" class="ad-btn sm" id="chAll" title="Add @all">@all</button></form><div id="chL">Loading…</div></div>';
   const draw=async()=>{const list=(await ADM.chat()).reverse(),box=$('chL');if(!box)return;box.innerHTML='';if(!list.length){box.textContent='No messages.';return;}
     list.forEach(m=>{const r=document.createElement('div');r.className='chat-row'+(D.mute[m.pid]===true?' hid':'');const t=document.createElement('span');t.className='t';t.textContent=m.t?new Date(m.t).toLocaleString([], {day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}):'';
       const mm=document.createElement('div');mm.className='m';const who=ADM.nameEl(m.pid);who.style.cursor='pointer';who.onclick=()=>openPanel(m.pid);mm.appendChild(who);mm.appendChild(document.createTextNode(' '+m.text));
       const ed=document.createElement('button');ed.className='ad-btn sm';ed.textContent='✎';ed.title='Edit';ed.onclick=async()=>{await ADM.editMsg(m.id);draw();};
       const del=document.createElement('button');del.className='ad-btn sm bad';del.textContent='✕';del.title='Delete';del.onclick=async()=>{if(!confirm('Delete this message?'))return;await ADM.delMsg(m.id).catch(e=>alert(e.message));draw();};
       r.append(t,mm,ed,del);box.appendChild(r);});};
-  $('chR').onclick=draw;await draw();}
+  $('chR').onclick=draw;$('chAll').onclick=()=>{const i=$('chT');if(!/(^|\s)@all(\s|$)/i.test(i.value))i.value='@all '+i.value;i.focus();};
+  $('chF').onsubmit=async e=>{e.preventDefault();const t=$('chT').value.trim();if(!t)return;try{await ADM.send(t);$('chT').value='';toast(/@all/i.test(t)?'✓ Sent to everyone (with @all).':'✓ Sent.');draw();}catch(x){alert('Couldn’t send ('+x.message+').');}};
+  await draw();}
 
 function vSite(v){const a=D.ann||{},c=D.challenge||{};
   v.innerHTML='<div class="ad-grid">'
