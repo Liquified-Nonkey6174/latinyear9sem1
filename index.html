@@ -3393,7 +3393,9 @@ function setQuizType(t){quizType=t;
   updCount();
 }
 function setInputMode(t){inputMode=t;document.getElementById('inputTyped').className='mode-btn'+(t==='typed'?' active':'');document.getElementById('inputMC').className='mode-btn'+(t==='mc'?' active':'');}
-function getWords(){const ws=[];Object.entries(selected).forEach(([ck,subs])=>Object.entries(subs).forEach(([sk,on])=>{if(on)DATA[ck].sub[sk].words.forEach(w=>ws.push({...w,catKey:ck,subKey:sk}));}));
+// words that belong to a word pack (e.g. the colours) only come up in quizzes when their pack is ticked; the word list still shows them
+let _packKeys=null;function packKeys(){if(_packKeys)return _packKeys;const k=new Set();try{WORD_PACKS.forEach(pk=>pk.words.forEach(w=>k.add(srKey(w))));_packKeys=k;}catch(e){}return k;}   // WORD_PACKS is defined further down the page
+function getWords(forList){const ws=[],PK=forList?null:packKeys();Object.entries(selected).forEach(([ck,subs])=>Object.entries(subs).forEach(([sk,on])=>{if(on)DATA[ck].sub[sk].words.forEach(w=>{const x={...w,catKey:ck,subKey:sk};if(PK&&PK.has(srKey(x)))return;ws.push(x);});}));
   // Ticked word packs join the selected categories (skipping words already included).
   let pw=[];try{pw=packWords();}catch(e){}const seen=new Set(ws.map(srKey));pw.forEach(w=>{const k=srKey(w);if(!seen.has(k)){seen.add(k);ws.push(w);}});return ws;}
 function updCount(){const ws=getWords();const n=ws.length;const iS=quizType==='sentences';document.getElementById('wordPill').textContent=iS?'All categories selected':n+(n===1?' word':' words')+' selected';document.getElementById('startBtn').disabled=iS?false:n===0;const due=getDue(ws);document.getElementById('srBtn').disabled=iS||due===0;document.getElementById('srBtn').textContent=due>0&&!iS?'Due ('+due+')':'Due (0)';document.getElementById('wordDrawerCount').textContent=n+' selected';if(document.getElementById('wordDrawer').classList.contains('open'))renderWordList();}
@@ -3679,7 +3681,7 @@ function getDailyWords(){
   });
   return ws;
 }
-function renderWordList(){const list=document.getElementById('wordList');const mainWs=getWords();const dailyWs=getDailyWords();const seen=new Set(mainWs.map(w=>w.lat));const extra=dailyWs.filter(w=>!seen.has(w.lat));const ws=[...mainWs,...extra];if(!ws.length){list.innerHTML='<div class="word-empty">Choose some categories to see words here.</div>';return;}list.innerHTML=ws.map(w=>{const r=getSR(w);const due=isDue(w);const isDaily=extra.includes(w);return'<div class="word-row"><div class="word-row-lat">'+fullLat(w)+(isDaily?' <span style="font-size:9px;color:var(--gold)">📅</span>':'')+'</div><div class="word-row-eng">'+displayEng(w)+'</div><div class="word-row-meta">'+(w.catKey&&DATA[w.catKey]?catSubLabel(w):'daily')+'</div>'+(r.seen>0?'<div class="word-row-sr" style="color:'+(due?'var(--gold)':'var(--green)')+'">SR: '+r.seen+' seen · '+Math.round(r.correct/r.seen*100)+'% · '+(due?'due now':'interval '+r.interval+'d')+'</div>':'')+'</div>';}).join('');}
+function renderWordList(){const list=document.getElementById('wordList');const mainWs=getWords(true);const dailyWs=getDailyWords();const seen=new Set(mainWs.map(w=>w.lat));const extra=dailyWs.filter(w=>!seen.has(w.lat));const ws=[...mainWs,...extra];if(!ws.length){list.innerHTML='<div class="word-empty">Choose some categories to see words here.</div>';return;}list.innerHTML=ws.map(w=>{const r=getSR(w);const due=isDue(w);const isDaily=extra.includes(w);return'<div class="word-row"><div class="word-row-lat">'+fullLat(w)+(isDaily?' <span style="font-size:9px;color:var(--gold)">📅</span>':'')+'</div><div class="word-row-eng">'+displayEng(w)+'</div><div class="word-row-meta">'+(w.catKey&&DATA[w.catKey]?catSubLabel(w):'daily')+'</div>'+(r.seen>0?'<div class="word-row-sr" style="color:'+(due?'var(--gold)':'var(--green)')+'">SR: '+r.seen+' seen · '+Math.round(r.correct/r.seen*100)+'% · '+(due?'due now':'interval '+r.interval+'d')+'</div>':'')+'</div>';}).join('');}
 const isObj=x=>x&&typeof x==='object'&&!Array.isArray(x);
 // text that ends up on screen: no markup characters, sensible length
 const safeTxt=(x,max)=>String(x==null?'':x).replace(/[<>&"'`\\]/g,'').replace(/\s+/g,' ').trim().slice(0,max||60);
@@ -3997,7 +3999,7 @@ function updDailyAll(){
   document.getElementById('dailyStartAll').disabled=n===0;
   const drawer=document.getElementById('wordDrawer');
   if(drawer&&drawer.classList.contains('open'))renderWordList();
-  document.getElementById('wordDrawerCount').textContent=(getWords().length+getDailyWords().length)+' selected';
+  document.getElementById('wordDrawerCount').textContent=(getWords(true).length+getDailyWords().length)+' selected';
 }
 function startDailyAll(){
   const ws=[];const seen=new Set();
@@ -5467,7 +5469,7 @@ renderWordList=function(){const list=document.getElementById('wordList');const i
     if(cnt)cnt.textContent=(wdStarOnly?'Starred · ':'')+res.length+(res.length===1?' match':' matches');
     if(!shown.length){list.innerHTML='<div class="word-empty">'+(wdStarOnly&&!q?'No starred words yet. Tap ☆ on a question or on any word here.':'No words match “'+esc(q)+'”.')+'</div>';return;}
     list.innerHTML=shown.map((w,i)=>wdRowHTML(w,i,(dailyBoxesOf(w).length?' <span style="font-size:9px;color:var(--gold)" title="'+esc(dailyBoxesOf(w).join(', '))+'">📅</span>':''))).join('')+(res.length>shown.length?'<div class="word-empty">Showing first 80 — refine your search.</div>':'');return;}
-  const mainWs=getWords();const dailyWs=getDailyWords();const seen=new Set(mainWs.map(w=>w.lat));const extra=dailyWs.filter(w=>!seen.has(w.lat));const ws=[...mainWs,...extra];wdRows=ws;
+  const mainWs=getWords(true);const dailyWs=getDailyWords();const seen=new Set(mainWs.map(w=>w.lat));const extra=dailyWs.filter(w=>!seen.has(w.lat));const ws=[...mainWs,...extra];wdRows=ws;
   if(cnt)cnt.textContent=mainWs.length+' selected';
   if(!ws.length){list.innerHTML='<div class="word-empty">Choose some categories to see words here, or type above to search every word.</div>';return;}
   list.innerHTML=ws.map((w,i)=>wdRowHTML(w,i,extra.includes(w)?' <span style="font-size:9px;color:var(--gold)">📅</span>':'')).join('');};
