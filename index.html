@@ -4959,10 +4959,10 @@ const BADGES=[
  {id:'rank',icon:'⭐',name:'Centurio',desc:'Ranks for your total ⭐: Centurio 100, Tribunus 200, Legatus 300, Praefectus 500, Imperator 1,000, Consul 2,000, Optimus 5,000. After that, Augustus.',unit:'⭐',stat:()=>lbMe&&lbPlayers[lbMe.pid]?Math.max(0,+lbPlayers[lbMe.pid].total||0):0,lv:[100,200,300,500,1000,2000,5000],
   tiers:[{name:'Centurio',icon:'⭐'},{name:'Tribunus',icon:'⭐'},{name:'Legatus',icon:'⭐'},{name:'Praefectus',icon:'⭐'},{name:'Imperator',icon:'⭐'},{name:'Consul',icon:'⭐'},{name:'Optimus',icon:'💎'}]},
  {id:'augustus',icon:'🦅',name:'Augustus',lat:'the revered one',desc:'Carries on after Optimus: a new level for every 5,000 ⭐ in total.',unit:'⭐',inf:true,stat:()=>lbMe&&lbPlayers[lbMe.pid]?Math.max(0,+lbPlayers[lbMe.pid].total||0):0,lv:Array.from({length:5000},(_,i)=>(i+1)*5000)},
- {id:'diesmagnus',icon:'☀️',name:'Dies Magnus',lat:'big day',desc:'Earn lots of ⭐ in a single day.',unit:'⭐ in a day',stat:()=>Math.max(bstat().bestDay||0,lbTodayPts()),lv:[50,100,200,300,500,750,1000]},
- {id:'diesingens',icon:'🌞',name:'Dies Ingens',lat:'huge day',desc:'A new level for every 1,000 ⭐ earned in a single day.',unit:'⭐ in a day',inf:true,stat:()=>Math.max(bstat().bestDay||0,lbTodayPts()),lv:Array.from({length:5000},(_,i)=>(i+1)*1000)},
- {id:'constans',icon:'🔥',name:'Constans',lat:'steady',desc:'Keep your 🔥 streak going: reach your daily goal several days in a row (or earn 20+ ⭐ a day).',unit:'day streak',stat:()=>Math.max(bstat().bestStreak||0,dailyStreak()),lv:[1,2,3,5,7,10,14]},
- {id:'perpetuus',icon:'♾️',name:'Perpetuus',lat:'never-ending',desc:'Carries on after Constans VII: a new level for every 14 days in a row.',unit:'day streak',inf:true,stat:()=>Math.max(bstat().bestStreak||0,dailyStreak()),lv:Array.from({length:5000},(_,i)=>(i+1)*14)},
+ {id:'diesmagnus',icon:'☀️',name:'Dies Magnus',lat:'big day',desc:'Earn lots of ⭐ in a single day.',unit:'⭐ today',stat:()=>Math.max(bstat().bestDay||0,lbTodayPts()),lv:[50,100,200,300,500,750,1000]},
+ {id:'diesingens',icon:'🌞',name:'Dies Ingens',lat:'huge day',desc:'A new level for every 1,000 ⭐ earned in a single day.',unit:'⭐ today',inf:true,stat:()=>Math.max(bstat().bestDay||0,lbTodayPts()),lv:Array.from({length:5000},(_,i)=>(i+1)*1000)},
+ {id:'constans',icon:'🔥',name:'Constans',lat:'steady',desc:'Keep your 🔥 streak going: reach your daily goal several days in a row (or earn 20+ ⭐ a day).',unit:'day streak now',stat:()=>Math.max(bstat().bestStreak||0,dailyStreak()),lv:[1,2,3,5,7,10,14]},
+ {id:'perpetuus',icon:'♾️',name:'Perpetuus',lat:'never-ending',desc:'Carries on after Constans VII: a new level for every 14 days in a row.',unit:'day streak now',inf:true,stat:()=>Math.max(bstat().bestStreak||0,dailyStreak()),lv:Array.from({length:5000},(_,i)=>(i+1)*14)},
  {id:'matutinus',icon:'🌅',name:'Matutinus',lat:'early riser',desc:'Get a question right before 8 am.',stat:()=>bstat().early||0,lv:[1]},
  {id:'nocturnus',icon:'🦉',name:'Nocturnus',lat:'night owl',desc:'Get a question right after 8 pm.',stat:()=>bstat().late||0,lv:[1]},
  {id:'sineerrore',icon:'🎯',name:'Sine Errore',lat:'without error',desc:'Get questions right in a row (any type).',unit:'in a row now',stat:()=>bstat().bestRun||0,lv:[10,20,30,50,100,200,300]},
@@ -5074,8 +5074,11 @@ function secretWipe(){try{const g=bjson(BADGE_KEY);let ch=false;
   Object.keys(g).forEach(k=>{const n=SX_OLDNAMES[_fnv(k)];if(n){if(!g[n]||g[k].l>g[n].l)g[n]=g[k];delete g[k];ch=true;}});
   if(ch){localStorage.setItem(BADGE_KEY,JSON.stringify(g));const pins=badgePins().map(x=>SX_OLDNAMES[_fnv(x)]||x).filter(id=>g[id]);localStorage.setItem(PIN_KEY,JSON.stringify(pins));}}catch(e){}}
 // progress shown on a badge: Sine Errore and Infallibilis show the run you're on now (levels still come from your best run)
-const RUN_BADGES=new Set(['sineerrore','infallibilis']);
-function badgeShowV(bd){if(RUN_BADGES.has(bd.id)){const L=srvOn()?(SRV.me||{}):null;return Math.max(0,L?(+L.run||0):(+bstat().run||0));}return badgeStatV(bd);}
+// (and the streak / daily ⭐ badges show your streak now and today's ⭐; levels still come from your best)
+const RUN_BADGES=new Set(['sineerrore','infallibilis']),NOW_STREAK=new Set(['constans','perpetuus']),NOW_DAY=new Set(['diesmagnus','diesingens']);
+function badgeShowV(bd){try{if(RUN_BADGES.has(bd.id)){const L=srvOn()?(SRV.me||{}):null;return Math.max(0,L?(+L.run||0):(+bstat().run||0));}
+  if(NOW_STREAK.has(bd.id))return Math.max(0,dailyStreak()||0);
+  if(NOW_DAY.has(bd.id))return Math.max(0,lbTodayPts()||0);}catch(e){}return badgeStatV(bd);}
 function badgeStatV(bd){if(!bd.secret&&srvOn())return srvProg(bd);let v=0;try{v=bd.stat();}catch(e){}if(bd.secret)return v;return Math.max(0,v-(+bstat()['base_'+bd.id]||0));}
 // the admin's give / take-away actions: each one is applied once per device (it can be earned back after a removal)
 function bgApply(got){let ch=false,done={};if(lbMe&&!lbPlayers[lbMe.pid])return false;   // wait until my points have loaded
