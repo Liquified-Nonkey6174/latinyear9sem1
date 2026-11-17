@@ -453,7 +453,12 @@ input[type=range]{flex:1;accent-color:var(--accent)}
 .chat-form{display:flex;gap:6px;padding:10px 14px;border-top:1px solid var(--border)}
 .chat-m{position:relative;border-radius:6px;padding:2px 4px;margin:0 -4px;transition:background .3s}
 .chat-m.flash{background:var(--accent-bg)}
-.chat-at{color:var(--accent);font-weight:600;cursor:pointer;border-radius:4px;padding:0 2px;background:color-mix(in srgb,var(--accent) 12%,transparent)}.chat-at.me{color:#fff;background:color-mix(in srgb,var(--accent) 55%,transparent)}
+.chat-at{color:var(--accent);font-weight:600;cursor:pointer;border-radius:4px;padding:0 2px;background:color-mix(in srgb,var(--accent) 12%,transparent)}.nt-n{display:inline-block;min-width:16px;height:16px;line-height:16px;padding:0 4px;margin-left:4px;border-radius:999px;background:var(--red);color:#fff;font-size:10.5px;font-weight:700;text-align:center;vertical-align:1px}
+.nt-list{max-height:55vh;overflow-y:auto;display:flex;flex-direction:column;gap:6px;margin:6px 0}
+.nt-row{text-align:left;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:8px 10px;color:var(--text);font:inherit;cursor:pointer}.nt-row:hover{border-color:var(--accent)}.nt-row.new{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
+.nt-top{display:flex;justify-content:space-between;gap:8px;font-size:12.5px}.nt-top span{color:var(--text3);white-space:nowrap}.nt-tx{font-size:13px;color:var(--text2);margin-top:2px;overflow-wrap:anywhere}
+.chat-at.all{background:var(--red)}
+.chat-at.me{color:#fff;background:color-mix(in srgb,var(--accent) 55%,transparent)}
 .chat-m.ping{background:color-mix(in srgb,var(--accent) 10%,transparent);box-shadow:inset 3px 0 0 var(--accent)}
 .chat-form{position:relative}.at-menu{position:absolute;left:14px;right:14px;bottom:calc(100% - 4px);background:var(--surface);border:1px solid var(--border2);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.35);padding:4px;z-index:30;display:none;max-height:220px;overflow:auto}
 .at-item{display:flex;gap:8px;align-items:baseline;width:100%;text-align:left;background:none;border:0;border-radius:7px;padding:6px 8px;color:var(--text);font:inherit;font-size:13px;cursor:pointer}.at-item b{color:var(--accent)}.at-item span{color:var(--text3);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.at-item.on,.at-item:hover{background:var(--surface2)}
@@ -813,7 +818,7 @@ body:has(.overlay[style*="display: flex"]) .side-fab,body:has(#bReveal[style*="d
       <span id="descText" class="desc-text"></span>
     </div>
   </div>
-  <div class="settings-row"><button class="settings-btn" onclick="showSettings()">⚙ Settings</button> <button class="settings-btn" id="acctBtn" onclick="acctHub()" title="Sign in, or use your account on other devices">👤 Account</button> <button class="settings-btn" onclick="openBadges()">🏅 Badges <span id="badgeBtnCount" style="opacity:.7;font-size:12px"></span><span class="bf-dot" id="badgeBtnDot" title="New in the badge feed"></span></button> <button class="settings-btn" id="dqBtn" onclick="dqOpen()" style="display:none">✍ December quote</button></div>
+  <div class="settings-row"><button class="settings-btn" onclick="showSettings()">⚙ Settings</button> <button class="settings-btn" id="acctBtn" onclick="acctHub()" title="Sign in, or use your account on other devices">👤 Account</button> <button class="settings-btn" onclick="openBadges()">🏅 Badges <span id="badgeBtnCount" style="opacity:.7;font-size:12px"></span><span class="bf-dot" id="badgeBtnDot" title="New in the badge feed"></span></button> <button class="settings-btn" id="ntBtn" onclick="ntOpen()" title="Mentions">🔔<span id="ntN" class="nt-n" style="display:none"></span></button> <button class="settings-btn" id="dqBtn" onclick="dqOpen()" style="display:none">✍ December quote</button></div>
   <div class="nav-tabs">
     <button class="nav-tab active" onclick="showMainTab('practice')">Practice</button>
     <button class="nav-tab" onclick="showMainTab('read')">Reading</button>
@@ -2140,6 +2145,15 @@ body:has(.overlay[style*="display: flex"]) .side-fab,body:has(#bReveal[style*="d
     <div class="ann-body" id="annBody"></div>
     <div class="ann-date" id="annDate"></div>
     <div class="ann-btns"><button class="btn-primary" id="annDq" onclick="closeAnn();dqOpen()" style="display:none">✍ Submit your quote</button><button class="btn-primary" onclick="closeAnn()">Got it</button><button class="lb-link" onclick="annHide()">Don’t show again until there’s a new one</button></div>
+  </div>
+</div>
+<div id="ntOverlay" class="overlay" style="display:none" onclick="closeOverlay('ntOverlay')">
+  <div class="about-box ann-box" onclick="event.stopPropagation()" style="text-align:left">
+    <button class="about-close" onclick="closeOverlay('ntOverlay')">×</button>
+    <div class="ann-head">🔔 Mentions</div>
+    <div id="ntList" class="nt-list"></div>
+    <div class="ann-btns"><button class="btn-secondary" id="ntPerm" onclick="ntPermAsk()" style="display:none">Turn on pop-ups for mentions</button></div>
+    <div id="ntPermNote" class="muted" style="font-size:12px;margin-top:4px"></div>
   </div>
 </div>
 <div id="dqOverlay" class="overlay" style="display:none" onclick="closeOverlay('dqOverlay')">
@@ -4589,21 +4603,47 @@ const AT_SEEN_KEY='latin_at_seen';let atSeen=(()=>{let v=0;try{v=+localStorage.g
 function atTags(){const out=[];Object.entries(ATAG||{}).forEach(([pid,t])=>{if(typeof t!=='string'||!t.trim()||!chatVisible(pid)||!lbPlayers[pidMain(pid)])return;out.push({pid,tag:t.trim()});});return out.sort((a,b)=>b.tag.length-a.tag.length);}
 function myTag(){const t=lbMe&&(ATAG||{})[lbMe.pid];return typeof t==='string'&&t.trim()?t.trim().toLowerCase():null;}
 // writes the message into el (as text, never HTML); mentions become highlighted spans. Returns true if it mentions me.
-function chatFillText(el,text){const tags=atTags(),me=myTag();let i=0,last=0,hit=false;const low=text.toLowerCase();
-  while((i=text.indexOf('@',i))>=0){const prev=i?text[i-1]:' ';let m=null;if(!/[A-Za-z0-9]/.test(prev))for(const t of tags){const L=t.tag.length;if(low.startsWith(t.tag.toLowerCase(),i+1)&&!/[A-Za-z0-9]/.test(text[i+1+L]||' ')){m=t;break;}}
+function chatFillText(el,text,from){const tags=atTags(),me=myTag();let i=0,last=0,hit=false;const low=text.toLowerCase();
+  while((i=text.indexOf('@',i))>=0){const prev=i?text[i-1]:' ';let m=null;
+    if(from===ADMIN_UID&&!/[A-Za-z0-9]/.test(prev)&&low.startsWith('all',i+1)&&!/[A-Za-z0-9]/.test(text[i+4]||' ')){if(i>last)el.appendChild(document.createTextNode(text.slice(last,i)));const sp=document.createElement('span');sp.className='chat-at me all';sp.textContent='@all';sp.title='Everyone';el.appendChild(sp);hit=true;i+=4;last=i;continue;}
+    if(!/[A-Za-z0-9]/.test(prev))for(const t of tags){const L=t.tag.length;if(low.startsWith(t.tag.toLowerCase(),i+1)&&!/[A-Za-z0-9]/.test(text[i+1+L]||' ')){m=t;break;}}
     if(!m){i++;continue;}if(i>last)el.appendChild(document.createTextNode(text.slice(last,i)));const sp=document.createElement('span');const mine=me&&m.tag.toLowerCase()===me;if(mine)hit=true;
     sp.className='chat-at'+(mine?' me':'');sp.textContent='@'+m.tag;sp.title=lbName(m.pid);sp.onclick=()=>openPlayerCard(m.pid);el.appendChild(sp);i+=1+m.tag.length;last=i;}
   if(last<text.length)el.appendChild(document.createTextNode(text.slice(last)));return hit;}
+const isAllPing=m=>m&&m.pid===ADMIN_UID&&/(^|[^A-Za-z0-9])@all(?![A-Za-z0-9])/i.test(m.text||'');
 function atNotify(){if(!atNew.length)return;const mx=Math.max(...atNew.map(m=>+m.t||0));const list=atNew;atNew=[];atSeen=Math.max(atSeen,mx);try{localStorage.setItem(AT_SEEN_KEY,String(atSeen));}catch(e){}
-  const m=list[list.length-1];toast('💬 '+lbName(m.pid)+' mentioned you: '+chatSnippet(m.text));try{playTone&&playTone(true);}catch(e){}}
+  list.forEach(m=>ntAdd({id:m.id,pid:m.pid,name:lbName(m.pid),text:String(m.text).slice(0,300),t:+m.t||Date.now(),all:isAllPing(m)}));
+  const m=list[list.length-1],who=lbName(m.pid),msg=(isAllPing(m)?'📢 '+who+' mentioned everyone: ':'💬 '+who+' mentioned you: ')+chatSnippet(m.text);toast(msg);try{playTone&&playTone(true);}catch(e){}
+  // a pop-up from the device when Latin Trainer isn't the window in front (only if they turned it on)
+  try{if(document.visibilityState==='hidden'&&'Notification' in window&&Notification.permission==='granted'){const n=new Notification(isAllPing(m)?who+' mentioned everyone':who+' mentioned you',{body:String(m.text).slice(0,140),tag:'lt-'+m.id,icon:'data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#1e1b18"/><text x="32" y="44" font-size="34" text-anchor="middle" fill="#c4935a" font-family="Georgia">L</text></svg>')});n.onclick=()=>{try{window.focus();}catch(e){}ntGo(m.id);n.close();};}}catch(e){}}
+// ── NOTIFICATIONS: everyone who mentioned you (or the admin's @all), kept on this device ──
+const NT_KEY='latin_notifs',NT_SEEN='latin_notif_seen';
+function ntList(){try{const a=JSON.parse(localStorage.getItem(NT_KEY)||'[]');return Array.isArray(a)?a:[];}catch(e){return [];}}
+function ntSeen(){try{return +localStorage.getItem(NT_SEEN)||0;}catch(e){return 0;}}
+function ntAdd(x){const a=ntList();if(a.some(y=>y.id===x.id))return;a.unshift(x);a.sort((p,q)=>q.t-p.t);try{localStorage.setItem(NT_KEY,JSON.stringify(a.slice(0,50)));}catch(e){}ntBadge();}
+function ntUnread(){const s=ntSeen();return ntList().filter(x=>x.t>s).length;}
+const NT_TITLE=document.title;
+function ntBadge(){const n=ntUnread(),b=document.getElementById('ntN');if(b){b.textContent=n?(n>9?'9+':String(n)):'';b.style.display=n?'':'none';}document.title=(n?'('+n+') ':'')+NT_TITLE;}
+function ntOpen(){const box=document.getElementById('ntList'),a=ntList(),seen=ntSeen();box.innerHTML='';
+  if(!a.length)box.innerHTML='<p class="muted" style="margin:6px 0">No mentions yet. When someone writes @ and your member tag in the chat, it shows up here.</p>';
+  a.forEach(x=>{const r=document.createElement('button');r.className='nt-row'+(x.t>seen?' new':'');const top=document.createElement('div');top.className='nt-top';
+    const w=document.createElement('b');w.textContent=(x.all?'📢 ':'💬 ')+x.name+(x.all?' → everyone':'');const tm=document.createElement('span');tm.textContent=chatTime(x.t);top.append(w,tm);
+    const tx=document.createElement('div');tx.className='nt-tx';tx.textContent=x.text;r.append(top,tx);r.onclick=()=>{closeOverlay('ntOverlay');ntGo(x.id);};box.appendChild(r);});
+  const pb=document.getElementById('ntPerm');if(pb){const has='Notification' in window,st=has?Notification.permission:'denied';pb.style.display=has&&st==='default'?'':'none';
+    document.getElementById('ntPermNote').textContent=!has?'':st==='granted'?'✓ Pop-ups are on: you’ll get one when Latin Trainer is in the background.':st==='denied'?'Pop-ups are blocked for this site in your browser settings.':'';}
+  document.getElementById('ntOverlay').style.display='flex';try{localStorage.setItem(NT_SEEN,String(Date.now()));}catch(e){}ntBadge();}
+async function ntPermAsk(){try{const r=await Notification.requestPermission();if(r==='granted')toast('✓ Pop-ups on.');}catch(e){}ntOpen();}
+function ntGo(id){try{openSide();}catch(e){}setTimeout(()=>{const t=document.getElementById('cm_'+id);if(t){t.scrollIntoView({block:'center',behavior:'smooth'});t.classList.add('flash');setTimeout(()=>t.classList.remove('flash'),1600);}else toast('That message is no longer in the chat.');},350);}
+setTimeout(ntBadge,500);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')ntBadge();});
 // autocomplete while typing @…
 let atMenu=null,atSel=0,atItems=[];
 function atQuery(){const inp=document.getElementById('chatInput');if(!inp)return null;const pos=inp.selectionStart||0,before=inp.value.slice(0,pos),k=before.lastIndexOf('@');if(k<0)return null;if(k>0&&/[A-Za-z0-9]/.test(before[k-1]))return null;const q=before.slice(k+1);if(q.length>40||/^\s/.test(q))return null;return {k,q,pos};}
 function atClose(){if(atMenu)atMenu.style.display='none';atItems=[];}
 function atUpdate(){const a=atQuery();if(!a||!lbMe){atClose();return;}const q=a.q.toLowerCase();
   atItems=atTags().filter(t=>t.pid!==lbMe.pid&&(t.tag.toLowerCase().startsWith(q)||(q.length>=2&&(t.tag.toLowerCase().includes(q)||String(lbName(t.pid)).toLowerCase().includes(q))))).sort((x,y)=>(y.tag.toLowerCase().startsWith(q)-x.tag.toLowerCase().startsWith(q))||x.tag.localeCompare(y.tag)).slice(0,6);
+  if(lbMe.pid===ADMIN_UID&&'all'.startsWith(q))atItems.unshift({pid:null,tag:'all'});
   if(!atItems.length){atClose();return;}if(!atMenu){atMenu=document.createElement('div');atMenu.className='at-menu';document.querySelector('.chat-form').appendChild(atMenu);}
-  atSel=Math.min(atSel,atItems.length-1);atMenu.innerHTML='';atItems.forEach((t,i)=>{const b=document.createElement('button');b.type='button';b.className='at-item'+(i===atSel?' on':'');const tg=document.createElement('b');tg.textContent='@'+t.tag;const nm=document.createElement('span');nm.textContent=lbName(t.pid);b.append(tg,nm);
+  atSel=Math.min(atSel,atItems.length-1);atMenu.innerHTML='';atItems.forEach((t,i)=>{const b=document.createElement('button');b.type='button';b.className='at-item'+(i===atSel?' on':'');const tg=document.createElement('b');tg.textContent='@'+t.tag;const nm=document.createElement('span');nm.textContent=t.pid?lbName(t.pid):'everyone';b.append(tg,nm);
     b.onmousedown=e=>{e.preventDefault();atPick(i);};atMenu.appendChild(b);});atMenu.style.display='block';}
 function atPick(i){const t=atItems[i],a=atQuery(),inp=document.getElementById('chatInput');if(!t||!a)return;const ins='@'+t.tag+' ';inp.value=(inp.value.slice(0,a.k)+ins+inp.value.slice(a.pos)).slice(0,300);const c=Math.min(a.k+ins.length,inp.value.length);inp.setSelectionRange(c,c);inp.focus();atClose();}
 (function(){const go=()=>{const inp=document.getElementById('chatInput');if(!inp)return setTimeout(go,300);
@@ -4615,7 +4655,7 @@ function renderChat(){const list=document.getElementById('chatList');if(!list||!
   if(!chatMsgs.length){list.innerHTML='<div class="lb-empty">No messages yet. Say salve!</div>';return;}
   chatMsgs.forEach(m=>{if(!m||typeof m.text!=='string'||!chatVisible(m.pid))return;const el=document.createElement('div');el.className='chat-m'+(lbMe&&m.pid===lbMe.pid?' me':'');
     const who=document.createElement('span');who.className='chat-who';who.appendChild(nameEl(m.pid,lbName(m.pid)));
-    const tx=document.createElement('span');const pinged=chatFillText(tx,m.text);if(pinged&&lbMe&&m.pid!==lbMe.pid){el.classList.add('ping');if(+m.t>atSeen)atNew.push(m);}
+    const tx=document.createElement('span');const pinged=chatFillText(tx,m.text,m.pid);if(pinged&&lbMe&&m.pid!==lbMe.pid){el.classList.add('ping');if(+m.t>atSeen)atNew.push(m);}
     const tm=document.createElement('span');tm.className='chat-time';tm.textContent=chatTime(m.t);
     el.id='cm_'+m.id;
     // A reply shows a short quote of the message it answers (click it to jump there).
