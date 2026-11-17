@@ -289,6 +289,26 @@ async function srvAdminSetup(){if(!isAdmin)return;try{
   catch(e){toast('Couldn’t set up server badges ('+e.message+'). Publish the latest database rules, then log in again.');}}
 window.ADM=ADM;
 Object.assign(ADM,{
+  // merge account S into T: points (all periods), secret badges, premium, member tag / approval; S is removed and
+  // linked to T (mto), so its chat messages, badge records and feed posts count as T's
+  async merge(S,T){if(!S||!T||S===T)throw new Error('pick two different players');
+    const cur=await fbReq('GET','mto/'+S,null,A).catch(()=>null);if(cur&&cur!==T)throw new Error('that account was already merged into someone else');
+    const g=x=>fbReq('GET',x,null,A).catch(()=>null);
+    const [pS,pT,gotS,gotT,oldS,oldT,premS,premT,taS,taT,apS,apT]=await Promise.all(['players/'+S,'players/'+T,'sx/got/'+S,'sx/got/'+T,'sx/old/'+S,'sx/old/'+T,'prem/'+S,'prem/'+T,'atag/'+S,'atag/'+T,'appr/'+S,'appr/'+T].map(g));
+    if(!pS)throw new Error('the account being merged has no leaderboard entry');
+    await fbReq('PUT','mto/'+S,T,A);MTO[S]=T;
+    if(typeof taS==='string'&&!taT)await fbReq('PUT','atag/'+T,taS,A);if(apS===true&&apT!==true&&!taT)await fbReq('PUT','appr/'+T,true,A);
+    for(const h of Object.keys(gotS||{}))if(!(gotT||{})[h])await fbReq('PUT','sx/got/'+T+'/'+h,{'.sv':'timestamp'},A).catch(()=>{});
+    if(typeof oldS==='string'&&oldS){const u=[...new Set([...String(oldT||'').split(','),...oldS.split(',')].filter(Boolean))].join(',');if(u!==oldT)await fbReq('PUT','sx/old/'+T,u,A).catch(()=>{});}
+    if(premS&&!premT)await fbReq('PUT','prem/'+T,{c:'merge',t:{'.sv':'timestamp'}},A);
+    const P='players/'+T+'/',body={};
+    if(!pT){body[P+'name']=pS.name;['av','color','font','fx','bd'].forEach(k=>{if(pS[k]!=null)body[P+k]=pS[k];});}
+    body[P+'total']=((pT&&+pT.total)||0)+(+pS.total||0);
+    ['d','w','m'].forEach(x=>Object.entries(pS[x]||{}).forEach(([k,v])=>{if(typeof v==='number')body[P+x+'/'+k]=((pT&&pT[x]&&pT[x][k])||0)+v;}));
+    body['players/'+S]=null;body['pub/'+S]=null;body['mlog/'+T+'/'+S]={name:String(pS.name||'?'),n:+pS.total||0,t:{'.sv':'timestamp'}};
+    await fbReq('PATCH','',body,A);
+    try{await fbReq('PUT','names/'+T+'/'+Date.now().toString(36)+'m',{n:(pT&&pT.name)||pS.name,t:{'.sv':'timestamp'},by:'admin',p:String(pS.name||'').slice(0,30)},A);}catch(e){}
+    await this.load();await this.pubSync();return {name:pS.name,n:+pS.total||0};},
   async dqList(){const [r,c]=await Promise.all([fbReq('GET','dquote',null,A).catch(()=>({})),fbReq('GET','dqcfg',null,A).catch(()=>null)]);
     return {cfg:c||{open:false},list:Object.entries(r||{}).map(([pid,v])=>({pid,...v})).filter(x=>x&&x.q).sort((a,b)=>(a.t||0)-(b.t||0))};},
   dqCfgSave(c){return fbReq('PUT','dqcfg',{open:!!c.open,title:String(c.title||'').slice(0,80),hint:String(c.hint||'').slice(0,400)},A);},
@@ -416,6 +436,11 @@ function openPanel(pid){panelPid=pid;const p=D.players[pid];const box=$('panel')
   btn('📈 Points history',async()=>{await E.showPointsHistory(pid,out);});
   btn('🏅 Badges',async()=>{await E.adminBadges(pid,out);});
   btn('Name history',async()=>{await E.showNameHistory(pid,out);});
+  btn('🔀 Merge into…',async()=>{const v=prompt('Merge '+name(pid)+' into which account? Type the name (or member tag) of the account that STAYS.\n'+name(pid)+'’s points, secret badges, premium and member tag are added to it, and '+name(pid)+' is removed.');if(v===null)return;const q=v.trim().toLowerCase();if(!q)return;
+    const ids=Object.keys(D.players).filter(x=>x!==pid&&D.players[x]&&(String(D.players[x].name||'').trim().toLowerCase()===q||String(D.atag[x]||'').trim().toLowerCase()===q));
+    if(!ids.length){alert('Nobody is called “'+v.trim()+'”. Use the exact name or member tag.');return;}if(ids.length>1){alert(ids.length+' players match “'+v.trim()+'”. Use their member tag instead, or rename one first.');return;}
+    const T=ids[0],sc=ADM.scores(pid);if(!confirm('Merge '+name(pid)+' (⭐ '+sc.all.toLocaleString()+') into '+name(T)+(D.atag[T]?' ['+D.atag[T]+']':'')+' (⭐ '+ADM.scores(T).all.toLocaleString()+')?\n\n'+name(pid)+' is removed. This can’t be undone.'))return;
+    try{const r=await ADM.merge(pid,T);await reload();toast('✓ Merged '+r.name+' into '+name(T)+'.');openPanel(T);render();}catch(e){alert('The merge didn’t work: '+e.message+(/40[13]/.test(e.message)?' (publish the latest database rules)':''));}});
   btn('✕ Remove player',async()=>{if(await ADM.remove(pid)){closePanel();render();}},'bad');
   if(sk&&typeof sk.n==='number')out.innerHTML='<p style="font-size:12.5px;color:var(--text3)">🔥 Streak '+sk.n+' reported by their device '+ago(sk.t)+(sk.g?' · daily goal '+sk.g+', '+(sk.d||0)+' today':' · no daily goal set')+'.</p>';
   $('pnX').onclick=closePanel;}

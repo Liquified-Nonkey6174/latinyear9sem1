@@ -424,7 +424,7 @@
       "$uid": {
         ".read": "auth != null && auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2'",
         "$src": {
-          ".write": "auth != null && auth.uid === $uid && !data.exists() && root.child('mto').child($src).val() === $uid",
+          ".write": "auth != null && ((auth.uid === $uid && !data.exists() && root.child('mto').child($src).val() === $uid) || auth.uid === 'F8AyOfnDz4RASWZnH6J09EmcAtv2')",
           ".validate": "newData.hasChildren(['name', 'n', 't']) && newData.child('name').isString() && newData.child('n').isNumber() && newData.child('t').val() === now"
         }
       }
