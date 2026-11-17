@@ -4965,8 +4965,8 @@ const BADGES=[
  {id:'perpetuus',icon:'♾️',name:'Perpetuus',lat:'never-ending',desc:'Carries on after Constans VII: a new level for every 14 days in a row.',unit:'day streak',inf:true,stat:()=>Math.max(bstat().bestStreak||0,dailyStreak()),lv:Array.from({length:5000},(_,i)=>(i+1)*14)},
  {id:'matutinus',icon:'🌅',name:'Matutinus',lat:'early riser',desc:'Get a question right before 8 am.',stat:()=>bstat().early||0,lv:[1]},
  {id:'nocturnus',icon:'🦉',name:'Nocturnus',lat:'night owl',desc:'Get a question right after 8 pm.',stat:()=>bstat().late||0,lv:[1]},
- {id:'sineerrore',icon:'🎯',name:'Sine Errore',lat:'without error',desc:'Get questions right in a row (any type).',unit:'in a row',stat:()=>bstat().bestRun||0,lv:[10,20,30,50,100,200,300]},
- {id:'infallibilis',icon:'🎯',name:'Infallibilis',lat:'unerring',desc:'Carries on after Sine Errore VII: a new level for every 100 more right in a row.',unit:'in a row',inf:true,stat:()=>bstat().bestRun||0,lv:Array.from({length:5000},(_,i)=>300+i*100)},
+ {id:'sineerrore',icon:'🎯',name:'Sine Errore',lat:'without error',desc:'Get questions right in a row (any type).',unit:'in a row now',stat:()=>bstat().bestRun||0,lv:[10,20,30,50,100,200,300]},
+ {id:'infallibilis',icon:'🎯',name:'Infallibilis',lat:'unerring',desc:'Carries on after Sine Errore VII: a new level for every 100 more right in a row.',unit:'in a row now',inf:true,stat:()=>bstat().bestRun||0,lv:Array.from({length:5000},(_,i)=>300+i*100)},
  {id:'perfectus',icon:'💯',name:'Perfectus',desc:'Get 50 questions right in a row.',stat:()=>bstat().perfect||0,lv:[1]},
  {id:'lexicon',icon:'📖',name:'Lexicon',desc:'See every word in the main list (word packs not included). New words make it harder, but once earned it stays.',stat:()=>lexStat('main','seen'),lv:[1]},
  {id:'lexiconmagnus',icon:'📚',name:'Lexicon Magnum',lat:'great dictionary',desc:'See every word in the main list and all word packs.',stat:()=>lexStat('all','seen'),lv:[1]},
@@ -5073,6 +5073,9 @@ setInterval(()=>{if(document.visibilityState==='visible')try{badgeCheck();}catch
 function secretWipe(){try{const g=bjson(BADGE_KEY);let ch=false;
   Object.keys(g).forEach(k=>{const n=SX_OLDNAMES[_fnv(k)];if(n){if(!g[n]||g[k].l>g[n].l)g[n]=g[k];delete g[k];ch=true;}});
   if(ch){localStorage.setItem(BADGE_KEY,JSON.stringify(g));const pins=badgePins().map(x=>SX_OLDNAMES[_fnv(x)]||x).filter(id=>g[id]);localStorage.setItem(PIN_KEY,JSON.stringify(pins));}}catch(e){}}
+// progress shown on a badge: Sine Errore and Infallibilis show the run you're on now (levels still come from your best run)
+const RUN_BADGES=new Set(['sineerrore','infallibilis']);
+function badgeShowV(bd){if(RUN_BADGES.has(bd.id)){const L=srvOn()?(SRV.me||{}):null;return Math.max(0,L?(+L.run||0):(+bstat().run||0));}return badgeStatV(bd);}
 function badgeStatV(bd){if(!bd.secret&&srvOn())return srvProg(bd);let v=0;try{v=bd.stat();}catch(e){}if(bd.secret)return v;return Math.max(0,v-(+bstat()['base_'+bd.id]||0));}
 // the admin's give / take-away actions: each one is applied once per device (it can be earned back after a removal)
 function bgApply(got){let ch=false,done={};if(lbMe&&!lbPlayers[lbMe.pid])return false;   // wait until my points have loaded
@@ -5125,7 +5128,7 @@ function badgeShown(l,max){return badgeFilter==='all'||(badgeFilter==='none'&&!l
 const BADGE_GROUPS=[['⭐','Points',['rank','augustus','diesmagnus','diesingens']],['🔥','Every day',['matutinus','nocturnus','constans','perpetuus']],['🎯','Accuracy',['primus','perfectus','sineerrore','infallibilis']],
   ['📚','Words',['lexicon','lexiconmagnus','doctus','doctissimus']],['⚔️','Challenges',['gladiator','rival','invictus','victor']],['💬','Leaderboard & chat',['salve','scriptor','socius','civis','popularis']]];
 function badgePinBtn(c,id){if(!lbMe)return;const pinned=badgePins().includes(id);const pb=document.createElement('button');pb.className='bd-pin'+(pinned?' on':'');pb.textContent=pinned?'📌 Shown':'📌 Show';pb.title=pinned?'Shown next to your name on the leaderboard. Click to hide.':'Show next to your name on the leaderboard (up to 6).';pb.onclick=()=>toggleBadgePin(id);c.appendChild(pb);if(pinned)c.classList.add('pinned');}
-function badgeCard(bd,got){const e=got[bd.id],l=e?e.l:0,v=badgeStatV(bd),next=bd.lv[l];const c=document.createElement('div');c.className='badge-card'+(l?' earned':' locked')+(bd.tiers?(l?' m-'+tierMetal(l,bd.lv.length):''):l?' lvl'+Math.min(l,7):'')+(GRAND[bd.id]?' grand'+GRAND[bd.id]:'')+(bd.secret?' secret':'')+(bd.id==='diesingens'?' legend legend-sun':bd.id==='augustus'?' legend legend-imp':bd.id==='perpetuus'?' legend legend-eter':bd.id==='infallibilis'?' legend legend-emer':'');
+function badgeCard(bd,got){const e=got[bd.id],l=e?e.l:0,v=badgeShowV(bd),next=bd.lv[l];const c=document.createElement('div');c.className='badge-card'+(l?' earned':' locked')+(bd.tiers?(l?' m-'+tierMetal(l,bd.lv.length):''):l?' lvl'+Math.min(l,7):'')+(GRAND[bd.id]?' grand'+GRAND[bd.id]:'')+(bd.secret?' secret':'')+(bd.id==='diesingens'?' legend legend-sun':bd.id==='augustus'?' legend legend-imp':bd.id==='perpetuus'?' legend legend-eter':bd.id==='infallibilis'?' legend legend-emer':'');
   let prog='';if(next!=null&&!bd.secret){if(bd.id.startsWith('lex')||bd.id.startsWith('doct'))prog=lexProgress(bd.id==='lexicon'||bd.id==='doctus'?'main':'all',bd.id.startsWith('lex')?'seen':'correct');else if(bd.lv.length>1||next>1)prog=Math.min(v,next).toLocaleString()+' / '+next.toLocaleString()+(bd.unit?' '+bd.unit:'');}
   const lvls=bd.lv.length>1&&!bd.tiers?(bd.inf?bd.lv.slice(0,3).map(x=>x.toLocaleString()).join(' · ')+' · … no limit':bd.lv.map(x=>x.toLocaleString()).join(' · ')):'';
   const pct=prog&&next?Math.max(0,Math.min(100,Math.round(Math.min(v,next)/next*100))):0;
@@ -5202,7 +5205,7 @@ function ansCheck2(v){const t=sxNorm(v);if(t&&t.length<=24)sxTry('a|'+t);}
 setTimeout(()=>{[['checkAnswer','answerInput'],['checkDrill','answerInput'],['checkSentence','sentInput'],['duelCheck','dpInput']].forEach(([fn,id])=>{const f=window[fn];if(typeof f!=='function')return;
   window[fn]=function(){try{const el=document.getElementById(id);if(el&&!el.disabled)ansCheck2(el.value);}catch(e){}return f.apply(this,arguments);};});},0);
 // Progress towards each badge's next level (for the side panel)
-function badgeProgress(bd){const got=bjson(BADGE_KEY),l=got[bd.id]?got[bd.id].l:0;if(l>=bd.lv.length||bd.secret)return null;let v=0,next=bd.lv[l];try{v=badgeStatV(bd);}catch(e){}
+function badgeProgress(bd){const got=bjson(BADGE_KEY),l=got[bd.id]?got[bd.id].l:0;if(l>=bd.lv.length||bd.secret)return null;let v=0,next=bd.lv[l];try{v=badgeShowV(bd);}catch(e){}
   if(bd.id.startsWith('lex')||bd.id.startsWith('doct')){const [a,b]=lexProgress(bd.id==='lexicon'||bd.id==='doctus'?'main':'all',bd.id.startsWith('lex')?'seen':'correct').split(' / ').map(Number);v=a;next=b;}
   const name=bd.tiers?bd.tiers[l].name+' '+romanN(l+1):bd.lv.length>1?bd.name+' '+romanN(l+1):bd.name;
   return {bd,v:Math.min(v,next),next,frac:next?Math.min(1,v/next):0,name};}
