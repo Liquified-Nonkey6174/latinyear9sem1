@@ -2737,7 +2737,7 @@ function formatValidIds(q){return getAllMatchingKeys(q).map(k=>q.word.lat+' '+di
 function rnd(arr){if(!arr||!arr.length)throw new Error('empty pool');return arr[Math.floor(Math.random()*arr.length)];}
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 var EXAM_MAIN=false;   // the exam only uses the main word list (no custom words)
-function wordsOf(ck){const ws=[];Object.entries(DATA[ck].sub).forEach(([sk,s])=>s.words.forEach(w=>ws.push({...w,catKey:ck,subKey:sk})));return EXAM_MAIN&&customWords.length?ws.filter(w=>!customWords.some(c=>c.lat===w.lat&&c.catKey===ck)):ws;}
+function wordsOf(ck){const ws=[];Object.entries(DATA[ck].sub).forEach(([sk,s])=>s.words.forEach(w=>ws.push({...w,catKey:ck,subKey:sk})));let cw=[];try{cw=customWords;}catch(e){}return cw.length?ws.filter(w=>!cw.some(c=>c.lat===w.lat&&c.catKey===ck)):ws;}
 function declineN(w,cas,num){try{const f=getNounForms(w);if(!f)return w.lat;return f[cas+' '+num]||f[cas+' plural']||w.lat;}catch(e){return w.lat;}}
 function conjV(w,p,num){try{const f=getVerbConj(w);if(!f)return w.lat;return f[p+' '+num]||w.lat;}catch(e){return w.lat;}}
 function declineA(w,g,cas,num){try{const f=getAdjForms(w);if(!f)return w.lat;return f[(g||'m')+' '+cas+' '+num]||w.lat;}catch(e){return w.lat;}}
@@ -3658,7 +3658,11 @@ function recAns(w,ok){try{recAns0(w,ok);}catch(e){reportErr(e,'recording the ans
 let ansStats={a:0,w:0,mc:0,ty:0,dr:0,ma:0,se:0,ps:0,pn:0},lastAnsAt=0;
 function noteAnswer(ok){const now=Date.now(),S=ansStats;S.a++;if(!ok)S.w++;S[isMatch?'ma':isSent?'se':isDrill?'dr':inputMode==='mc'?'mc':'ty']=(S[isMatch?'ma':isSent?'se':isDrill?'dr':inputMode==='mc'?'mc':'ty']||0)+1;
   if(lastAnsAt&&now-lastAnsAt<60000){S.ps+=now-lastAnsAt;S.pn++;}lastAnsAt=now;}
-function recAns0(w,ok){reviseAnswer(w,ok);try{noteAnswer(ok);}catch(e){}if(!ok)try{ansFlags();}catch(e){}const ck=w.catKey;if(!statsData.catStats[ck])statsData.catStats[ck]={seen:0,correct:0};statsData.catStats[ck].seen++;if(ok)statsData.catStats[ck].correct++;saveStats();if(ok){if(mcFast||tooFast())tooFastNote();else lbCount(isDrill&&!isSent?2:1);dailyTick();}mcFast=false;trackMistake(w,ok);window._ansW=w;badgeAnswer(ok);}   // declension/conjugation questions are worth 2 ⭐
+// custom words are for practice only: no ⭐, no badge progress, no daily goal (anyone could add easy "words")
+function isCustomWord(w){let cw=[];try{cw=customWords;}catch(e){}if(!w||!cw.length)return false;return cw.some(c=>c.lat===w.lat&&c.catKey===w.catKey&&(!w.subKey||!c.subKey||c.subKey===w.subKey));}
+let customNoteShown=false;function customNote(){if(customNoteShown)return;customNoteShown=true;toast('Custom words are for practice only: they don’t earn ⭐ or count for badges.');}
+function recAns0(w,ok){if(isCustomWord(w)){reviseAnswer(w,ok);const ck=w.catKey;if(!statsData.catStats[ck])statsData.catStats[ck]={seen:0,correct:0};statsData.catStats[ck].seen++;if(ok){statsData.catStats[ck].correct++;customNote();}saveStats();mcFast=false;trackMistake(w,ok);window._ansW=null;return;}
+  reviseAnswer(w,ok);try{noteAnswer(ok);}catch(e){}if(!ok)try{ansFlags();}catch(e){}const ck=w.catKey;if(!statsData.catStats[ck])statsData.catStats[ck]={seen:0,correct:0};statsData.catStats[ck].seen++;if(ok)statsData.catStats[ck].correct++;saveStats();if(ok){if(mcFast||tooFast())tooFastNote();else lbCount(isDrill&&!isSent?2:1);dailyTick();}mcFast=false;trackMistake(w,ok);window._ansW=w;badgeAnswer(ok);}   // declension/conjugation questions are worth 2 ⭐
 let sessionFinished=true;
 function finishSession(){sessionFinished=true;const total=isDrill?drillQs.length:isSent?sentTotal:quizWords.length;const pct=total>0?Math.round(score/total*100):0;if(window.resumeDate)statsData.sessions=statsData.sessions.filter(s=>s.date!==window.resumeDate);statsData.sessions.push({date:Date.now(),score,total,pct});if(total>=50&&score>=total)bump('perfect');if(total>0)sxTry('z|'+score+'|'+Math.min(total,9));if(total>0&&!isDrill&&!isSent&&!isMatch&&quizType==='vocab')sxTry('q|'+inputMode+'|'+score+'/'+total);window.resumeDate=null;if(statsData.sessions.length>20)statsData.sessions=statsData.sessions.slice(-20);saveStats();}
 const PHRASES=[[100,'Optime! Perfectly done.'],[80,'Bene! Well done.'],[60,'Satis bene. Keep going.'],[0,'Persevera. Try again.']];
@@ -4738,7 +4742,7 @@ function renderMistakes(){const box=document.getElementById('mistakeBox');if(!bo
 // first time, +5 more if you get them all.
 const REVISE_KEY='latin_revise';
 function reviseState(){try{return JSON.parse(localStorage.getItem(REVISE_KEY)||'{}')||{};}catch(e){return {};}}
-function reviseWords(){const t0=new Date();t0.setHours(0,0,0,0);return worstWords().filter(m=>m.t&&m.t<t0.getTime()).map(m=>m.w);}
+function reviseWords(){const t0=new Date();t0.setHours(0,0,0,0);return worstWords().filter(m=>m.t&&m.t<t0.getTime()&&!isCustomWord(m.w)).map(m=>m.w);}
 function reviseDone(){return reviseState().day===lbKeys().d;}
 let reviseRun=null;
 function startRevise(){if(reviseDone()){toast('You’ve done today’s revision. Come back tomorrow!');return;}const ws=reviseWords();if(!ws.length){toast('Nothing to revise yet: words you get wrong come back here the next day.');return;}
@@ -5301,7 +5305,7 @@ function updDuelBtn(){badgeCheckSoon();const b=document.getElementById('duelBtn'
     +(inc.length>3?'<button class="lb-link" onclick="openDuelInbox()">+ '+(inc.length-3)+' more</button>':'');}
 function wordByKey(k){return allWordsFlat().find(w=>wKey(w)===k);}
 function openDuelSetup(pid){const p=lbPlayers[pid];if(!p||!lbMe)return;if(!isPublic(lbMe.pid)){toast('Only members can do this. '+memberHow());return;}duelSel={to:pid,subs:{},packs:{},dir:'mixed'};renderDuelSetup();document.getElementById('duelSetupOverlay').style.display='flex';}
-function duelPool(){const ws=[],seen=new Set();Object.entries(duelSel.subs).forEach(([k,on])=>{if(!on)return;const [ck,sk]=k.split('||');DATA[ck].sub[sk].words.forEach(w=>{const x={...w,catKey:ck,subKey:sk};if(!seen.has(wKey(x))){seen.add(wKey(x));ws.push(x);}});});
+function duelPool(){const ws=[],seen=new Set();Object.entries(duelSel.subs).forEach(([k,on])=>{if(!on)return;const [ck,sk]=k.split('||');DATA[ck].sub[sk].words.forEach(w=>{const x={...w,catKey:ck,subKey:sk};if(isCustomWord(x))return;if(!seen.has(wKey(x))){seen.add(wKey(x));ws.push(x);}});});
   WORD_PACKS.forEach(pk=>{if(duelSel.packs[pk.id])pk.words.forEach(w=>{if(!seen.has(wKey(w))){seen.add(wKey(w));ws.push(w);}});});return ws;}
 function renderDuelSetup(){const p=lbPlayers[duelSel.to];const box=document.getElementById('duelSetup');const n=duelPool().length;
   let h='<div class="about-title">⚔ Challenge '+esc(p.name)+'</div><p class="forms-note" style="text-align:center"><span>Pick the words that can come up. You both get the same '+DUEL_N+' questions; the higher score wins, and if it’s a tie, the faster player wins.</span></p>'
