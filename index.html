@@ -824,7 +824,7 @@ body:has(.overlay[style*="display: flex"]) .side-fab,body:has(#bReveal[style*="d
       <span id="descText" class="desc-text"></span>
     </div>
   </div>
-  <div class="settings-row"><button class="settings-btn" onclick="showSettings()">⚙ Settings</button> <button class="settings-btn" id="acctBtn" onclick="acctHub()" title="Sign in, or use your account on other devices">👤 Account</button> <button class="settings-btn" onclick="openBadges()">🏅 Badges <span id="badgeBtnCount" style="opacity:.7;font-size:12px"></span><span class="bf-dot" id="badgeBtnDot" title="New in the badge feed"></span></button> <button class="settings-btn" onclick="printOpen()" title="Print the word list or save it as a PDF">🖨 Print words</button> <button class="settings-btn" id="ntBtn" onclick="ntOpen()" title="Mentions">🔔<span id="ntN" class="nt-n" style="display:none"></span></button> <button class="settings-btn" id="dqBtn" onclick="dqOpen()" style="display:none">✍ December quote</button></div>
+  <div class="settings-row"><button class="settings-btn" onclick="showSettings()">⚙ Settings</button> <button class="settings-btn" id="acctBtn" onclick="acctHub()" title="Sign in, or use your account on other devices">👤 Account</button> <button class="settings-btn" onclick="openBadges()">🏅 Badges <span id="badgeBtnCount" style="opacity:.7;font-size:12px"></span><span class="bf-dot" id="badgeBtnDot" title="New in the badge feed"></span></button> <button class="settings-btn" onclick="printOpen(true)" title="Print the word list or save it as a PDF">🖨 Print words</button> <button class="settings-btn" id="ntBtn" onclick="ntOpen()" title="Mentions">🔔<span id="ntN" class="nt-n" style="display:none"></span></button> <button class="settings-btn" id="dqBtn" onclick="dqOpen()" style="display:none">✍ December quote</button></div>
   <div class="nav-tabs">
     <button class="nav-tab active" onclick="showMainTab('practice')">Practice</button>
     <button class="nav-tab" onclick="showMainTab('read')">Reading</button>
@@ -857,7 +857,7 @@ body:has(.overlay[style*="display: flex"]) .side-fab,body:has(#bReveal[style*="d
       <span style="font-size:12px;color:var(--text3)">Categories</span>
       <div style="display:flex;gap:6px">
         <button class="sel-small-btn" id="customWordsBtn" onclick="showCustomList()">Custom words</button>
-        <button class="sel-small-btn pr-btn" id="printWordsBtn" onclick="printOpen()" title="Print the word list or save it as a PDF">🖨 Print words</button>
+        <button class="sel-small-btn pr-btn" id="printWordsBtn" onclick="printOpen(true)" title="Print the word list or save it as a PDF">🖨 Print words</button>
         <button class="sel-small-btn" onclick="selectAll()">Select all</button>
         <button class="sel-small-btn" onclick="deselectAll()">Deselect all</button>
       </div>
@@ -2158,11 +2158,11 @@ body:has(.overlay[style*="display: flex"]) .side-fab,body:has(#bReveal[style*="d
   <div class="about-box ann-box" onclick="event.stopPropagation()" style="text-align:left;max-width:560px">
     <button class="about-close" onclick="closeOverlay('printOverlay')">×</button>
     <div class="ann-head">🖨 Print words</div>
-    <p class="muted" style="font-size:12.5px;margin:4px 0 10px">Choose what to include, then press Print. To get a PDF, pick <b>Save as PDF</b> as the printer.</p>
+    <p class="muted" style="font-size:12.5px;margin:4px 0 10px">It starts with what you’ve selected to practise: change it here if you like, then press Print. To get a PDF, pick <b>Save as PDF</b> as the printer.</p>
     <div class="pr-quick"><button class="sel-small-btn" onclick="printSel(true)">Everything</button><button class="sel-small-btn" onclick="printSel(false)">Nothing</button><button class="sel-small-btn" onclick="printSel('quiz')">Same as my quiz selection</button></div>
     <div id="printTree" class="pr-tree"></div>
     <div class="pr-opts">
-      <label><input type="checkbox" id="prGram" checked> Genitive &amp; gender</label>
+      <label><input type="checkbox" id="prGram" checked> Genitive &amp; gender (3rd declension)</label>
       <label><input type="checkbox" id="prBlank"> Leave English blank (to test yourself)</label>
       <label><input type="checkbox" id="prCols" checked> Two columns</label>
       <label>Order: <select id="prOrder"><option value="list">as in Latin Trainer</option><option value="az">A–Z</option></select></label>
@@ -4571,7 +4571,7 @@ let printChoice=null;
 function printGroups(){const g=[];Object.entries(DATA).forEach(([ck,cat])=>{if(cat.packOnly)return;const subs=Object.entries(cat.sub).map(([sk,sub])=>({id:ck+'||'+sk,label:sameLabel(cat.label,sk)?cat.label:sk,words:sub.words.filter(w=>!isCustomWord({...w,catKey:ck,subKey:sk})).map(w=>({...w,catKey:ck,subKey:sk}))})).filter(x=>x.words.length);if(subs.length)g.push({id:ck,label:cat.label,subs});});
   try{const ps=WORD_PACKS.map(pk=>({id:'pack:'+pk.id,label:pk.label,words:pk.words})).filter(x=>x.words.length);if(ps.length)g.push({id:'packs',label:'Word packs',subs:ps});}catch(e){}
   let cw=[];try{cw=customWords;}catch(e){}if(cw.length)g.push({id:'custom',label:'My custom words',subs:[{id:'custom',label:'Custom words',words:cw.slice()}]});return g;}
-function printOpen(){const G=printGroups();if(!printChoice){printChoice={};G.forEach(c=>c.subs.forEach(s=>{printChoice[s.id]=c.id!=='packs'&&c.id!=='custom';}));}
+function printOpen(fresh){const G=printGroups();if(fresh||!printChoice){printChoice={};printSelFill(G,'quiz');if(!Object.values(printChoice).some(Boolean))G.forEach(c=>c.subs.forEach(s=>{printChoice[s.id]=c.id!=='packs'&&c.id!=='custom';}));}
   const box=document.getElementById('printTree');box.innerHTML='';
   G.forEach(c=>{const d=document.createElement('div');d.className='pr-cat';const all=c.subs.every(s=>printChoice[s.id]),some=c.subs.some(s=>printChoice[s.id]);
     const cl=document.createElement('label');const cb=document.createElement('input');cb.type='checkbox';cb.checked=all;cb.indeterminate=some&&!all;cb.onchange=()=>{c.subs.forEach(s=>printChoice[s.id]=cb.checked);printOpen();};
@@ -4580,11 +4580,11 @@ function printOpen(){const G=printGroups();if(!printChoice){printChoice={};G.for
     box.appendChild(d);});
   const n=G.reduce((a,c)=>a+c.subs.filter(s=>printChoice[s.id]).reduce((b,s)=>b+s.words.length,0),0);document.getElementById('printCount').textContent=n+' word'+(n===1?'':'s');
   document.getElementById('printOverlay').style.display='flex';}
-function printSel(v){const G=printGroups();G.forEach(c=>c.subs.forEach(s=>{printChoice[s.id]=v==='quiz'?(s.id.startsWith('pack:')?!!packSel[s.id.slice(5)]:s.id==='custom'?false:(()=>{const [ck,sk]=s.id.split('||');return !!(selected[ck]&&selected[ck][sk]);})()):!!v;}));printOpen();}
+function printSelFill(G,v){G.forEach(c=>c.subs.forEach(s=>{printChoice[s.id]=v==='quiz'?(s.id.startsWith('pack:')?!!(typeof packSel!=='undefined'&&packSel[s.id.slice(5)]):s.id==='custom'?false:(()=>{const [ck,sk]=s.id.split('||');return !!(selected[ck]&&selected[ck][sk]);})()):!!v;}));}
+function printSel(v){printSelFill(printGroups(),v);printOpen();}
 // dictionary form for nouns: puella, puellae (f) · castra, castrorum (n pl.)
-const PRINT_PL={Athenae:'Athenarum',ludi:'ludorum',Alpes:'Alpium'};   // plural-only names the declension tables treat as singular
-function printLat(w,gram){if(!gram||w.catKey!=='nouns')return fullLat(w);if(PRINT_PL[w.lat])return w.lat+', '+PRINT_PL[w.lat]+(w.gender?' ('+w.gender+' pl.)':'');let g=w.gen,pl=false;try{const f=getNounForms(w);if(f){if(f['genitive singular'])g=f['genitive singular'];else if(f['genitive plural']){g=f['genitive plural'];pl=true;}}}catch(e){}
-  if(!g&&!w.gender)return fullLat(w);return w.lat+(g&&g!==w.lat?', '+g:'')+(w.gender?' ('+w.gender+(pl?' pl.':'')+')':'');}
+// 3rd declension nouns: rex, regis (m). Everything else is just the word.
+function printLat(w,gram){if(gram&&w.catKey==='nouns'&&is3rd(w.subKey)&&w.gen)return w.lat+', '+w.gen+(w.gender?' ('+w.gender+')':'');return w.catKey==='nouns'?w.lat:fullLat(w);}
 function printGo(){const G=printGroups(),gram=document.getElementById('prGram').checked,blank=document.getElementById('prBlank').checked,cols=document.getElementById('prCols').checked,az=document.getElementById('prOrder').value==='az';
   // a plain table (2 or 4 cells a row, fixed widths, long words wrap): prints the same in every browser and never runs off the page
   const cell=w=>{let e='';try{e=displayEng(w);}catch(x){e=(w.eng||[]).join(', ');}return '<td class="la">'+esc(printLat(w,gram))+'</td><td class="en">'+(blank?'':esc(e))+'</td>';};
