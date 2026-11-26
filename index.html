@@ -5179,7 +5179,7 @@ function secretWipe(){try{const g=bjson(BADGE_KEY);let ch=false;
 // progress shown on a badge: Sine Errore and Infallibilis show the run you're on now (levels still come from your best run)
 // (and the streak / daily ⭐ badges show your streak now and today's ⭐; levels still come from your best)
 const RUN_BADGES=new Set(['sineerrore','infallibilis']),NOW_STREAK=new Set(['constans','perpetuus']),NOW_DAY=new Set(['diesmagnus','diesingens']);
-function badgeShowV(bd){try{if(RUN_BADGES.has(bd.id)){const L=srvOn()?(SRV.me||{}):null;return Math.max(0,L?(+L.run||0):(+bstat().run||0));}
+function badgeShowV(bd){try{if(RUN_BADGES.has(bd.id))return Math.max(0,+bstat().run||0);   // this device's run (the server's count also includes words sent in the background, which reset it every 6)
   if(NOW_STREAK.has(bd.id))return Math.max(0,dailyStreak()||0);
   if(NOW_DAY.has(bd.id))return Math.max(0,lbTodayPts()||0);}catch(e){}return badgeStatV(bd);}
 function badgeStatV(bd){if(!bd.secret&&srvOn())return srvProg(bd);let v=0;try{v=bd.stat();}catch(e){}if(bd.secret)return v;return Math.max(0,v-(+bstat()['base_'+bd.id]||0));}
