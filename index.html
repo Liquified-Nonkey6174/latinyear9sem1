@@ -4705,12 +4705,14 @@ function chatFillText(el,text,from){const tags=atTags(),me=myTag();let i=0,last=
     if(!m){i++;continue;}if(i>last)el.appendChild(document.createTextNode(text.slice(last,i)));const sp=document.createElement('span');const mine=me&&m.tag.toLowerCase()===me;if(mine)hit=true;
     sp.className='chat-at'+(mine?' me':'');sp.textContent='@'+m.tag;sp.title=lbName(m.pid);sp.onclick=()=>openPlayerCard(m.pid);el.appendChild(sp);i+=1+m.tag.length;last=i;}
   if(last<text.length)el.appendChild(document.createTextNode(text.slice(last)));return hit;}
+// a reply to one of my messages notifies me just like a mention
+const isReplyToMe=m=>!!(m&&lbMe&&typeof m.re==='string'&&chatObj[m.re]&&pidMain(chatObj[m.re].pid)===lbMe.pid&&pidMain(m.pid)!==lbMe.pid);
 const isAllPing=m=>m&&m.pid===ADMIN_UID&&/(^|[^A-Za-z0-9])@all(?![A-Za-z0-9])/i.test(m.text||'');
 function atNotify(){if(!atNew.length)return;const mx=Math.max(...atNew.map(m=>+m.t||0));const list=atNew;atNew=[];atSeen=Math.max(atSeen,mx);try{localStorage.setItem(AT_SEEN_KEY,String(atSeen));}catch(e){}
-  list.forEach(m=>ntAdd({id:m.id,pid:m.pid,name:lbName(m.pid),text:String(m.text).slice(0,300),t:+m.t||Date.now(),all:isAllPing(m)}));
-  const m=list[list.length-1],who=lbName(m.pid),msg=(isAllPing(m)?'📢 '+who+' mentioned everyone: ':'💬 '+who+' mentioned you: ')+chatSnippet(m.text);toast(msg);try{playTone&&playTone(true);}catch(e){}
+  list.forEach(m=>ntAdd({id:m.id,pid:m.pid,name:lbName(m.pid),text:String(m.text).slice(0,300),t:+m.t||Date.now(),all:isAllPing(m),reply:isReplyToMe(m)}));
+  const m=list[list.length-1],who=lbName(m.pid),msg=(isAllPing(m)?'📢 '+who+' mentioned everyone: ':isReplyToMe(m)?'↩ '+who+' replied to you: ':'💬 '+who+' mentioned you: ')+chatSnippet(m.text);toast(msg);try{playTone&&playTone(true);}catch(e){}
   // a pop-up from the device when Latin Trainer isn't the window in front (only if they turned it on)
-  try{if(document.visibilityState==='hidden'&&'Notification' in window&&Notification.permission==='granted'){const n=new Notification(isAllPing(m)?who+' mentioned everyone':who+' mentioned you',{body:String(m.text).slice(0,140),tag:'lt-'+m.id,icon:'data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#1e1b18"/><text x="32" y="44" font-size="34" text-anchor="middle" fill="#c4935a" font-family="Georgia">L</text></svg>')});n.onclick=()=>{try{window.focus();}catch(e){}ntGo(m.id);n.close();};}}catch(e){}}
+  try{if(document.visibilityState==='hidden'&&'Notification' in window&&Notification.permission==='granted'){const n=new Notification(isAllPing(m)?who+' mentioned everyone':isReplyToMe(m)?who+' replied to you':who+' mentioned you',{body:String(m.text).slice(0,140),tag:'lt-'+m.id,icon:'data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#1e1b18"/><text x="32" y="44" font-size="34" text-anchor="middle" fill="#c4935a" font-family="Georgia">L</text></svg>')});n.onclick=()=>{try{window.focus();}catch(e){}ntGo(m.id);n.close();};}}catch(e){}}
 // ── NOTIFICATIONS: everyone who mentioned you (or the admin's @all), kept on this device ──
 const NT_KEY='latin_notifs',NT_SEEN='latin_notif_seen';
 function ntList(){try{const a=JSON.parse(localStorage.getItem(NT_KEY)||'[]');return Array.isArray(a)?a:[];}catch(e){return [];}}
@@ -4720,9 +4722,9 @@ function ntUnread(){const s=ntSeen();return ntList().filter(x=>x.t>s).length;}
 const NT_TITLE=document.title;
 function ntBadge(){const n=ntUnread(),b=document.getElementById('ntN');if(b){b.textContent=n?(n>9?'9+':String(n)):'';b.style.display=n?'':'none';}document.title=(n?'('+n+') ':'')+NT_TITLE;}
 function ntOpen(){const box=document.getElementById('ntList'),a=ntList(),seen=ntSeen();box.innerHTML='';
-  if(!a.length)box.innerHTML='<p class="muted" style="margin:6px 0">No mentions yet. When someone writes @ and your member tag in the chat, it shows up here.</p>';
+  if(!a.length)box.innerHTML='<p class="muted" style="margin:6px 0">No mentions yet. When someone writes @ and your member tag in the chat, or replies to one of your messages, it shows up here.</p>';
   a.forEach(x=>{const r=document.createElement('button');r.className='nt-row'+(x.t>seen?' new':'');const top=document.createElement('div');top.className='nt-top';
-    const w=document.createElement('b');w.textContent=(x.all?'📢 ':'💬 ')+x.name+(x.all?' → everyone':'');const tm=document.createElement('span');tm.textContent=chatTime(x.t);top.append(w,tm);
+    const w=document.createElement('b');w.textContent=(x.all?'📢 ':x.reply?'↩ ':'💬 ')+x.name+(x.all?' → everyone':x.reply?' replied':'');const tm=document.createElement('span');tm.textContent=chatTime(x.t);top.append(w,tm);
     const tx=document.createElement('div');tx.className='nt-tx';tx.textContent=x.text;r.append(top,tx);r.onclick=()=>{closeOverlay('ntOverlay');ntGo(x.id);};box.appendChild(r);});
   const pb=document.getElementById('ntPerm');if(pb){const has='Notification' in window,st=has?Notification.permission:'denied';pb.style.display=has&&st==='default'?'':'none';
     document.getElementById('ntPermNote').textContent=!has?'':st==='granted'?'✓ Pop-ups are on: you’ll get one when Latin Trainer is in the background.':st==='denied'?'Pop-ups are blocked for this site in your browser settings.':'';}
@@ -4750,7 +4752,7 @@ function renderChat(){const list=document.getElementById('chatList');if(!list||!
   if(!chatMsgs.length){list.innerHTML='<div class="lb-empty">No messages yet. Say salve!</div>';return;}
   chatMsgs.forEach(m=>{if(!m||typeof m.text!=='string'||!chatVisible(m.pid))return;const el=document.createElement('div');el.className='chat-m'+(lbMe&&m.pid===lbMe.pid?' me':'');
     const who=document.createElement('span');who.className='chat-who';who.appendChild(nameEl(m.pid,lbName(m.pid)));
-    const tx=document.createElement('span');const pinged=chatFillText(tx,m.text,m.pid);if(pinged&&lbMe&&m.pid!==lbMe.pid){el.classList.add('ping');if(+m.t>atSeen)atNew.push(m);}
+    const tx=document.createElement('span');const pinged=chatFillText(tx,m.text,m.pid)||isReplyToMe(m);if(pinged&&lbMe&&m.pid!==lbMe.pid){el.classList.add('ping');if(+m.t>atSeen)atNew.push(m);}
     const tm=document.createElement('span');tm.className='chat-time';tm.textContent=chatTime(m.t);
     el.id='cm_'+m.id;
     // A reply shows a short quote of the message it answers (click it to jump there).
