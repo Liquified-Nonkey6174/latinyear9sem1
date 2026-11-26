@@ -453,7 +453,12 @@ input[type=range]{flex:1;accent-color:var(--accent)}
 .chat-form{display:flex;gap:6px;padding:10px 14px;border-top:1px solid var(--border)}
 .chat-m{position:relative;border-radius:6px;padding:2px 4px;margin:0 -4px;transition:background .3s}
 .chat-m.flash{background:var(--accent-bg)}
-.chat-at{color:var(--accent);font-weight:600;cursor:pointer;border-radius:4px;padding:0 2px;background:color-mix(in srgb,var(--accent) 12%,transparent)}.nt-n{display:inline-block;min-width:16px;height:16px;line-height:16px;padding:0 4px;margin-left:4px;border-radius:999px;background:var(--red);color:#fff;font-size:10.5px;font-weight:700;text-align:center;vertical-align:1px}
+.chat-at{color:var(--accent);font-weight:600;cursor:pointer;border-radius:4px;padding:0 2px;background:color-mix(in srgb,var(--accent) 12%,transparent)}.pr-quick{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.pr-tree{max-height:46vh;overflow-y:auto;border:1px solid var(--border);border-radius:10px;padding:8px 10px;background:var(--surface2)}
+.pr-cat{margin:4px 0 8px}.pr-cat>label{font-weight:600;font-size:13.5px}.pr-subs{display:flex;flex-wrap:wrap;gap:2px 14px;margin:3px 0 0 22px}
+.pr-subs label,.pr-opts label{font-size:12.5px;color:var(--text2);display:inline-flex;gap:5px;align-items:center;cursor:pointer}
+.pr-opts{display:flex;flex-wrap:wrap;gap:6px 16px;margin:10px 0 2px}.pr-opts select{font:inherit;font-size:12.5px;background:var(--surface2);color:var(--text);border:1px solid var(--border2);border-radius:6px}
+.nt-n{display:inline-block;min-width:16px;height:16px;line-height:16px;padding:0 4px;margin-left:4px;border-radius:999px;background:var(--red);color:#fff;font-size:10.5px;font-weight:700;text-align:center;vertical-align:1px}
 .nt-list{max-height:55vh;overflow-y:auto;display:flex;flex-direction:column;gap:6px;margin:6px 0}
 .nt-row{text-align:left;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:8px 10px;color:var(--text);font:inherit;cursor:pointer}.nt-row:hover{border-color:var(--accent)}.nt-row.new{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
 .nt-top{display:flex;justify-content:space-between;gap:8px;font-size:12.5px}.nt-top span{color:var(--text3);white-space:nowrap}.nt-tx{font-size:13px;color:var(--text2);margin-top:2px;overflow-wrap:anywhere}
@@ -851,6 +856,7 @@ body:has(.overlay[style*="display: flex"]) .side-fab,body:has(#bReveal[style*="d
       <span style="font-size:12px;color:var(--text3)">Categories</span>
       <div style="display:flex;gap:6px">
         <button class="sel-small-btn" id="customWordsBtn" onclick="showCustomList()">Custom words</button>
+        <button class="sel-small-btn" id="printWordsBtn" onclick="printOpen()" title="Print the word list or save it as a PDF">🖨 Print words</button>
         <button class="sel-small-btn" onclick="selectAll()">Select all</button>
         <button class="sel-small-btn" onclick="deselectAll()">Deselect all</button>
       </div>
@@ -2145,6 +2151,22 @@ body:has(.overlay[style*="display: flex"]) .side-fab,body:has(#bReveal[style*="d
     <div class="ann-body" id="annBody"></div>
     <div class="ann-date" id="annDate"></div>
     <div class="ann-btns"><button class="btn-primary" id="annDq" onclick="closeAnn();dqOpen()" style="display:none">✍ Submit your quote</button><button class="btn-primary" onclick="closeAnn()">Got it</button><button class="lb-link" onclick="annHide()">Don’t show again until there’s a new one</button></div>
+  </div>
+</div>
+<div id="printOverlay" class="overlay" style="display:none" onclick="closeOverlay('printOverlay')">
+  <div class="about-box ann-box" onclick="event.stopPropagation()" style="text-align:left;max-width:560px">
+    <button class="about-close" onclick="closeOverlay('printOverlay')">×</button>
+    <div class="ann-head">🖨 Print words</div>
+    <p class="muted" style="font-size:12.5px;margin:4px 0 10px">Choose what to include, then press Print. To get a PDF, pick <b>Save as PDF</b> as the printer.</p>
+    <div class="pr-quick"><button class="sel-small-btn" onclick="printSel(true)">Everything</button><button class="sel-small-btn" onclick="printSel(false)">Nothing</button><button class="sel-small-btn" onclick="printSel('quiz')">Same as my quiz selection</button></div>
+    <div id="printTree" class="pr-tree"></div>
+    <div class="pr-opts">
+      <label><input type="checkbox" id="prGram" checked> Genitive &amp; gender</label>
+      <label><input type="checkbox" id="prBlank"> Leave English blank (to test yourself)</label>
+      <label><input type="checkbox" id="prCols" checked> Two columns</label>
+      <label>Order: <select id="prOrder"><option value="list">as in Latin Trainer</option><option value="az">A–Z</option></select></label>
+    </div>
+    <div class="ann-btns"><button class="btn-primary" onclick="printGo()">🖨 Print / Save as PDF</button><span id="printCount" class="muted" style="font-size:12.5px;align-self:center"></span></div>
   </div>
 </div>
 <div id="ntOverlay" class="overlay" style="display:none" onclick="closeOverlay('ntOverlay')">
@@ -4543,6 +4565,36 @@ async function dqNudge(){if(dqNudged||ENGINE)return;await dqLoad();if(!(DQ&&DQ.o
   const show=()=>{if(dqNudged)return;const busy=(typeof tourSteps!=='undefined'&&tourSteps)||[...document.querySelectorAll('.overlay')].some(o=>o.style.display==='flex')||(typeof revealOn!=='undefined'&&revealOn);
     if(busy){setTimeout(show,1500);return;}dqNudged=true;dqOpen();};show();}
 setTimeout(dqNudge,4000);setInterval(()=>{if(document.visibilityState==='visible')dqLoad();},300000);
+// ── PRINT / PDF: the word list, by category, on clean printable pages (Save as PDF from the print window) ──
+let printChoice=null;
+function printGroups(){const g=[];Object.entries(DATA).forEach(([ck,cat])=>{if(cat.packOnly)return;const subs=Object.entries(cat.sub).map(([sk,sub])=>({id:ck+'||'+sk,label:sameLabel(cat.label,sk)?cat.label:sk,words:sub.words.filter(w=>!isCustomWord({...w,catKey:ck,subKey:sk})).map(w=>({...w,catKey:ck,subKey:sk}))})).filter(x=>x.words.length);if(subs.length)g.push({id:ck,label:cat.label,subs});});
+  try{const ps=WORD_PACKS.map(pk=>({id:'pack:'+pk.id,label:pk.label,words:pk.words})).filter(x=>x.words.length);if(ps.length)g.push({id:'packs',label:'Word packs',subs:ps});}catch(e){}
+  let cw=[];try{cw=customWords;}catch(e){}if(cw.length)g.push({id:'custom',label:'My custom words',subs:[{id:'custom',label:'Custom words',words:cw.slice()}]});return g;}
+function printOpen(){const G=printGroups();if(!printChoice){printChoice={};G.forEach(c=>c.subs.forEach(s=>{printChoice[s.id]=c.id!=='packs'&&c.id!=='custom';}));}
+  const box=document.getElementById('printTree');box.innerHTML='';
+  G.forEach(c=>{const d=document.createElement('div');d.className='pr-cat';const all=c.subs.every(s=>printChoice[s.id]),some=c.subs.some(s=>printChoice[s.id]);
+    const cl=document.createElement('label');const cb=document.createElement('input');cb.type='checkbox';cb.checked=all;cb.indeterminate=some&&!all;cb.onchange=()=>{c.subs.forEach(s=>printChoice[s.id]=cb.checked);printOpen();};
+    cl.append(cb,document.createTextNode(' '+c.label+' ('+c.subs.reduce((a,s)=>a+s.words.length,0)+')'));d.appendChild(cl);
+    if(c.subs.length>1||c.subs[0].label!==c.label){const sd=document.createElement('div');sd.className='pr-subs';c.subs.forEach(s=>{const l=document.createElement('label');const x=document.createElement('input');x.type='checkbox';x.checked=!!printChoice[s.id];x.onchange=()=>{printChoice[s.id]=x.checked;printOpen();};l.append(x,document.createTextNode(s.label+' ('+s.words.length+')'));sd.appendChild(l);});d.appendChild(sd);}
+    box.appendChild(d);});
+  const n=G.reduce((a,c)=>a+c.subs.filter(s=>printChoice[s.id]).reduce((b,s)=>b+s.words.length,0),0);document.getElementById('printCount').textContent=n+' word'+(n===1?'':'s');
+  document.getElementById('printOverlay').style.display='flex';}
+function printSel(v){const G=printGroups();G.forEach(c=>c.subs.forEach(s=>{printChoice[s.id]=v==='quiz'?(s.id.startsWith('pack:')?!!packSel[s.id.slice(5)]:s.id==='custom'?false:(()=>{const [ck,sk]=s.id.split('||');return !!(selected[ck]&&selected[ck][sk]);})()):!!v;}));printOpen();}
+// dictionary form for nouns: puella, puellae (f) · castra, castrorum (n pl.)
+const PRINT_PL={Athenae:'Athenarum',ludi:'ludorum',Alpes:'Alpium'};   // plural-only names the declension tables treat as singular
+function printLat(w,gram){if(!gram||w.catKey!=='nouns')return fullLat(w);if(PRINT_PL[w.lat])return w.lat+', '+PRINT_PL[w.lat]+(w.gender?' ('+w.gender+' pl.)':'');let g=w.gen,pl=false;try{const f=getNounForms(w);if(f){if(f['genitive singular'])g=f['genitive singular'];else if(f['genitive plural']){g=f['genitive plural'];pl=true;}}}catch(e){}
+  if(!g&&!w.gender)return fullLat(w);return w.lat+(g&&g!==w.lat?', '+g:'')+(w.gender?' ('+w.gender+(pl?' pl.':'')+')':'');}
+function printGo(){const G=printGroups(),gram=document.getElementById('prGram').checked,blank=document.getElementById('prBlank').checked,cols=document.getElementById('prCols').checked,az=document.getElementById('prOrder').value==='az';
+  let n=0,body='';G.forEach(c=>{const subs=c.subs.filter(s=>printChoice[s.id]);if(!subs.length)return;body+='<section><h2>'+esc(c.label)+'</h2>';
+    subs.forEach(s=>{let ws=s.words.slice();if(az)ws.sort((a,b)=>String(a.lat).localeCompare(String(b.lat),'la',{sensitivity:'base'}));n+=ws.length;
+      body+=(s.label!==c.label||subs.length>1?'<h3>'+esc(s.label)+' <span>('+ws.length+')</span></h3>':'')+'<table>'+ws.map(w=>{let e='';try{e=displayEng(w);}catch(x){e=(w.eng||[]).join(', ');}return '<tr><td class="la">'+esc(printLat(w,gram))+'</td><td class="en">'+(blank?'':esc(e))+'</td></tr>';}).join('')+'</table>';});body+='</section>';});
+  if(!n){toast('Choose at least one category to print.');return;}
+  const html='<!doctype html><html><head><meta charset="utf-8"><title>Latin Trainer word list</title><style>@page{margin:14mm}*{box-sizing:border-box}body{font:11pt/1.35 Georgia,"Times New Roman",serif;color:#111;margin:0}header{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid #333;margin-bottom:10px;padding-bottom:4px}header h1{font-size:18pt;margin:0}header span{font:9pt system-ui,sans-serif;color:#555}main{'+(cols?'column-count:2;column-gap:10mm;column-rule:1px solid #ddd':'')+'}section{margin-bottom:8px}h2{font-size:13.5pt;margin:8px 0 3px;border-bottom:1px solid #999;break-after:avoid;column-span:none}h3{font:600 9.5pt system-ui,sans-serif;text-transform:uppercase;letter-spacing:.05em;color:#444;margin:7px 0 2px;break-after:avoid}h3 span{font-weight:400;color:#777}table{width:100%;border-collapse:collapse}tr{break-inside:avoid}td{padding:2.5px 4px;border-bottom:1px solid #e4e4e4;vertical-align:top}td.la{width:48%;font-weight:600}td.en{color:#222}'+(blank?'td.en{border-bottom:1px solid #999}':'')+'@media screen{body{max-width:900px;margin:20px auto;padding:0 16px}.bar{position:sticky;top:0;background:#fff;padding:8px 0;margin-bottom:8px;border-bottom:1px solid #ddd;font:10pt system-ui,sans-serif}}@media print{.bar{display:none}}</style></head><body><div class="bar"><button onclick="print()">🖨 Print / Save as PDF</button></div><header><h1>Latin Trainer · word list</h1><span>'+n+' words · '+esc(new Date().toLocaleDateString())+'</span></header><main>'+body+'</main><script>setTimeout(function(){print()},400)<\/script></body></html>';
+  let w=null;try{w=window.open('','_blank');}catch(e){}
+  if(w){w.document.open();w.document.write(html);w.document.close();closeOverlay('printOverlay');return;}
+  // pop-ups blocked: print from a hidden frame instead
+  const f=document.createElement('iframe');f.style.cssText='position:fixed;width:0;height:0;border:0;right:0;bottom:0';document.body.appendChild(f);const d=f.contentWindow.document;d.open();d.write(html.replace('<script>setTimeout(function(){print()},400)<\/script>',''));d.close();
+  setTimeout(()=>{try{f.contentWindow.focus();f.contentWindow.print();}catch(e){toast('Couldn’t open the print window. Allow pop-ups for this site and try again.');}setTimeout(()=>f.remove(),60000);},300);closeOverlay('printOverlay');}
 function closeAnn(){document.getElementById('annOverlay').style.display='none';}
 function annHide(){try{localStorage.setItem(ANN_HIDE,String((annCur&&annCur.t)||Date.now()));}catch(e){}closeAnn();}
 setTimeout(()=>annLoad(false),1800);
