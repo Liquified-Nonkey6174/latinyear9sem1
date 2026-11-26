@@ -2165,6 +2165,7 @@ body:has(.overlay[style*="display: flex"]) .side-fab,body:has(#bReveal[style*="d
       <label><input type="checkbox" id="prGram" checked> Genitive &amp; gender (3rd declension)</label>
       <label><input type="checkbox" id="prBlank"> Leave English blank (to test yourself)</label>
       <label><input type="checkbox" id="prCols" checked> Two columns</label>
+      <label>Style: <select id="prStyle"><option value="designed">Designed (colour)</option><option value="classic">Classic (black &amp; white)</option></select></label>
       <label>Order: <select id="prOrder"><option value="list">as in Latin Trainer</option><option value="az">A–Z</option></select></label>
     </div>
     <div class="ann-btns"><button class="btn-primary" onclick="printGo()">🖨 Print / Save as PDF</button><span id="printCount" class="muted" style="font-size:12.5px;align-self:center"></span></div>
@@ -4589,25 +4590,48 @@ function printGo(){const G=printGroups(),gram=document.getElementById('prGram').
   // a plain table (2 or 4 cells a row, fixed widths, long words wrap): prints the same in every browser and never runs off the page
   const cell=w=>{let e='';try{e=displayEng(w);}catch(x){e=(w.eng||[]).join(', ');}return '<td class="la">'+esc(printLat(w,gram))+'</td><td class="en">'+(blank?'':esc(e))+'</td>';};
   const per=cols?2:1,colg='<colgroup>'+(cols?'<col style="width:27%"><col style="width:22%"><col class="gap"><col style="width:27%"><col style="width:22%">':'<col style="width:45%"><col style="width:55%">')+'</colgroup>';
-  let n=0,body='';G.forEach(c=>{const subs=c.subs.filter(s=>printChoice[s.id]);if(!subs.length)return;body+='<h2>'+esc(c.label)+'</h2>';
-    subs.forEach(s=>{let ws=s.words.slice();if(az)ws.sort((a,b)=>String(a.lat).localeCompare(String(b.lat),'la',{sensitivity:'base'}));n+=ws.length;
+  // one table per category: its heading repeats at the top of each page it runs onto, and a subcategory heading always
+  // stays with its first words (no heading left alone at the bottom of a page)
+  const span=cols?5:2;let n=0,body='';G.forEach(c=>{const subs=c.subs.filter(s=>printChoice[s.id]);if(!subs.length)return;const cn=subs.reduce((a,s)=>a+s.words.length,0);
+    let rows='';subs.forEach(s=>{let ws=s.words.slice();if(az)ws.sort((a,b)=>String(a.lat).localeCompare(String(b.lat),'la',{sensitivity:'base'}));n+=ws.length;
       const head=(s.label!==c.label||subs.length>1)?'<h3>'+esc(s.label)+' <span>('+ws.length+')</span></h3>':'';
-      const half=Math.ceil(ws.length/per);let rows='';for(let r=0;r<half;r++){rows+='<tr>'+cell(ws[r]);if(cols)rows+='<td class="gap"></td>'+(ws[r+half]?cell(ws[r+half]):'<td></td><td></td>');rows+='</tr>';}   // reads down the left column, then the right
-      body+=head+'<table>'+colg+rows+'</table>';});});
+      const half=Math.ceil(ws.length/per);for(let r=0;r<half;r++){const row=cell(ws[r])+(cols?'<td class="gap"></td>'+(ws[r+half]?cell(ws[r+half]):'<td class="gap"></td><td class="gap"></td>'):'');   // reads down the left column, then the right
+        rows+=(r===0&&head?'<tbody class="keep"><tr class="sub"><td colspan="'+span+'">'+head+'</td></tr><tr class="z0">'+row+'</tr></tbody><tbody>':(r===0?'<tbody>':''))+'<tr class="'+(r%2?'z1':'z0')+'"'+(r===0&&head?' hidden':'')+'>'+(r===0&&head?'':row)+'</tr>';}
+      rows+='</tbody>';});
+    body+='<table>'+colg+'<thead><tr class="cat"><td colspan="'+span+'"><h2>'+esc(c.label)+' <span>'+cn+' word'+(cn===1?'':'s')+'</span></h2></td></tr></thead>'+rows.replace(/<tr class="z[01]" hidden><\/tr>/g,'')+'</table>';});
   if(!n){toast('Choose at least one category to print.');return;}
-  const css='@page{size:A4;margin:18mm 18mm 20mm}*{box-sizing:border-box}html,body{margin:0;padding:0}body{font:10.5pt/1.3 Georgia,"Times New Roman",serif;color:#111;-webkit-print-color-adjust:exact;print-color-adjust:exact}'
+  const designed=(document.getElementById('prStyle')||{}).value!=='classic',date=esc(new Date().toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric'}));
+  const common='*{box-sizing:border-box}html,body{margin:0;padding:0}body{-webkit-print-color-adjust:exact;print-color-adjust:exact}table{width:100%;table-layout:fixed;border-collapse:collapse}tr{page-break-inside:avoid;break-inside:avoid}td{vertical-align:top;overflow-wrap:anywhere;word-wrap:break-word;hyphens:auto}td.gap,col.gap{width:4%;border:0!important;background:none!important}h2,h3{page-break-after:avoid;break-after:avoid}thead{display:table-header-group}tbody.keep{page-break-inside:avoid;break-inside:avoid}tr.cat td,tr.sub td{border:0!important;background:none!important;padding:0!important}td.la,td.en{vertical-align:baseline}'
+    +'.bar{font:10pt Arial,Helvetica,sans-serif;padding:8px 0 12px}.bar button{font:inherit;padding:6px 14px;border-radius:6px;border:1px solid #888;background:#f4f4f4;cursor:pointer}@media print{.bar{display:none}}';
+  const classic='@page{size:A4;margin:18mm 18mm 20mm}body{font:10.5pt/1.3 Georgia,"Times New Roman",serif;color:#111}'
     +'header{display:flex;justify-content:space-between;align-items:baseline;gap:10px;border-bottom:2px solid #333;margin-bottom:6px;padding-bottom:3px}header h1{font-size:16pt;margin:0}header span{font:8.5pt Arial,Helvetica,sans-serif;color:#555;white-space:nowrap}'
-    +'h2{font-size:13pt;margin:10px 0 2px;padding-bottom:1px;border-bottom:1px solid #888;page-break-after:avoid;break-after:avoid}h3{font:bold 8.5pt Arial,Helvetica,sans-serif;text-transform:uppercase;letter-spacing:.04em;color:#444;margin:6px 0 1px;page-break-after:avoid;break-after:avoid}h3 span{font-weight:normal;color:#777}'
-    +'table{width:100%;table-layout:fixed;border-collapse:collapse;margin-bottom:2px}tr{page-break-inside:avoid;break-inside:avoid}td{padding:3px 7px;border-bottom:1px solid #e2e2e2;vertical-align:top;overflow-wrap:anywhere;word-wrap:break-word;hyphens:auto}td.la{font-weight:bold}td.gap,col.gap{width:4%;border:0}'
-    +(blank?'td.en{border-bottom:1px solid #888}':'')
-    +'.bar{font:10pt Arial,Helvetica,sans-serif;padding:8px 0 10px}.bar button{font:inherit;padding:6px 14px;border-radius:6px;border:1px solid #888;background:#f4f4f4;cursor:pointer}'
-    +'@media screen{body{max-width:190mm;margin:16px auto;padding:0 18mm}}@media print{.bar{display:none}}';
-  const html='<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Latin Trainer word list</title><style>'+css+'</style></head><body><div class="bar"><button onclick="print()">🖨 Print / Save as PDF</button></div><header><h1>Latin Trainer · word list</h1><span>'+n+' words · '+esc(new Date().toLocaleDateString())+'</span></header>'+body+'<script>setTimeout(function(){print()},400)<\/script></body></html>';
+    +'h2{font-size:13pt;margin:10px 0 2px;padding-bottom:1px;border-bottom:1px solid #888}h2 span{font:normal 8.5pt Arial,Helvetica,sans-serif;color:#777}h3{font:bold 8.5pt Arial,Helvetica,sans-serif;text-transform:uppercase;letter-spacing:.04em;color:#444;margin:6px 0 1px}h3 span{font-weight:normal;color:#777}'
+    +'td{padding:3px 7px;border-bottom:1px solid #e2e2e2}td.la{font-weight:bold}'+(blank?'td.en{border-bottom:1px solid #888}':'')
+    +'@media screen{body{max-width:190mm;margin:16px auto;padding:0 18mm}}';
+  // the designed version: Roman capitals (Cinzel), Garamond for the Latin, a clean sans for the English; deep red and gold
+  const RED='#7a1f2b',GOLD='#b08a3e';
+  const design='@page{size:A4;margin:17mm 17mm 19mm;@bottom-center{content:"Vocabularium  ·  " counter(page);font:7.5pt "Source Sans 3",Arial,sans-serif;letter-spacing:.12em;color:#a3968a}}'
+    +'body{font:10.3pt/1.35 "EB Garamond",Garamond,Georgia,serif;color:#2a2420}'
+    +'.cover{text-align:center;margin:0 0 7mm}.eyebrow{font:600 7.5pt "Source Sans 3",Arial,sans-serif;letter-spacing:.34em;text-transform:uppercase;color:'+GOLD+'}'
+    +'.cover h1{font:600 30pt/1.1 Cinzel,"Trajan Pro",Georgia,serif;letter-spacing:.07em;color:'+RED+';margin:2.5mm 0 1.5mm}.meta{font:8.8pt "Source Sans 3",Arial,sans-serif;color:#85786d;letter-spacing:.03em}'
+    +'.orn{display:flex;align-items:center;gap:3.5mm;justify-content:center;margin:3.5mm auto 0;width:62%}.orn i{flex:1;height:.7pt;background:linear-gradient(90deg,rgba(176,138,62,0),'+GOLD+',rgba(176,138,62,0))}.orn b{color:'+GOLD+';font-size:8pt;font-weight:normal}'
+    +'h2{display:flex;justify-content:space-between;align-items:baseline;font:600 12.5pt Cinzel,Georgia,serif;letter-spacing:.13em;color:'+RED+';margin:5mm 0 2mm;padding-bottom:1.4mm;border-bottom:.7pt solid '+GOLD+'}h2 span{font:400 7.8pt "Source Sans 3",Arial,sans-serif;letter-spacing:.08em;color:#a3968a;text-transform:uppercase}'
+    +'h3{display:inline-block;font:600 7.2pt "Source Sans 3",Arial,sans-serif;letter-spacing:.15em;text-transform:uppercase;color:'+RED+';background:#f5ede1;border-radius:2pt;padding:1.1mm 2.4mm;margin:3mm 0 1.4mm}h3 span{color:#a8988a;font-weight:400;letter-spacing:.05em}'
+    +'td{padding:1.25mm 2.3mm}tr.z1 td{background:#faf6ef}td.la{font-weight:600;color:#3b1d17}td.en{font:9.3pt/1.35 "Source Sans 3",Arial,sans-serif;color:#4a423c}'
+    +(blank?'td.en{border-bottom:.6pt solid #cdbda6}':'')
+    +'@media screen{body{max-width:210mm;margin:16px auto;padding:10mm 17mm;background:#fff;box-shadow:0 2px 18px rgba(0,0,0,.12)}html{background:#ece7df}}';
+  const fonts=designed?'<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&family=EB+Garamond:wght@400;600&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">':'';
+  const top=designed?'<div class="cover"><div class="eyebrow">Latin Trainer · Word list</div><h1>Vocabularium</h1><div class="meta">'+n+' words  ·  '+date+'</div><div class="orn"><i></i><b>✦</b><i></i></div></div>'
+    :'<header><h1>Latin Trainer · word list</h1><span>'+n+' words · '+date+'</span></header>';
+  // print once the fonts have arrived (otherwise the first page can print in a fallback font)
+  const go='<script>(function(){var done=false;function p(){if(done)return;done=true;setTimeout(function(){print()},200);}if(document.fonts&&document.fonts.ready)document.fonts.ready.then(p);setTimeout(p,2500);})()<\/script>';
+  const html='<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Latin Trainer word list</title>'+fonts+'<style>'+common+(designed?design:classic)+'</style></head><body><div class="bar"><button onclick="print()">🖨 Print / Save as PDF</button></div>'+top+body+go+'</body></html>';
   let w=null;try{w=window.open('','_blank');}catch(e){}
   if(w){w.document.open();w.document.write(html);w.document.close();closeOverlay('printOverlay');return;}
   // pop-ups blocked: print from a hidden frame instead
-  const f=document.createElement('iframe');f.style.cssText='position:fixed;width:0;height:0;border:0;right:0;bottom:0';document.body.appendChild(f);const d=f.contentWindow.document;d.open();d.write(html.replace('<script>setTimeout(function(){print()},400)<\/script>',''));d.close();
-  setTimeout(()=>{try{f.contentWindow.focus();f.contentWindow.print();}catch(e){toast('Couldn’t open the print window. Allow pop-ups for this site and try again.');}setTimeout(()=>f.remove(),60000);},300);closeOverlay('printOverlay');}
+  const f=document.createElement('iframe');f.style.cssText='position:fixed;width:0;height:0;border:0;right:0;bottom:0';document.body.appendChild(f);const d=f.contentWindow.document;d.open();d.write(html.replace(go,''));d.close();
+  const pr=()=>{try{f.contentWindow.focus();f.contentWindow.print();}catch(e){toast('Couldn’t open the print window. Allow pop-ups for this site and try again.');}setTimeout(()=>f.remove(),60000);};
+  try{(d.fonts&&d.fonts.ready?Promise.race([d.fonts.ready,new Promise(r=>setTimeout(r,2500))]):Promise.resolve()).then(()=>setTimeout(pr,200));}catch(e){setTimeout(pr,600);}closeOverlay('printOverlay');}
 function closeAnn(){document.getElementById('annOverlay').style.display='none';}
 function annHide(){try{localStorage.setItem(ANN_HIDE,String((annCur&&annCur.t)||Date.now()));}catch(e){}closeAnn();}
 setTimeout(()=>annLoad(false),1800);
